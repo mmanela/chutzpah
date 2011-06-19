@@ -1,0 +1,11 @@
+syntax: glob
+*.suo
+*_ReSharper.*
+*/bin/*
+*/obj/*
+*ReSharper.user
+*.csproj.user
+*.orig
+*.psess
+*.vsp
+*.cache
