@@ -12,6 +12,7 @@ properties {
 
 # Aliases
 task Default -depends Run-Build
+task CI -depends Run-Build
 task Build -depends Run-Build
 task Clean -depends Clean-Solution
 
