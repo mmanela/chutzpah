@@ -68,7 +68,7 @@ namespace Chutzpah.VisualStudio
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             base.Initialize();
 
-            dte = (DTE2) GetService(typeof (DTE));
+            dte = (DTE2)GetService(typeof(DTE));
             if (dte == null)
             {
                 //if dte is null then we throw a excpetion
@@ -79,23 +79,23 @@ namespace Chutzpah.VisualStudio
             testRunner = new TestRunner();
 
             Logger = new Logger(this);
-            statusBar = GetService(typeof (SVsStatusbar)) as IVsStatusbar;
+            statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
             runnerCallback = new VisualStudioRunnerCallback(dte, statusBar);
 
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
-            var mcs = GetService(typeof (IMenuCommandService)) as OleMenuCommandService;
+            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
             {
                 // Source Code Editor - Run JS Tests
                 var sourceEditorRunTestsCmdId = new CommandID(GuidList.guidSourceEditorCmdSet,
-                                                              (int) PkgCmdIDList.cmdidRunJSTests);
+                                                              (int)PkgCmdIDList.cmdidRunJSTests);
                 var sourceEditorMenuItem = new MenuCommand(RunTestsFromEditorCallback, sourceEditorRunTestsCmdId);
                 mcs.AddCommand(sourceEditorMenuItem);
 
                 // Solution Explorer Item Node - Run JS Tests
                 var solutionItemRunTestsCmdId = new CommandID(GuidList.guidSolutionItemCmdSet,
-                                                              (int) PkgCmdIDList.cmdidRunJSTests);
+                                                              (int)PkgCmdIDList.cmdidRunJSTests);
                 var solutionItemMenuItem = new OleMenuCommand(RunTestsFromSolutionItemCallback,
                                                               solutionItemRunTestsCmdId);
                 solutionItemMenuItem.BeforeQueryStatus += SolutionItemMenuItemBeforeQueryStatus;
@@ -103,13 +103,12 @@ namespace Chutzpah.VisualStudio
 
                 // Solution Explorer Folder or Project Node - Run JS Tests
                 var solutionFolderNodeRunTestsCmd = new CommandID(GuidList.guidSolutionFolderNodeCmdSet,
-                                                                  (int) PkgCmdIDList.cmdidRunJSTests);
+                                                                  (int)PkgCmdIDList.cmdidRunJSTests);
                 var solutionFolderNodeMenuItem = new OleMenuCommand(RunTestsInSolutionFolderNodeCallback,
                                                                     solutionFolderNodeRunTestsCmd);
                 mcs.AddCommand(solutionFolderNodeMenuItem);
             }
         }
-
 
         private static TestFileType GetFileType(string filename)
         {
@@ -132,7 +131,6 @@ namespace Chutzpah.VisualStudio
 
             return TestFileType.Other;
         }
-
 
         private void SolutionItemMenuItemBeforeQueryStatus(object sender, EventArgs e)
         {
@@ -161,8 +159,8 @@ namespace Chutzpah.VisualStudio
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem) item).Object as ProjectItem;
-                var projectNode = ((UIHierarchyItem) item).Object as Project;
+                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                var projectNode = ((UIHierarchyItem)item).Object as Project;
 
                 if (projectItem != null)
                 {
@@ -182,7 +180,6 @@ namespace Chutzpah.VisualStudio
             RunTests(filePaths);
         }
 
-
         private void RunTestsFromEditorCallback(object sender, EventArgs e)
         {
             string filePath = CurrentDocumentPath;
@@ -193,7 +190,7 @@ namespace Chutzpah.VisualStudio
         {
             foreach (object item in SolutionExplorerItems)
             {
-                var projItem = (ProjectItem) ((UIHierarchyItem) item).Object;
+                var projItem = (ProjectItem)((UIHierarchyItem)item).Object;
                 string fileName = projItem.FileNames[0];
                 RunTests(fileName);
             }
@@ -203,10 +200,9 @@ namespace Chutzpah.VisualStudio
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                RunTests(new[] {filePath});
+                RunTests(new[] { filePath });
             }
         }
-
 
         private void RunTests(IEnumerable<string> filePaths)
         {
@@ -216,25 +212,25 @@ namespace Chutzpah.VisualStudio
                 {
                     if (!testingInProgress)
                     {
+                        dte.Documents.SaveAll();
                         testingInProgress = true;
                         Task.Factory.StartNew(
                             () =>
-                                {
-                                    testRunner.RunTests(filePaths, runnerCallback);
-                                    testingInProgress = false;
-                                });
+                            {
+                                testRunner.RunTests(filePaths, runnerCallback);
+                                testingInProgress = false;
+                            });
                     }
                 }
             }
         }
 
-
         private Array SolutionExplorerItems
         {
             get
             {
-                var hierarchy = (UIHierarchy) dte.ToolWindows.GetToolWindow(Constants.vsWindowKindSolutionExplorer);
-                return (Array) hierarchy.SelectedItems;
+                var hierarchy = (UIHierarchy)dte.ToolWindows.GetToolWindow(Constants.vsWindowKindSolutionExplorer);
+                return (Array)hierarchy.SelectedItems;
             }
         }
 
