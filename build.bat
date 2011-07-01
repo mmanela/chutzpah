@@ -14,7 +14,7 @@ goto Build
 
 :Build
 
-powershell -NonInteractive -NoProfile -ExecutionPolicy unrestricted -Command "& {Import-Module %~dp0\packages\psake.4.0.0.0\psake.psm1; Invoke-psake -properties @{configuration='%Configuration%'} -parameters @{arg0='%1'; arg1='%2'; arg2='%3'} -framework '4.0' %*"}"
+powershell -NonInteractive -NoProfile -ExecutionPolicy unrestricted -Command "& {Import-Module %~dp0\packages\psake.4.0.1.0\Tools\psake.psm1; Invoke-psake -properties @{configuration='%Configuration%'} -parameters @{arg0='%1'; arg1='%2'; arg2='%3'} -framework '4.0' %*"}"
 
 goto end
 
