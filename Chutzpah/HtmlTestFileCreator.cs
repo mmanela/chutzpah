@@ -26,22 +26,27 @@ namespace Chutzpah
             this.fileProbe = fileProbe;
         }
 
-        public string CreateTestFile(string jsFile)
+        public string UpdateTestFolder(string jsFile, string generatedHtmlFilePath)
         {
             if (string.IsNullOrWhiteSpace(jsFile))
                 throw new ArgumentNullException("jsFile");
             if (!Path.GetExtension(jsFile).Equals(".js", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Expecting a .js file");
+            if (string.IsNullOrEmpty(generatedHtmlFilePath))
+                throw new ArgumentException("generatedHtmlFilePath");
 
             string jsFilePath = fileProbe.FindPath(jsFile);
             if (jsFilePath == null)
                 throw new FileNotFoundException("Unable to find file: " + jsFile);
 
-            var tempFolder = fileSystem.GetTemporayFolder();
+            var tempFolder = Path.GetDirectoryName(generatedHtmlFilePath);
+            if (!fileSystem.FolderExists(tempFolder))
+                throw new FileNotFoundException("Unable to find folder : " + tempFolder);
+
             var testHtmlFilePath = Path.Combine(tempFolder, "test.html");
             var qunitFilePath = Path.Combine(tempFolder, "qunit.js");
             var qunitCssFilePath = Path.Combine(tempFolder, "qunit.css");
-            var uniqueJsFileName = MakeUnique(Path.GetFileName(jsFile));
+            var uniqueJsFileName = Path.GetFileName(jsFile);
             var testFilePath = Path.Combine(tempFolder, uniqueJsFileName);
 
             var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate.html");
@@ -61,6 +66,12 @@ namespace Chutzpah
             return testHtmlFilePath;
         }
 
+        public string CreateTestFile(string jsFile)
+        {
+            var tempFolder = fileSystem.GetTemporayFolder();
+            return UpdateTestFolder(jsFile, tempFolder);
+        }
+
         private IEnumerable<string> GetAndCopyReferencedFiles(string testFileText, string testFilePath, string tempFolder)
         {
             var paths = new List<string>();
@@ -69,14 +80,14 @@ namespace Chutzpah
                 if (match.Success)
                 {
                     string referencePath = match.Groups["Path"].Value;
-                    Uri referenceUri = new Uri(referencePath,UriKind.RelativeOrAbsolute);
+                    Uri referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(testFilePath), referencePath);
                         var absolutePath = fileProbe.FindPath(relativeReferencePath);
                         if (absolutePath != null)
                         {
-                            var uniqueFileName = MakeUnique(Path.GetFileName(referencePath));
+                            var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), tempFolder);
                             fileSystem.CopyFile(absolutePath, Path.Combine(tempFolder, uniqueFileName));
                             paths.Add(uniqueFileName);
                         }
@@ -111,10 +122,16 @@ namespace Chutzpah
             return string.Format(format, path);
         }
 
-        private string MakeUnique(string fileName)
+        private string MakeUniqueIfNeeded(string fileName, string directoryPath)
         {
-            var randomFileName = fileSystem.GetRandomFileName();
-            return string.Format("{0}_{1}", randomFileName, fileName);
+            var filePath = Path.Combine(directoryPath, fileName);
+            if (fileSystem.FileExists(filePath))
+            {
+                var randomFileName = fileSystem.GetRandomFileName();
+                return string.Format("{0}_{1}", randomFileName, fileName);
+            }
+
+            return fileName;
         }
     }
 }

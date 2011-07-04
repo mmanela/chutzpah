@@ -24,14 +24,14 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestableHtmlTestFileCreator(new Mock<IFileSystemWrapper>(), new Mock<IFileProbe>());
 
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.MoqFileProbe.Setup(x => x.FindPath(It.IsAny<string>())).Returns<string>(x => x);
                 creator.MoqFileSystemWrapper.Setup(x => x.GetText(It.IsAny<string>())).Returns("");
                 creator.MoqFileSystemWrapper.Setup(x => x.GetRandomFileName()).Returns("unique");
+                creator.MoqFileSystemWrapper.Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
                 return creator;
             }
         }
-
 
         public static string QUnitContents
         {
@@ -46,6 +46,20 @@ namespace Chutzpah.Facts
         public static string TestTempateContents
         {
             get { return EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate"); }
+        }
+
+        public class UpdateTestFolder
+        {
+            [Fact]
+            public void Will_throw_if_html_test_folder_does_not_exists()
+            {
+                TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
+                creator.MoqFileSystemWrapper.Setup(x => x.FolderExists(@"C:\existing")).Returns(false);
+
+                var ex = Record.Exception(() => creator.UpdateTestFolder("test.js", @"C:\existing\"));
+
+                Assert.IsType<FileNotFoundException>(ex);
+            }
         }
 
         public class CreateTestFile
@@ -74,7 +88,7 @@ namespace Chutzpah.Facts
             public void Will_throw_if_test_file_does_not_exist()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
-                creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns((string) null);
+                creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns((string)null);
 
                 Exception ex = Record.Exception(() => creator.CreateTestFile("test.js"));
 
@@ -85,34 +99,34 @@ namespace Chutzpah.Facts
             public void Will_save_generated_test_html_file_to_temporary_folder_and_return_path()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
 
                 string path = creator.CreateTestFile("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"temp\test.html", It.IsAny<string>()));
-                Assert.Equal(@"temp\test.html", path);
+                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()));
+                Assert.Equal(@"C:\temp\test.html", path);
             }
 
             [Fact]
             public void Will_save_qunit_file_to_temporary_folder()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
 
                 string path = creator.CreateTestFile("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"temp\qunit.js", QUnitContents));
+                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"C:\temp\qunit.js", QUnitContents));
             }
 
             [Fact]
             public void Will_save_qunit_css_file_to_temporary_folder()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
 
                 string path = creator.CreateTestFile("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"temp\qunit.css", QUnitCssContents));
+                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"C:\temp\qunit.css", QUnitCssContents));
             }
 
             [Fact]
@@ -120,12 +134,12 @@ namespace Chutzpah.Facts
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.MoqFileSystemWrapper.Setup(x => x.GetText(@"path\test.js")).Returns("contents");
 
                 string path = creator.CreateTestFile("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"temp\unique_test.js", "contents"));
+                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"C:\temp\test.js", "contents"));
             }
 
             [Fact]
@@ -133,14 +147,14 @@ namespace Chutzpah.Facts
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 string text = null;
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.MoqFileSystemWrapper
-                    .Setup(x => x.Save(@"temp\test.html", It.IsAny<string>()))
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
 
                 string path = creator.CreateTestFile(@"some\path\test.js");
 
-                string scriptStatement = HtmlTestFileCreator.GetScriptStatement(@"unique_test.js");
+                string scriptStatement = HtmlTestFileCreator.GetScriptStatement(@"test.js");
                 Assert.Contains(scriptStatement, text);
                 Assert.DoesNotContain("@@TestFiles@@", text);
             }
@@ -156,7 +170,7 @@ namespace Chutzpah.Facts
             public void Will_copy_files_referenced_from_test_file_to_temporary_folder()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
                     .Setup(x => x.GetText(@"path\test.js"))
@@ -167,12 +181,36 @@ namespace Chutzpah.Facts
                 creator.MoqFileProbe
                     .Setup(x => x.FindPath(Path.Combine(@"path\", @"../../js/common.js")))
                    .Returns(@"path\common.js");
-   
+
                 string path = creator.CreateTestFile("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\lib.js", @"temp\unique_lib.js", true));
-                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\common.js", @"temp\unique_common.js", true));
-            } 
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\lib.js", true));
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\common.js", true));
+            }
+
+            [Fact]
+            public void Will_copy_files_referenced_from_test_file_to_temporary_folder_if_they_already_exists()
+            {
+                TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
+                creator.MoqFileSystemWrapper.Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
+                creator.MoqFileSystemWrapper.Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
+                creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
+                creator.MoqFileSystemWrapper
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestFileContents);
+                creator.MoqFileProbe
+                    .Setup(x => x.FindPath(Path.Combine(@"path\", @"lib.js")))
+                    .Returns(@"path\lib.js");
+                creator.MoqFileProbe
+                    .Setup(x => x.FindPath(Path.Combine(@"path\", @"../../js/common.js")))
+                   .Returns(@"path\common.js");
+
+                string path = creator.CreateTestFile("test.js");
+
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\unique_lib.js", true));
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\unique_common.js", true));
+            }
 
             [Fact]
             public void Will_replace_referenced_file_place_holder_in_html_template_with_referenced_files()
@@ -180,9 +218,9 @@ namespace Chutzpah.Facts
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 string text = null;
                 creator.MoqFileSystemWrapper
-                    .Setup(x => x.Save(@"temp\test.html", It.IsAny<string>()))
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
                     .Setup(x => x.GetText(@"path\test.js"))
@@ -196,8 +234,8 @@ namespace Chutzpah.Facts
 
                 string path = creator.CreateTestFile("test.js");
 
-                string scriptStatement1 = HtmlTestFileCreator.GetScriptStatement(@"unique_lib.js");
-                string scriptStatement2 = HtmlTestFileCreator.GetScriptStatement(@"unique_common.js");
+                string scriptStatement1 = HtmlTestFileCreator.GetScriptStatement(@"lib.js");
+                string scriptStatement2 = HtmlTestFileCreator.GetScriptStatement(@"common.js");
                 Assert.Contains(scriptStatement1, text);
                 Assert.Contains(scriptStatement2, text);
                 Assert.DoesNotContain("@@ReferencedFiles@@", text);
@@ -224,9 +262,9 @@ namespace Chutzpah.Facts
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 string text = null;
                 creator.MoqFileSystemWrapper
-                    .Setup(x => x.Save(@"temp\test.html", It.IsAny<string>()))
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
-                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns("temp");
+                creator.MoqFileSystemWrapper.Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 string TestFileContents = @"/// <reference path=""http://a.com/lib.js"" />";
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
@@ -237,8 +275,8 @@ namespace Chutzpah.Facts
 
                 string scriptStatement = HtmlTestFileCreator.GetScriptStatement(@"http://a.com/lib.js");
                 Assert.Contains(scriptStatement, text);
-            } 
+            }
 
         }
     }
-}  
+}

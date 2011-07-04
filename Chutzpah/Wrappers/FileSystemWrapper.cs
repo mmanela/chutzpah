@@ -111,7 +111,7 @@ namespace Chutzpah.Wrappers
 
         public void Save(string path, Stream stream)
         {
-            using (FileStream fs = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
             {
                 byte[] data = GetContent(stream);
                 fs.Write(data, 0, data.Length);
