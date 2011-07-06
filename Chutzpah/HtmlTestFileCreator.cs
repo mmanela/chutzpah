@@ -26,35 +26,34 @@ namespace Chutzpah
             this.fileProbe = fileProbe;
         }
 
-        public string UpdateTestFolder(string jsFile, string generatedHtmlFilePath)
+        public string CreateTestFile(string jsFile, string testFolder)
         {
             if (string.IsNullOrWhiteSpace(jsFile))
                 throw new ArgumentNullException("jsFile");
             if (!Path.GetExtension(jsFile).Equals(".js", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Expecting a .js file");
-            if (string.IsNullOrEmpty(generatedHtmlFilePath))
+            if (string.IsNullOrEmpty(testFolder))
                 throw new ArgumentException("generatedHtmlFilePath");
 
             string jsFilePath = fileProbe.FindPath(jsFile);
             if (jsFilePath == null)
                 throw new FileNotFoundException("Unable to find file: " + jsFile);
 
-            var tempFolder = Path.GetDirectoryName(generatedHtmlFilePath);
-            if (!fileSystem.FolderExists(tempFolder))
-                throw new FileNotFoundException("Unable to find folder : " + tempFolder);
+            if (!fileSystem.FolderExists(testFolder))
+                fileSystem.CreateDirectory(testFolder);
 
-            var testHtmlFilePath = Path.Combine(tempFolder, "test.html");
-            var qunitFilePath = Path.Combine(tempFolder, "qunit.js");
-            var qunitCssFilePath = Path.Combine(tempFolder, "qunit.css");
+            var testHtmlFilePath = Path.Combine(testFolder, "test.html");
+            var qunitFilePath = Path.Combine(testFolder, "qunit.js");
+            var qunitCssFilePath = Path.Combine(testFolder, "qunit.css");
             var uniqueJsFileName = Path.GetFileName(jsFile);
-            var testFilePath = Path.Combine(tempFolder, uniqueJsFileName);
+            var testFilePath = Path.Combine(testFolder, uniqueJsFileName);
 
             var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate.html");
             var quintText = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.qunit.js");
             var quintCssText = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.qunit.css");
             var testFileText = fileSystem.GetText(jsFilePath);
 
-            IEnumerable<string> referencedFilePaths = GetAndCopyReferencedFiles(testFileText, jsFilePath, tempFolder);
+            IEnumerable<string> referencedFilePaths = GetAndCopyReferencedFiles(testFileText, jsFilePath, testFolder);
 
             string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, uniqueJsFileName, referencedFilePaths);
 
@@ -68,8 +67,8 @@ namespace Chutzpah
 
         public string CreateTestFile(string jsFile)
         {
-            var tempFolder = fileSystem.GetTemporayFolder();
-            return UpdateTestFolder(jsFile, tempFolder);
+            var testFolder = fileSystem.GetTemporayFolder();
+            return CreateTestFile(jsFile, testFolder);
         }
 
         private IEnumerable<string> GetAndCopyReferencedFiles(string testFileText, string testFilePath, string tempFolder)

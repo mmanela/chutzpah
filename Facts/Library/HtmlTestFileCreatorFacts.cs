@@ -48,17 +48,17 @@ namespace Chutzpah.Facts
             get { return EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate"); }
         }
 
-        public class UpdateTestFolder
+        public class CreateTestFile_WithPath
         {
             [Fact]
-            public void Will_throw_if_html_test_folder_does_not_exists()
+            public void Will_create_test_folder_if_does_not_exists()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 creator.MoqFileSystemWrapper.Setup(x => x.FolderExists(@"C:\existing")).Returns(false);
 
-                var ex = Record.Exception(() => creator.UpdateTestFolder("test.js", @"C:\existing\"));
+                var res = creator.CreateTestFile("test.js", @"C:\existing");
 
-                Assert.IsType<FileNotFoundException>(ex);
+                creator.MoqFileSystemWrapper.Verify(x => x.CreateDirectory(@"C:\existing"));
             }
         }
 

@@ -35,6 +35,16 @@ namespace Chutzpah
             this.htmlTestFileCreator = htmlTestFileCreator;
         }
 
+        public string GetTestHarnessPath(string testFile)
+        {
+            string htmlTestFile = testFile;
+            if (IsJavaScriptFile(testFile))
+            {
+                htmlTestFile = htmlTestFileCreator.CreateTestFile(testFile);
+            }
+            return htmlTestFile;
+        }
+
         public TestResultsSummary RunTests(IEnumerable<string> testFiles, ITestMethodRunnerCallback callback = null)
         {
             string headlessBrowserPath = fileProbe.FindPath(HeadlessBrowserName);
@@ -54,11 +64,7 @@ namespace Chutzpah
             {
                 try
                 {
-                    string htmlTestFile = testFile;
-                    if (IsJavaScriptFile(testFile))
-                    {
-                        htmlTestFile = htmlTestFileCreator.CreateTestFile(testFile);
-                    }
+                    string htmlTestFile = GetTestHarnessPath(testFile);
 
                     if (IsHtmlFile(htmlTestFile))
                     {
@@ -81,6 +87,12 @@ namespace Chutzpah
             if (callback != null) callback.TestSuiteFinished(summary);
             return summary;
         }
+        
+        
+        public TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null)
+        {
+            return RunTests(new[] {testFile}, callback);
+        }
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,
                                           string jsTestRunnerPath,
@@ -102,7 +114,7 @@ namespace Chutzpah
 
             if (DebugEnabled)
                 Console.WriteLine(jsonResult);
-            
+
             IEnumerable<TestResult> fileTests = testResultsBuilder.Build(new BrowserTestFileResult(htmlTestFilePath, inputTestFilePath, jsonResult));
             testResults.AddRange(fileTests);
 
@@ -117,11 +129,7 @@ namespace Chutzpah
             return true;
         }
 
-        public TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null)
-        {
-            return RunTests(new[] {testFile}, callback);
-        }
-
+        
         private static bool IsHtmlFile(string fileName)
         {
             string ext = Path.GetExtension(fileName);
