@@ -53,6 +53,7 @@
     <Compile Include="ITestMethodRunnerCallback.cs" />
     <Compile Include="ITestResultsBuilder.cs" />
     <Compile Include="ITestRunner.cs" />
+    <Compile Include="Models\JsonLogOutput.cs" />
     <Compile Include="Models\JsonTestCase.cs" />
     <Compile Include="Models\JsonTestResult.cs" />
     <Compile Include="Models\TestResult.cs" />

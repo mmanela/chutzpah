@@ -7,12 +7,12 @@ namespace Chutzpah.Models
         public JsonTestOutput()
         {
             Results = new List<JsonTestCase>();
-            Warnings = new List<string>();
+            Logs = new List<JsonLogOutput>();
             Errors = new List<string>();
         }
 
-        public IList<string> Warnings { get; set; }
         public IList<string> Errors { get; set; }
+        public IList<JsonLogOutput> Logs { get; set; }
         public IList<JsonTestCase> Results { get; set; }
     }
 }

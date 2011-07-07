@@ -1,8 +1,14 @@
-if (phantom.state.length === 0) {
-    phantom.state = 'checking';
-    phantom.userAgent = 'SpecialAgent';
-    phantom.open('http://www.httpuseragent.org');
-} else {
-    console.log(document.getElementById('myagent').innerText);
+var page = new WebPage();
+console.log('The default user agent is ' + page.settings.userAgent);
+page.settings.userAgent = 'SpecialAgent';
+page.open('http://www.httpuseragent.org', function (status) {
+    if (status !== 'success') {
+        console.log('Unable to access network');
+    } else {
+        var ua = page.evaluate(function () {
+            return document.getElementById('myagent').innerText;
+        });
+        console.log(ua);
+    }
     phantom.exit();
-}
+});

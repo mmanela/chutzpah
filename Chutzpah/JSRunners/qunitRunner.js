@@ -1,181 +1,140 @@
-function objectToString(o) {
-    function escapeHTML(str) {
-        var div = document.createElement('div');
-        var text = document.createTextNode(str);
-        div.appendChild(text);
-        return div.innerHTML;
-    }
-    function isArray(obj) {
-        return (toString.call(obj).indexOf("Array") > -1);
-    }
-    function isNumber(obj) {
-        return (toString.call(obj).indexOf("Number") > -1);
-    }
-    function isString(obj) {
-        return (toString.call(obj).indexOf("String") > -1);
-    }
-    function isObject(obj) {
-        return (toString.call(obj).indexOf("Object") > -1);
-    }
-    var parse = function (_o) {
-        var a = [], t;
-
-
-        if (isNumber(_o)) {
-            return _o;
-        }
-        else if (isString(_o)) {
-            return '"' + escape(_o) + '"';
-        }
-        else if (isArray(_o)) {
-            for (var i = 0; i < _o.length; i++) {
-                a.push(arguments.callee(_o[i]));
-            }
-            return "[" + a.join(", ") + "]";
-        }
-        else {
-            for (var p in _o) {
-                if (_o.hasOwnProperty(p)) {
-                    t = _o[p];
-                    if (t && isObject(t)) {
-                        a[a.length] = "\"" + p + "\"" + ": " + arguments.callee(t);
-                    }
-                    else {
-                        a[a.length] = ["\"" + p + "\"" + ": " + arguments.callee(t)];
-                    }
+/**
+* Wait until the test condition is true or a timeout occurs. Useful for waiting
+* on a server response or for a ui change (fadeIn, etc.) to occur.
+*
+* @param testFx javascript condition that evaluates to a boolean,
+* it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
+* as a callback function.
+* @param onReady what to do when testFx condition is fulfilled,
+* it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
+* as a callback function.
+* @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
+*/
+function waitFor(testFx, onReady, timeOutMillis) {
+    var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3001, //< Default Max Timout is 3s
+        start = new Date().getTime(),
+        condition = false,
+        interval = setInterval(function () {
+            if ((new Date().getTime() - start < maxtimeOutMillis) && !condition) {
+                // If not time-out yet and condition not yet fulfilled
+                condition = (typeof (testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+            } else {
+                if (!condition) {
+                    // If condition still not fulfilled (timeout but condition is 'false')
+                    //console.log("'waitFor()' timeout");
+                    phantom.exit(1);
+                } else {
+                    // Condition fulfilled (timeout and/or condition is 'true')
+                    // console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                    typeof (onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+                    clearInterval(interval); //< Stop this interval
                 }
             }
-            return "{" + a.join(", ") + "}";
-        }
-    };
-    return parse(o);
+        }, 100); //< repeat check every 250ms
+};
+
+
+if (phantom.args.length === 0 || phantom.args.length > 2) {
+    console.log('Error: too few arguments');
+    phantom.exit();
 }
 
-warnings = [];
-errors = [];
+var page = new WebPage();
+var logs = []
+// Route console messages
+page.onConsoleMessage = function (msg, line, source) {
+    logs.push({ message: msg, line: line, source: source });
+    //console.log(msg);
+    //console.log("Message: " + msg + "   Line: " + line + "   Source: " + source);
+};
 
-if (console) {
-    console.warn = function (m) {
-        warnings.push(objectToString(m));
-    };
-
-    console.error = function (m) {
-        errors.push(objectToString(m));
-    };
-
-    console.assert = function () {
-        errors.push(objectToString(m));
-    };
-
-    console.info = function () { };
-    console.count = function () { };
-    console.debug = function () { };
-    console.profileEnd = function () { };
-    console.trace = function () { };
-    console.dir = function () { };
-    console.dirxml = function () { };
-    console.time = function () { };
-    console.profile = function () { };
-    console.timeEnd = function () { };
-    console.group = function () { };
-    console.groupEnd = function () { };
-}
-
-window.onerror = function () { };
-
-if (phantom.state.length === 0) {
-    if (phantom.args.length === 0 || phantom.args.length > 2) {
-        console.log("QUnit test runner for phantom.js");
-        console.log('Usage: testrunner.js htmlTestFile.html');
-        console.log('Accepts: http://example.com/file.html and file://some/path/test.html');
+page.open(phantom.args[0], function (status) {
+    if (status !== "success") {
+        console.log("Unable to access network");
         phantom.exit();
     } else {
-        phantom.state = "run-qunit";
-        phantom.open(phantom.args[0]);
-    }
-} else {
-
-    var done = false;
-    setInterval(function () {
-        if (phantom.state == 'finish') { return;  }
-        var testRunningStatusContainer = document.getElementById('qunit-testresult');
-
-        if (!testRunningStatusContainer) {
-            phantom.exit(1);
-            return;
-        }
-
-        if (document.querySelector("#qunit-tests li.running") != null) {
-            return;
-        }
-
-        try {
-            var passed = testRunningStatusContainer.getElementsByClassName('passed')[0].innerHTML;
-            var total = testRunningStatusContainer.getElementsByClassName('total')[0].innerHTML;
-            var failed = testRunningStatusContainer.getElementsByClassName('failed')[0].innerHTML;
-        } catch (e) {
-            console.error(e);
-        }
-
-        var testResults = { 'results': [], 'warnings': warnings, 'errors': errors };
-        var testContainer = document.getElementById('qunit-tests');
-
-
-        if (typeof testContainer !== 'undefined') {
-            try {
-                var tests = testContainer.children;
-                for (var i = 0; i < tests.length; i++) {
-                    var test = tests[i];
-                    var result = {};
-                    result.state = test.className;
-                    result.name = test.querySelector('.test-name').innerHTML;
-                    var moduleNode = test.querySelector('.module-name');
-                    if (moduleNode != null) {
-                        result.module = moduleNode.innerHTML;
-                    }
-
-                    if (result.state !== "pass") {
-                        var failedAssert = test.querySelector("ol li.fail");
-                        if (failedAssert) {
-                            var hasNodes = failedAssert.querySelector("*");
-
-                            if (hasNodes) {
-                                var expected = failedAssert.querySelector('.test-expected pre');
-                                var actual = failedAssert.querySelector('.test-actual pre');
-                                var message = failedAssert.querySelector('.test-message');
-
-                                if (message) {
-                                    result.message = message.innerHTML;
-                                }
-
-                                if (expected) {
-                                    result.expected = expected.innerHTML;
-                                }
-                                if (actual) {
-                                    result.actual = actual.innerHTML;
-                                }
-                            } else {
-                                result.message = failedAssert.innerHTML;
-                            }
-                        }
-                    }
-
-                    testResults['results'].push(result);
+        waitFor(function () { // wait condition
+            return page.evaluate(function () {
+                var el = document.getElementById('qunit-testresult');
+                if (el && el.innerText.match('completed')) {
+                    return true;
                 }
-            } catch (e) {
-                console.error(e);
-            }
+                return false;
+            });
+        },
+            function () { // gather test results
+                var testSummary = page.evaluate(function () {
+                    var errors = [];
 
-            console.log("#_#Begin#_#");
-            console.log(objectToString(testResults));
-            console.log("#_#End#_#");
+                    try {
+                        var testRunningStatusContainer = document.getElementById('qunit-testresult');
+                        var passed = testRunningStatusContainer.getElementsByClassName('passed')[0].innerHTML;
+                        var total = testRunningStatusContainer.getElementsByClassName('total')[0].innerHTML;
+                        var failed = testRunningStatusContainer.getElementsByClassName('failed')[0].innerHTML;
+                    } catch (e) {
+                        errors.push(JSON.stringify(e, null, 4));
+                    }
 
-            if (parseInt(failed, 10) > 0) {
-                phantom.exit(1);
+                    var testResults = { 'results': [], 'logs': [], 'errors': errors, failedCount: failed };
+                    var testContainer = document.getElementById('qunit-tests');
 
-            } else {
-                phantom.exit(0);
-            }
-        }
-    }, 100);
-}
+
+                    if (typeof testContainer !== 'undefined') {
+                        try {
+                            var tests = testContainer.children;
+                            for (var i = 0; i < tests.length; i++) {
+                                var test = tests[i];
+                                var result = {};
+                                result.state = test.className;
+                                result.name = test.querySelector('.test-name').innerHTML;
+                                var moduleNode = test.querySelector('.module-name');
+                                if (moduleNode != null) {
+                                    result.module = moduleNode.innerHTML;
+                                }
+
+                                if (result.state !== "pass") {
+                                    var failedAssert = test.querySelector("ol li.fail");
+                                    if (failedAssert) {
+                                        var hasNodes = failedAssert.querySelector("*");
+
+                                        if (hasNodes) {
+                                            var expected = failedAssert.querySelector('.test-expected pre');
+                                            var actual = failedAssert.querySelector('.test-actual pre');
+                                            var message = failedAssert.querySelector('.test-message');
+
+                                            if (message) {
+                                                result.message = message.innerHTML;
+                                            }
+
+                                            if (expected) {
+                                                result.expected = expected.innerHTML;
+                                            }
+                                            if (actual) {
+                                                result.actual = actual.innerHTML;
+                                            }
+                                        } else {
+                                            result.message = failedAssert.innerHTML;
+                                        }
+                                    }
+                                }
+
+                                testResults['results'].push(result);
+                            }
+                        } catch (e) {
+                            errors.push(JSON.stringify(e, null, 4));
+                        }
+
+                        return testResults;
+                    }
+                });
+
+                testSummary.logs = testSummary.logs.concat(logs);
+                console.log("#_#Begin#_#");
+                console.log(JSON.stringify(testSummary, null, 4));
+                console.log("#_#End#_#");
+
+                phantom.exit((parseInt(testSummary.failedCount, 10) > 0) ? 1 : 0);
+            });
+
+    }
+});
