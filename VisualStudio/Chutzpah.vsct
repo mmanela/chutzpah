@@ -43,14 +43,7 @@
          group as the part of a menu contained between two lines. The parent of a group 
          must be a menu. -->
         <Groups>
-
-            <Group guid="guidSourceEditorCmdSet" id="SourceEditorMenuGroup" priority="0x0600">
-            </Group>
-
-            <Group guid="guidSolutionItemCmdSet" id="SolutionItemMenuGroup" priority="0x0600">
-            </Group>
-
-            <Group guid="guidSolutionFolderNodeCmdSet" id="SolutionFolderNodeMenuGroup" priority="0x0600">
+            <Group guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0600">
             </Group>
         </Groups>
 
@@ -66,17 +59,8 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node or set it to <Icon guid="guidOfficeIcon" id="msotcidNoIcon" /> -->
 
-            <Button guid="guidSourceEditorCmdSet" id="cmdidRunJSTests" priority="0x0100" type="Button">
-                <Parent guid="guidSourceEditorCmdSet" id="SourceEditorMenuGroup" />
-                <Icon guid="guidImages" id="chet1" />
-                <Strings>
-                    <CommandName>RunJSTests</CommandName>
-                    <ButtonText>Run JS Tests</ButtonText>
-                </Strings>
-            </Button>
-
-            <Button guid="guidSolutionItemCmdSet" id="cmdidRunJSTests" priority="0x0100" type="Button">
-                <Parent guid="guidSolutionItemCmdSet" id="SolutionItemMenuGroup" />
+            <Button guid="guidChutzpahCmdSetString" id="cmdidRunJSTests" priority="0x0100" type="Button">
+                <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
                 <Icon guid="guidImages" id="chet1" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
@@ -85,15 +69,6 @@
                     <ButtonText>Run JS Tests</ButtonText>
                 </Strings>
             </Button>
-
-            <Button guid="guidSolutionFolderNodeCmdSet" id="cmdidRunJSTests" priority="0x0100" type="Button">
-               <Parent guid="guidSolutionFolderNodeCmdSet" id="SolutionFolderNodeMenuGroup" />
-               <Icon guid="guidImages" id="chet1" />
-               <Strings>
-                   <CommandName>RunJSTests</CommandName>
-                   <ButtonText>Run JS Tests</ButtonText>
-               </Strings>
-           </Button>
         </Buttons>
 
         <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -110,27 +85,27 @@
     </Commands>
 
     <CommandPlacements>
-        <CommandPlacement guid="guidSourceEditorCmdSet" id="SourceEditorMenuGroup" priority="0x0000">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidHtmEdGrp" id="IDM_HTM_SOURCE_SCRIPT"/>
         </CommandPlacement>
-        <CommandPlacement guid="guidSourceEditorCmdSet" id="SourceEditorMenuGroup" priority="0x0000">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidHtmEdGrp" id="IDM_HTM_SOURCE_HTML"/>
         </CommandPlacement>
-        <CommandPlacement guid="guidSourceEditorCmdSet" id="SourceEditorMenuGroup" priority="0x0300">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0300">
             <Parent guid="guidCssEdGrp" id="IDM_CTX_SOURCE"/>
         </CommandPlacement>
 
-        <CommandPlacement guid="guidSolutionItemCmdSet" id="SolutionItemMenuGroup" priority="0x0000">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
         </CommandPlacement>
-        <CommandPlacement guid="guidSolutionItemCmdSet" id="SolutionItemMenuGroup" priority="0x0000">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_WEBITEMNODE" />
         </CommandPlacement>
 
-        <CommandPlacement guid="guidSolutionFolderNodeCmdSet" id="SolutionFolderNodeMenuGroup" priority="0x0000">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE" />
         </CommandPlacement>
-        <CommandPlacement guid="guidSolutionFolderNodeCmdSet" id="SolutionFolderNodeMenuGroup" priority="0x0100">
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0100">
             <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
         </CommandPlacement>
     </CommandPlacements>
@@ -142,20 +117,12 @@
         <GuidSymbol name="guidChutzpahPkg" value="{0a3da9d8-a5b6-4fb9-b423-ef87ff203628}" />
 
 
-        <!-- This is the guid used to group the menu commands together -->
-        <GuidSymbol name="guidSourceEditorCmdSet" value="{F683BB14-1D01-444C-9B19-C40485C67824}">
-            <IDSymbol name="SourceEditorMenuGroup" value="0x1020" />
+        <!-- This is the guid used to group the commands together -->
+        <GuidSymbol name="guidChutzpahCmdSetString" value="{F0D5D16A-56CE-40A2-9C34-B890D6961CF2}">
+            <IDSymbol name="ChutzpahMenuGroup" value="0x1020" />
             <IDSymbol name="cmdidRunJSTests" value="0x0100" />
-        </GuidSymbol>
-
-        <GuidSymbol name="guidSolutionItemCmdSet" value="{3AC35B4C-E12D-40EE-9BCA-33F5B6B4191E}">
-            <IDSymbol name="SolutionItemMenuGroup" value="0x1020" />
-            <IDSymbol name="cmdidRunJSTests" value="0x0100" />
-        </GuidSymbol>
-
-        <GuidSymbol name="guidSolutionFolderNodeCmdSet" value="{7E174869-EE8C-45FC-BEF4-5D19B6AF146D}">
-            <IDSymbol name="SolutionFolderNodeMenuGroup" value="0x1020" />
-            <IDSymbol name="cmdidRunJSTests" value="0x0100" />
+            <IDSymbol name="cmdidOpenInBrowser" value="0x0101" />
+            <IDSymbol name="cmdidDebugInBrowser" value="0x0102" />
         </GuidSymbol>
 
         <GuidSymbol name="guidCssEdGrp" value="{A764E896-518D-11d2-9A89-00C04F79EFC3}">

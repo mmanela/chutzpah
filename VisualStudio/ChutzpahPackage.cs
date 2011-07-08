@@ -87,26 +87,12 @@ namespace Chutzpah.VisualStudio
             var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
             {
-                // Source Code Editor - Run JS Tests
-                var sourceEditorRunTestsCmdId = new CommandID(GuidList.guidSourceEditorCmdSet,
+                // Command - Run JS Tests
+                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet,
                                                               (int)PkgCmdIDList.cmdidRunJSTests);
-                var sourceEditorMenuItem = new MenuCommand(RunTestsFromEditorCallback, sourceEditorRunTestsCmdId);
-                mcs.AddCommand(sourceEditorMenuItem);
-
-                // Solution Explorer Item Node - Run JS Tests
-                var solutionItemRunTestsCmdId = new CommandID(GuidList.guidSolutionItemCmdSet,
-                                                              (int)PkgCmdIDList.cmdidRunJSTests);
-                var solutionItemMenuItem = new OleMenuCommand(RunTestsFromSolutionItemCallback,
-                                                              solutionItemRunTestsCmdId);
-                solutionItemMenuItem.BeforeQueryStatus += SolutionItemMenuItemBeforeQueryStatus;
-                mcs.AddCommand(solutionItemMenuItem);
-
-                // Solution Explorer Folder or Project Node - Run JS Tests
-                var solutionFolderNodeRunTestsCmd = new CommandID(GuidList.guidSolutionFolderNodeCmdSet,
-                                                                  (int)PkgCmdIDList.cmdidRunJSTests);
-                var solutionFolderNodeMenuItem = new OleMenuCommand(RunTestsInSolutionFolderNodeCallback,
-                                                                    solutionFolderNodeRunTestsCmd);
-                mcs.AddCommand(solutionFolderNodeMenuItem);
+                var runJsTestMenuCmd = new OleMenuCommand(RunJSTestCmdCallback, runJsTestsCmd);
+                runJsTestMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
+                mcs.AddCommand(runJsTestMenuCmd);
             }
         }
 
@@ -132,21 +118,39 @@ namespace Chutzpah.VisualStudio
             return TestFileType.Other;
         }
 
-        private void SolutionItemMenuItemBeforeQueryStatus(object sender, EventArgs e)
+        private void RunJSTestCmdCallback(object sender, EventArgs e)
+        {
+            var activeWindow = dte.ActiveWindow;
+            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
+            {
+                RunTestsInSolutionFolderNodeCallback(sender, e);
+            }
+            else if (activeWindow.Kind == "Document")
+            {
+                RunTestsFromEditorCallback(sender, e);
+            }
+        }
+
+        private void RunJSTestsCmdQueryStatus(object sender, EventArgs e)
         {
             var menuCommand = sender as OleMenuCommand;
             if (menuCommand == null) return;
 
-            Array activeItems = SolutionExplorerItems;
-            foreach (UIHierarchyItem item in activeItems)
+            var activeWindow = dte.ActiveWindow;
+            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
             {
-                TestFileType fileType = GetFileType(item.Name);
 
-                if (fileType == TestFileType.Other || fileType == TestFileType.Folder)
+                Array activeItems = SolutionExplorerItems;
+                foreach (UIHierarchyItem item in activeItems)
                 {
-                    menuCommand.Visible = false;
+                    TestFileType fileType = GetFileType(item.Name);
 
-                    return;
+                    if (fileType == TestFileType.Other || fileType == TestFileType.Folder)
+                    {
+                        menuCommand.Visible = false;
+
+                        return;
+                    }
                 }
             }
 
@@ -184,16 +188,6 @@ namespace Chutzpah.VisualStudio
         {
             string filePath = CurrentDocumentPath;
             RunTests(filePath);
-        }
-
-        private void RunTestsFromSolutionItemCallback(object sender, EventArgs e)
-        {
-            foreach (object item in SolutionExplorerItems)
-            {
-                var projItem = (ProjectItem)((UIHierarchyItem)item).Object;
-                string fileName = projItem.FileNames[0];
-                RunTests(fileName);
-            }
         }
 
         private void RunTests(string filePath)
