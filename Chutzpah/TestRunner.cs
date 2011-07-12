@@ -37,11 +37,18 @@ namespace Chutzpah
 
         public string GetTestHarnessPath(string testFile)
         {
-            string htmlTestFile = testFile;
+            if (string.IsNullOrEmpty(testFile)) return null;
+
+            string htmlTestFile = null;
             if (IsJavaScriptFile(testFile))
             {
                 htmlTestFile = htmlTestFileCreator.CreateTestFile(testFile);
             }
+            else if (IsHtmlFile(testFile))
+            {
+                htmlTestFile = testFile;       
+            }
+
             return htmlTestFile;
         }
 

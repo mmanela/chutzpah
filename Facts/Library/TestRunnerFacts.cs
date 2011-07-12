@@ -45,6 +45,50 @@ namespace Chutzpah.Facts
             }
         }
 
+        public class GetTestHarnessPath
+        {
+            [Fact]
+            public void Will_get_test_harness_path_for_JS_file()
+            {
+                var runner = TestableTestRunner.Create();
+                runner.MoqHtmlTestFileCreator.Setup(x => x.CreateTestFile("a.js")).Returns("a.html");
+                
+                var file = runner.GetTestHarnessPath("a.js");
+
+                Assert.Equal("a.html", file);
+            }
+
+            [Fact]
+            public void Will_get_test_harness_path_for_html_file()
+            {
+                var runner = TestableTestRunner.Create();
+
+                var file = runner.GetTestHarnessPath("a.html");
+
+                Assert.Equal("a.html", file);
+            }
+
+            [Fact]
+            public void Will_return_null_if_file_name_is_empty()
+            {
+                var runner = TestableTestRunner.Create();
+
+                var file = runner.GetTestHarnessPath("");
+
+                Assert.Null(file);
+            }
+
+            [Fact]
+            public void Will_return_null_if_neither_html_or_js_file()
+            {
+                var runner = TestableTestRunner.Create();
+
+                var file = runner.GetTestHarnessPath("a.css");
+
+                Assert.Null(file);
+            }
+        }
+
         public class RunTests
         {
             [Fact]

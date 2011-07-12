@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Constants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
+using System.Linq;
 
 namespace Chutzpah.VisualStudio
 {
@@ -88,11 +89,16 @@ namespace Chutzpah.VisualStudio
             if (null != mcs)
             {
                 // Command - Run JS Tests
-                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet,
-                                                              (int)PkgCmdIDList.cmdidRunJSTests);
+                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunJSTests);
                 var runJsTestMenuCmd = new OleMenuCommand(RunJSTestCmdCallback, runJsTestsCmd);
                 runJsTestMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
                 mcs.AddCommand(runJsTestMenuCmd);
+
+                // Command - Run JS tests in browser
+                var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunInBrowser);
+                var runJsTestInBrowserMenuCmd = new OleMenuCommand(RunJSTestInBrowserCmdCallback, runJsTestsInBrowserCmd);
+                runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
+                mcs.AddCommand(runJsTestInBrowserMenuCmd);
             }
         }
 
@@ -116,6 +122,29 @@ namespace Chutzpah.VisualStudio
             }
 
             return TestFileType.Other;
+        }
+
+        private void RunJSTestInBrowserCmdCallback(object sender, EventArgs e)
+        {
+            string selectedFile = null;
+            var activeWindow = dte.ActiveWindow;
+            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
+            {
+                selectedFile = GetSelectedTestableFiles().FirstOrDefault();
+            }
+            else if (activeWindow.Kind == "Document")
+            {
+                selectedFile = CurrentDocumentPath;
+            }
+
+            if (selectedFile != null)
+            {
+                var testHarness = testRunner.GetTestHarnessPath(selectedFile);
+                if (testHarness != null)
+                {
+                    LaunchFileInBrowser(testHarness);
+                }
+            }
         }
 
         private void RunJSTestCmdCallback(object sender, EventArgs e)
@@ -159,28 +188,7 @@ namespace Chutzpah.VisualStudio
 
         private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e)
         {
-            Predicate<TestFileType> fileTypeCheck = x => x == TestFileType.JS || x == TestFileType.HTML;
-            var filePaths = new List<string>();
-            foreach (object item in SolutionExplorerItems)
-            {
-                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
-                var projectNode = ((UIHierarchyItem)item).Object as Project;
-
-                if (projectItem != null)
-                {
-                    string filePath = projectItem.FileNames[0];
-                    TestFileType fileType = GetFileType(filePath);
-                    if (fileTypeCheck(fileType))
-                        filePaths.Add(filePath);
-                    else
-                        filePaths.AddRange(GetFilesFromTree(projectItem.ProjectItems, fileTypeCheck));
-                }
-                else if (projectNode != null)
-                {
-                    filePaths.AddRange(GetFilesFromTree(projectNode.ProjectItems, fileTypeCheck));
-                }
-            }
-
+            var filePaths = GetSelectedTestableFiles();
             RunTests(filePaths);
         }
 
@@ -217,6 +225,41 @@ namespace Chutzpah.VisualStudio
                     }
                 }
             }
+        }
+
+        private void LaunchFileInBrowser(string file)
+        {
+            var startInfo = new ProcessStartInfo();
+            startInfo.UseShellExecute = true;
+            startInfo.Verb = "Open";
+            startInfo.FileName = file;
+            System.Diagnostics.Process.Start(startInfo);
+        }
+
+        private List<string> GetSelectedTestableFiles()
+        {
+            Predicate<TestFileType> fileTypeCheck = x => x == TestFileType.JS || x == TestFileType.HTML;
+            var filePaths = new List<string>();
+            foreach (object item in SolutionExplorerItems)
+            {
+                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                var projectNode = ((UIHierarchyItem)item).Object as Project;
+
+                if (projectItem != null)
+                {
+                    string filePath = projectItem.FileNames[0];
+                    TestFileType fileType = GetFileType(filePath);
+                    if (fileTypeCheck(fileType))
+                        filePaths.Add(filePath);
+                    else
+                        filePaths.AddRange(GetFilesFromTree(projectItem.ProjectItems, fileTypeCheck));
+                }
+                else if (projectNode != null)
+                {
+                    filePaths.AddRange(GetFilesFromTree(projectNode.ProjectItems, fileTypeCheck));
+                }
+            }
+            return filePaths;
         }
 
         private Array SolutionExplorerItems
