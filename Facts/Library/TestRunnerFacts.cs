@@ -16,13 +16,13 @@ namespace Chutzpah.Facts
             public Mock<IProcessWrapper> MoqProcessWrapper { get; set; }
             public Mock<ITestResultsBuilder> MoqTestResultsBuilder { get; set; }
             public Mock<IFileProbe> MoqFileProbe { get; set; }
-            public Mock<IHtmlTestFileCreator> MoqHtmlTestFileCreator { get; set; }
+            public Mock<ITestContextBuilder> MoqHtmlTestFileCreator { get; set; }
 
 
             private TestableTestRunner(Mock<IProcessWrapper> moqProcessWrapper,
                                        Mock<ITestResultsBuilder> moqTestResultsBuilder,
                                        Mock<IFileProbe> moqFileProbe,
-                                       Mock<IHtmlTestFileCreator> moqHtmlTestFileCreator)
+                                       Mock<ITestContextBuilder> moqHtmlTestFileCreator)
                 : base(moqProcessWrapper.Object, moqTestResultsBuilder.Object, moqFileProbe.Object, moqHtmlTestFileCreator.Object)
             {
                 MoqProcessWrapper = moqProcessWrapper;
@@ -37,7 +37,7 @@ namespace Chutzpah.Facts
                     new Mock<IProcessWrapper>(),
                     new Mock<ITestResultsBuilder>(),
                     new Mock<IFileProbe>(),
-                    new Mock<IHtmlTestFileCreator>());
+                    new Mock<ITestContextBuilder>());
 
                 runner.MoqFileProbe.Setup(x => x.FindPath(It.IsAny<string>())).Returns("");
 
@@ -51,7 +51,7 @@ namespace Chutzpah.Facts
             public void Will_get_test_harness_path_for_JS_file()
             {
                 var runner = TestableTestRunner.Create();
-                runner.MoqHtmlTestFileCreator.Setup(x => x.CreateTestFile("a.js")).Returns("a.html");
+                runner.MoqHtmlTestFileCreator.Setup(x => x.BuildContext("a.js")).Returns(new TestContext { TestHarnessPath = "a.html" });
                 
                 var file = runner.GetTestHarnessPath("a.js");
 
@@ -168,7 +168,7 @@ namespace Chutzpah.Facts
                 string args = "\"jsPath\"" + @" ""file:///D:/path/tests.html""";
                 runner.MoqProcessWrapper.Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
                 runner.MoqTestResultsBuilder.Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
-                runner.MoqHtmlTestFileCreator.Setup(x => x.CreateTestFile(@"js\tests.js")).Returns(@"path\tests.html");
+                runner.MoqHtmlTestFileCreator.Setup(x => x.BuildContext(@"js\tests.js")).Returns(new TestContext { TestHarnessPath = @"path\tests.html" });
 
                 TestResultsSummary res = runner.RunTests(@"js\tests.js");
 

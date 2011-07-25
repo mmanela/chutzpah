@@ -46,13 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileProbe.cs" />
-    <Compile Include="HtmlTestFileCreator.cs" />
+    <Compile Include="Models\TestFileType.cs" />
+    <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
     <Compile Include="IHtmlTestFileCreator.cs" />
     <Compile Include="Models\BrowserTestFileResult.cs" />
     <Compile Include="ITestMethodRunnerCallback.cs" />
     <Compile Include="ITestResultsBuilder.cs" />
     <Compile Include="ITestRunner.cs" />
+    <Compile Include="Models\TestContext.cs" />
     <Compile Include="Models\JsonLogOutput.cs" />
     <Compile Include="Models\JsonTestCase.cs" />
     <Compile Include="Models\JsonTestResult.cs" />

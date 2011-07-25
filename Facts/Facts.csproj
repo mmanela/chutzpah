@@ -51,7 +51,7 @@
   <ItemGroup>
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
-    <Compile Include="Library\HtmlTestFileCreatorFacts.cs" />
+    <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\TestResultsBuilderFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

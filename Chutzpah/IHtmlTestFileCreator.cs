@@ -1,8 +1,9 @@
-﻿namespace Chutzpah
+﻿using Chutzpah.Models;
+namespace Chutzpah
 {
-    public interface IHtmlTestFileCreator
+    public interface ITestContextBuilder
     {
-        string CreateTestFile(string jsFile);
-        string CreateTestFile(string jsFile, string generatedHtmlFilePath);
+        TestContext BuildContext(string jsFile);
+        TestContext BuildContext(string jsFile, string generatedHtmlFilePath);
     }
 }

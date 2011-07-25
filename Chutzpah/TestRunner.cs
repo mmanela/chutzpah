@@ -14,7 +14,7 @@ namespace Chutzpah
         private readonly IProcessWrapper process;
         private readonly ITestResultsBuilder testResultsBuilder;
         private readonly IFileProbe fileProbe;
-        private readonly IHtmlTestFileCreator htmlTestFileCreator;
+        private readonly ITestContextBuilder testContextBuilder;
 
         public bool DebugEnabled { get; set; }
 
@@ -23,33 +23,24 @@ namespace Chutzpah
                 new ProcessWrapper(),
                 new TestResultsBuilder(),
                 new FileProbe(new EnvironmentWrapper(), new FileSystemWrapper()),
-                new HtmlTestFileCreator())
+                new TestContextBuilder())
         {
         }
 
-        public TestRunner(IProcessWrapper process, ITestResultsBuilder testResultsBuilder, IFileProbe fileProbe, IHtmlTestFileCreator htmlTestFileCreator)
+        public TestRunner(IProcessWrapper process, ITestResultsBuilder testResultsBuilder, IFileProbe fileProbe, ITestContextBuilder htmlTestFileCreator)
         {
             this.process = process;
             this.testResultsBuilder = testResultsBuilder;
             this.fileProbe = fileProbe;
-            this.htmlTestFileCreator = htmlTestFileCreator;
+            this.testContextBuilder = htmlTestFileCreator;
         }
 
         public string GetTestHarnessPath(string testFile)
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
-            string htmlTestFile = null;
-            if (IsJavaScriptFile(testFile))
-            {
-                htmlTestFile = htmlTestFileCreator.CreateTestFile(testFile);
-            }
-            else if (IsHtmlFile(testFile))
-            {
-                htmlTestFile = testFile;       
-            }
-
-            return htmlTestFile;
+            var context = testContextBuilder.BuildContext(testFile);
+            return context.TestHarnessPath;
         }
 
         public TestResultsSummary RunTests(IEnumerable<string> testFiles, ITestMethodRunnerCallback callback = null)
