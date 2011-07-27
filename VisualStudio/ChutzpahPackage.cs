@@ -139,11 +139,13 @@ namespace Chutzpah.VisualStudio
 
             if (selectedFile != null)
             {
-                var testHarness = testRunner.GetTestHarnessPath(selectedFile);
-                if (testHarness != null)
+                try
                 {
-                    LaunchFileInBrowser(testHarness);
+                    var testContext = testRunner.GetTestContext(selectedFile);
+                    LaunchFileInBrowser(testContext.TestHarnessPath);
                 }
+                catch (FileNotFoundException)
+                { }
             }
         }
 

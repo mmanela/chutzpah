@@ -48,6 +48,13 @@ namespace Chutzpah.Facts
             get { return EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate"); }
         }
 
+        const string TestJSFileContents =
+@"/// <reference path=""lib.js"" />
+                        /// <reference path=""../../js/common.js"" />
+                        some javascript code
+                        ";
+
+
         public class CreateTestFile_WithPath
         {
             [Fact]
@@ -75,7 +82,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_throw_if_test_file_is_not_a_js_file()
+            public void Will_throw_if_test_file_is_not_a_js_or_html_file()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
 
@@ -161,13 +168,6 @@ namespace Chutzpah.Facts
                 Assert.DoesNotContain("@@ReferencedFiles@@", text);
             }
 
-            const string TestFileContents =
-    @"/// <reference path=""lib.js"" />
-                        /// <reference path=""../../js/common.js"" />
-                        some javascript code
-                        ";
-
-
             [Fact]
             public void Will_copy_files_referenced_from_test_file_to_temporary_folder()
             {
@@ -176,7 +176,7 @@ namespace Chutzpah.Facts
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
                     .Setup(x => x.GetText(@"path\test.js"))
-                    .Returns(TestFileContents);
+                    .Returns(TestJSFileContents);
                 creator.MoqFileProbe
                     .Setup(x => x.FindPath(Path.Combine(@"path\", @"lib.js")))
                     .Returns(@"path\lib.js");
@@ -200,7 +200,7 @@ namespace Chutzpah.Facts
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
                     .Setup(x => x.GetText(@"path\test.js"))
-                    .Returns(TestFileContents);
+                    .Returns(TestJSFileContents);
                 creator.MoqFileProbe
                     .Setup(x => x.FindPath(Path.Combine(@"path\", @"lib.js")))
                     .Returns(@"path\lib.js");
@@ -226,7 +226,7 @@ namespace Chutzpah.Facts
                 creator.MoqFileProbe.Setup(x => x.FindPath("test.js")).Returns(@"path\test.js");
                 creator.MoqFileSystemWrapper
                     .Setup(x => x.GetText(@"path\test.js"))
-                    .Returns(TestFileContents);
+                    .Returns(TestJSFileContents);
                 creator.MoqFileProbe
                     .Setup(x => x.FindPath(Path.Combine(@"path\", @"lib.js")))
                     .Returns(@"path\lib.js");

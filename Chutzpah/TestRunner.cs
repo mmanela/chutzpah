@@ -35,12 +35,12 @@ namespace Chutzpah
             this.testContextBuilder = htmlTestFileCreator;
         }
 
-        public string GetTestHarnessPath(string testFile)
+        public TestContext GetTestContext(string testFile)
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
             var context = testContextBuilder.BuildContext(testFile);
-            return context.TestHarnessPath;
+            return context;
         }
 
         public TestResultsSummary RunTests(IEnumerable<string> testFiles, ITestMethodRunnerCallback callback = null)
@@ -62,17 +62,10 @@ namespace Chutzpah
             {
                 try
                 {
-                    string htmlTestFile = GetTestHarnessPath(testFile);
+                    string htmlTestFile = GetTestContext(testFile).TestHarnessPath;
+                    bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, htmlTestFile, testFile, testResults, callback);
+                    if (!result) break;
 
-                    if (IsHtmlFile(htmlTestFile))
-                    {
-                        bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, htmlTestFile, testFile, testResults, callback);
-                        if (!result) break;
-                    }
-                    else
-                    {
-                        //TODO: Log that fact that this is not a runnable test file
-                    }
                 }
                 catch (Exception e)
                 {
@@ -85,24 +78,23 @@ namespace Chutzpah
             if (callback != null) callback.TestSuiteFinished(summary);
             return summary;
         }
-        
-        
+
+
         public TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(new[] {testFile}, callback);
+            return RunTests(new[] { testFile }, callback);
         }
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,
                                           string jsTestRunnerPath,
-                                          string htmlTestFile,
+                                          string htmlTestFilePath,
                                           string inputTestFile,
                                           List<TestResult> testResults,
                                           ITestMethodRunnerCallback callback)
         {
             string inputTestFilePath = fileProbe.FindPath(inputTestFile);
-            string htmlTestFilePath = fileProbe.FindPath(htmlTestFile);
             if (htmlTestFilePath == null)
-                throw new FileNotFoundException("Unable to find test file " + htmlTestFile);
+                throw new FileNotFoundException("Unable to find test file " + htmlTestFilePath);
 
             if (callback != null && !callback.FileStart(inputTestFilePath)) return false;
 
@@ -127,7 +119,7 @@ namespace Chutzpah
             return true;
         }
 
-        
+
         private static bool IsHtmlFile(string fileName)
         {
             string ext = Path.GetExtension(fileName);

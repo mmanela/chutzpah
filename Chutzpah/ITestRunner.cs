@@ -6,7 +6,7 @@ namespace Chutzpah
     public interface ITestRunner
     {
         bool DebugEnabled { get; set; }
-        string GetTestHarnessPath(string testFile);
+        TestContext GetTestContext(string testFile);
         TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null);
         TestResultsSummary RunTests(IEnumerable<string> testFile, ITestMethodRunnerCallback callback = null);
     }

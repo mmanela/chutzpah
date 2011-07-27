@@ -14,7 +14,7 @@ namespace Chutzpah
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
 
-        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference+path\s*=\s*[""'](?<Path>[^""<>|]+)[""']\s*/>",
+        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -129,7 +129,8 @@ namespace Chutzpah
             var referenceReplacement = new StringBuilder();
             foreach (ReferencedJavaScriptFile referencedFile in referencedFiles)
             {
-                referenceReplacement.AppendLine(GetScriptStatement(referencedFile.StagedPath));
+                var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
+                referenceReplacement.AppendLine(GetScriptStatement(referencePath));
             }
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedFiles@@", referenceReplacement.ToString());
