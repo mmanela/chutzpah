@@ -49,14 +49,15 @@ namespace Chutzpah
 
             var testFileName = Path.GetFileName(file);
             var testFileText = fileSystem.GetText(filePath);
-            var referencedFiles = GetAndCopyReferencedFiles(fileKind, testFileText, filePath, stagingFolder);
+            var referencedFiles = GetReferencedFiles(fileKind, testFileText, filePath, stagingFolder);
 
             if (fileKind == TestFileType.JavaScript)
             {
                 var stagedFilePath = Path.Combine(stagingFolder, testFileName);
                 referencedFiles.Add(new ReferencedJavaScriptFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true });
-                fileSystem.Save(stagedFilePath, testFileText);
             }
+
+            CopyReferencedFiles(referencedFiles);
 
             var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
             var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
@@ -93,7 +94,7 @@ namespace Chutzpah
             }
         }
 
-        private IList<ReferencedJavaScriptFile> GetAndCopyReferencedFiles(TestFileType testFileType, string testFileText, string testFilePath, string stagingFolder)
+        private IList<ReferencedJavaScriptFile> GetReferencedFiles(TestFileType testFileType, string testFileText, string testFilePath, string stagingFolder)
         {
             var regex = testFileType == TestFileType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
             var files = new List<ReferencedJavaScriptFile>();
@@ -112,7 +113,7 @@ namespace Chutzpah
                             var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), stagingFolder);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
                             fileSystem.CopyFile(absolutePath, stagedPath);
-                            files.Add(new ReferencedJavaScriptFile{ Path = referencePath, StagedPath = stagedPath, IsLocal = true});
+                            files.Add(new ReferencedJavaScriptFile{ Path = absolutePath, StagedPath = stagedPath, IsLocal = true});
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
@@ -122,6 +123,17 @@ namespace Chutzpah
                 }
             }
             return files;
+        }
+
+        private void CopyReferencedFiles(IEnumerable<ReferencedJavaScriptFile> referencedFiles)
+        {
+            foreach (var referencedFile in referencedFiles)
+            {
+                if (referencedFile.IsLocal)
+                {
+                    fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
+                }
+            }
         }
 
         private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedJavaScriptFile> referencedFiles)
