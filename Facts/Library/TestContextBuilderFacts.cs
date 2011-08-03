@@ -170,7 +170,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.BuildContext("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.Save(@"C:\temp\test.js", "contents"));
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(@"path\test.js", @"C:\temp\test.js",true));
             }
 
             [Fact]
@@ -310,7 +310,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_not_copy_referenced_path_is_not_a_file()
+            public void Will_not_copy_referenced_path_if_not_a_file()
             {
                 TestableHtmlTestFileCreator creator = TestableHtmlTestFileCreator.Create();
                 string TestFileContents = @"/// <reference path=""http://a.com/lib.js"" />";
@@ -321,7 +321,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.BuildContext("test.js");
 
-                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+                creator.MoqFileSystemWrapper.Verify(x => x.CopyFile(It.Is<string>(p => p.Contains("lib.js")), It.IsAny<string>(), true), Times.Never());
             }
 
             [Fact]
