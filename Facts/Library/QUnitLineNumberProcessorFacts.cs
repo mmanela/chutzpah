@@ -8,50 +8,37 @@ namespace Chutzpah.Facts
 {
     public class QUnitLineNumberProcessorFacts
     {
-        private class TestableQUnitLineNumberProcessor : QUnitLineNumberProcessor
+        private class TestableQUnitLineNumberProcessor : Testable<QUnitLineNumberProcessor>
         {
-            public Mock<IFileSystemWrapper> MoqFileSystemWrapper { get; set; }
-
-            private TestableQUnitLineNumberProcessor(Mock<IFileSystemWrapper> moqFileSystemWrapper)
-                : base(moqFileSystemWrapper.Object)
+            public TestableQUnitLineNumberProcessor()
             {
-                MoqFileSystemWrapper = moqFileSystemWrapper;
-            }
-
-
-            public static TestableQUnitLineNumberProcessor Create()
-            {
-                var prob = new TestableQUnitLineNumberProcessor(new Mock<IFileSystemWrapper>());
-
-                return prob;
             }
         }
 
         public class Process
         {
-
             [Fact]
             public void Will_get_skip_if_file_is_not_under_test()
             {
-                var processor = TestableQUnitLineNumberProcessor.Create();
+                var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, StagedPath = "path" };
 
-                processor.Process(file);
+                processor.ClassUnderTest.Process(file);
 
-                processor.MoqFileSystemWrapper.Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
+                processor.Mock<IFileSystemWrapper>().Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
             }
 
             [Fact]
             public void Will_get_line_number_for_tests()
             {
-                var processor = TestableQUnitLineNumberProcessor.Create();
+                var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, StagedPath = "path" };
-                processor.MoqFileSystemWrapper.Setup(x => x.GetLines("path")).Returns(new string[] 
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
                 {
                     "//js file", "test (\"test1\", function(){}); ", "module ( \"module1\");", "  test('test2', function(){});"
                 });
 
-                processor.Process(file);
+                processor.ClassUnderTest.Process(file);
 
                 Assert.Equal(2, file.FilePositions.Get("","test1").Line);
                 Assert.Equal(1, file.FilePositions.Get("","test1").Column);

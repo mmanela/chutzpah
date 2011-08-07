@@ -9,23 +9,11 @@ namespace Chutzpah.Facts
 {
     public class TestResultsBuilderFacts
     {
-        private class TestableTestResultsBuilder : TestResultsBuilder
+        private class TestableTestResultsBuilder : Testable<TestResultsBuilder>
         {
-            public Mock<IJsonSerializer> MoqJsonSerializer { get; set; }
-            public Mock<IHtmlUtility> MoqHtmlUtility { get; set; }
-
-            private TestableTestResultsBuilder(Mock<IJsonSerializer> moqJsonSerializer, Mock<IHtmlUtility> moqHtmlUtility)
-                : base(moqJsonSerializer.Object, moqHtmlUtility.Object)
+            public TestableTestResultsBuilder()
             {
-                MoqJsonSerializer = moqJsonSerializer;
-                MoqHtmlUtility = moqHtmlUtility;
-            }
 
-            public static TestableTestResultsBuilder Create()
-            {
-                var builder = new TestableTestResultsBuilder(new Mock<IJsonSerializer>(), new Mock<IHtmlUtility>());
-
-                return builder;
             }
         }
 
@@ -34,9 +22,9 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_throw_argument_null_exception_if_browser_result_is_null()
             {
-                var builder = TestableTestResultsBuilder.Create();
+                var builder = new TestableTestResultsBuilder();
 
-                var model = Record.Exception(() => builder.Build(null)) as ArgumentNullException;
+                var model = Record.Exception(() => builder.ClassUnderTest.Build(null)) as ArgumentNullException;
 
                 Assert.NotNull(model);
             }
@@ -44,10 +32,10 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_argument_exception_if_browser_result_json_is_null()
             {
-                var builder = TestableTestResultsBuilder.Create();
+                var builder = new TestableTestResultsBuilder();
 
                 var model =
-                    Record.Exception(() => builder.Build(new BrowserTestFileResult(new TestContext(), null))) as
+                    Record.Exception(() => builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), null))) as
                     ArgumentNullException;
 
                 Assert.NotNull(model);
@@ -56,25 +44,25 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_parse_json_out_of_browser_result()
             {
-                var builder = TestableTestResultsBuilder.Create();
+                var builder = new TestableTestResultsBuilder();
                 var json = @"#_#Begin#_#
                             json
                             #_#End#_#";
-                builder.MoqJsonSerializer.Setup(x => x.Deserialize<JsonTestOutput>("json")).Returns(new JsonTestOutput()).Verifiable();
+                builder.Mock<IJsonSerializer>().Setup(x => x.Deserialize<JsonTestOutput>("json")).Returns(new JsonTestOutput()).Verifiable();
 
-                builder.Build(new BrowserTestFileResult(new TestContext(), json));
+                builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), json));
 
-                builder.MoqJsonSerializer.Verify();
+                builder.Mock<IJsonSerializer>().Verify();
             }
 
             [Fact]
             public void Will_map_deserialized_json_to_test_result_model()
             {
-                var builder = TestableTestResultsBuilder.Create();
-                builder.MoqHtmlUtility
+                var builder = new TestableTestResultsBuilder();
+                builder.Mock<IHtmlUtility>()
                     .Setup(x => x.DecodeJavaScript(It.IsAny<string>()))
                     .Returns<string>(x => "Decoded " + x);
-                builder.MoqJsonSerializer
+                builder.Mock<IJsonSerializer>()
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                                  {
@@ -97,7 +85,7 @@ namespace Chutzpah.Facts
                                                    }
                                  });
 
-                var tests = builder.Build(new BrowserTestFileResult(new TestContext { TestHarnessPath = "htmlTestFile", InputTestFile = "inputTestFile" }, "json"));
+                var tests = builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext { TestHarnessPath = "htmlTestFile", InputTestFile = "inputTestFile" }, "json"));
 
                 Assert.Equal(2, tests.Count());
                 Assert.True(tests.ElementAt(0).Passed);
@@ -118,8 +106,8 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_get_map_line_numbers_to_test_result()
             {
-                var builder = TestableTestResultsBuilder.Create();
-                builder.MoqHtmlUtility
+                var builder = new TestableTestResultsBuilder();
+                builder.Mock<IHtmlUtility>()
                     .Setup(x => x.DecodeJavaScript(It.IsAny<string>()))
                     .Returns<string>(x => x);
                 var referencedFile = new ReferencedFile
@@ -129,7 +117,7 @@ namespace Chutzpah.Facts
                     FilePositions = new FilePositions()
                 };
                 referencedFile.FilePositions.Add("module", "name", 1, 3);
-                builder.MoqJsonSerializer
+                builder.Mock<IJsonSerializer>()
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                                  {
@@ -147,7 +135,7 @@ namespace Chutzpah.Facts
                                                    }
                                  });
 
-                var tests = builder.Build(new BrowserTestFileResult(new TestContext
+                var tests = builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext
                 {
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
@@ -162,8 +150,8 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_set_line_number_to_zero_if_not_file_positons_exist()
             {
-                var builder = TestableTestResultsBuilder.Create();
-                builder.MoqHtmlUtility
+                var builder = new TestableTestResultsBuilder();
+                builder.Mock<IHtmlUtility>()
                     .Setup(x => x.DecodeJavaScript(It.IsAny<string>()))
                     .Returns<string>(x => x);
                 var referencedFile = new ReferencedFile
@@ -173,7 +161,7 @@ namespace Chutzpah.Facts
                     FilePositions = new FilePositions()
                 };
                 referencedFile.FilePositions.Add("module", "name", 1, 3);
-                builder.MoqJsonSerializer
+                builder.Mock<IJsonSerializer>()
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                     {
@@ -191,7 +179,7 @@ namespace Chutzpah.Facts
                                                    }
                     });
 
-                var tests = builder.Build(new BrowserTestFileResult(new TestContext
+                var tests = builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext
                 {
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",

@@ -37,6 +37,9 @@
     <Reference Include="StructureMap, Version=2.6.2.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <HintPath>..\packages\structuremap.2.6.2\lib\StructureMap.dll</HintPath>
     </Reference>
+    <Reference Include="StructureMap.AutoMocking">
+      <HintPath>..\packages\structuremap.automocking.2.6.2.1\lib\StructureMap.AutoMocking.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +64,7 @@
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\TestRunnerFacts.cs" />
+    <Compile Include="Testable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
