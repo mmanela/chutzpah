@@ -18,13 +18,11 @@ namespace Chutzpah
 
         public bool DebugEnabled { get; set; }
 
-        public TestRunner()
-            : this(
-                new ProcessWrapper(),
-                new TestResultsBuilder(),
-                new FileProbe(new EnvironmentWrapper(), new FileSystemWrapper()),
-                new TestContextBuilder())
+        public static ITestRunner Create(bool debugEnabled = false)
         {
+            var runner = ChutzpahContainer.Current.GetInstance<TestRunner>();
+            runner.DebugEnabled = debugEnabled;
+            return runner;
         }
 
         public TestRunner(IProcessWrapper process, ITestResultsBuilder testResultsBuilder, IFileProbe fileProbe, ITestContextBuilder htmlTestFileCreator)

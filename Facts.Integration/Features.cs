@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Chutzpah.Models;
 using Xunit;
+using System.Linq;
 
 namespace Chutzpah.Facts.Integration
 {
@@ -9,7 +10,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_a_tests_from_a_js_file()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
 
@@ -19,9 +20,35 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_get_file_position_for_test_without_module()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
+
+            var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("A basic test"));
+            Assert.Equal(3, test.Line);
+            Assert.Equal(2, test.Column);
+        }
+
+
+        [Fact]
+        public void Will_get_file_position_for_test_with_module()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
+
+            var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
+            Assert.Equal(11, test.Line);
+            Assert.Equal(3, test.Column);
+        }
+
+
+        [Fact]
         public void Will_run_a_tests_from_a_html_file()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.html");
 
@@ -33,7 +60,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_a_passing_tests_with_characters_that_need_encoding()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\encoding.js");
 
@@ -45,7 +72,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_a_passing_tests_that_has_a_reference_to_web_url()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\webReference.js");
 
@@ -57,7 +84,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_multiple_files_and_aggregate_results()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
             var tests = new List<string>
                             {
                                 @"JS\Test\basic.js",
@@ -73,7 +100,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_test_which_logs_object_to_console_log()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             testRunner.DebugEnabled = true;
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js");
@@ -86,7 +113,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_test_which_logs_object_to_console_error()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\consoleError.js");
 
             Assert.Equal(0, result.FailedCount);
@@ -97,7 +124,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_test_which_logs_object_to_console_warn()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\consoleWarn.js");
 
@@ -109,7 +136,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_run_test_which_has_script_error_which_gets_logged_to_output()
         {
-            var testRunner = new TestRunner();
+            var testRunner = TestRunner.Create();
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\scriptError.js");
 
             Assert.Equal(3, result.FailedCount);

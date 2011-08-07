@@ -35,6 +35,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="StructureMap">
+      <HintPath>..\packages\structuremap.2.6.2\lib\StructureMap.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -45,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="FileProbe.cs" />
     <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />

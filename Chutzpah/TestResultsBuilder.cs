@@ -19,11 +19,6 @@ namespace Chutzpah
             this.htmlUtility = htmlUtility;
         }
 
-        public TestResultsBuilder()
-            : this(new JsonSerializer(), new HtmlUtility())
-        {
-        }
-
         public IEnumerable<TestResult> Build(BrowserTestFileResult browserTestFileResult)
         {
             if (browserTestFileResult == null) throw new ArgumentNullException("browserTestFileResult");

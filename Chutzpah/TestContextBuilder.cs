@@ -20,11 +20,6 @@ namespace Chutzpah
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public TestContextBuilder()
-            : this(new FileSystemWrapper(), new FileProbe(), new List<IReferencedFileProcessor> { new QUnitLineNumberProcessor(new FileSystemWrapper()) })
-        {
-        }
-
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors)
         {
             this.fileSystem = fileSystem;

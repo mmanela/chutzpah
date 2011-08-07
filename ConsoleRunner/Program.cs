@@ -9,16 +9,6 @@ namespace Chutzpah
 {
     class Program
     {
-        static void Main2(string[] args)
-        {
-            var testRunner = new TestRunner();
-            var testFile = Path.GetFullPath(@"JS\test.html");
-            var res = testRunner.RunTests(testFile);
-
-            Console.WriteLine("Running tests for {0}", testFile);
-            Console.WriteLine(string.Format("Passed: {0}  Failed:{1}", res.PassedCount, res.FailedCount));
-        }
-
         [STAThread]
         public static int Main(string[] args)
         {
@@ -90,8 +80,8 @@ namespace Chutzpah
 
         static int RunTests(CommandLine commandLine)
         {
- 
-            var testRunner = new TestRunner {DebugEnabled = commandLine.Debug};
+
+            var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
             var chutzpahAssemblyName = testRunner.GetType().Assembly.GetName();
             

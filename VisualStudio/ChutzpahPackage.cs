@@ -41,7 +41,7 @@ namespace Chutzpah.VisualStudio
     public sealed class ChutzpahPackage : Package
     {
         private DTE2 dte;
-        private TestRunner testRunner;
+        private ITestRunner testRunner;
         internal ILogger Logger { get; private set; }
         private ITestMethodRunnerCallback runnerCallback;
         private IVsStatusbar statusBar;
@@ -77,7 +77,7 @@ namespace Chutzpah.VisualStudio
                 throw new ArgumentNullException("dte");
             }
 
-            testRunner = new TestRunner();
+            testRunner = TestRunner.Create();
 
             Logger = new Logger(this);
             statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;

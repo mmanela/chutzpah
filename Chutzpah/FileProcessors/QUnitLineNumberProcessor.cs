@@ -20,12 +20,6 @@ namespace Chutzpah.FileProcessors
             this.fileSystem = fileSystem;
         }
 
-        public QUnitLineNumberProcessor()
-            : this(new FileSystemWrapper())
-        {
-            
-        }
-
         public void Process(ReferencedFile referencedFile)
         {
             if(!referencedFile.IsFileUnderTest) return;
