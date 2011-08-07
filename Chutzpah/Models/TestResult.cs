@@ -10,5 +10,7 @@
         public string Expected { get; set; }
         public string Actual { get; set; }
         public string Message { get; set; }
+        public int Line { get; set; }
+        public int Column { get; set; }
     }
 }

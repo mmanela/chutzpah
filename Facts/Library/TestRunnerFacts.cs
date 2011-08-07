@@ -94,12 +94,13 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_run_html_test_file_and_return_test_results_model()
+            public void Will_run_test_file_and_return_test_results_model()
             {
                 TestableTestRunner runner = TestableTestRunner.Create();
                 BrowserTestFileResult fileResult = null;
                 var testResults = new List<TestResult> {new TestResult()};
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
+                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(context);
                 runner.MoqFileProbe.Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 runner.MoqFileProbe.Setup(x => x.FindPath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
@@ -110,31 +111,7 @@ namespace Chutzpah.Facts
                 TestResultsSummary res = runner.RunTests(@"path\tests.html");
 
                 Assert.Equal(1, res.TotalCount);
-                Assert.Equal(@"D:\harnessPath.html", fileResult.HtmlTestFile);
-                Assert.Equal(@"D:\path\tests.html", fileResult.InputTestFile);
-                Assert.Equal("json", fileResult.BrowserOutput);
-            }
-
-            [Fact]
-            public void Will_run_html_test_file_created_from_js_file_and_return_test_results_model()
-            {
-                TestableTestRunner runner = TestableTestRunner.Create();
-                BrowserTestFileResult fileResult = null;
-                var testResults = new List<TestResult> {new TestResult()};
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(It.IsAny<string>())).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
-                runner.MoqFileProbe.Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
-                runner.MoqFileProbe.Setup(x => x.FindPath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
-                runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.MoqFileProbe.Setup(x => x.FindPath(@"js\tests.js")).Returns(@"D:\js\tests.js");
-                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html""";
-                runner.MoqProcessWrapper.Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
-                runner.MoqTestResultsBuilder.Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
-
-                TestResultsSummary res = runner.RunTests(@"js\tests.js");
-
-                Assert.Equal(1, res.TotalCount);
-                Assert.Equal(@"D:\harnessPath.html", fileResult.HtmlTestFile);
-                Assert.Equal(@"D:\js\tests.js", fileResult.InputTestFile);
+                Assert.Equal(context, fileResult.TestContext);
                 Assert.Equal("json", fileResult.BrowserOutput);
             }
 
@@ -144,8 +121,10 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = TestableTestRunner.Create();
                 var fileResults = new List<BrowserTestFileResult>();
                 var testResults = new List<TestResult> {new TestResult()};
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests1.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath1.html" });
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests2.htm")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath2.htm" });
+                var context1 = new TestContext { TestHarnessPath = @"D:\harnessPath1.html" };
+                var context2 = new TestContext { TestHarnessPath = @"D:\harnessPath2.htm" };
+                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests1.html")).Returns(context1);
+                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests2.htm")).Returns(context2);
                 runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests1.html")).Returns(@"D:\path\tests1.html");
                 runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests2.htm")).Returns(@"D:\path\tests2.htm");
                 runner.MoqFileProbe.Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
@@ -158,9 +137,9 @@ namespace Chutzpah.Facts
                 TestResultsSummary res = runner.RunTests(new List<string> {@"path\tests1.html", @"path\tests2.htm"});
 
                 Assert.Equal(2, res.TotalCount);
-                Assert.Equal(@"D:\harnessPath1.html", fileResults[0].HtmlTestFile);
+                Assert.Equal(context1, fileResults[0].TestContext);
                 Assert.Equal("json1", fileResults[0].BrowserOutput);
-                Assert.Equal(@"D:\harnessPath2.htm", fileResults[1].HtmlTestFile);
+                Assert.Equal(context2, fileResults[1].TestContext);
                 Assert.Equal("json2", fileResults[1].BrowserOutput);
             }
 
@@ -201,9 +180,8 @@ namespace Chutzpah.Facts
             {
                 TestableTestRunner runner = TestableTestRunner.Create();
                 var testCallback = new MockTestMethodRunnerCallback();
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
                 testCallback.Setup(x => x.FileStart(@"D:\path\tests.html")).Returns(false).Verifiable();
-                runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
 
                 TestResultsSummary res = runner.RunTests(@"path\tests.html", testCallback.Object);
@@ -218,9 +196,8 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = TestableTestRunner.Create();
                 var testResults = new List<TestResult> {new TestResult()};
                 var testCallback = new MockTestMethodRunnerCallback();
-                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.MoqTestContextBuilder.Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
                 testCallback.Setup(x => x.FileFinished(@"D:\path\tests.html", It.Is<TestResultsSummary>(t => t.TotalCount == 1))).Returns(false).Verifiable();
-                runner.MoqFileProbe.Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
                 runner.MoqProcessWrapper.Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
                 runner.MoqTestResultsBuilder.Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);

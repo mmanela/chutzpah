@@ -62,8 +62,9 @@ namespace Chutzpah
             {
                 try
                 {
-                    string htmlTestFile = GetTestContext(testFile).TestHarnessPath;
-                    bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, htmlTestFile, testFile, testResults, callback);
+                    var testContext = GetTestContext(testFile);
+                    bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
+                    
                     if (!result) break;
 
                 }
@@ -87,25 +88,20 @@ namespace Chutzpah
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,
                                           string jsTestRunnerPath,
-                                          string htmlTestFilePath,
-                                          string inputTestFile,
+                                          TestContext testContext,
                                           List<TestResult> testResults,
                                           ITestMethodRunnerCallback callback)
         {
-            string inputTestFilePath = fileProbe.FindPath(inputTestFile);
-            if (htmlTestFilePath == null)
-                throw new FileNotFoundException("Unable to find test file " + htmlTestFilePath);
+            if (callback != null && !callback.FileStart(testContext.InputTestFile)) return false;
 
-            if (callback != null && !callback.FileStart(inputTestFilePath)) return false;
-
-            string fileUrl = BuildFileUrl(htmlTestFilePath);
+            string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
             string args = string.Format("\"{0}\" {1}", jsTestRunnerPath, fileUrl);
             string jsonResult = process.RunExecutableAndCaptureOutput(headlessBrowserPath, args);
 
             if (DebugEnabled)
                 Console.WriteLine(jsonResult);
 
-            IEnumerable<TestResult> fileTests = testResultsBuilder.Build(new BrowserTestFileResult(htmlTestFilePath, inputTestFilePath, jsonResult));
+            IEnumerable<TestResult> fileTests = testResultsBuilder.Build(new BrowserTestFileResult(testContext, jsonResult));
             testResults.AddRange(fileTests);
 
             if (callback != null)
@@ -114,23 +110,9 @@ namespace Chutzpah
                     callback.TestFinished(test);
             }
 
-            if (callback != null && !callback.FileFinished(inputTestFilePath, new TestResultsSummary(fileTests))) return false;
+            if (callback != null && !callback.FileFinished(testContext.InputTestFile, new TestResultsSummary(fileTests))) return false;
 
             return true;
-        }
-
-
-        private static bool IsHtmlFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null &&
-                   (ext.Equals(".html", StringComparison.OrdinalIgnoreCase) || ext.Equals(".htm", StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static bool IsJavaScriptFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null && ext.Equals(".js", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string BuildFileUrl(string absolutePath)

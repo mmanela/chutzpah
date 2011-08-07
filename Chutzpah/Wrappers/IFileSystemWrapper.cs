@@ -28,6 +28,7 @@ namespace Chutzpah.Wrappers
         byte[] GetContent(Stream stream);
         void Save(string path, string contents);
         string GetText(string path);
+        string[] GetLines(string path);
         string GetRandomFileName();
     }
 }

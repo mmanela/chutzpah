@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Chutzpah.Wrappers;
 using Chutzpah.Models;
+using Chutzpah.FileProcessors;
 
 namespace Chutzpah
 {
@@ -13,20 +14,22 @@ namespace Chutzpah
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
+        IEnumerable<IReferencedFileProcessor> referencedFileProcessors;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public TestContextBuilder()
-            : this(new FileSystemWrapper(), new FileProbe())
+            : this(new FileSystemWrapper(), new FileProbe(), new List<IReferencedFileProcessor> { new QUnitLineNumberProcessor(new FileSystemWrapper()) })
         {
         }
 
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe)
+        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
+            this.referencedFileProcessors = referencedFileProcessors;
         }
 
         public TestContext BuildContext(string file, string stagingFolder)
@@ -54,7 +57,7 @@ namespace Chutzpah
             if (fileKind == TestFileType.JavaScript)
             {
                 var stagedFilePath = Path.Combine(stagingFolder, testFileName);
-                referencedFiles.Add(new ReferencedJavaScriptFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true });
+                referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
             }
 
             CopyReferencedFiles(referencedFiles);
@@ -65,7 +68,7 @@ namespace Chutzpah
             CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
             var testHtmlFilePath = CreateTestHarness(stagingFolder, referencedFiles);
 
-            return new TestContext{ TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles};
+            return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
         }
 
         public TestContext BuildContext(string file)
@@ -74,7 +77,7 @@ namespace Chutzpah
             return BuildContext(file, testFolder);
         }
 
-        private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedJavaScriptFile> referencedFiles)
+        private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate.html");
@@ -94,10 +97,10 @@ namespace Chutzpah
             }
         }
 
-        private IList<ReferencedJavaScriptFile> GetReferencedFiles(TestFileType testFileType, string testFileText, string testFilePath, string stagingFolder)
+        private IList<ReferencedFile> GetReferencedFiles(TestFileType testFileType, string testFileText, string testFilePath, string stagingFolder)
         {
             var regex = testFileType == TestFileType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
-            var files = new List<ReferencedJavaScriptFile>();
+            var files = new List<ReferencedFile>();
             foreach (Match match in regex.Matches(testFileText))
             {
                 if (match.Success)
@@ -113,33 +116,39 @@ namespace Chutzpah
                             var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), stagingFolder);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
                             fileSystem.CopyFile(absolutePath, stagedPath);
-                            files.Add(new ReferencedJavaScriptFile{ Path = absolutePath, StagedPath = stagedPath, IsLocal = true});
+                            files.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        files.Add(new ReferencedJavaScriptFile { Path = referencePath, StagedPath = referencePath, IsLocal = false });
+                        files.Add(new ReferencedFile { Path = referencePath, StagedPath = referencePath, IsLocal = false });
                     }
                 }
             }
             return files;
         }
 
-        private void CopyReferencedFiles(IEnumerable<ReferencedJavaScriptFile> referencedFiles)
+        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles)
         {
             foreach (var referencedFile in referencedFiles)
             {
                 if (referencedFile.IsLocal)
                 {
                     fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
+
+                    foreach (var referencedFileProcessor in referencedFileProcessors)
+                    {
+                        referencedFileProcessor.Process(referencedFile);
+                    }
+                    
                 }
             }
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedJavaScriptFile> referencedFiles)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles)
         {
             var referenceReplacement = new StringBuilder();
-            foreach (ReferencedJavaScriptFile referencedFile in referencedFiles)
+            foreach (ReferencedFile referencedFile in referencedFiles)
             {
                 var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
                 referenceReplacement.AppendLine(GetScriptStatement(referencePath));

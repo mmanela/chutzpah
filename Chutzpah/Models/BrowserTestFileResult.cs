@@ -2,15 +2,13 @@
 {
     public class BrowserTestFileResult
     {
-        public BrowserTestFileResult(string htmlTestFile, string inputTestFile, string browserOutput)
+        public BrowserTestFileResult(TestContext testContext, string browserOutput)
         {
-            HtmlTestFile = htmlTestFile;
-            InputTestFile = inputTestFile;
+            TestContext = testContext;
             BrowserOutput = browserOutput;
         }
 
-        public string HtmlTestFile { get; set; }
-        public string InputTestFile { get; set; }
+        public TestContext TestContext { get; set; }
         public string BrowserOutput { get; set; }
     }
 }

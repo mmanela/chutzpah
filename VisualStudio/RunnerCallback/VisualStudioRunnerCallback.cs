@@ -75,7 +75,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
         protected virtual void TestFailed(TestResult result)
         {
             var errorMessage = GetTestFailureMessage(result);
-            WriteToOutputPaneAndErrorTaskList(result.InputTestFile, errorMessage, errorMessage);
+            WriteToOutputPaneAndErrorTaskList(result.InputTestFile, errorMessage, errorMessage, result.Line);
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
@@ -136,7 +136,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
             }
         }
 
-        private void WriteToOutputPaneAndErrorTaskList(string filePath, string outputPaneText, string taskItemText)
+        private void WriteToOutputPaneAndErrorTaskList(string filePath, string outputPaneText, string taskItemText, int line)
         {
             testPane.OutputTaskItemString(
                 outputPaneText, // Output window text
@@ -144,7 +144,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
                 null,
                 vsTaskIcon.vsTaskIconSquiggle,
                 filePath,
-                0,
+                line,
                 taskItemText, // Task text
                 true);
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using System.Linq;
 
 namespace Chutzpah
 {
@@ -28,6 +29,7 @@ namespace Chutzpah
             if (browserTestFileResult == null) throw new ArgumentNullException("browserTestFileResult");
             if (string.IsNullOrWhiteSpace(browserTestFileResult.BrowserOutput)) throw new ArgumentNullException("browserTestFileResult.BrowserOutput");
 
+            var referencedFile = browserTestFileResult.TestContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testResults = new List<TestResult>();
 
             string json = ParseJsonResultFromBrowserOutput(browserTestFileResult.BrowserOutput);
@@ -36,14 +38,22 @@ namespace Chutzpah
             foreach (JsonTestCase rawTest in rawResults.Results)
             {
                 var test = new TestResult();
-                test.InputTestFile = browserTestFileResult.InputTestFile;
-                test.HtmlTestFile = browserTestFileResult.HtmlTestFile;
+                test.InputTestFile = browserTestFileResult.TestContext.InputTestFile;
+                test.HtmlTestFile = browserTestFileResult.TestContext.TestHarnessPath;
                 test.ModuleName = htmlUtility.DecodeJavaScript(rawTest.Module);
                 test.TestName = htmlUtility.DecodeJavaScript(rawTest.Name);
                 test.Actual = htmlUtility.DecodeJavaScript(rawTest.Actual);
                 test.Expected = htmlUtility.DecodeJavaScript(rawTest.Expected);
                 test.Message = htmlUtility.DecodeJavaScript(rawTest.Message);
                 test.Passed = rawTest.State != null && rawTest.State.Equals("pass", StringComparison.OrdinalIgnoreCase);
+
+                if (referencedFile != null)
+                {
+                    var position = referencedFile.FilePositions.Get(test.ModuleName, test.TestName);
+                    test.Line = position.Line;
+                    test.Column = position.Column;
+                }
+
                 testResults.Add(test);
             }
 

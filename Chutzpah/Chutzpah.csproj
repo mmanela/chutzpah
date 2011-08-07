@@ -46,6 +46,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileProbe.cs" />
+    <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
+    <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
+    <Compile Include="Models\FilePosition.cs" />
+    <Compile Include="Models\FilePositions.cs" />
+    <Compile Include="Models\ReferencedFile.cs" />
     <Compile Include="Models\TestFileType.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />

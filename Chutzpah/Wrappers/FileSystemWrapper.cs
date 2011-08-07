@@ -141,6 +141,11 @@ namespace Chutzpah.Wrappers
             return File.ReadAllText(path);
         }
 
+        public string[] GetLines(string path)
+        {
+            return File.ReadAllLines(path);
+        }
+
         public void Save(string path, string contents)
         {
             File.WriteAllText(path,contents);
