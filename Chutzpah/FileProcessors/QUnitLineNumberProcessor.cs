@@ -13,7 +13,7 @@ namespace Chutzpah.FileProcessors
     /// </summary>
     public class QUnitLineNumberProcessor : IReferencedFileProcessor
     {
-        private static Regex testAndModuleRegex = new Regex(@"(module[\t ]*\([\t ]*[""'](?<Module>.*?)[""'])|(test[\t ]*\([\t ]*[""'](?<Test>.*?)[""'])", RegexOptions.Compiled);
+        private static Regex testAndModuleRegex = new Regex(@"(module[\t ]*\([\t ]*[""'](?<Module>.*)[""'])|(test[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
         IFileSystemWrapper fileSystem;
         public QUnitLineNumberProcessor(IFileSystemWrapper fileSystem)
         {

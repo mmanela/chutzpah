@@ -114,7 +114,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
                 failureMessage += string.Format("{0}", result.Message);
             }
 
-            failureMessage += string.Format("   at {0} in {1}\n\n", title, result.InputTestFile);
+            failureMessage += string.Format("\n\tin {0}({1},{2}) at {3}\n\n", result.InputTestFile, result.Line, result.Column, title);
 
             return failureMessage;
         }

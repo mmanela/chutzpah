@@ -78,6 +78,9 @@ namespace Chutzpah.RunnerCallbacks
             {
                 errorString += string.Format("{0}", result.Message);
             }
+
+            errorString += string.Format("\n\tin {0}({1},{2}) at {3}\n\n", result.InputTestFile, result.Line, result.Column, GetTestDisplayText(result));
+
             return errorString;
         }
     }

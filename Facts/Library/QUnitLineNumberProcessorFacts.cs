@@ -46,6 +46,23 @@ namespace Chutzpah.Facts
                 Assert.Equal(3, file.FilePositions.Get("module1","test2").Column);
             }
 
+
+            [Fact]
+            public void Will_get_line_number_for_test_with_quotes_in_title()
+            {
+                var processor = new TestableQUnitLineNumberProcessor();
+                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, StagedPath = "path" };
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
+                {
+                    "module ( \"modu\"le'1\");", " test (\"t\"e'st1\", function(){}); "
+                });
+
+                processor.ClassUnderTest.Process(file);
+
+                Assert.Equal(2, file.FilePositions.Get("modu\"le'1", "t\"e'st1").Line);
+                Assert.Equal(2, file.FilePositions.Get("modu\"le'1", "t\"e'st1").Column);
+            }
+
         }
     }
 }
