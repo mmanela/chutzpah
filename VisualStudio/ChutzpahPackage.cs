@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Constants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
 using System.Linq;
+using Chutzpah.Models;
 
 namespace Chutzpah.VisualStudio
 {
@@ -47,6 +48,11 @@ namespace Chutzpah.VisualStudio
         private IVsStatusbar statusBar;
         private readonly object syncLock = new object();
         private bool testingInProgress;
+
+        // Keeps track of last staging folder
+        // This will allow the open in browser path to stay the same so
+        // you can just hit refresh
+        string stagingFolder;
 
         /// <summary>
         /// Default constructor of the package.
@@ -141,7 +147,8 @@ namespace Chutzpah.VisualStudio
             {
                 try
                 {
-                    var testContext = testRunner.GetTestContext(selectedFile);
+                    var testContext = testRunner.GetTestContext(selectedFile, new TestOptions { StagingFolder = stagingFolder });
+                    stagingFolder = Path.GetDirectoryName(testContext.TestHarnessPath);
                     LaunchFileInBrowser(testContext.TestHarnessPath);
                 }
                 catch (FileNotFoundException)
@@ -221,7 +228,7 @@ namespace Chutzpah.VisualStudio
                         Task.Factory.StartNew(
                             () =>
                             {
-                                testRunner.RunTests(filePaths, runnerCallback);
+                                testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
                                 testingInProgress = false;
                             });
                     }

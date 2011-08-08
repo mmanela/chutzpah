@@ -68,6 +68,7 @@
     <Compile Include="Models\JsonTestCase.cs" />
     <Compile Include="Models\JsonTestResult.cs" />
     <Compile Include="Models\TestResult.cs" />
+    <Compile Include="TestOptions.cs" />
     <Compile Include="TestResultsBuilder.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />

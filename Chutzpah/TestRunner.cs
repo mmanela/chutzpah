@@ -33,15 +33,25 @@ namespace Chutzpah
             this.testContextBuilder = htmlTestFileCreator;
         }
 
-        public TestContext GetTestContext(string testFile)
+        public TestContext GetTestContext(string testFile, TestOptions options)
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
-            var context = testContextBuilder.BuildContext(testFile);
+            var context = testContextBuilder.BuildContext(testFile, options.StagingFolder);
             return context;
         }
 
+        public TestContext GetTestContext(string testFile)
+        {
+            return GetTestContext(testFile, new TestOptions());
+        }
+
         public TestResultsSummary RunTests(IEnumerable<string> testFiles, ITestMethodRunnerCallback callback = null)
+        {
+            return RunTests(testFiles, new TestOptions(), callback);
+        }
+
+        public TestResultsSummary RunTests(IEnumerable<string> testFiles, TestOptions options, ITestMethodRunnerCallback callback = null)
         {
             string headlessBrowserPath = fileProbe.FindPath(HeadlessBrowserName);
             string jsTestRunnerPath = fileProbe.FindPath(TestRunnerJsName);
@@ -60,7 +70,7 @@ namespace Chutzpah
             {
                 try
                 {
-                    var testContext = GetTestContext(testFile);
+                    var testContext = GetTestContext(testFile,options);
                     bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
                     
                     if (!result) break;
@@ -81,7 +91,12 @@ namespace Chutzpah
 
         public TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(new[] { testFile }, callback);
+            return RunTests(testFile, new TestOptions(), callback);
+        }
+
+        public TestResultsSummary RunTests(string testFile, TestOptions options, ITestMethodRunnerCallback callback = null)
+        {
+            return RunTests(new[] { testFile }, options, callback);
         }
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,

@@ -26,9 +26,21 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var context = new TestContext();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext("a.js")).Returns(context);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext("a.js", null)).Returns(context);
                 
                 var res = runner.ClassUnderTest.GetTestContext("a.js");
+
+                Assert.Equal(context, res);
+            }
+
+            [Fact]
+            public void Will_get_test_context_given_staging_folder()
+            {
+                var runner = new TestableTestRunner();
+                var context = new TestContext();
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext("a.js", "staging")).Returns(context);
+
+                var res = runner.ClassUnderTest.GetTestContext("a.js", new TestOptions {StagingFolder = "staging" });
 
                 Assert.Equal(context, res);
             }
@@ -68,13 +80,30 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_build_context_with_given_staging_path()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                var testCallback = new MockTestMethodRunnerCallback();
+                runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<ITestContextBuilder>()
+                    .Setup(x => x.BuildContext(@"path\tests.html", "staging"))
+                    .Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" })
+                    .Verifiable();
+                string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
+
+                TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html",new TestOptions {StagingFolder = "staging" }, testCallback.Object);
+
+                runner.Mock<ITestContextBuilder>().Verify();
+            }
+
+            [Fact]
             public void Will_run_test_file_and_return_test_results_model()
             {
                 TestableTestRunner runner = new TestableTestRunner();
                 BrowserTestFileResult fileResult = null;
                 var testResults = new List<TestResult> {new TestResult()};
                 var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(context);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(context);
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
@@ -97,8 +126,8 @@ namespace Chutzpah.Facts
                 var testResults = new List<TestResult> {new TestResult()};
                 var context1 = new TestContext { TestHarnessPath = @"D:\harnessPath1.html" };
                 var context2 = new TestContext { TestHarnessPath = @"D:\harnessPath2.htm" };
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests1.html")).Returns(context1);
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests2.htm")).Returns(context2);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests1.html", null)).Returns(context1);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests2.htm", null)).Returns(context2);
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests1.html")).Returns(@"D:\path\tests1.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests2.htm")).Returns(@"D:\path\tests2.htm");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
@@ -123,7 +152,7 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
@@ -137,7 +166,7 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
                 var testResults = new List<TestResult> {new TestResult()};
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 string args = "jsPath" + @" file:///D:/harnessPath.html";
@@ -154,7 +183,7 @@ namespace Chutzpah.Facts
             {
                 TestableTestRunner runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
                 testCallback.Setup(x => x.FileStart(@"D:\path\tests.html")).Returns(false).Verifiable();
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
 
@@ -170,7 +199,7 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = new TestableTestRunner();
                 var testResults = new List<TestResult> {new TestResult()};
                 var testCallback = new MockTestMethodRunnerCallback();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
                 testCallback.Setup(x => x.FileFinished(@"D:\path\tests.html", It.Is<TestResultsSummary>(t => t.TotalCount == 1))).Returns(false).Verifiable();
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
                 runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
@@ -188,7 +217,7 @@ namespace Chutzpah.Facts
                 TestableTestRunner runner = new TestableTestRunner();
                 var testResults = new List<TestResult> {new TestResult(), new TestResult()};
                 var testCallback = new MockTestMethodRunnerCallback();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
                 runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
@@ -207,8 +236,8 @@ namespace Chutzpah.Facts
                 var testResults = new List<TestResult> {new TestResult()};
                 var testCallback = new MockTestMethodRunnerCallback();
                 var exception = new Exception();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests1.html")).Throws(exception);
-                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests2.html")).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests1.html", null)).Throws(exception);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests2.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests1.html")).Throws(exception);
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests2.html")).Returns(@"D:\path\tests2.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";

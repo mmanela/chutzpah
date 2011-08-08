@@ -34,8 +34,7 @@ namespace Chutzpah
             var fileKind = GetTestFileType(file);
             if (fileKind == TestFileType.Other)
                 throw new ArgumentException("Expecting a .js or .html file");
-            if (string.IsNullOrEmpty(stagingFolder))
-                throw new ArgumentException("generatedHtmlFilePath");
+            stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporayFolder() : stagingFolder;
 
             string filePath = fileProbe.FindPath(file);
             if (filePath == null)
@@ -68,8 +67,7 @@ namespace Chutzpah
 
         public TestContext BuildContext(string file)
         {
-            var testFolder = fileSystem.GetTemporayFolder();
-            return BuildContext(file, testFolder);
+            return BuildContext(file, null);
         }
 
         private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles)
