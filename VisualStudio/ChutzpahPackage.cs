@@ -228,7 +228,8 @@ namespace Chutzpah.VisualStudio
                         Task.Factory.StartNew(
                             () =>
                             {
-                                testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
+                                var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
+                                stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
                                 testingInProgress = false;
                             });
                     }
