@@ -23,6 +23,8 @@ namespace Chutzpah
         public bool Debug { get; protected set; }
 
         public bool Silent { get; protected set; }
+        
+        public bool OpenInBrowser { get; protected set; }
 
         public bool TeamCity { get; protected set; }
 
@@ -66,6 +68,11 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     Debug = true;
+                }
+                else if (optionName == "/openinbrowser")
+                {
+                    GuardNoOptionValue(option);
+                    OpenInBrowser = true;
                 }
                 else if (optionName == "/silent")
                 {

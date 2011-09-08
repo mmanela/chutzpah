@@ -15,6 +15,7 @@ using Constants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
 using System.Linq;
 using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.VisualStudio
 {
@@ -46,6 +47,7 @@ namespace Chutzpah.VisualStudio
         internal ILogger Logger { get; private set; }
         private ITestMethodRunnerCallback runnerCallback;
         private IVsStatusbar statusBar;
+        IProcessHelper processHelper;
         private readonly object syncLock = new object();
         private bool testingInProgress;
 
@@ -85,6 +87,7 @@ namespace Chutzpah.VisualStudio
 
             testRunner = TestRunner.Create();
 
+            processHelper = new ProcessHelper();
             Logger = new Logger(this);
             statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
             runnerCallback = new VisualStudioRunnerCallback(dte, statusBar);
@@ -239,11 +242,7 @@ namespace Chutzpah.VisualStudio
 
         private void LaunchFileInBrowser(string file)
         {
-            var startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.Verb = "Open";
-            startInfo.FileName = file;
-            System.Diagnostics.Process.Start(startInfo);
+            processHelper.LaunchFileInBrowser(file);
         }
 
         private List<string> GetSelectedTestableFiles()

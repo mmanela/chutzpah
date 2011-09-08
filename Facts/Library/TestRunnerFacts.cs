@@ -108,7 +108,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html""";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
@@ -116,6 +116,26 @@ namespace Chutzpah.Facts
                 Assert.Equal(1, res.TotalCount);
                 Assert.Equal(context, fileResult.TestContext);
                 Assert.Equal("json", fileResult.BrowserOutput);
+            }
+
+            [Fact]
+            public void Will_open_test_file_in_browser_when_given_flag()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                BrowserTestFileResult fileResult = null;
+                var testResults = new List<TestResult> { new TestResult() };
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(context);
+                runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html""";
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+
+                TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { OpenInBrowser = true });
+
+                runner.Mock<IProcessHelper>().Verify(x => x.LaunchFileInBrowser(@"D:\harnessPath.html"));
             }
 
             [Fact]
@@ -133,8 +153,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 string args1 = "\"jsPath\"" + @" ""file:///D:/harnessPath1.html""";
                 string args2 = "\"jsPath\"" + @" ""file:///D:/harnessPath2.htm""";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args1)).Returns("json1");
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args2)).Returns("json2");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args1)).Returns("json1");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args2)).Returns("json2");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(fileResults.Add).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new List<string> {@"path\tests1.html", @"path\tests2.htm"});
@@ -170,7 +190,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 string args = "jsPath" + @" file:///D:/harnessPath.html";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args)).Returns("json");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args)).Returns("json");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
@@ -190,7 +210,7 @@ namespace Chutzpah.Facts
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
 
                 testCallback.Verify();
-                runner.Mock<IProcessWrapper>().Verify(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args), Times.Never());
+                runner.Mock<IProcessHelper>().Verify(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args), Times.Never());
             }
 
             [Fact]
@@ -202,7 +222,7 @@ namespace Chutzpah.Facts
                 runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html", InputTestFile = @"D:\path\tests.html" });
                 testCallback.Setup(x => x.FileFinished(@"D:\path\tests.html", It.Is<TestResultsSummary>(t => t.TotalCount == 1))).Returns(false).Verifiable();
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] {@"path\tests.html", @"path\tests.html"}, testCallback.Object);
@@ -220,7 +240,7 @@ namespace Chutzpah.Facts
                 runner.Mock<ITestContextBuilder>().Setup(x => x.BuildContext(@"path\tests.html", null)).Returns(new TestContext { TestHarnessPath = @"D:\harnessPath.html" });
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] {@"path\tests.html", @"path\tests.html"}, testCallback.Object);
@@ -241,7 +261,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests1.html")).Throws(exception);
                 runner.Mock<IFileProbe>().Setup(x => x.FindPath(@"path\tests2.html")).Returns(@"D:\path\tests2.html");
                 string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
-                runner.Mock<IProcessWrapper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, args)).Returns("json");
                 runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] {@"path\tests1.html", @"path\tests2.html"}, testCallback.Object);

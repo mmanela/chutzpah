@@ -11,7 +11,7 @@ namespace Chutzpah
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\qunitRunner.js";
 
-        private readonly IProcessWrapper process;
+        private readonly IProcessHelper process;
         private readonly ITestResultsBuilder testResultsBuilder;
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
@@ -25,7 +25,7 @@ namespace Chutzpah
             return runner;
         }
 
-        public TestRunner(IProcessWrapper process, ITestResultsBuilder testResultsBuilder, IFileProbe fileProbe, ITestContextBuilder htmlTestFileCreator)
+        public TestRunner(IProcessHelper process, ITestResultsBuilder testResultsBuilder, IFileProbe fileProbe, ITestContextBuilder htmlTestFileCreator)
         {
             this.process = process;
             this.testResultsBuilder = testResultsBuilder;
@@ -73,6 +73,11 @@ namespace Chutzpah
                     var testContext = GetTestContext(testFile,options);
                     bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
                     
+                    if(options.OpenInBrowser) 
+                    {
+                        process.LaunchFileInBrowser(testContext.TestHarnessPath);
+                    }
+
                     if (!result) break;
 
                 }

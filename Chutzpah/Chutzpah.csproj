@@ -78,9 +78,9 @@
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
     <Compile Include="Wrappers\IHtmlUtility.cs" />
     <Compile Include="Wrappers\IJsonSerializer.cs" />
-    <Compile Include="Wrappers\IProcessWrapper.cs" />
+    <Compile Include="Wrappers\IProcessHelper.cs" />
     <Compile Include="Wrappers\JsonSerializer.cs" />
-    <Compile Include="Wrappers\ProcessWrapper.cs" />
+    <Compile Include="Wrappers\ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\TestResultsSummary.cs" />

@@ -8,5 +8,6 @@ namespace Chutzpah
     public class TestOptions
     {
         public string StagingFolder { get; set; }
+        public bool OpenInBrowser { get; set; }
     }
 }

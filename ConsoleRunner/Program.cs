@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
+using System.Linq;
 
 namespace Chutzpah
 {
@@ -72,6 +73,7 @@ namespace Chutzpah
             Console.WriteLine("  /teamcity              : forces TeamCity mode (normally auto-detected)");
             Console.WriteLine("  /wait                  : wait for input after completion");
             Console.WriteLine("  /debug                 : print debugging information");
+            Console.WriteLine("  /openInBrowser         : launch the tests in the default browser");
             Console.WriteLine("  /file fileName         : adds fileName to list of test files");
             Console.WriteLine("                         : sepcify more than once to add multiple files");
             Console.WriteLine("                         : (e.g. /file test1.html /file test2.html)");
@@ -95,8 +97,8 @@ namespace Chutzpah
             {
 
                 var callback = commandLine.TeamCity ? (RunnerCallback)new TeamCityRunnerCallback() : new StandardRunnerCallback(commandLine.Silent);
-
-                testResultsSummary = testRunner.RunTests(commandLine.Files, callback);
+                var testOptions = new TestOptions { OpenInBrowser = commandLine.OpenInBrowser };
+                testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
             }
             catch (ArgumentException ex)
             {

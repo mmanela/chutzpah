@@ -2,7 +2,7 @@
 
 namespace Chutzpah.Wrappers
 {
-    public class ProcessWrapper : IProcessWrapper
+    public class ProcessHelper : IProcessHelper
     {
         public string RunExecutableAndCaptureOutput(string exePath, string arguments)
         {
@@ -16,6 +16,15 @@ namespace Chutzpah.Wrappers
             var output = p.StandardOutput.ReadToEnd();
             p.WaitForExit();
             return output;
+        }
+
+        public void LaunchFileInBrowser(string file)
+        {
+            var startInfo = new ProcessStartInfo();
+            startInfo.UseShellExecute = true;
+            startInfo.Verb = "Open";
+            startInfo.FileName = file;
+            System.Diagnostics.Process.Start(startInfo);
         }
     }
 }
