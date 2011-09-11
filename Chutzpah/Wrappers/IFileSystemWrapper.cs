@@ -20,7 +20,7 @@ namespace Chutzpah.Wrappers
         void CreateDirectory(string path);
         string GetFullPath(string path);
         IEnumerable<string> GetDirectories(string directory);
-        string[] GetFiles(string path);
+        string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
         string GetFileName(string path);
         Stream Open(string path);
         Stream Open(string path, FileMode mode, FileAccess access);

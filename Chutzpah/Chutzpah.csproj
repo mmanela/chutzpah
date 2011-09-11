@@ -55,7 +55,8 @@
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
-    <Compile Include="Models\TestFileType.cs" />
+    <Compile Include="Models\PathType.cs" />
+    <Compile Include="RegexPatterns.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
     <Compile Include="IHtmlTestFileCreator.cs" />
@@ -68,6 +69,8 @@
     <Compile Include="Models\JsonTestCase.cs" />
     <Compile Include="Models\JsonTestResult.cs" />
     <Compile Include="Models\TestResult.cs" />
+    <Compile Include="TestableFileDetectors\ITestableFileDetector.cs" />
+    <Compile Include="TestableFileDetectors\QUnitTestableFileDetector.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestResultsBuilder.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />

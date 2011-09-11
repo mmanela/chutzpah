@@ -69,14 +69,16 @@ namespace Chutzpah
             Console.WriteLine("usage: {0} <testFile> [options]", executableName);
             Console.WriteLine();
             Console.WriteLine("Valid options:");
-            Console.WriteLine("  /silent                : do not output running test count");
-            Console.WriteLine("  /teamcity              : forces TeamCity mode (normally auto-detected)");
-            Console.WriteLine("  /wait                  : wait for input after completion");
-            Console.WriteLine("  /debug                 : print debugging information");
-            Console.WriteLine("  /openInBrowser         : launch the tests in the default browser");
-            Console.WriteLine("  /file fileName         : adds fileName to list of test files");
-            Console.WriteLine("                         : sepcify more than once to add multiple files");
-            Console.WriteLine("                         : (e.g. /file test1.html /file test2.html)");
+            Console.WriteLine("  /silent                : Do not output running test count");
+            Console.WriteLine("  /teamcity              : Forces TeamCity mode (normally auto-detected)");
+            Console.WriteLine("  /wait                  : Wait for input after completion");
+            Console.WriteLine("  /debug                 : Print debugging information");
+            Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
+            Console.WriteLine("  /path path             : Adds a path to a folder or file to the list of test paths to run.");
+            Console.WriteLine("                         : Specify more than one to add multiple paths.");
+            Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
+            Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
+            Console.WriteLine("  /file path             : Alias for /path");
             Console.WriteLine();
         }
 

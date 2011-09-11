@@ -31,12 +31,12 @@ namespace Chutzpah
         {
             if (string.IsNullOrWhiteSpace(file))
                 throw new ArgumentNullException("file");
-            var fileKind = GetTestFileType(file);
-            if (fileKind == TestFileType.Other)
+            var fileKind = fileProbe.GetPathType(file);
+            if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
                 throw new ArgumentException("Expecting a .js or .html file");
             stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporayFolder() : stagingFolder;
 
-            string filePath = fileProbe.FindPath(file);
+            string filePath = fileProbe.FindFilePath(file);
             if (filePath == null)
                 throw new FileNotFoundException("Unable to find file: " + file);
 
@@ -48,7 +48,7 @@ namespace Chutzpah
             var testFileText = fileSystem.GetText(filePath);
             var referencedFiles = GetReferencedFiles(fileKind, testFileText, filePath, stagingFolder);
 
-            if (fileKind == TestFileType.JavaScript)
+            if (fileKind == PathType.JavaScript)
             {
                 var stagedFilePath = Path.Combine(stagingFolder, testFileName);
                 referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
@@ -90,9 +90,9 @@ namespace Chutzpah
             }
         }
 
-        private IList<ReferencedFile> GetReferencedFiles(TestFileType testFileType, string testFileText, string testFilePath, string stagingFolder)
+        private IList<ReferencedFile> GetReferencedFiles(PathType testFileType, string testFileText, string testFilePath, string stagingFolder)
         {
-            var regex = testFileType == TestFileType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
+            var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
             var files = new List<ReferencedFile>();
             foreach (Match match in regex.Matches(testFileText))
             {
@@ -103,7 +103,7 @@ namespace Chutzpah
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(testFilePath), referencePath);
-                        var absolutePath = fileProbe.FindPath(relativeReferencePath);
+                        var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null)
                         {
                             var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), stagingFolder);
@@ -169,26 +169,6 @@ namespace Chutzpah
             }
 
             return fileName;
-        }
-
-        private static TestFileType GetTestFileType(string fileName)
-        {
-            if (IsHtmlFile(fileName)) return TestFileType.Html;
-            if (IsJavaScriptFile(fileName)) return TestFileType.JavaScript;
-            return TestFileType.Other;
-        }
-
-        private static bool IsHtmlFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null &&
-                   (ext.Equals(".html", StringComparison.OrdinalIgnoreCase) || ext.Equals(".htm", StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static bool IsJavaScriptFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null && ext.Equals(".js", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

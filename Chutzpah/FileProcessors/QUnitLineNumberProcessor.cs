@@ -13,7 +13,6 @@ namespace Chutzpah.FileProcessors
     /// </summary>
     public class QUnitLineNumberProcessor : IReferencedFileProcessor
     {
-        private static Regex testAndModuleRegex = new Regex(@"(module[\t ]*\([\t ]*[""'](?<Module>.*)[""'])|(test[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
         IFileSystemWrapper fileSystem;
         public QUnitLineNumberProcessor(IFileSystemWrapper fileSystem)
         {
@@ -29,7 +28,7 @@ namespace Chutzpah.FileProcessors
             int lineNum = 1;
             foreach (var line in lines)
             {
-                var match = testAndModuleRegex.Match(line);
+                var match = RegexPatterns.QUnitTestAndModuleRegex.Match(line);
                 while (match.Success)
                 {
                     var moduleName = match.Groups["Module"].Value;

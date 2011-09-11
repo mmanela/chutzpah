@@ -89,9 +89,9 @@ namespace Chutzpah.Wrappers
             return Directory.GetDirectories(directory);
         }
 
-        public string[] GetFiles(string path)
+        public string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.GetFiles(path);
+            return Directory.GetFiles(path, searchPattern, searchOption);
         }
 
         public string GetFileName(string path)

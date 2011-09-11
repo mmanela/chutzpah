@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using System.Linq;
 
 namespace Chutzpah
 {
@@ -46,18 +47,18 @@ namespace Chutzpah
             return GetTestContext(testFile, new TestOptions());
         }
 
-        public TestResultsSummary RunTests(IEnumerable<string> testFiles, ITestMethodRunnerCallback callback = null)
+        public TestResultsSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(testFiles, new TestOptions(), callback);
+            return RunTests(testPaths, new TestOptions(), callback);
         }
 
-        public TestResultsSummary RunTests(IEnumerable<string> testFiles, TestOptions options, ITestMethodRunnerCallback callback = null)
+        public TestResultsSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null)
         {
-            string headlessBrowserPath = fileProbe.FindPath(HeadlessBrowserName);
-            string jsTestRunnerPath = fileProbe.FindPath(TestRunnerJsName);
+            string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
+            string jsTestRunnerPath = fileProbe.FindFilePath(TestRunnerJsName);
 
-            if (testFiles == null)
-                throw new ArgumentNullException("testFiles");
+            if (testPaths == null)
+                throw new ArgumentNullException("testPaths");
             if (headlessBrowserPath == null)
                 throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
             if (jsTestRunnerPath == null)
@@ -66,7 +67,7 @@ namespace Chutzpah
             if (callback != null) callback.TestSuiteStarted();
 
             var testResults = new List<TestResult>();
-            foreach (string testFile in testFiles)
+            foreach (string testFile in fileProbe.FindTestableFiles(testPaths))
             {
                 try
                 {
@@ -94,14 +95,14 @@ namespace Chutzpah
         }
 
 
-        public TestResultsSummary RunTests(string testFile, ITestMethodRunnerCallback callback = null)
+        public TestResultsSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(testFile, new TestOptions(), callback);
+            return RunTests(testPath, new TestOptions(), callback);
         }
 
-        public TestResultsSummary RunTests(string testFile, TestOptions options, ITestMethodRunnerCallback callback = null)
+        public TestResultsSummary RunTests(string testPath, TestOptions options, ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(new[] { testFile }, options, callback);
+            return RunTests(new[] { testPath }, options, callback);
         }
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,

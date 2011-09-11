@@ -1,9 +1,10 @@
 ﻿namespace Chutzpah.Models
 {
-    public enum TestFileType
+    public enum PathType
     {
         Other,
         JavaScript,
-        Html
+        Html,
+        Folder
     }
 }

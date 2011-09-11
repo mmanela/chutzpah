@@ -32,7 +32,7 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
-        public class FileOptionFacts
+        public class PathOptionFacts
         {
             [Fact]
             public void First_Argument_With_No_Slash_Is_Added_As_File()
@@ -45,9 +45,30 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
 
             [Fact]
+            public void Path_Option_Adds_File()
+            {
+                var arguments = new[] {"/path", "test.html"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Contains("test.html", commandLine.Files);
+            }
+
+            [Fact]
+            public void Path_Option_Ignores_Case()
+            {
+                string[] arguments = new[] {"/paTH", "test"};
+
+                TestableCommandLine commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Contains("test", commandLine.Files);
+            }
+
+
+            [Fact]
             public void File_Option_Adds_File()
             {
-                var arguments = new[] {"/file", "test.html"};
+                var arguments = new[] { "/file", "test.html" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
@@ -57,7 +78,7 @@ namespace Chutzpah.Facts.ConsoleRunner
             [Fact]
             public void File_Option_Ignores_Case()
             {
-                string[] arguments = new[] {"/fIlE", "test.html"};
+                string[] arguments = new[] { "/fIlE", "test.html" };
 
                 TestableCommandLine commandLine = TestableCommandLine.Create(arguments);
 

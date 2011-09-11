@@ -106,26 +106,28 @@ namespace Chutzpah.VisualStudio
                 // Command - Run JS tests in browser
                 var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunInBrowser);
                 var runJsTestInBrowserMenuCmd = new OleMenuCommand(RunJSTestInBrowserCmdCallback, runJsTestsInBrowserCmd);
-                runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
+                runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsInBrowserCmdQueryStatus;
                 mcs.AddCommand(runJsTestInBrowserMenuCmd);
             }
         }
 
-        private static TestFileType GetFileType(string filename)
+        private TestFileType GetFileType(ProjectItem item)
         {
-            if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+            if (IsFile(item))
             {
-                return TestFileType.JS;
+                var filename = item.FileNames[0];
+                if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+                {
+                    return TestFileType.JS;
+                }
+
+                if (filename.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) ||
+                    filename.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+                {
+                    return TestFileType.HTML;
+                }
             }
-
-
-            if (filename.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) ||
-                filename.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
-            {
-                return TestFileType.HTML;
-            }
-
-            if (filename.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.OrdinalIgnoreCase))
+            else if (IsFolder(item))
             {
                 return TestFileType.Folder;
             }
@@ -135,18 +137,19 @@ namespace Chutzpah.VisualStudio
 
         private void RunJSTestInBrowserCmdCallback(object sender, EventArgs e)
         {
-            string selectedFile = null;
+            IEnumerable<string> selectedFiles = null;
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
             {
-                selectedFile = GetSelectedTestableFiles().FirstOrDefault();
+                // We only support one file for opening in browser throuhg VS for now
+                selectedFiles = SearchForTestableFiles().Take(1);
             }
             else if (activeWindow.Kind == "Document")
             {
-                selectedFile = CurrentDocumentPath;
+                selectedFiles = new List<string> { CurrentDocumentPath };
             }
 
-            if (selectedFile != null)
+            foreach (var selectedFile in selectedFiles)
             {
                 try
                 {
@@ -154,8 +157,10 @@ namespace Chutzpah.VisualStudio
                     stagingFolder = Path.GetDirectoryName(testContext.TestHarnessPath);
                     LaunchFileInBrowser(testContext.TestHarnessPath);
                 }
-                catch (FileNotFoundException)
-                { }
+                catch (FileNotFoundException ex)
+                {
+                    Logger.Log("Unable to find file to open in browser", "ChutzpahPackage", ex);
+                }
             }
         }
 
@@ -177,6 +182,19 @@ namespace Chutzpah.VisualStudio
             var menuCommand = sender as OleMenuCommand;
             if (menuCommand == null) return;
 
+            SetCommandVisibility(menuCommand, TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
+        }
+
+        private void RunJSTestsInBrowserCmdQueryStatus(object sender, EventArgs e)
+        {
+            var menuCommand = sender as OleMenuCommand;
+            if (menuCommand == null) return;
+
+            SetCommandVisibility(menuCommand, TestFileType.HTML, TestFileType.JS);
+        }
+
+        private void SetCommandVisibility(OleMenuCommand menuCommand, params TestFileType[] allowedTypes)
+        {
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
             {
@@ -184,12 +202,22 @@ namespace Chutzpah.VisualStudio
                 Array activeItems = SolutionExplorerItems;
                 foreach (UIHierarchyItem item in activeItems)
                 {
-                    TestFileType fileType = GetFileType(item.Name);
+                    var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                    var projectNode = ((UIHierarchyItem)item).Object as Project;
 
-                    if (fileType == TestFileType.Other || fileType == TestFileType.Folder)
+                    TestFileType fileType = TestFileType.Other;
+                    if (projectItem != null)
+                    {
+                        fileType = GetFileType(projectItem);
+                    }
+                    else if (projectNode != null)
+                    {
+                        fileType = TestFileType.Folder;
+                    }
+
+                    if (!allowedTypes.Contains(fileType))
                     {
                         menuCommand.Visible = false;
-
                         return;
                     }
                 }
@@ -200,7 +228,7 @@ namespace Chutzpah.VisualStudio
 
         private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e)
         {
-            var filePaths = GetSelectedTestableFiles();
+            var filePaths = GetSelectedFilesAndFolders(TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
             RunTests(filePaths);
         }
 
@@ -245,9 +273,9 @@ namespace Chutzpah.VisualStudio
             processHelper.LaunchFileInBrowser(file);
         }
 
-        private List<string> GetSelectedTestableFiles()
+
+        private List<string> GetSelectedFilesAndFolders(params TestFileType[] allowedTypes)
         {
-            Predicate<TestFileType> fileTypeCheck = x => x == TestFileType.JS || x == TestFileType.HTML;
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
@@ -257,17 +285,36 @@ namespace Chutzpah.VisualStudio
                 if (projectItem != null)
                 {
                     string filePath = projectItem.FileNames[0];
-                    TestFileType fileType = GetFileType(filePath);
-                    if (fileTypeCheck(fileType))
+                    var type = GetFileType(projectItem);
+                    if (allowedTypes.Contains(type))
+                    {
                         filePaths.Add(filePath);
-                    else
-                        filePaths.AddRange(GetFilesFromTree(projectItem.ProjectItems, fileTypeCheck));
+                    }
                 }
                 else if (projectNode != null)
                 {
-                    filePaths.AddRange(GetFilesFromTree(projectNode.ProjectItems, fileTypeCheck));
+                    filePaths.Add(projectNode.FullName);
                 }
             }
+            return filePaths;
+        }
+
+        private IEnumerable<string> SearchForTestableFiles()
+        {
+            Predicate<TestFileType> fileTypeCheck = x => x == TestFileType.JS || x == TestFileType.HTML;
+            var filePaths = new List<string>();
+            foreach (object item in SolutionExplorerItems)
+            {
+                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                if (projectItem != null)
+                {
+                    string filePath = projectItem.FileNames[0];
+                    TestFileType fileType = GetFileType(projectItem);
+                    if (fileTypeCheck(fileType))
+                        filePaths.Add(filePath);
+                }
+            }
+
             return filePaths;
         }
 
@@ -296,7 +343,7 @@ namespace Chutzpah.VisualStudio
                 if (IsFile(projectItem))
                 {
                     string filePath = projectItem.FileNames[0];
-                    if (validFile(GetFileType(filePath)))
+                    if (validFile(GetFileType(projectItem)))
                         filePaths.Add(filePath);
                 }
                 else if (projectItem.ProjectItems != null && projectItem.ProjectItems.Count > 0)
@@ -313,6 +360,21 @@ namespace Chutzpah.VisualStudio
             catch (Exception ex)
             {
                 Logger.Log("Unable to determine if project item is file", "ChutzpahPackage", ex);
+            }
+
+            return false;
+        }
+
+
+        private bool IsFolder(ProjectItem projectItem)
+        {
+            try
+            {
+                return projectItem.Kind.Equals(Constants.vsProjectItemKindPhysicalFolder);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Unable to determine if project item is folder", "ChutzpahPackage", ex);
             }
 
             return false;

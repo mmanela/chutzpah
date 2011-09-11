@@ -20,6 +20,30 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_run_a_tests_from_a_folder()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\SubFolder");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_run_a_tests_from_a_folder_and_a_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(new List<string>{@"JS\Test\basic.js", @"JS\Test\SubFolder"});
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(4, result.PassedCount);
+            Assert.Equal(5, result.TotalCount);
+        }
+
+        [Fact]
         public void Will_get_file_position_for_test_without_module()
         {
             var testRunner = TestRunner.Create();
@@ -30,7 +54,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(3, test.Line);
             Assert.Equal(2, test.Column);
         }
-
 
         [Fact]
         public void Will_get_file_position_for_test_with_module()
@@ -43,7 +66,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(11, test.Line);
             Assert.Equal(3, test.Column);
         }
-
 
         [Fact]
         public void Will_run_a_tests_from_a_html_file()

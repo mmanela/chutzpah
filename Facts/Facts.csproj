@@ -58,6 +58,7 @@
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />
+    <Compile Include="Library\QUnitTestableFileDetectorFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\TestResultsBuilderFacts.cs" />

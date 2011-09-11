@@ -84,7 +84,7 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     TeamCity = true;
                 }
-                else if (optionName == "/file")
+                else if (optionName == "/file" || optionName == "/path")
                 {
                     AddFileOption(option.Value);
                 }
