@@ -5,7 +5,8 @@
         <version>@Version@</version>
         <title>Chutzpah - A JavaScript Test Runner</title>
         <authors>Matthew Manela</authors>
-        <description>Chutzpah helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio. It also supports running in the TeamCity continuous integration server.</description>
+        <summary>Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</summary>
+        <description>Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio. It also supports running in the TeamCity continuous integration server.</description>
         <language>en-US</language>
         <projectUrl>http://chutzpah.codeplex.com</projectUrl>
         <licenseUrl>http://chutzpah.codeplex.com/license</licenseUrl>
