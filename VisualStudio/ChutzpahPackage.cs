@@ -259,9 +259,22 @@ namespace Chutzpah.VisualStudio
                         Task.Factory.StartNew(
                             () =>
                             {
-                                var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
-                                stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
-                                testingInProgress = false;
+                                try
+                                {
+                                    var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
+                                    if (summary.Tests.Any())
+                                    {
+                                        stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
+                                    }
+                                }
+                                catch(Exception e) 
+                                {
+                                    Logger.Log("Error while running tests", "ChutzpahPackage", e);
+                                }
+                                finally
+                                {
+                                    testingInProgress = false;
+                                }
                             });
                     }
                 }

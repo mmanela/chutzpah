@@ -3,10 +3,10 @@
 if ERRORLEVEL 1 goto end
 set Configuration=Debug
 
-if /i "%1"=="CI" goto CI
+if /i "%1"=="Package" goto Package
 goto Build
 
-:CI
+:Package
 set Configuration=Release
 goto Build
 
