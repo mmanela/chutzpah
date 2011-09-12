@@ -2,7 +2,8 @@ properties {
   $baseDir = Resolve-Path .
   $configuration = "debug"
   $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
-    
+  $filesDir = "_BuildFiles"
+  $version = "0.9." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . vsvars2010.ps1 
@@ -12,7 +13,7 @@ properties {
 
 # Aliases
 task Default -depends Run-Build
-task Build-Package -depends Update-AssemblyInfoFiles, Run-Build
+task Package -depends Update-AssemblyInfoFiles, Run-Build
 task Build -depends Run-Build
 task Clean -depends Clean-Solution
 
