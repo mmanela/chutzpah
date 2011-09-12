@@ -4,7 +4,7 @@ properties {
   $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
-  $version = "1.2.0." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count
+  $version = "1.2.0." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . vsvars2010.ps1 
@@ -57,12 +57,13 @@ task Package-NuGet {
     copy-item "$baseDir\License.txt", $nuspec -destination $nugetDir
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     $v = new-object -TypeName System.Version -ArgumentList $version
-    regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(4)
+    regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)
     exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $nugetDir }
 }
 
 task Push-Nuget {
-	exec { .\Tools\nuget.exe push $nugetDir\Chutzpah.$version.nupkg }
+  $v = new-object -TypeName System.Version -ArgumentList $version
+	exec { .\Tools\nuget.exe push $nugetDir\Chutzpah.$($v.ToString(3)).nupkg }
 }
 
 
