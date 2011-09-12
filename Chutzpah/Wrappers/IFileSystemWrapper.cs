@@ -10,6 +10,7 @@ namespace Chutzpah.Wrappers
         void MoveFile(string sourceFilename, string destFilename);
         void CopyFile(string sourceFilename, string destFilename, bool overwrite=true);
         void MoveDirectory(string sourceDirectory, string destDirectory);
+        void SetFileAttributes(string fileName, FileAttributes attributes);
         DateTime GetCreationTime(string path);
         DateTime GetLastAccessTime(string path);
         bool FileExists(string path);

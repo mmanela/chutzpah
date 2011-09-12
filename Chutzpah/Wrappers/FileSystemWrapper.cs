@@ -24,12 +24,17 @@ namespace Chutzpah.Wrappers
             File.Move(sourceFilename, destFilename);
         }
 
-        public virtual void CopyFile(string sourceFilename, string destFilename, bool overwrite=true)
+        public void CopyFile(string sourceFilename, string destFilename, bool overwrite=true)
         {
             File.Copy(sourceFilename, destFilename, overwrite);
         }
 
-        public virtual void MoveDirectory(string sourceDirectory, string destDirectory)
+        public void SetFileAttributes(string fileName, FileAttributes attributes)
+        {
+            File.SetAttributes(fileName, attributes);
+        }
+
+        public void MoveDirectory(string sourceDirectory, string destDirectory)
         {
             if (!sourceDirectory.Equals(destDirectory, StringComparison.OrdinalIgnoreCase))
             {
@@ -69,7 +74,7 @@ namespace Chutzpah.Wrappers
                 Directory.Delete(path, recursive);
         }
 
-        public virtual string GetDirectoryName(string path)
+        public string GetDirectoryName(string path)
         {
             return Path.GetDirectoryName(path);
         }

@@ -201,7 +201,9 @@ namespace Chutzpah.Facts
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\lib.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\lib.js", FileAttributes.Normal));
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\common.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\common.js", FileAttributes.Normal));
             }
 
             [Fact]

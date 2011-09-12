@@ -108,7 +108,6 @@ namespace Chutzpah
                         {
                             var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), stagingFolder);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
-                            fileSystem.CopyFile(absolutePath, stagedPath);
                             files.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
                         }
                     }
@@ -128,6 +127,7 @@ namespace Chutzpah
                 if (referencedFile.IsLocal)
                 {
                     fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
+                    fileSystem.SetFileAttributes(referencedFile.StagedPath, FileAttributes.Normal);
 
                     foreach (var referencedFileProcessor in referencedFileProcessors)
                     {
