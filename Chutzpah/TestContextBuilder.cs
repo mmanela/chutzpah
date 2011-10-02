@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Chutzpah.Wrappers;
@@ -19,6 +20,8 @@ namespace Chutzpah
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors)
         {
@@ -55,11 +58,12 @@ namespace Chutzpah
             }
 
             CopyReferencedFiles(referencedFiles);
-
+                
             var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
-            var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
             CreateIfDoesNotExist(qunitFilePath, "Chutzpah.TestFiles.qunit.js");
+            var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
             CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
+
             var testHtmlFilePath = CreateTestHarness(stagingFolder, referencedFiles);
 
             return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
@@ -100,13 +104,21 @@ namespace Chutzpah
                 {
                     string referencePath = match.Groups["Path"].Value;
                     Uri referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
+                    var referenceFileName = Path.GetFileName(referencePath);
+
+                    // Don't copy over test runner, since we use our own.
+                    if (TestRunnerRegex.IsMatch(referenceFileName))
+                    {
+                        continue;
+                    }
+
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(testFilePath), referencePath);
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null)
                         {
-                            var uniqueFileName = MakeUniqueIfNeeded(Path.GetFileName(referencePath), stagingFolder);
+                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, stagingFolder);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
                             files.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
                         }

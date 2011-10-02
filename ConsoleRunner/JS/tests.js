@@ -1,4 +1,5 @@
-﻿/// <reference path="../js/code.js" />
+﻿/// <reference path="../js/qunit.js" />
+/// <reference path="../js/code.js" />
 ///  <reference path="http://code.jquery.com/jquery-1.5.2.min.js" />
 //  <reference path="jquery-1.5.2.min.js" />
 

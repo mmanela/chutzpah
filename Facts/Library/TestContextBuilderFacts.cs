@@ -55,6 +55,12 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+        const string TestJSFileWithQUnitContents =
+@"/// <reference path=""lib.js"" />
+                        /// <reference path=""../../js/common.js"" />
+                        /// <reference path=""../../js/qunit.js"" />
+                        some javascript code
+                        ";
 
         public class CreateTestFile_WithPath
         {
@@ -138,6 +144,7 @@ namespace Chutzpah.Facts
                 TestableHtmlTestFileCreator creator = new TestableHtmlTestFileCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.js")).Returns(false);
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"pa\test.js")).Returns(TestJSFileContents);
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
@@ -204,6 +211,24 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\lib.js", FileAttributes.Normal));
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\common.js", true));
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\common.js", FileAttributes.Normal));
+            }
+
+            [Fact]
+            public void Will_not_copy_referenced_file_if_it_is_the_test_runner()
+            {
+                TestableHtmlTestFileCreator creator = new TestableHtmlTestFileCreator();
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithQUnitContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"qunit.js")))
+                    .Returns(@"path\qunit.js");
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true), Times.Never());
             }
 
             [Fact]
