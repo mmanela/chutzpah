@@ -53,7 +53,7 @@ namespace Chutzpah.Facts
                     .Returns(@"//js file
                                 NOtAtest (""test1"", function(){}); 
                                 module ( ""module1"");
-                                testNOT('test2', function(){});");
+                                a.test('test2', function(){});");
 
                 var res = detector.ClassUnderTest.IsTestableFile("path");
 
