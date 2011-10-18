@@ -89,13 +89,20 @@
     <Compile Include="Models\TestResultsSummary.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="TestFiles\jasmine-html.js" />
+    <EmbeddedResource Include="TestFiles\jasmine.css" />
+    <EmbeddedResource Include="TestFiles\jasmine.js" />
+    <EmbeddedResource Include="TestFiles\jasmine_favicon.png" />
+    <EmbeddedResource Include="TestFiles\jasmine.html" />
     <EmbeddedResource Include="TestFiles\qunit.js" />
-    <EmbeddedResource Include="TestFiles\testTemplate.html" />
+    <EmbeddedResource Include="TestFiles\qunit.html" />
     <EmbeddedResource Include="TestFiles\qunit.css" />
     <Content Include="..\3rdParty\Phantom\phantomjs.exe">
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JSRunners\chutzpah.js" />
+    <Content Include="JSRunners\jasmineRunner.js" />
     <Content Include="JSRunners\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

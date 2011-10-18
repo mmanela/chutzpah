@@ -1,4 +1,4 @@
-/// <reference path="chutzpah.js" />
+﻿/// <reference path="chutzpah.js" />
 /*globals chutzpah*/
 
 (function () {

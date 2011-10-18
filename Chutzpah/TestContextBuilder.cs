@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chutzpah.Wrappers;
 using Chutzpah.Models;
-using Chutzpah.FileProcessors;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -58,7 +56,7 @@ namespace Chutzpah
             }
 
             CopyReferencedFiles(referencedFiles);
-                
+
             var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
             CreateIfDoesNotExist(qunitFilePath, "Chutzpah.TestFiles.qunit.js");
             var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
@@ -77,7 +75,7 @@ namespace Chutzpah
         private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
-            var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate.html");
+            var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.qunit.html");
             string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
@@ -145,7 +143,7 @@ namespace Chutzpah
                     {
                         referencedFileProcessor.Process(referencedFile);
                     }
-                    
+
                 }
             }
         }
