@@ -39,7 +39,7 @@
             errors.push(JSON.stringify(argumentError, null, 4));
         }
 
-        testResults = new chutzpah.TestResults(errors, failed);
+        testResults = new chutzpah.TestOutput(errors, failed);
         testContainer = document.getElementById('qunit-tests');
 
         if (typeof testContainer !== 'undefined') {
@@ -49,7 +49,7 @@
                     test = tests[i];
                     moduleNode = test.querySelector('.module-name');
 
-                    result = new chutzpah.TestResult(
+                    result = new chutzpah.TestCase(
                         test.classname,
                         test.querySelector('.test-name').innerHTML,
                         moduleNode !== null ? moduleNode.innerHTML : undefined
@@ -82,7 +82,7 @@
                         }
                     }
 
-                    testResults.addResult(result);
+                    testResults.addCase(result);
                 }
             } catch (gatherError) {
                 errors.push(JSON.stringify(gatherError, null, 4));
