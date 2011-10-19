@@ -52,6 +52,10 @@
     <Compile Include="FileProbe.cs" />
     <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
+    <Compile Include="FrameworkDefinitions\BaseFrameworkDefinition.cs" />
+    <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
+    <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
+    <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\ReferencedFile.cs" />

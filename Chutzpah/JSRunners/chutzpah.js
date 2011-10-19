@@ -1,9 +1,9 @@
 ﻿/*globals phantom, WebPage, console*/
 var chutzpah = {};
 
-chutzpah.TestCase = function (state, name, module) {
+chutzpah.TestCase = function (passed, name, module) {
     /// <summary>Constructor for a single test result.</summary>
-    /// <param name="state" type="String">State of the test.</param>
+    /// <param name="passed" type="Boolean">Whether the test was successful.</param>
     /// <param name="name" type="String">Name of the test.</param>
     /// <param name="module" type="String">Module of the test.</param>
     /// <field name="state" type="String">State of the test.</field>
@@ -14,7 +14,7 @@ chutzpah.TestCase = function (state, name, module) {
     /// <field name="actual" type="String">Actual outcome of the test.</field>
     'use strict';
 
-    this.state = state;
+    this.passed = passed;
     this.name = name;
     this.module = module;
     this.message = '';

@@ -1,0 +1,42 @@
+<stylecopresultscache>
+  <version>11</version>
+  <sourcecode name="QUnitDefinition.cs" parser="StyleCop.CSharp.CsParser">
+    <settings>
+      <timestamp>10/19/2011 19:42:24</timestamp>
+      <milliseconds>678</milliseconds>
+    </settings>
+    <timestamp>10/19/2011 21:34:37</timestamp>
+    <milliseconds>144</milliseconds>
+    <violations />
+  </sourcecode>
+  <sourcecode name="IFrameworkDefinition.cs" parser="StyleCop.CSharp.CsParser">
+    <settings>
+      <timestamp>10/19/2011 19:42:24</timestamp>
+      <milliseconds>678</milliseconds>
+    </settings>
+    <timestamp>10/19/2011 21:17:20</timestamp>
+    <milliseconds>889</milliseconds>
+    <violations />
+  </sourcecode>
+  <sourcecode name="JasmineDefinition.cs" parser="StyleCop.CSharp.CsParser">
+    <settings>
+      <timestamp>10/19/2011 19:42:24</timestamp>
+      <milliseconds>678</milliseconds>
+    </settings>
+    <timestamp>10/19/2011 21:36:24</timestamp>
+    <milliseconds>745</milliseconds>
+    <violations />
+  </sourcecode>
+  <sourcecode name="BaseFrameworkDefinition.cs" parser="StyleCop.CSharp.CsParser">
+    <settings>
+      <timestamp>10/19/2011 19:42:24</timestamp>
+      <milliseconds>678</milliseconds>
+    </settings>
+    <timestamp>10/19/2011 21:36:55</timestamp>
+    <milliseconds>40</milliseconds>
+    <violations />
+  </sourcecode>
+  <project key="-1776253709">
+    <configuration>DEBUG;TRACE</configuration>
+  </project>
+</stylecopresultscache>
