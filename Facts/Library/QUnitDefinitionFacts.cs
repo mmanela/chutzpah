@@ -9,14 +9,14 @@
         public class FileUsesFramework
         {
             [Fact]
-            public void GivenJasmineScript_ReturnsFalse()
+            public void ReturnsFalse_GivenJasmineSuite()
             {
                 var definition = new QUnitDefinition();
                 Assert.False(definition.FileUsesFramework(Resources.JasmineSuite));
             }
 
             [Fact]
-            public void GivenQUnitScript_ReturnsTrue()
+            public void ReturnsTrue_GivenQUnitSuite()
             {
                 var definition = new QUnitDefinition();
                 Assert.True(definition.FileUsesFramework(Resources.QUnitSuite));
