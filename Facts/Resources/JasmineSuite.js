@@ -1,25 +1,28 @@
 ﻿/// <reference path="jasmine.js" />
-/// <reference path="coffee.js" />
-/*globals describe, it, expect, jasmine, coffee*/
+// Example copied from https://github.com/michaelphines/Jasmine-Examples/blob/master/example-3/spec/javascript/exampleSpec.js
 
-(function () {
-    'use strict';
-
-    describe('coffee', function () {
-        describe('machine', function () {
-            it('makes a single shot flat white given milk and 1 shot', function () {
-                waits(5000);
-                runs(function () {
-                    var actual = coffee.machine(1, 'milk', false),
-                        expected = 'single shot flat white';
-                    expect(actual).toEqual(expected);
-                });
-            });
-            it('makes a double shot cafe latte given froth, 2 shots and sugar', function () {
-                var actual = coffee.machine(2, 'froth', true),
-                    expected = 'double shot cafe latte';
-                expect(actual).toEqual(expected);
-            });
+describe('Greeter', function () {
+    describe('#sayHello()', function () {
+        var greeter;
+        beforeEach(function () {
+            greeter = new Greeter('');
         });
+
+        it('says hello', function () {
+            expect(greeter.sayHello()).toMatch(/^Hello, .*!$/);
+        });
+
+        it('uses the name', function () {
+            spyOn(greeter, 'getName').andReturn('name');
+            expect(greeter.sayHello()).toMatch(/name/);
+            expect(greeter.getName).wasCalled();
+        });
+    })
+
+    describe('#name()', function () {
+        it('gets the name', function () {
+            var greeter = new Greeter('name');
+            expect(greeter.getName()).toEqual('name');
+        })
     });
-}());
+});

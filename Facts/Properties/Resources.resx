@@ -119,9 +119,18 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="JasmineSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\JasmineSuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\jasminesuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JSSpecSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\jsspecsuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JsTestDriverSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\jstestdriversuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="QUnitSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\QUnitSuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\resources\qunitsuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="YUITestSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\yuitestsuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

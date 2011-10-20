@@ -62,19 +62,20 @@ namespace Chutzpah.Facts.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to /// &lt;reference path=&quot;jasmine.js&quot; /&gt;
-        ////// &lt;reference path=&quot;coffee.js&quot; /&gt;
-        ////*globals describe, it, expect, jasmine, coffee*/
+        ///// Example copied from https://github.com/michaelphines/Jasmine-Examples/blob/master/example-3/spec/javascript/exampleSpec.js
         ///
-        ///(function () {
-        ///    &apos;use strict&apos;;
+        ///describe(&apos;Greeter&apos;, function () {
+        ///    describe(&apos;#sayHello()&apos;, function () {
+        ///        var greeter;
+        ///        beforeEach(function () {
+        ///            greeter = new Greeter(&apos;&apos;);
+        ///        });
         ///
-        ///    describe(&apos;coffee&apos;, function () {
-        ///        describe(&apos;machine&apos;, function () {
-        ///            it(&apos;makes a single shot flat white given milk and 1 shot&apos;, function () {
-        ///                waits(5000);
-        ///                runs(function () {
-        ///                    var actual = coffee.machine(1, &apos;milk&apos;, false),
-        ///                        expected = &apos;single shot  [rest of string was truncated]&quot;;.
+        ///        it(&apos;says hello&apos;, function () {
+        ///            expect(greeter.sayHello()).toMatch(/^Hello, .*!$/);
+        ///        });
+        ///
+        ///        it(&apos;uses the name&apos;, function  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JasmineSuite {
             get {
@@ -83,24 +84,98 @@ namespace Chutzpah.Facts.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /// &lt;reference path=&quot;jasmine.js&quot; /&gt;
-        ////// &lt;reference path=&quot;coffee.js&quot; /&gt;
-        ////*globals describe, it, expect, jasmine, coffee*/
+        ///   Looks up a localized string similar to /// &lt;reference path=&quot;jsspec.js&quot; /&gt;
+        ///// Example copied from http://jania.pe.kr/jsspec/demo.html
         ///
-        ///(function () {
-        ///    &apos;use strict&apos;;
+        ///describe(&apos;Plus operator (just for example)&apos;, {
+        ///    &apos;should concatenate two strings&apos;: function () {
+        ///        expect(&quot;Hello &quot; + &quot;World&quot;).should_be(&quot;Hello World&quot;);
+        ///    },
+        ///    &apos;should add two numbers&apos;: function () {
+        ///        expect(1 + 2).should_be(3);
+        ///    }
+        ///})
         ///
-        ///    describe(&apos;coffee&apos;, function () {
-        ///        describe(&apos;machine&apos;, function () {
-        ///            it(&apos;makes a single shot flat white given milk and 1 shot&apos;, function () {
-        ///                waits(5000);
-        ///                runs(function () {
-        ///                    var actual = coffee.machine(1, &apos;milk&apos;, false),
-        ///                        expected = &apos;single shot  [rest of string was truncated]&quot;;.
+        ///describe(&apos;&quot;Should match&quot;s&apos;, {
+        ///    &apos;Should match&apos;: function () {
+        ///        expect(&quot;Hello&quot;).should_match(/ell/);
+        ///    },
+        ///    &apos;Should match 1&apos;: functi [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JSSpecSuite {
+            get {
+                return ResourceManager.GetString("JSSpecSuite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /// &lt;reference path=&quot;browser_controlled_runner.js&quot; /&gt;
+        ////// &lt;reference path=&quot;jstestdriver.js&quot; /&gt;
+        ///// Example copied from http://code.google.com/p/js-test-driver/source/browse/samples/hello-world/src-test/GreeterTest.js
+        ///
+        ///GreeterTest = TestCase(&quot;GreeterTest&quot;);
+        ///
+        ///GreeterTest.prototype.testGreet = function () {
+        ///    var greeter = new myapp.Greeter();
+        ///    assertEquals(&quot;Hello World!&quot;, greeter.greet(&quot;World&quot;));
+        ///    jstestdriver.console.log(&quot;JsTestDriver&quot;, greeter.greet(&quot;World&quot;));
+        ///    console.log(greeter.greet( [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JsTestDriverSuite {
+            get {
+                return ResourceManager.GetString("JsTestDriverSuite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /// &lt;reference path=&quot;qunit.js&quot; /&gt;
+        ///// Example copief from http://docs.jquery.com/QUnit
+        ///
+        ///test(&quot;a basic test example&quot;, function () {
+        ///    ok(true, &quot;this test is fine&quot;);
+        ///    var value = &quot;hello&quot;;
+        ///    equal(value, &quot;hello&quot;, &quot;We expect value to be hello&quot;);
+        ///});
+        ///
+        ///module(&quot;Module A&quot;);
+        ///
+        ///test(&quot;first test within module&quot;, function () {
+        ///    ok(true, &quot;all pass&quot;);
+        ///});
+        ///
+        ///test(&quot;second test within module&quot;, function () {
+        ///    ok(true, &quot;all pass&quot;);
+        ///});
+        ///
+        ///module(&quot;Module B&quot;);
+        ///
+        ///test(&quot;some other test&quot;, function () {
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QUnitSuite {
             get {
                 return ResourceManager.GetString("QUnitSuite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /// &lt;reference path=&quot;yuitest.js&quot; /&gt;
+        ///// Example copied from http://developer.yahoo.com/yui/examples/yuitest/yt-simple-example.html
+        ///
+        ///YAHOO.namespace(&quot;example.yuitest&quot;);
+        ///
+        ///YAHOO.example.yuitest.DataTestCase = new YAHOO.tool.TestCase({
+        ///
+        ///    //name of the test case - if not provided, one is auto-generated
+        ///    name: &quot;Data Tests&quot;,
+        ///
+        ///    //---------------------------------------------------------------------
+        ///    // setUp and tearDown methods - optional
+        ///    //----------------------------------------------- [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string YUITestSuite {
+            get {
+                return ResourceManager.GetString("YUITestSuite", resourceCulture);
             }
         }
     }

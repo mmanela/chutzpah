@@ -1,25 +1,57 @@
 ﻿namespace Chutzpah.Facts.Library
 {
+    using System.Collections.Generic;
     using Chutzpah.Facts.Properties;
     using Chutzpah.FrameworkDefinitions;
     using Xunit;
+    using Xunit.Extensions;
 
     public class QUnitDefinitionFacts
     {
         public class FileUsesFramework
         {
-            [Fact]
-            public void ReturnsFalse_GivenJasmineSuite()
+            public static IEnumerable<object[]> TestSuites
             {
-                var definition = new QUnitDefinition();
-                Assert.False(definition.FileUsesFramework(Resources.JasmineSuite));
+                get
+                {
+                    return new object[][]
+                    {
+                        new object[] { Resources.JasmineSuite },
+                        new object[] { Resources.JSSpecSuite },
+                        new object[] { Resources.JsTestDriverSuite },
+                        new object[] { Resources.YUITestSuite }
+                    };
+                }
             }
 
             [Fact]
-            public void ReturnsTrue_GivenQUnitSuite()
+            public void ReturnsTrue_GivenQUnitSuiteAndDefinitiveDetection()
             {
                 var definition = new QUnitDefinition();
-                Assert.True(definition.FileUsesFramework(Resources.QUnitSuite));
+                Assert.True(definition.FileUsesFramework(Resources.QUnitSuite, false));
+            }
+
+            [Fact]
+            public void ReturnsTrue_GivenQUnitSuiteAndBestGuessDetection()
+            {
+                var definition = new QUnitDefinition();
+                Assert.True(definition.FileUsesFramework(Resources.QUnitSuite, true));
+            }
+
+            [Theory]
+            [PropertyData("TestSuites")]
+            public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
+            {
+                var definition = new QUnitDefinition();
+                Assert.False(definition.FileUsesFramework(suite, false));
+            }
+
+            [Theory]
+            [PropertyData("TestSuites")]
+            public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
+            {
+                var definition = new QUnitDefinition();
+                Assert.False(definition.FileUsesFramework(suite, true));
             }
         }
     }

@@ -21,8 +21,9 @@
         /// Tests whether the given file contents uses the framework.
         /// </summary>
         /// <param name="fileContents">Contents of the file as a string to test.</param>
+        /// <param name="bestGuess">True if the method should fall back to best guess detection.</param>
         /// <returns>True if the file uses the framework, otherwise false.</returns>
-        bool FileUsesFramework(string fileContents);
+        bool FileUsesFramework(string fileContents, bool bestGuess);
 
         /// <summary>
         /// Tests whether the given file is the framework itself.

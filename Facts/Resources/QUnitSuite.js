@@ -1,21 +1,26 @@
 ﻿/// <reference path="qunit.js" />
-/// <reference path="coffee.js" />
-/*globals describe, it, expect, jasmine, coffee*/
+// Example copief from http://docs.jquery.com/QUnit
 
-(function () {
-    'use strict';
+test("a basic test example", function () {
+    ok(true, "this test is fine");
+    var value = "hello";
+    equal(value, "hello", "We expect value to be hello");
+});
 
-    module('coffee machine');
+module("Module A");
 
-    test('makes a single shot flat white given milk and 1 shot', function () {
-        var actual = coffee.machine(1, 'milk', false),
-            expected = 'single shot flat white';
-        equal(actual, expected);
-    });
+test("first test within module", function () {
+    ok(true, "all pass");
+});
 
-    test('makes a double shot cafe latte given froth, 2 shots and sugar', function () {
-        var actual = coffee.machine(2, 'froth', true),
-            expected = 'double shot cafe latte';
-        equal(actual, expected);
-    });
-}());
+test("second test within module", function () {
+    ok(true, "all pass");
+});
+
+module("Module B");
+
+test("some other test", function () {
+    expect(2);
+    equal(true, false, "failing test");
+    equal(true, true, "passing test");
+});
