@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Chutzpah.Wrappers;
 using Chutzpah.Models;
 using Chutzpah.FileProcessors;
+using HtmlAgilityPack;
 
 namespace Chutzpah
 {
@@ -22,6 +23,8 @@ namespace Chutzpah
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private readonly string QUnitTestFixtureId = "qunit-fixture";
 
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors)
         {
@@ -50,11 +53,16 @@ namespace Chutzpah
             var testFileName = Path.GetFileName(file);
             var testFileText = fileSystem.GetText(filePath);
             var referencedFiles = GetReferencedFiles(fileKind, testFileText, filePath, stagingFolder);
+            var fixtureContent = "";
 
             if (fileKind == PathType.JavaScript)
             {
                 var stagedFilePath = Path.Combine(stagingFolder, testFileName);
                 referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+            }
+            else if(fileKind == PathType.Html)
+            {
+                fixtureContent = GetTextFixtureContent(testFileText);
             }
 
             CopyReferencedFiles(referencedFiles);
@@ -64,9 +72,24 @@ namespace Chutzpah
             var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
             CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
 
-            var testHtmlFilePath = CreateTestHarness(stagingFolder, referencedFiles);
+            var testHtmlFilePath = CreateTestHarness(stagingFolder, referencedFiles, fixtureContent);
 
             return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
+        }
+
+        private string GetTextFixtureContent(string htmlHarnessText)
+        {
+            var fixtureContent = "";
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlHarnessText);
+
+            var testFixture = htmlDocument.GetElementbyId(QUnitTestFixtureId);
+            if(testFixture != null)
+            {
+                fixtureContent = testFixture.InnerHtml;
+            }
+
+            return fixtureContent;
         }
 
         public TestContext BuildContext(string file)
@@ -74,11 +97,11 @@ namespace Chutzpah
             return BuildContext(file, null);
         }
 
-        private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles)
+        private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.testTemplate.html");
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles);
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles, fixtureContent);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
@@ -150,7 +173,7 @@ namespace Chutzpah
             }
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
             var referenceReplacement = new StringBuilder();
             foreach (ReferencedFile referencedFile in referencedFiles)
@@ -160,6 +183,7 @@ namespace Chutzpah
             }
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedFiles@@", referenceReplacement.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@FixtureContent@@", fixtureContent);
 
 
             return testHtmlTemplate;
