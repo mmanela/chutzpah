@@ -47,6 +47,11 @@ namespace Chutzpah.Facts
         <script type=""text/javascript"" src=""../../js/common.js""></script>
         <script type=""text/javascript"" src=""lib.js""></script>
     </head>
+    <body>
+        <div id=""qunit-fixture"">
+            <div> some <a>fixture</a> content </div>
+        </div>
+    </body>
 </html>
 ";
         const string TestJSFileContents =
@@ -408,6 +413,36 @@ namespace Chutzpah.Facts
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"http://a.com/lib.js");
                 Assert.Contains(scriptStatement, text);
+            }
+
+
+
+
+            [Fact]
+            public void Will_replace_text_fixture_place_holder_with_existing_fixture()
+            {
+                TestableHtmlTestFileCreator creator = new TestableHtmlTestFileCreator();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporayFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("testFile.html")).Returns(@"path\testFile.html");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\testFile.html"))
+                    .Returns(TestHTMLFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
+                    .Returns(@"path\lib.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
+                    .Returns(@"path\common.js");
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathType("testFile.html")).Returns(PathType.Html);
+
+                var context = creator.ClassUnderTest.BuildContext("testFile.html");
+
+                Assert.Contains("<div> some <a>fixture</a> content </div>", text);
+                Assert.DoesNotContain("@@FixtureContent@@", text);
             }
 
         }

@@ -80,6 +80,18 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_pass_tests_that_depend_on_fixture_from_source_test_harness()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\fixture.html");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
         public void Will_run_a_passing_tests_with_characters_that_need_encoding()
         {
             var testRunner = TestRunner.Create();
