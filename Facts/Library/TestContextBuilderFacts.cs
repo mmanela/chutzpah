@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Chutzpah.Frameworks;
+using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -15,8 +15,11 @@ namespace Chutzpah.Facts
         {
             public TestableHtmlTestFileCreator()
             {
-                IFrameworkDefinition qunitDefinition = new QUnitDefinition();
-                Mock<IFrameworkManager>().Setup(x => x.TryDetectFramework(It.IsAny<string>(), out qunitDefinition)).Returns(true);
+                var frameworkMock = this.Mock<IFrameworkDefinition>();
+                frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
+                frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
+                frameworkMock.Setup(x => x.FileDependencies).Returns(new string[] { "qunit.js", "qunit.css" });
+                frameworkMock.Setup(x => x.GetFixtureContent(It.IsAny<string>())).Returns("<div> some <a>fixture</a> content </div>");
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
                 Mock<IFileProbe>().Setup(x => x.GetPathType(It.IsAny<string>())).Returns(PathType.JavaScript);
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");

@@ -1,18 +1,32 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Chutzpah.Models;
 using Xunit;
-using System.Linq;
+using Xunit.Extensions;
 
 namespace Chutzpah.Facts.Integration
 {
     public class Features
     {
-        [Fact]
-        public void Will_run_a_tests_from_a_js_file()
+        public static IEnumerable<object[]> TestScripts
+        {
+            get
+            {
+                return new object[][]
+                {
+                    new object[] { @"JS\Test\basic-qunit.js" },
+                    new object[] { @"JS\Test\basic-jasmine.js" }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("TestScripts")]
+        public void Will_run_tests_from_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
 
-            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
+            TestResultsSummary result = testRunner.RunTests(scriptPath);
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -20,35 +34,35 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_a_tests_from_a_folder()
+        public void Will_run_qunit_tests_from_a_folder()
         {
             var testRunner = TestRunner.Create();
 
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\SubFolder");
 
             Assert.Equal(0, result.FailedCount);
-            Assert.Equal(1, result.PassedCount);
-            Assert.Equal(1, result.TotalCount);
+            Assert.Equal(2, result.PassedCount);
+            Assert.Equal(2, result.TotalCount);
         }
 
         [Fact]
-        public void Will_run_a_tests_from_a_folder_and_a_file()
+        public void Will_run_tests_from_a_folder_and_a_file()
         {
             var testRunner = TestRunner.Create();
 
-            TestResultsSummary result = testRunner.RunTests(new List<string>{@"JS\Test\basic.js", @"JS\Test\SubFolder"});
+            TestResultsSummary result = testRunner.RunTests(new List<string> { @"JS\Test\basic-qunit.js", @"JS\Test\SubFolder" });
 
             Assert.Equal(1, result.FailedCount);
-            Assert.Equal(4, result.PassedCount);
-            Assert.Equal(5, result.TotalCount);
+            Assert.Equal(5, result.PassedCount);
+            Assert.Equal(6, result.TotalCount);
         }
 
         [Fact]
-        public void Will_get_file_position_for_test_without_module()
+        public void Will_get_file_position_for_qunit_test_without_module()
         {
             var testRunner = TestRunner.Create();
 
-            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js");
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("A basic test"));
             Assert.Equal(3, test.Line);
@@ -56,11 +70,11 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_get_file_position_for_test_with_module()
+        public void Will_get_file_position_for_qunit_test_with_module()
         {
             var testRunner = TestRunner.Create();
 
-            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.js");
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js");
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
             Assert.Equal(11, test.Line);
@@ -68,11 +82,23 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_a_tests_from_a_html_file()
+        public void Will_get_file_position_for_jasmine_test()
         {
             var testRunner = TestRunner.Create();
 
-            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic.html");
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic-jasmine.js");
+
+            var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
+            Assert.Equal(11, test.Line);
+            Assert.Equal(3, test.Column);
+        }
+
+        [Fact]
+        public void Will_run_qunit_tests_from_a_html_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.html");
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -80,7 +106,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_pass_tests_that_depend_on_fixture_from_source_test_harness()
+        public void Will_pass_qunit_tests_that_depend_on_fixture_from_source_test_harness()
         {
             var testRunner = TestRunner.Create();
 
@@ -92,7 +118,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_a_passing_tests_with_characters_that_need_encoding()
+        public void Will_run_qunit_passing_tests_with_characters_that_need_encoding()
         {
             var testRunner = TestRunner.Create();
 
@@ -104,7 +130,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_a_passing_tests_that_has_a_reference_to_web_url()
+        public void Will_run_qunit_passing_tests_that_has_a_reference_to_web_url()
         {
             var testRunner = TestRunner.Create();
 
@@ -121,8 +147,8 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
             var tests = new List<string>
                             {
-                                @"JS\Test\basic.js",
-                                @"JS\Test\basic.html"
+                                @"JS\Test\basic-qunit.js",
+                                @"JS\Test\basic-qunit.html"
                             };
             TestResultsSummary result = testRunner.RunTests(tests);
 

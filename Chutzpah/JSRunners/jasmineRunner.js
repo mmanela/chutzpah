@@ -39,7 +39,7 @@
             for (i = 0, length = specs.length; i < length; i += 1) {
                 specNode = specs[i];
                 nameNode = specNode.getElementsByClassName('description')[0];
-                passed = attributeValue(specNode, 'class').match('passed') === 'passed';
+                passed = attributeValue(specNode, 'class').match(/passed/) ? true : false;
                 name = nameNode.innerText;
                 fullName = attributeValue(nameNode, 'title');
                 module = fullName.substr(0, (fullName.length - name.length) - 2);

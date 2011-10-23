@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using Chutzpah.Facts.Properties;
-    using Chutzpah.Frameworks;
+    using Chutzpah.FrameworkDefinitions;
     using Xunit;
     using Xunit.Extensions;
 

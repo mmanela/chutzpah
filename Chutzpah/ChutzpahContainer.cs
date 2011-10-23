@@ -1,4 +1,5 @@
-﻿using StructureMap;
+﻿using Chutzpah.FrameworkDefinitions;
+using StructureMap;
 
 namespace Chutzpah
 {
@@ -21,6 +22,7 @@ namespace Chutzpah
                     scan.TheCallingAssembly();
                     scan.WithDefaultConventions();
                     scan.AddAllTypesOf<IReferencedFileProcessor>();
+                    scan.AddAllTypesOf<IFrameworkDefinition>();
                 });
             });
 

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chutzpah.Frameworks;
+using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -14,8 +15,8 @@ namespace Chutzpah
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
-        IEnumerable<IReferencedFileProcessor> referencedFileProcessors;
-        private readonly IFrameworkManager frameworkManager;
+        private IEnumerable<IReferencedFileProcessor> referencedFileProcessors;
+        private IEnumerable<IFrameworkDefinition> frameworkDefinitions;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -23,12 +24,12 @@ namespace Chutzpah
 
         private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors, IFrameworkManager frameworkManager)
+        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.referencedFileProcessors = referencedFileProcessors;
-            this.frameworkManager = frameworkManager;
+            this.frameworkDefinitions = frameworkDefinitions;
         }
 
         public TestContext BuildContext(string file)
@@ -64,7 +65,7 @@ namespace Chutzpah
 
             IFrameworkDefinition definition;
 
-            if (frameworkManager.TryDetectFramework(testFileText, out definition))
+            if (this.TryDetectFramework(testFileText, out definition))
             {
                 if (!fileSystem.FolderExists(stagingFolder))
                 {
@@ -166,6 +167,18 @@ namespace Chutzpah
         //{
         //    return _BuildContext(file, null);
         //}
+
+        private bool TryDetectFramework(string content, out IFrameworkDefinition definition)
+        {
+            definition = this.frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false));
+
+            if (definition == null)
+            {
+                definition = this.frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true));
+            }
+
+            return definition != null;
+        }
 
         private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {

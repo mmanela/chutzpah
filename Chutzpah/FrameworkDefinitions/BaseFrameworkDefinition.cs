@@ -1,4 +1,4 @@
-﻿namespace Chutzpah.Frameworks
+﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System;
     using System.Collections.Generic;
@@ -21,6 +21,11 @@
                 return new string[] { this.FrameworkKey + ".js", this.FrameworkKey + ".css" };
             }
         }
+
+        /// <summary>
+        /// Gets a processor to assign line numbers to tests.
+        /// </summary>
+        public abstract IReferencedFileProcessor LineNumberProcessor { get; }
 
         /// <summary>
         /// Gets the file name of the test harness to use with the framework.

@@ -1,4 +1,4 @@
-﻿namespace Chutzpah.Frameworks
+﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System.Text.RegularExpressions;
     using HtmlAgilityPack;
@@ -38,6 +38,11 @@
         protected override HtmlNode GetFixtureNode(HtmlDocument fixtureDocument)
         {
             return fixtureDocument.GetElementbyId(this.FrameworkKey + "-fixture");
+        }
+
+        public override IReferencedFileProcessor LineNumberProcessor
+        {
+            get { throw new System.NotImplementedException(); }
         }
     }
 }

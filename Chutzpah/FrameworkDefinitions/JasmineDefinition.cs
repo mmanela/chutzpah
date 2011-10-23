@@ -1,4 +1,4 @@
-﻿namespace Chutzpah.Frameworks
+﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -10,6 +10,14 @@
     /// </summary>
     public class JasmineDefinition : BaseFrameworkDefinition
     {
+        /// <summary>
+        /// Gets a processor to assign line numbers to tests.
+        /// </summary>
+        public override IReferencedFileProcessor LineNumberProcessor
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
         /// <summary>
         /// Gets a list of file dependencies to bundle with the Jasmine test harness.
         /// </summary>

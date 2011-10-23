@@ -1,4 +1,4 @@
-﻿namespace Chutzpah.Frameworks
+﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System.Collections.Generic;
 
@@ -11,6 +11,11 @@
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
         IEnumerable<string> FileDependencies { get; }
+
+        /// <summary>
+        /// Gets a processor to assign line numbers to tests.
+        /// </summary>
+        IReferencedFileProcessor LineNumberProcessor { get; }
 
         /// <summary>
         /// Gets the file name of the HTML test harness to use with the framework.
