@@ -47,7 +47,7 @@
                 testCase = {
                     passed: passed,
                     name: name,
-                    moduleName: module
+                    module: module
                 };
 
                 if (!passed) {
@@ -65,5 +65,9 @@
         return testResults;
     }
 
-    chutzpah.runner(testsComplete, testsEvaluator);
+    try {
+        chutzpah.runner(testsComplete, testsEvaluator);
+    } catch (e) {
+        phantom.exit();
+    }
 }());

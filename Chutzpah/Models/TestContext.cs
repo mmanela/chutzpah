@@ -1,16 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Collections;
-namespace Chutzpah.Models
+﻿namespace Chutzpah.Models
 {
+    using System.Collections.Generic;
+
     public class TestContext
     {
         public TestContext()
         {
-            ReferencedJavaScriptFiles = new List<ReferencedFile>();
+            this.ReferencedJavaScriptFiles = new List<ReferencedFile>();
         }
 
         public string InputTestFile { get; set; }
+
+        public string TestRunner { get; set; }
+
         public string TestHarnessPath { get; set; }
+
         public IEnumerable<ReferencedFile> ReferencedJavaScriptFiles { get; set; }
     }
 }

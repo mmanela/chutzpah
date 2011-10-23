@@ -11,7 +11,7 @@ namespace Chutzpah
         private const int TestableFileSearchLimit = 100;
 
         public static string HeadlessBrowserName = "phantomjs.exe";
-        public static string TestRunnerJsName = @"JSRunners\qunitRunner.js";
+        public static string TestRunnerJsName = @"JSRunners\chutzpah.js";
 
         private readonly IProcessHelper process;
         private readonly ITestResultsBuilder testResultsBuilder;
@@ -101,7 +101,6 @@ namespace Chutzpah
             return summary;
         }
 
-
         public TestResultsSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
             return RunTests(testPath, new TestOptions(), callback);
@@ -120,8 +119,9 @@ namespace Chutzpah
         {
             if (callback != null && !callback.FileStart(testContext.InputTestFile)) return false;
 
+            string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
-            string args = string.Format("\"{0}\" {1}", jsTestRunnerPath, fileUrl);
+            string args = string.Format("\"{0}\" {1}", runnerPath, fileUrl);
             string jsonResult = process.RunExecutableAndCaptureOutput(headlessBrowserPath, args);
 
             if (DebugEnabled)

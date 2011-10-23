@@ -98,7 +98,8 @@ namespace Chutzpah
                 {
                     InputTestFile = filePath,
                     TestHarnessPath = testHtmlFilePath,
-                    ReferencedJavaScriptFiles = referencedFiles
+                    ReferencedJavaScriptFiles = referencedFiles,
+                    TestRunner = definition.TestRunner
                 };
             }
 

@@ -40,7 +40,7 @@
         {
             get
             {
-                return this.FrameworkKey + "Runner.js";
+                return @"JSRunners\" + this.FrameworkKey + "Runner.js";
             }
         }
 

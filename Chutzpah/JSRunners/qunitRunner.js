@@ -50,7 +50,7 @@
                     result = {
                         passed: test.className === 'pass',
                         name: test.querySelector('.test-name').innerHTML,
-                        moduleName: moduleNode !== null ? moduleNode.innerHTML : undefined
+                        module: moduleNode !== null ? moduleNode.innerHTML : undefined
                     };
 
                     if (!result.passed) {
@@ -91,5 +91,9 @@
         }
     }
 
-    chutzpah.runner(testsComplete, testsEvaluator);
+    try {
+        chutzpah.runner(testsComplete, testsEvaluator);
+    } catch (e) {
+        phantom.exit();
+    }
 }());
