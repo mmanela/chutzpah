@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chutzpah.Wrappers;
+using Chutzpah.Frameworks;
 using Chutzpah.Models;
-using Chutzpah.FileProcessors;
-using HtmlAgilityPack;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -17,6 +15,7 @@ namespace Chutzpah
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
         IEnumerable<IReferencedFileProcessor> referencedFileProcessors;
+        private readonly IFrameworkManager frameworkManager;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -24,83 +23,153 @@ namespace Chutzpah
 
         private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private readonly string QUnitTestFixtureId = "qunit-fixture";
-
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors)
+        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors, IFrameworkManager frameworkManager)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.referencedFileProcessors = referencedFileProcessors;
+            this.frameworkManager = frameworkManager;
+        }
+
+        public TestContext BuildContext(string file)
+        {
+            return this.BuildContext(file, null);
         }
 
         public TestContext BuildContext(string file, string stagingFolder)
         {
             if (string.IsNullOrWhiteSpace(file))
+            {
                 throw new ArgumentNullException("file");
+            }
+
             var fileKind = fileProbe.GetPathType(file);
+
             if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
+            {
                 throw new ArgumentException("Expecting a .js or .html file");
-            stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporayFolder() : stagingFolder;
+            }
+
+            stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
 
             string filePath = fileProbe.FindFilePath(file);
+
             if (filePath == null)
+            {
                 throw new FileNotFoundException("Unable to find file: " + file);
-
-            if (!fileSystem.FolderExists(stagingFolder))
-                fileSystem.CreateDirectory(stagingFolder);
-
+            }
 
             var testFileName = Path.GetFileName(file);
             var testFileText = fileSystem.GetText(filePath);
-            var referencedFiles = GetReferencedFiles(fileKind, testFileText, filePath, stagingFolder);
-            var fixtureContent = "";
 
-            if (fileKind == PathType.JavaScript)
+            IFrameworkDefinition definition;
+
+            if (frameworkManager.TryDetectFramework(testFileText, out definition))
             {
-                var stagedFilePath = Path.Combine(stagingFolder, testFileName);
-                referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+                if (!fileSystem.FolderExists(stagingFolder))
+                {
+                    fileSystem.CreateDirectory(stagingFolder);
+                }
+
+                var referencedFiles = GetReferencedFiles(definition, fileKind, testFileText, filePath, stagingFolder);
+                var fixtureContent = "";
+
+                if (fileKind == PathType.JavaScript)
+                {
+                    var stagedFilePath = Path.Combine(stagingFolder, testFileName);
+                    referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+                }
+                else if (fileKind == PathType.Html)
+                {
+                    fixtureContent = definition.GetFixtureContent(testFileText);
+                }
+
+                this.CopyReferencedFiles(referencedFiles);
+
+                foreach (var item in definition.FileDependencies)
+                {
+                    var itemPath = Path.Combine(stagingFolder, item);
+                    this.CreateIfDoesNotExist(itemPath, "Chutzpah.TestFiles." + item);
+                }
+
+                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
+
+                return new TestContext
+                {
+                    InputTestFile = filePath,
+                    TestHarnessPath = testHtmlFilePath,
+                    ReferencedJavaScriptFiles = referencedFiles
+                };
             }
-            else if(fileKind == PathType.Html)
-            {
-                fixtureContent = GetTextFixtureContent(testFileText);
-            }
 
-            CopyReferencedFiles(referencedFiles);
-
-            var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
-            CreateIfDoesNotExist(qunitFilePath, "Chutzpah.TestFiles.qunit.js");
-            var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
-            CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
-
-            var testHtmlFilePath = CreateTestHarness(stagingFolder, referencedFiles, fixtureContent);
-
-            return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
+            return null;
         }
 
-        private string GetTextFixtureContent(string htmlHarnessText)
+        public bool TryBuildContext(string file, out TestContext context)
         {
-            var fixtureContent = "";
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(htmlHarnessText);
-
-            var testFixture = htmlDocument.GetElementbyId(QUnitTestFixtureId);
-            if(testFixture != null)
-            {
-                fixtureContent = testFixture.InnerHtml;
-            }
-
-            return fixtureContent;
+            return this.TryBuildContext(file, null, out context);
         }
 
-        public TestContext BuildContext(string file)
+        public bool TryBuildContext(string file, string stagingFolder, out TestContext context)
         {
-            return BuildContext(file, null);
+            context = this.BuildContext(file, stagingFolder);
+            return context != null;
         }
 
-        private string CreateTestHarness(string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
+        //public TestContext _BuildContext(string file, string stagingFolder)
+        //{
+        //    if (string.IsNullOrWhiteSpace(file))
+        //        throw new ArgumentNullException("file");
+        //    var fileKind = fileProbe.GetPathType(file);
+        //    if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
+        //        throw new ArgumentException("Expecting a .js or .html file");
+        //    stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
+
+        //    string filePath = fileProbe.FindFilePath(file);
+        //    if (filePath == null)
+        //        throw new FileNotFoundException("Unable to find file: " + file);
+
+        //    if (!fileSystem.FolderExists(stagingFolder))
+        //        fileSystem.CreateDirectory(stagingFolder);
+
+
+        //    var definition = frameworkManager[Framework.QUnit];
+        //    var testFileName = Path.GetFileName(file);
+        //    var testFileText = fileSystem.GetText(filePath);
+        //    var referencedFiles = GetReferencedFiles(definition, fileKind, testFileText, filePath, stagingFolder);
+        //    var fixtureContent = "";
+
+        //    if (fileKind == PathType.JavaScript)
+        //    {
+        //        var stagedFilePath = Path.Combine(stagingFolder, testFileName);
+        //        referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+        //    }
+        //    else if (fileKind == PathType.Html)
+        //    {
+        //        fixtureContent = definition.GetFixtureContent(testFileText);
+        //    }
+
+        //    CopyReferencedFiles(referencedFiles);
+
+        //    var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
+        //    CreateIfDoesNotExist(qunitFilePath, "Chutzpah.TestFiles.qunit.js");
+        //    var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
+        //    CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
+
+        //    var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
+
+        //    return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
+        //}
+
+        //public TestContext _BuildContext(string file)
+        //{
+        //    return _BuildContext(file, null);
+        //}
+
+        private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
-            var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles.qunit.html");
+            var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles." + definition.TestHarness);
             string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles, fixtureContent);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
@@ -117,7 +186,7 @@ namespace Chutzpah
             }
         }
 
-        private IList<ReferencedFile> GetReferencedFiles(PathType testFileType, string testFileText, string testFilePath, string stagingFolder)
+        private IList<ReferencedFile> GetReferencedFiles(IFrameworkDefinition definition, PathType testFileType, string testFileText, string testFilePath, string stagingFolder)
         {
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
             var files = new List<ReferencedFile>();
@@ -130,7 +199,7 @@ namespace Chutzpah
                     var referenceFileName = Path.GetFileName(referencePath);
 
                     // Don't copy over test runner, since we use our own.
-                    if (TestRunnerRegex.IsMatch(referenceFileName))
+                    if (definition.ReferenceIsDependency(referenceFileName))
                     {
                         continue;
                     }

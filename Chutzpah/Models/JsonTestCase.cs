@@ -2,7 +2,7 @@
 {
     public class JsonTestCase
     {
-        public string State { get; set; }
+        public bool Passed { get; set; }
         public string Name { get; set; }
         public string Module { get; set; }
         public string Expected { get; set; }

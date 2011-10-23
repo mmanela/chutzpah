@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using StructureMap;
-using Chutzpah.TestFileDetectors;
+﻿using StructureMap;
 
 namespace Chutzpah
 {
@@ -27,8 +22,6 @@ namespace Chutzpah
                     scan.WithDefaultConventions();
                     scan.AddAllTypesOf<IReferencedFileProcessor>();
                 });
-
-                config.For<ITestableFileDetector>().Add<QUnitTestableFileDetector>();
             });
 
 

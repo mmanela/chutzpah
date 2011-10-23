@@ -11,7 +11,7 @@ namespace Chutzpah.Wrappers
             return Path.GetRandomFileName();
         }
 
-        public string GetTemporayFolder()
+        public string GetTemporaryFolder()
         {
             var folder = Path.GetTempPath();
             var tempFolder = Path.Combine(folder, Path.GetRandomFileName());

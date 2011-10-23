@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
-using System.Linq;
 
 namespace Chutzpah
 {
@@ -40,7 +40,7 @@ namespace Chutzpah
                 test.Actual = htmlUtility.DecodeJavaScript(rawTest.Actual);
                 test.Expected = htmlUtility.DecodeJavaScript(rawTest.Expected);
                 test.Message = htmlUtility.DecodeJavaScript(rawTest.Message);
-                test.Passed = rawTest.State != null && rawTest.State.Equals("pass", StringComparison.OrdinalIgnoreCase);
+                test.Passed = rawTest.Passed;
 
                 if (referencedFile != null)
                 {
@@ -61,7 +61,7 @@ namespace Chutzpah
             var json = browserResult;
             var startIndex = browserResult.IndexOf(StartJsonDelimiter);
             var endIndex = browserResult.IndexOf(EndJsonDelimiter);
-            if(startIndex >= 0)
+            if (startIndex >= 0)
             {
                 startIndex += StartJsonDelimiter.Length;
                 json = json.Substring(startIndex, endIndex - startIndex).Trim();

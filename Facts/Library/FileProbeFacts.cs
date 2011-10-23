@@ -1,13 +1,10 @@
-﻿using Chutzpah.Wrappers;
-using Moq;
-using Xunit;
-using StructureMap.AutoMocking;
-using System;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Chutzpah.Models;
-using System.Collections.Generic;
-using System.IO;
-using Chutzpah.TestFileDetectors;
+using Chutzpah.Wrappers;
+using Moq;
+using Xunit;
 
 namespace Chutzpah.Facts
 {
@@ -170,7 +167,7 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var res = probe.ClassUnderTest.FindTestableFiles(null);
+                var res = probe.ClassUnderTest.FindScriptFiles(null);
 
                 Assert.Empty(res);
             }
@@ -186,7 +183,7 @@ namespace Chutzpah.Facts
                                 "c.blah"
                             };
 
-                var res = probe.ClassUnderTest.FindTestableFiles(paths);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(2, res.Count());
                 Assert.Contains("a.js", res);
@@ -194,7 +191,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_testable_js_files_that_are_found_in_given_folder()
+            public void Will_return_js_files_that_are_found_in_given_folder()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
@@ -202,16 +199,14 @@ namespace Chutzpah.Facts
                 probe.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetFiles("folder", "*.js", SearchOption.AllDirectories))
                     .Returns(new string[] { "subFile1.js", "subFile2.js" });
-                probe.Mock<ITestableFileDetector>().Setup(x => x.IsTestableFile("subFile1.js")).Returns(true);
-                probe.Mock<ITestableFileDetector>().Setup(x => x.IsTestableFile("subFile2.js")).Returns(false);
                 var paths = new List<string>
                             {
                                 "folder"
                             };
 
-                var res = probe.ClassUnderTest.FindTestableFiles(paths);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
-                Assert.Equal(1, res.Count());
+                Assert.Equal(2, res.Count());
                 Assert.Contains("subFile1.js", res);
             }
 

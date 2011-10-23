@@ -1,10 +1,8 @@
-﻿using System.IO;
-using Chutzpah.Wrappers;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Chutzpah.Models;
-using System;
-using System.Linq;
-using Chutzpah.TestFileDetectors;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -12,14 +10,12 @@ namespace Chutzpah
     {
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
-        private readonly ITestableFileDetector testableFileDetector;
-        private const int TestableFileSearchLimit = 100;
+        //private const int TestableFileSearchLimit = 100;
 
-        public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem, ITestableFileDetector testableFileDetector)
+        public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem)
         {
             this.environment = environment;
             this.fileSystem = fileSystem;
-            this.testableFileDetector = testableFileDetector;
         }
 
         public string FindFilePath(string fileName)
@@ -50,13 +46,14 @@ namespace Chutzpah
             return null;
         }
 
-        public IEnumerable<string> FindTestableFiles(IEnumerable<string> testPaths)
+        public IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths)
         {
             if (testPaths == null) yield break;
 
             foreach (var path in testPaths)
             {
                 var pathType = GetPathType(path);
+
                 switch (pathType)
                 {
                     case PathType.Html:
@@ -64,13 +61,57 @@ namespace Chutzpah
                         yield return path;
                         break;
                     case PathType.Folder:
-                        var testableFiles = from file in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories)
-                                            where testableFileDetector.IsTestableFile(file)
-                                            select file;
-                        foreach (var file in testableFiles.Take(TestableFileSearchLimit))
+                        //var testableFiles = from file in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories)
+                        //                    where testableFileDetector.IsTestableFile(file)
+                        //                    select file;
+                        //testableFiles = fileSystem
+                        //    .GetFiles(path, "*.js", SearchOption.AllDirectories)
+                        //    .Where(x => testableFileDetector.IsTestableFile(x));
+
+                        //foreach (var name in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories))
+                        //{
+                        //    var content = fileSystem.GetText(name);
+                        //    var framework = Framework.Unknown;
+
+                        //    // Attempt difinitive framework test on file
+                        //    foreach (var key in FrameworkManager.Instance.Keys)
+                        //    {
+                        //        if (FrameworkManager.Instance[key].FileUsesFramework(content, false))
+                        //        {
+                        //            framework = key;
+                        //            break;
+                        //        }
+                        //    }
+
+                        //    if (framework == Framework.Unknown)
+                        //    {
+                        //        // Attempt best guess framework test on file
+                        //        foreach (var key in FrameworkManager.Instance.Keys)
+                        //        {
+                        //            if (FrameworkManager.Instance[key].FileUsesFramework(content, true))
+                        //            {
+                        //                framework = key;
+                        //                break;
+                        //            }
+                        //        }
+                        //    }
+
+                        //    if (framework != Framework.Unknown)
+                        //    {
+                        //        var testFile = new TestFile(name, content, framework);
+                        //    }
+                        //}
+
+                        //foreach (var file in testableFiles.Take(TestableFileSearchLimit))
+                        //{
+                        //    yield return file;
+                        //}
+
+                        foreach (var item in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories))
                         {
-                            yield return file;
+                            yield return item;
                         }
+
                         break;
                     default:
                         break;

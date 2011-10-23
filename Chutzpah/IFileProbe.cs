@@ -28,13 +28,13 @@ namespace Chutzpah
         /// </summary>
         /// <param name="testPaths">The test paths.</param>
         /// <returns>A list of files to test</returns>
-        IEnumerable<string> FindTestableFiles(IEnumerable<string> testPaths);
+        IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths);
 
         /// <summary>
         /// Gets the type of the path.
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <returns>The type of item the path points to.</returns>
+        /// <returns>The type of name the path points to.</returns>
         PathType GetPathType(string path);
     }
 }

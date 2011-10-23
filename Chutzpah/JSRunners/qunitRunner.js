@@ -1,8 +1,10 @@
 /// <reference path="chutzpah.js" />
-/*globals chutzpah*/
+/*globals phantom, chutzpah*/
 
 (function () {
     'use strict';
+
+    phantom.injectJs('chutzpah.js');
 
     function testsComplete() {
         var el = document.getElementById('qunit-testresult');
@@ -15,10 +17,7 @@
     }
 
     function testsEvaluator() {
-        var errors = [],
-            testRunningStatusContainer,
-            failed,
-            testResults,
+        var testResults,
             testContainer,
             tests,
             i,
@@ -32,14 +31,13 @@
             actual,
             message;
 
-        try {
-            testRunningStatusContainer = document.getElementById('qunit-testresult');
-            failed = testRunningStatusContainer.getElementsByClassName('failed')[0].innerHTML;
-        } catch (argumentError) {
-            errors.push(JSON.stringify(argumentError, null, 4));
-        }
+        testResults = {
+            results: [],
+            logs: [],
+            errors: [],
+            failedCount: 0
+        };
 
-        testResults = new chutzpah.TestOutput(errors, failed);
         testContainer = document.getElementById('qunit-tests');
 
         if (typeof testContainer !== 'undefined') {
@@ -49,13 +47,14 @@
                     test = tests[i];
                     moduleNode = test.querySelector('.module-name');
 
-                    result = new chutzpah.TestCase(
-                        test.classname,
-                        test.querySelector('.test-name').innerHTML,
-                        moduleNode !== null ? moduleNode.innerHTML : undefined
-                    );
+                    result = {
+                        passed: test.className === 'pass',
+                        name: test.querySelector('.test-name').innerHTML,
+                        moduleName: moduleNode !== null ? moduleNode.innerHTML : undefined
+                    };
 
-                    if (result.state !== 'pass') {
+                    if (!result.passed) {
+                        testResults.failedCount += 1;
                         failedAssert = test.querySelector('ol li.fail');
                         if (failedAssert) {
                             hasNodes = failedAssert.querySelector('*');
@@ -82,10 +81,10 @@
                         }
                     }
 
-                    testResults.addCase(result);
+                    testResults.results.push(result);
                 }
-            } catch (gatherError) {
-                errors.push(JSON.stringify(gatherError, null, 4));
+            } catch (e) {
+                testResults.errors.push(JSON.stringify(e, null, 4));
             }
 
             return testResults;

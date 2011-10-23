@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
-using System.Linq;
 
 namespace Chutzpah
 {
     public class TestRunner : ITestRunner
     {
+        private const int TestableFileSearchLimit = 100;
+
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\qunitRunner.js";
 
@@ -38,8 +39,7 @@ namespace Chutzpah
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
-            var context = testContextBuilder.BuildContext(testFile, options.StagingFolder);
-            return context;
+            return testContextBuilder.BuildContext(testFile, options.StagingFolder);
         }
 
         public TestContext GetTestContext(string testFile)
@@ -67,19 +67,26 @@ namespace Chutzpah
             if (callback != null) callback.TestSuiteStarted();
 
             var testResults = new List<TestResult>();
-            foreach (string testFile in fileProbe.FindTestableFiles(testPaths))
+            var resultCount = 1;
+
+            foreach (string testFile in fileProbe.FindScriptFiles(testPaths))
             {
                 try
                 {
-                    var testContext = GetTestContext(testFile,options);
-                    bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
-                    
-                    if(options.OpenInBrowser) 
-                    {
-                        process.LaunchFileInBrowser(testContext.TestHarnessPath);
-                    }
+                    TestContext testContext;
 
-                    if (!result) break;
+                    if (testContextBuilder.TryBuildContext(testFile, options.StagingFolder, out testContext))
+                    {
+                        resultCount++;
+                        bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
+
+                        if (options.OpenInBrowser)
+                        {
+                            process.LaunchFileInBrowser(testContext.TestHarnessPath);
+                        }
+
+                        if (!result || resultCount >= TestableFileSearchLimit) break;
+                    }
 
                 }
                 catch (Exception e)

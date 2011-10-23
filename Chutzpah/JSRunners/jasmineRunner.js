@@ -1,16 +1,13 @@
 ﻿/// <reference path="chutzpah.js" />
-/*globals chutzpah*/
+/*globals phantom, chutzpah*/
 
 (function () {
     'use strict';
 
-    function attributeValue(node, attribute) {
-        return node.attributes.getNamedItem(attribute).nodeValue;
-    }
+    phantom.injectJs('chutzpah.js');
 
     function testsComplete() {
-        var el = document.getElementsByClassName('runner')[0];
-        return !attributeValue(el, 'class').match('running');
+        return !document.body.getElementsByClassName('running').length;
     }
 
     function testsEvaluator() {
@@ -20,29 +17,50 @@
             nameNode,
             messageNode,
             testResults,
-            specs = document.getElementsByClassName('spec'),
+            specs = document.body.getElementsByClassName('spec'),
             passed,
             name,
             fullName,
             module,
             testCase;
 
-        for (i = 0, length = specs.length; i < length; i += 1) {
-            specNode = specs[i];
-            nameNode = specNode.getElementsByClassName('description')[0];
-            passed = attributeValue(specNode, 'class').match('passed');
-            name = nameNode.innerText;
-            fullName = attributeValue(nameNode, 'title');
-            module = fullName.substr(0, (fullName.length - name.length) - 1);
-            testCase = new chutzpah.TestCase(passed, name, module);
-
-            if (!passed) {
-                messageNode = specNode.getElementsByClassName('resultMessage')[0];
-                testCase.message = messageNode.innerText;
-            }
+        function attributeValue(node, attribute) {
+            return node.attributes.getNamedItem(attribute).nodeValue;
         }
 
-        testResults = new chutzpah.TestOutput([], 0);
+        testResults = {
+            results: [],
+            logs: [],
+            errors: [],
+            failedCount: 0
+        };
+
+        try {
+            for (i = 0, length = specs.length; i < length; i += 1) {
+                specNode = specs[i];
+                nameNode = specNode.getElementsByClassName('description')[0];
+                passed = attributeValue(specNode, 'class').match('passed') === 'passed';
+                name = nameNode.innerText;
+                fullName = attributeValue(nameNode, 'title');
+                module = fullName.substr(0, (fullName.length - name.length) - 2);
+
+                testCase = {
+                    passed: passed,
+                    name: name,
+                    moduleName: module
+                };
+
+                if (!passed) {
+                    testResults.failedCount += 1;
+                    messageNode = specNode.getElementsByClassName('resultMessage')[0];
+                    testCase.message = messageNode.innerText;
+                }
+
+                testResults.results.push(testCase);
+            }
+        } catch (e) {
+            testResults.errors.push(JSON.stringify(e, null, 4));
+        }
 
         return testResults;
     }

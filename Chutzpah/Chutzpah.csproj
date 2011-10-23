@@ -55,10 +55,12 @@
     <Compile Include="FileProbe.cs" />
     <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
-    <Compile Include="FrameworkDefinitions\BaseFrameworkDefinition.cs" />
-    <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
-    <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
-    <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
+    <Compile Include="Frameworks\BaseFrameworkDefinition.cs" />
+    <Compile Include="Frameworks\FrameworkManager.cs" />
+    <Compile Include="Frameworks\IFrameworkDefinition.cs" />
+    <Compile Include="Frameworks\IFrameworkManager.cs" />
+    <Compile Include="Frameworks\JasmineDefinition.cs" />
+    <Compile Include="Frameworks\QUnitDefinition.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
@@ -66,7 +68,7 @@
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
-    <Compile Include="IHtmlTestFileCreator.cs" />
+    <Compile Include="ITestContextBuilder.cs" />
     <Compile Include="Models\BrowserTestFileResult.cs" />
     <Compile Include="ITestMethodRunnerCallback.cs" />
     <Compile Include="ITestResultsBuilder.cs" />
@@ -74,10 +76,8 @@
     <Compile Include="Models\TestContext.cs" />
     <Compile Include="Models\JsonLogOutput.cs" />
     <Compile Include="Models\JsonTestCase.cs" />
-    <Compile Include="Models\JsonTestResult.cs" />
+    <Compile Include="Models\JsonTestOutput.cs" />
     <Compile Include="Models\TestResult.cs" />
-    <Compile Include="TestableFileDetectors\ITestableFileDetector.cs" />
-    <Compile Include="TestableFileDetectors\QUnitTestableFileDetector.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestResultsBuilder.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />

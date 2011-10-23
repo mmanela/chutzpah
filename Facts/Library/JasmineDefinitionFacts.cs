@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using Chutzpah.Facts.Properties;
-    using Chutzpah.FrameworkDefinitions;
+    using Chutzpah.Frameworks;
     using Xunit;
     using Xunit.Extensions;
 
@@ -52,6 +52,24 @@
             {
                 var definition = new JasmineDefinition();
                 Assert.False(definition.FileUsesFramework(suite, true));
+            }
+        }
+
+        public class ReferenceIsDependency
+        {
+            [Fact]
+            public void ReturnsTrue_GivenJasmineFile()
+            {
+                var definition = new JasmineDefinition();
+                Assert.True(definition.ReferenceIsDependency("jasmine.js"));
+                Assert.True(definition.ReferenceIsDependency("jasmine-html.js"));
+            }
+
+            [Fact]
+            public void ReturnsFalse_GivenQUnitFile()
+            {
+                var definition = new JasmineDefinition();
+                Assert.False(definition.ReferenceIsDependency("qunit.js"));
             }
         }
     }

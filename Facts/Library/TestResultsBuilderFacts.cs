@@ -70,12 +70,12 @@ namespace Chutzpah.Facts
                                                    {
                                                        new JsonTestCase
                                                            {
-                                                               State = "pass",
+                                                               Passed = true,
                                                                Name = "name1"
                                                            },
                                                        new JsonTestCase
                                                            {
-                                                               State = "fail",
+                                                               Passed = false,
                                                                Name = "name2",
                                                                Module = "module2",
                                                                Expected = "10",
@@ -125,7 +125,7 @@ namespace Chutzpah.Facts
                                                    {
                                                        new JsonTestCase
                                                            {
-                                                               State = "fail",
+                                                               Passed = false,
                                                                Name = "name",
                                                                Module = "module",
                                                                Expected = "10",
@@ -169,7 +169,7 @@ namespace Chutzpah.Facts
                                                    {
                                                        new JsonTestCase
                                                            {
-                                                               State = "fail",
+                                                               Passed = false,
                                                                Name = "name",
                                                                Module = "module",
                                                                Expected = "10",

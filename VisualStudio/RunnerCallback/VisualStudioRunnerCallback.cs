@@ -139,13 +139,13 @@ namespace Chutzpah.VisualStudio.RunnerCallback
         private void WriteToOutputPaneAndErrorTaskList(string filePath, string outputPaneText, string taskItemText, int line)
         {
             testPane.OutputTaskItemString(
-                outputPaneText, // Output window text
+                outputPaneText, // Output window content
                 vsTaskPriority.vsTaskPriorityHigh,
                 null,
                 vsTaskIcon.vsTaskIconSquiggle,
                 filePath,
                 line,
-                taskItemText, // Task text
+                taskItemText, // Task content
                 true);
         }
 
