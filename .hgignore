@@ -10,3 +10,4 @@ syntax: glob
 *.vsp
 *.cache
 *.Cache
+*.StyleCop
