@@ -89,8 +89,8 @@ namespace Chutzpah.Facts.Integration
             TestResultsSummary result = testRunner.RunTests(@"JS\Test\basic-jasmine.js");
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
-            Assert.Equal(11, test.Line);
-            Assert.Equal(3, test.Column);
+            Assert.Equal(13, test.Line);
+            Assert.Equal(5, test.Column);
         }
 
         [Fact]
