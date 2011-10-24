@@ -1,6 +1,7 @@
 ﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System.Text.RegularExpressions;
+    using Chutzpah.FileProcessors;
     using HtmlAgilityPack;
 
     /// <summary>
@@ -8,6 +9,27 @@
     /// </summary>
     public class QUnitDefinition : BaseFrameworkDefinition
     {
+        private IReferencedFileProcessor lineNumberProcessor;
+
+        /// <summary>
+        /// Constructs a new QUnitDefinition.
+        /// </summary>
+        public QUnitDefinition()
+        {
+            this.lineNumberProcessor = ChutzpahContainer.Current.GetInstance<QUnitLineNumberProcessor>();
+        }
+
+        /// <summary>
+        /// Gets a processor to assign line numbers to tests.
+        /// </summary>
+        public override IReferencedFileProcessor LineNumberProcessor
+        {
+            get
+            {
+                return this.lineNumberProcessor;
+            }
+        }
+
         /// <summary>
         /// Gets a short, file system friendly key for the QUnit library.
         /// </summary>
@@ -38,11 +60,6 @@
         protected override HtmlNode GetFixtureNode(HtmlDocument fixtureDocument)
         {
             return fixtureDocument.GetElementbyId(this.FrameworkKey + "-fixture");
-        }
-
-        public override IReferencedFileProcessor LineNumberProcessor
-        {
-            get { throw new System.NotImplementedException(); }
         }
     }
 }

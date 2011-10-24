@@ -4,7 +4,7 @@
     using Chutzpah.Models;
     using Chutzpah.Wrappers;
 
-    public class JasmineLineNumberProcessor
+    public class JasmineLineNumberProcessor : IReferencedFileProcessor
     {
         private IFileSystemWrapper fileSystem;
 

@@ -15,11 +15,13 @@ namespace Chutzpah.Facts
         {
             public TestableHtmlTestFileCreator()
             {
+                var processorMock = this.Mock<IReferencedFileProcessor>();
                 var frameworkMock = this.Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new string[] { "qunit.js", "qunit.css" });
                 frameworkMock.Setup(x => x.GetFixtureContent(It.IsAny<string>())).Returns("<div> some <a>fixture</a> content </div>");
+                frameworkMock.Setup(x => x.LineNumberProcessor).Returns(processorMock.Object);
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
                 Mock<IFileProbe>().Setup(x => x.GetPathType(It.IsAny<string>())).Returns(PathType.JavaScript);
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
@@ -245,7 +247,7 @@ namespace Chutzpah.Facts
             public void Will_run_referenced_files_through_referenced_file_processors()
             {
                 var creator = new TestableHtmlTestFileCreator();
-                var processor = new Mock<IReferencedFileProcessor>();
+                var processor = creator.Mock<IReferencedFileProcessor>();
                 creator.InjectArray<IReferencedFileProcessor>(new[] { processor.Object });
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);

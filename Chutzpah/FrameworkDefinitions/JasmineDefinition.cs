@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Chutzpah.FileProcessors;
     using HtmlAgilityPack;
 
     /// <summary>
@@ -10,12 +11,28 @@
     /// </summary>
     public class JasmineDefinition : BaseFrameworkDefinition
     {
+        private IReferencedFileProcessor lineNumberProcessor;
+
+        private IEnumerable<string> fileDependencies;
+
+        /// <summary>
+        /// Constructs a new JasmineDefinition.
+        /// </summary>
+        public JasmineDefinition()
+        {
+            this.lineNumberProcessor = ChutzpahContainer.Current.GetInstance<JasmineLineNumberProcessor>();
+            this.fileDependencies = base.FileDependencies.Concat(new string[] { "jasmine-html.js", "jasmine_favicon.png" });
+        }
+
         /// <summary>
         /// Gets a processor to assign line numbers to tests.
         /// </summary>
         public override IReferencedFileProcessor LineNumberProcessor
         {
-            get { throw new System.NotImplementedException(); }
+            get
+            {
+                return this.lineNumberProcessor;
+            }
         }
 
         /// <summary>
@@ -25,7 +42,7 @@
         {
             get
             {
-                return base.FileDependencies.Concat(new string[] { "jasmine-html.js", "jasmine_favicon.png" });
+                return this.fileDependencies;
             }
         }
 

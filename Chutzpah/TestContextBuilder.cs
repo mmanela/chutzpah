@@ -15,7 +15,6 @@ namespace Chutzpah
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
-        private IEnumerable<IReferencedFileProcessor> referencedFileProcessors;
         private IEnumerable<IFrameworkDefinition> frameworkDefinitions;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
@@ -24,11 +23,10 @@ namespace Chutzpah
 
         private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IReferencedFileProcessor> referencedFileProcessors, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
+        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
-            this.referencedFileProcessors = referencedFileProcessors;
             this.frameworkDefinitions = frameworkDefinitions;
         }
 
@@ -85,7 +83,7 @@ namespace Chutzpah
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
 
-                this.CopyReferencedFiles(referencedFiles);
+                this.CopyReferencedFiles(referencedFiles, definition.LineNumberProcessor);
 
                 foreach (var item in definition.FileDependencies)
                 {
@@ -117,56 +115,6 @@ namespace Chutzpah
             context = this.BuildContext(file, stagingFolder);
             return context != null;
         }
-
-        //public TestContext _BuildContext(string file, string stagingFolder)
-        //{
-        //    if (string.IsNullOrWhiteSpace(file))
-        //        throw new ArgumentNullException("file");
-        //    var fileKind = fileProbe.GetPathType(file);
-        //    if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
-        //        throw new ArgumentException("Expecting a .js or .html file");
-        //    stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
-
-        //    string filePath = fileProbe.FindFilePath(file);
-        //    if (filePath == null)
-        //        throw new FileNotFoundException("Unable to find file: " + file);
-
-        //    if (!fileSystem.FolderExists(stagingFolder))
-        //        fileSystem.CreateDirectory(stagingFolder);
-
-
-        //    var definition = frameworkManager[Framework.QUnit];
-        //    var testFileName = Path.GetFileName(file);
-        //    var testFileText = fileSystem.GetText(filePath);
-        //    var referencedFiles = GetReferencedFiles(definition, fileKind, testFileText, filePath, stagingFolder);
-        //    var fixtureContent = "";
-
-        //    if (fileKind == PathType.JavaScript)
-        //    {
-        //        var stagedFilePath = Path.Combine(stagingFolder, testFileName);
-        //        referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
-        //    }
-        //    else if (fileKind == PathType.Html)
-        //    {
-        //        fixtureContent = definition.GetFixtureContent(testFileText);
-        //    }
-
-        //    CopyReferencedFiles(referencedFiles);
-
-        //    var qunitFilePath = Path.Combine(stagingFolder, "qunit.js");
-        //    CreateIfDoesNotExist(qunitFilePath, "Chutzpah.TestFiles.qunit.js");
-        //    var qunitCssFilePath = Path.Combine(stagingFolder, "qunit.css");
-        //    CreateIfDoesNotExist(qunitCssFilePath, "Chutzpah.TestFiles.qunit.css");
-
-        //    var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
-
-        //    return new TestContext { InputTestFile = filePath, TestHarnessPath = testHtmlFilePath, ReferencedJavaScriptFiles = referencedFiles };
-        //}
-
-        //public TestContext _BuildContext(string file)
-        //{
-        //    return _BuildContext(file, null);
-        //}
 
         private bool TryDetectFramework(string content, out IFrameworkDefinition definition)
         {
@@ -238,7 +186,7 @@ namespace Chutzpah
             return files;
         }
 
-        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles)
+        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IReferencedFileProcessor processor)
         {
             foreach (var referencedFile in referencedFiles)
             {
@@ -246,12 +194,7 @@ namespace Chutzpah
                 {
                     fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
                     fileSystem.SetFileAttributes(referencedFile.StagedPath, FileAttributes.Normal);
-
-                    foreach (var referencedFileProcessor in referencedFileProcessors)
-                    {
-                        referencedFileProcessor.Process(referencedFile);
-                    }
-
+                    processor.Process(referencedFile);
                 }
             }
         }
