@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Chutzpah.FileProcessors;
+    using Chutzpah.Models;
     using HtmlAgilityPack;
 
     /// <summary>
@@ -21,11 +23,6 @@
                 return new string[] { this.FrameworkKey + ".js", this.FrameworkKey + ".css" };
             }
         }
-
-        /// <summary>
-        /// Gets a processor to assign line numbers to tests.
-        /// </summary>
-        public abstract IReferencedFileProcessor LineNumberProcessor { get; }
 
         /// <summary>
         /// Gets the file name of the test harness to use with the framework.
@@ -58,6 +55,11 @@
         /// Gets a regular expression pattern to match a testable file.
         /// </summary>
         protected abstract Regex FrameworkSignature { get; }
+
+        /// <summary>
+        /// Gets a list of file processors to call within the Process method.
+        /// </summary>
+        protected abstract IEnumerable<IReferencedFileProcessor> FileProcessors { get; }
 
         /// <summary>
         /// Tests whether the given file contents uses the framework.
@@ -109,6 +111,21 @@
             }
 
             return fixtureContent;
+        }
+
+        /// <summary>
+        /// Processes a referenced file according to the framework's needs.
+        /// </summary>
+        /// <param name="referencedFile">A referenced file to process.</param>
+        public void Process(ReferencedFile referencedFile)
+        {
+            if (this.FileProcessors != null)
+            {
+                foreach (var item in this.FileProcessors)
+                {
+                    item.Process(referencedFile);
+                }
+            }
         }
 
         /// <summary>

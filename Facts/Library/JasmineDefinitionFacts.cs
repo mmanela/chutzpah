@@ -2,12 +2,22 @@
 {
     using System.Collections.Generic;
     using Chutzpah.Facts.Properties;
+    using Chutzpah.FileProcessors;
     using Chutzpah.FrameworkDefinitions;
+    using Chutzpah.Models;
+    using Moq;
     using Xunit;
     using Xunit.Extensions;
 
     public class JasmineDefinitionFacts
     {
+        private class JasmineDefinitionCreator : Testable<JasmineDefinition>
+        {
+            public JasmineDefinitionCreator()
+            {
+            }
+        }
+
         public class FileUsesFramework
         {
             public static IEnumerable<object[]> TestSuites
@@ -27,31 +37,35 @@
             [Fact]
             public void ReturnsTrue_WithJasmineSuiteAndDefinitiveDetection()
             {
-                var definition = new JasmineDefinition();
-                Assert.True(definition.FileUsesFramework(Resources.JasmineSuite, false));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, false));
             }
 
             [Fact]
             public void ReturnsTrue_WithJasmineSuiteAndBestGuessDetection()
             {
-                var definition = new JasmineDefinition();
-                Assert.True(definition.FileUsesFramework(Resources.JasmineSuite, true));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, true));
             }
 
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
             {
-                var definition = new JasmineDefinition();
-                Assert.False(definition.FileUsesFramework(suite, false));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false));
             }
 
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
             {
-                var definition = new JasmineDefinition();
-                Assert.False(definition.FileUsesFramework(suite, true));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true));
             }
         }
 
@@ -60,16 +74,48 @@
             [Fact]
             public void ReturnsTrue_GivenJasmineFile()
             {
-                var definition = new JasmineDefinition();
-                Assert.True(definition.ReferenceIsDependency("jasmine.js"));
-                Assert.True(definition.ReferenceIsDependency("jasmine-html.js"));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js"));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine-html.js"));
             }
 
             [Fact]
             public void ReturnsFalse_GivenQUnitFile()
             {
-                var definition = new JasmineDefinition();
-                Assert.False(definition.ReferenceIsDependency("qunit.js"));
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("qunit.js"));
+            }
+        }
+
+        public class Process
+        {
+            [Fact]
+            public void CallsDependency_GivenOneProcessor()
+            {
+                var creator = new JasmineDefinitionCreator();
+                var processor = creator.Mock<IJasmineReferencedFileProcessor>();
+                processor.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+                creator.ClassUnderTest.Process(new ReferencedFile());
+
+                processor.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+            }
+
+            [Fact]
+            public void CallsAllDependencies_GivenMultipleProcessors()
+            {
+                var creator = new JasmineDefinitionCreator();
+                var processor1 = new Mock<IJasmineReferencedFileProcessor>();
+                var processor2 = new Mock<IJasmineReferencedFileProcessor>();
+                processor1.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor2.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+                creator.InjectArray<IJasmineReferencedFileProcessor>(new[] { processor1.Object, processor2.Object });
+
+                creator.ClassUnderTest.Process(new ReferencedFile());
+
+                processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
             }
         }
     }

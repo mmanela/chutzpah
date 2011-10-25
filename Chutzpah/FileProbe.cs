@@ -10,7 +10,6 @@ namespace Chutzpah
     {
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
-        //private const int TestableFileSearchLimit = 100;
 
         public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem)
         {
@@ -61,52 +60,6 @@ namespace Chutzpah
                         yield return path;
                         break;
                     case PathType.Folder:
-                        //var testableFiles = from file in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories)
-                        //                    where testableFileDetector.IsTestableFile(file)
-                        //                    select file;
-                        //testableFiles = fileSystem
-                        //    .GetFiles(path, "*.js", SearchOption.AllDirectories)
-                        //    .Where(x => testableFileDetector.IsTestableFile(x));
-
-                        //foreach (var name in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories))
-                        //{
-                        //    var content = fileSystem.GetText(name);
-                        //    var framework = Framework.Unknown;
-
-                        //    // Attempt difinitive framework test on file
-                        //    foreach (var key in FrameworkManager.Instance.Keys)
-                        //    {
-                        //        if (FrameworkManager.Instance[key].FileUsesFramework(content, false))
-                        //        {
-                        //            framework = key;
-                        //            break;
-                        //        }
-                        //    }
-
-                        //    if (framework == Framework.Unknown)
-                        //    {
-                        //        // Attempt best guess framework test on file
-                        //        foreach (var key in FrameworkManager.Instance.Keys)
-                        //        {
-                        //            if (FrameworkManager.Instance[key].FileUsesFramework(content, true))
-                        //            {
-                        //                framework = key;
-                        //                break;
-                        //            }
-                        //        }
-                        //    }
-
-                        //    if (framework != Framework.Unknown)
-                        //    {
-                        //        var testFile = new TestFile(name, content, framework);
-                        //    }
-                        //}
-
-                        //foreach (var file in testableFiles.Take(TestableFileSearchLimit))
-                        //{
-                        //    yield return file;
-                        //}
-
                         foreach (var item in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories))
                         {
                             yield return item;

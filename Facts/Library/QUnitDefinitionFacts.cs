@@ -2,12 +2,22 @@
 {
     using System.Collections.Generic;
     using Chutzpah.Facts.Properties;
+    using Chutzpah.FileProcessors;
     using Chutzpah.FrameworkDefinitions;
+    using Chutzpah.Models;
+    using Moq;
     using Xunit;
     using Xunit.Extensions;
 
     public class QUnitDefinitionFacts
     {
+        private class QUnitDefinitionCreator : Testable<QUnitDefinition>
+        {
+            public QUnitDefinitionCreator()
+            {
+            }
+        }
+
         public class FileUsesFramework
         {
             public static IEnumerable<object[]> TestSuites
@@ -27,31 +37,31 @@
             [Fact]
             public void ReturnsTrue_GivenQUnitSuiteAndDefinitiveDetection()
             {
-                var definition = new QUnitDefinition();
-                Assert.True(definition.FileUsesFramework(Resources.QUnitSuite, false));
+                var creator = new QUnitDefinitionCreator();
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, false));
             }
 
             [Fact]
             public void ReturnsTrue_GivenQUnitSuiteAndBestGuessDetection()
             {
-                var definition = new QUnitDefinition();
-                Assert.True(definition.FileUsesFramework(Resources.QUnitSuite, true));
+                var creator = new QUnitDefinitionCreator();
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, true));
             }
 
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
             {
-                var definition = new QUnitDefinition();
-                Assert.False(definition.FileUsesFramework(suite, false));
+                var creator = new QUnitDefinitionCreator();
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false));
             }
 
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
             {
-                var definition = new QUnitDefinition();
-                Assert.False(definition.FileUsesFramework(suite, true));
+                var creator = new QUnitDefinitionCreator();
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true));
             }
         }
 
@@ -60,15 +70,46 @@
             [Fact]
             public void ReturnsTrue_GivenQUnitFile()
             {
-                var definition = new QUnitDefinition();
-                Assert.True(definition.ReferenceIsDependency("qunit.js"));
+                var creator = new QUnitDefinitionCreator();
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("qunit.js"));
             }
 
             [Fact]
             public void ReturnsFalse_GivenJasmineFile()
             {
-                var definition = new QUnitDefinition();
-                Assert.False(definition.ReferenceIsDependency("jasmine.js"));
+                var creator = new QUnitDefinitionCreator();
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js"));
+            }
+        }
+
+        public class Process
+        {
+            [Fact]
+            public void CallsDependency_GivenOneProcessor()
+            {
+                var creator = new QUnitDefinitionCreator();
+                var processor = creator.Mock<IQUnitReferencedFileProcessor>();
+                processor.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+
+                creator.ClassUnderTest.Process(new ReferencedFile());
+
+                processor.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+            }
+
+            [Fact]
+            public void CallsAllDependencies_GivenMultipleProcessors()
+            {
+                var creator = new QUnitDefinitionCreator();
+                var processor1 = creator.Mock<IQUnitReferencedFileProcessor>();
+                var processor2 = creator.Mock<IQUnitReferencedFileProcessor>();
+                processor1.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor2.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
+                creator.InjectArray<IQUnitReferencedFileProcessor>(new[] { processor1.Object, processor2.Object });
+
+                creator.ClassUnderTest.Process(new ReferencedFile());
+
+                processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
             }
         }
     }

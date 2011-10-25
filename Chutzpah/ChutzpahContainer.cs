@@ -1,8 +1,9 @@
-﻿using Chutzpah.FrameworkDefinitions;
-using StructureMap;
-
-namespace Chutzpah
+﻿namespace Chutzpah
 {
+    using Chutzpah.FileProcessors;
+    using Chutzpah.FrameworkDefinitions;
+    using StructureMap;
+
     public class ChutzpahContainer
     {
         public static IContainer Current
@@ -21,11 +22,11 @@ namespace Chutzpah
                 {
                     scan.TheCallingAssembly();
                     scan.WithDefaultConventions();
-                    scan.AddAllTypesOf<IReferencedFileProcessor>();
+                    scan.AddAllTypesOf<IQUnitReferencedFileProcessor>();
+                    scan.AddAllTypesOf<IJasmineReferencedFileProcessor>();
                     scan.AddAllTypesOf<IFrameworkDefinition>();
                 });
             });
-
 
             return container;
         }

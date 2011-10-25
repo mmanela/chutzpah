@@ -1,5 +1,6 @@
 ﻿namespace Chutzpah.FrameworkDefinitions
 {
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Chutzpah.FileProcessors;
     using HtmlAgilityPack;
@@ -9,25 +10,14 @@
     /// </summary>
     public class QUnitDefinition : BaseFrameworkDefinition
     {
-        private IReferencedFileProcessor lineNumberProcessor;
+        private IEnumerable<IQUnitReferencedFileProcessor> fileProcessors;
 
         /// <summary>
-        /// Constructs a new QUnitDefinition.
+        /// Initializes a new instance of the QUnitDefinition class.
         /// </summary>
-        public QUnitDefinition()
+        public QUnitDefinition(IEnumerable<IQUnitReferencedFileProcessor> fileProcessors)
         {
-            this.lineNumberProcessor = ChutzpahContainer.Current.GetInstance<QUnitLineNumberProcessor>();
-        }
-
-        /// <summary>
-        /// Gets a processor to assign line numbers to tests.
-        /// </summary>
-        public override IReferencedFileProcessor LineNumberProcessor
-        {
-            get
-            {
-                return this.lineNumberProcessor;
-            }
+            this.fileProcessors = fileProcessors;
         }
 
         /// <summary>
@@ -49,6 +39,17 @@
             get
             {
                 return RegexPatterns.QUnitTestRegex;
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of file processors to call within the Process method.
+        /// </summary>
+        protected override IEnumerable<IReferencedFileProcessor> FileProcessors
+        {
+            get
+            {
+                return this.fileProcessors;
             }
         }
 

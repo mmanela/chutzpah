@@ -1,10 +1,9 @@
 ﻿namespace Chutzpah.FileProcessors
 {
-    using System;
     using Chutzpah.Models;
     using Chutzpah.Wrappers;
 
-    public class JasmineLineNumberProcessor : IReferencedFileProcessor
+    public class JasmineLineNumberProcessor : IJasmineReferencedFileProcessor
     {
         private IFileSystemWrapper fileSystem;
 
@@ -21,7 +20,7 @@
             }
 
             string currentModuleName = string.Empty;
-            var lines = fileSystem.GetLines(referencedFile.StagedPath);
+            var lines = this.fileSystem.GetLines(referencedFile.StagedPath);
             int lineNum = 1;
 
             foreach (var line in lines)
@@ -32,11 +31,11 @@
                 {
                     var moduleName = match.Groups["Module"].Value;
                     var testName = match.Groups["Test"].Value;
-                    if (!String.IsNullOrWhiteSpace(moduleName))
+                    if (!string.IsNullOrWhiteSpace(moduleName))
                     {
                         currentModuleName = moduleName;
                     }
-                    else if (!String.IsNullOrWhiteSpace(testName))
+                    else if (!string.IsNullOrWhiteSpace(testName))
                     {
                         referencedFile.FilePositions.Add(currentModuleName, testName, lineNum, match.Index + 1);
                     }

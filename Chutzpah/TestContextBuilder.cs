@@ -83,7 +83,7 @@ namespace Chutzpah
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
 
-                this.CopyReferencedFiles(referencedFiles, definition.LineNumberProcessor);
+                this.CopyReferencedFiles(referencedFiles, definition);
 
                 foreach (var item in definition.FileDependencies)
                 {
@@ -186,7 +186,7 @@ namespace Chutzpah
             return files;
         }
 
-        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IReferencedFileProcessor processor)
+        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IFrameworkDefinition definition)
         {
             foreach (var referencedFile in referencedFiles)
             {
@@ -194,7 +194,7 @@ namespace Chutzpah
                 {
                     fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
                     fileSystem.SetFileAttributes(referencedFile.StagedPath, FileAttributes.Normal);
-                    processor.Process(referencedFile);
+                    definition.Process(referencedFile);
                 }
             }
         }

@@ -53,9 +53,11 @@
   <ItemGroup>
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="FileProbe.cs" />
+    <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
+    <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\JasmineLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
-    <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
+    <Compile Include="FileProcessors\IQUnitReferencedFileProcessor.cs" />
     <Compile Include="FrameworkDefinitions\BaseFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />

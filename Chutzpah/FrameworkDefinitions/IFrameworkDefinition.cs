@@ -1,6 +1,7 @@
 ﻿namespace Chutzpah.FrameworkDefinitions
 {
     using System.Collections.Generic;
+    using Chutzpah.Models;
 
     /// <summary>
     /// Interface that describes a test framework.
@@ -11,11 +12,6 @@
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
         IEnumerable<string> FileDependencies { get; }
-
-        /// <summary>
-        /// Gets a processor to assign line numbers to tests.
-        /// </summary>
-        IReferencedFileProcessor LineNumberProcessor { get; }
 
         /// <summary>
         /// Gets the file name of the HTML test harness to use with the framework.
@@ -48,5 +44,11 @@
         /// <param name="harnessText">The contents of a test harness.</param>
         /// <returns>The fixture content from a test harness if it exists.</returns>
         string GetFixtureContent(string harnessText);
+
+        /// <summary>
+        /// Processes a referenced file according to the framework's needs.
+        /// </summary>
+        /// <param name="referencedFile">A referenced file to process.</param>
+        void Process(ReferencedFile referencedFile);
     }
 }

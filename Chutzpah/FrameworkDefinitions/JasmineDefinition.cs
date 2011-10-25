@@ -11,28 +11,16 @@
     /// </summary>
     public class JasmineDefinition : BaseFrameworkDefinition
     {
-        private IReferencedFileProcessor lineNumberProcessor;
-
+        private IEnumerable<IJasmineReferencedFileProcessor> fileProcessors;
         private IEnumerable<string> fileDependencies;
 
         /// <summary>
-        /// Constructs a new JasmineDefinition.
+        /// Initializes a new instance of the JasmineDefinition class.
         /// </summary>
-        public JasmineDefinition()
+        public JasmineDefinition(IEnumerable<IJasmineReferencedFileProcessor> fileProcessors)
         {
-            this.lineNumberProcessor = ChutzpahContainer.Current.GetInstance<JasmineLineNumberProcessor>();
+            this.fileProcessors = fileProcessors;
             this.fileDependencies = base.FileDependencies.Concat(new string[] { "jasmine-html.js", "jasmine_favicon.png" });
-        }
-
-        /// <summary>
-        /// Gets a processor to assign line numbers to tests.
-        /// </summary>
-        public override IReferencedFileProcessor LineNumberProcessor
-        {
-            get
-            {
-                return this.lineNumberProcessor;
-            }
         }
 
         /// <summary>
@@ -65,6 +53,17 @@
             get
             {
                 return RegexPatterns.JasmineTestRegex;
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of file processors to call within the Process method.
+        /// </summary>
+        protected override IEnumerable<IReferencedFileProcessor> FileProcessors
+        {
+            get
+            {
+                return this.fileProcessors;
             }
         }
 
