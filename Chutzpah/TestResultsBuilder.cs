@@ -30,6 +30,8 @@ namespace Chutzpah
             string json = ParseJsonResultFromBrowserOutput(browserTestFileResult.BrowserOutput);
 
             var rawResults = jsonSerializer.Deserialize<JsonTestOutput>(json);
+            var testIndex = 0;
+
             foreach (JsonTestCase rawTest in rawResults.Results)
             {
                 var test = new TestResult();
@@ -44,11 +46,12 @@ namespace Chutzpah
 
                 if (referencedFile != null)
                 {
-                    var position = referencedFile.FilePositions.Get(test.ModuleName, test.TestName);
+                    var position = referencedFile.FilePositions[testIndex];
                     test.Line = position.Line;
                     test.Column = position.Column;
                 }
 
+                testIndex++;
                 testResults.Add(test);
             }
 

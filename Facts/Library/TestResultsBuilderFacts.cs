@@ -116,7 +116,7 @@ namespace Chutzpah.Facts
                     Path = "inputTestFile",
                     FilePositions = new FilePositions()
                 };
-                referencedFile.FilePositions.Add("module", "name", 1, 3);
+                referencedFile.FilePositions.Add(1, 3);
                 builder.Mock<IJsonSerializer>()
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
@@ -160,7 +160,7 @@ namespace Chutzpah.Facts
                     Path = "inputTestFile",
                     FilePositions = new FilePositions()
                 };
-                referencedFile.FilePositions.Add("module", "name", 1, 3);
+                referencedFile.FilePositions.Add(1, 3);
                 builder.Mock<IJsonSerializer>()
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput

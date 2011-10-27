@@ -19,25 +19,20 @@
                 return;
             }
 
-            string currentModuleName = string.Empty;
             var lines = this.fileSystem.GetLines(referencedFile.StagedPath);
             int lineNum = 1;
 
             foreach (var line in lines)
             {
-                var match = RegexPatterns.JasmineTestAndModuleRegex.Match(line);
+                var match = RegexPatterns.JasmineTestRegex.Match(line);
 
                 while (match.Success)
                 {
-                    var moduleName = match.Groups["Module"].Value;
                     var testName = match.Groups["Test"].Value;
-                    if (!string.IsNullOrWhiteSpace(moduleName))
+
+                    if (!string.IsNullOrWhiteSpace(testName))
                     {
-                        currentModuleName = moduleName;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(testName))
-                    {
-                        referencedFile.FilePositions.Add(currentModuleName, testName, lineNum, match.Index + 1);
+                        referencedFile.FilePositions.Add(lineNum, match.Index + 1);
                     }
 
                     match = match.NextMatch();

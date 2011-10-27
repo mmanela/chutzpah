@@ -1,32 +1,27 @@
-﻿using System.Collections.Generic;
-using System.Collections;
-namespace Chutzpah.Models
+﻿namespace Chutzpah.Models
 {
+    using System.Collections.Generic;
+
     public class FilePositions
     {
-        private readonly Dictionary<string, FilePosition> mapping;
-        const string TestNameFormat = "{0}::{1}";
+        private readonly List<FilePosition> positions;
 
         public FilePositions()
         {
-            mapping = new Dictionary<string, FilePosition>();
+            this.positions = new List<FilePosition>();
         }
 
-        public FilePosition Get(string moduleName, string testName)
+        public FilePosition this[int index]
         {
-            var key = string.Format(TestNameFormat, moduleName, testName);
-            if (mapping.ContainsKey(key))
+            get
             {
-                return mapping[key];
+                return this.positions[index];
             }
-
-            return new FilePosition();
         }
 
-        public void Add(string moduleName, string testName, int line, int column)
+        public void Add(int line, int column)
         {
-            moduleName = moduleName ?? "";
-            mapping[string.Format(TestNameFormat, moduleName, testName)] = new FilePosition(line, column);
+            this.positions.Add(new FilePosition(line, column));
         }
     }
 }

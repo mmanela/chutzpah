@@ -28,20 +28,15 @@
 
             foreach (var line in lines)
             {
-                var match = RegexPatterns.QUnitTestAndModuleRegex.Match(line);
+                var match = RegexPatterns.QUnitTestRegex.Match(line);
 
                 while (match.Success)
                 {
-                    var moduleName = match.Groups["Module"].Value;
                     var testName = match.Groups["Test"].Value;
 
-                    if (!string.IsNullOrWhiteSpace(moduleName))
+                    if (!string.IsNullOrWhiteSpace(testName))
                     {
-                        currentModuleName = moduleName;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(testName))
-                    {
-                        referencedFile.FilePositions.Add(currentModuleName, testName, lineNum, match.Index + 1);
+                        referencedFile.FilePositions.Add(lineNum, match.Index + 1);
                     }
 
                     match = match.NextMatch();
