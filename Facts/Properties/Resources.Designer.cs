@@ -61,6 +61,29 @@ namespace Chutzpah.Facts.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;
+        ///  &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+        ///&lt;html&gt;
+        ///&lt;head&gt;
+        ///  &lt;title&gt;Jasmine Spec Runner&lt;/title&gt;
+        ///
+        ///  &lt;link rel=&quot;shortcut icon&quot; type=&quot;image/png&quot; href=&quot;jasmine_favicon.png&quot;&gt;
+        ///
+        ///  &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;jasmine.css&quot;&gt;
+        ///  &lt;script type=&quot;text/javascript&quot; src=&quot;jasmine.js&quot;&gt;&lt;/script&gt;
+        ///  &lt;script type=&quot;text/javascript&quot; src=&quot;jasmine-html.js&quot;&gt;&lt;/script&gt;
+        ///
+        ///  &lt;script type=&quot;text/javascript&quot; src=&quot;library.js&quot;&gt;&lt;/script&gt;
+        ///
+        ///  &lt;script type=&quot;tex [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JasmineHarness {
+            get {
+                return ResourceManager.GetString("JasmineHarness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /// &lt;reference path=&quot;jasmine.js&quot; /&gt;
         ///// Example copied from https://github.com/michaelphines/Jasmine-Examples/blob/master/example-3/spec/javascript/exampleSpec.js
         ///
@@ -110,7 +133,6 @@ namespace Chutzpah.Facts.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to /// &lt;reference path=&quot;browser_controlled_runner.js&quot; /&gt;
-        ////// &lt;reference path=&quot;jstestdriver.js&quot; /&gt;
         ///// Example copied from http://code.google.com/p/js-test-driver/source/browse/samples/hello-world/src-test/GreeterTest.js
         ///
         ///GreeterTest = TestCase(&quot;GreeterTest&quot;);
@@ -119,11 +141,41 @@ namespace Chutzpah.Facts.Properties {
         ///    var greeter = new myapp.Greeter();
         ///    assertEquals(&quot;Hello World!&quot;, greeter.greet(&quot;World&quot;));
         ///    jstestdriver.console.log(&quot;JsTestDriver&quot;, greeter.greet(&quot;World&quot;));
-        ///    console.log(greeter.greet( [rest of string was truncated]&quot;;.
+        ///    console.log(greeter.greet(&quot;Browser&quot;, &quot;World&quot;));
+        ///};
+        ///.
         /// </summary>
         internal static string JsTestDriverSuite {
             get {
                 return ResourceManager.GetString("JsTestDriverSuite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
+        ///&lt;html&gt;
+        ///&lt;head&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; href=&quot;qunit.css&quot; type=&quot;text/css&quot;/&gt;
+        ///    &lt;script type=&quot;text/javascript&quot; src=&quot;qunit.js&quot;&gt;&lt;/script&gt;
+        ///
+        ///    &lt;script type=&quot;text/javascript&quot; src=&quot;library.js&quot;&gt;&lt;/script&gt;
+        ///
+        ///    &lt;script type=&quot;text/javascript&quot; src=&quot;library-test.js&quot;&gt;&lt;/script&gt;
+        ///&lt;/head&gt;
+        ///
+        ///&lt;body&gt;
+        /// &lt;h1 id=&quot;qunit-header&quot;&gt;Unit Tests&lt;/h1&gt;
+        /// &lt;h2 id=&quot;qunit-banner&quot;&gt;&lt;/h2&gt;
+        /// &lt;h2 id=&quot;qunit-userAgent&quot;&gt;&lt;/h2&gt;
+        /// &lt;ol id=&quot;qunit-tests&quot;&gt;&lt;/ol&gt;
+        /// &lt;div id=&quot;qunit-fixture&quot;&gt;
+        ///  &lt;ul&gt;
+        ///    &lt;li&gt;Some&lt;/li&gt;
+        ///    &lt;li&gt;Test&lt;/l [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string QUnitHarness {
+            get {
+                return ResourceManager.GetString("QUnitHarness", resourceCulture);
             }
         }
         

@@ -74,7 +74,7 @@
         /// <returns>The parent node of text fixture content.</returns>
         protected override HtmlNode GetFixtureNode(HtmlDocument fixtureDocument)
         {
-            return fixtureDocument.DocumentNode.SelectSingleNode("/body");
+            return fixtureDocument.DocumentNode.SelectSingleNode("/html/body");
         }
     }
 }

@@ -80,6 +80,15 @@
                 var creator = new QUnitDefinitionCreator();
                 Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js"));
             }
+
+            [Fact]
+            public void ReturnsFalse_GivenEmptyOrNullString()
+            {
+                var creator = new QUnitDefinitionCreator();
+
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null));
+            }
         }
 
         public class Process
@@ -110,6 +119,38 @@
 
                 processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
                 processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+            }
+        }
+
+        public class GetFixtureNode
+        {
+            [Fact]
+            public void ReturnsFixtureContent_GivenCustomHarness()
+            {
+                var creator = new QUnitDefinitionCreator();
+                var expected = @"
+  <ul>
+    <li>Some</li>
+    <li>Test</li>
+    <li>Fixture</li>
+    <li><b>Content</b></li>
+  </ul>
+ ";
+
+                var actual = creator.ClassUnderTest.GetFixtureContent(Resources.QUnitHarness);
+
+                Assert.Equal(expected, actual);
+            }
+
+            [Fact]
+            public void ReturnsEmpty_GivenInvalidHarness()
+            {
+                var creator = new QUnitDefinitionCreator();
+                var harness = "I am not a valid test harness";
+
+                var actual = creator.ClassUnderTest.GetFixtureContent(harness);
+
+                Assert.Equal(string.Empty, actual);
             }
         }
     }

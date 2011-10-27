@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Chutzpah.Facts.Mocks;
-using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -45,6 +44,16 @@ namespace Chutzpah.Facts
                 var res = runner.ClassUnderTest.GetTestContext("a.js", new TestOptions { StagingFolder = "staging" });
 
                 Assert.Equal(context, res);
+            }
+
+            [Fact]
+            public void Will_return_null_given_empty_path()
+            {
+                var runner = new TestableTestRunner();
+
+                var result = runner.ClassUnderTest.GetTestContext(string.Empty);
+
+                Assert.Null(result);
             }
         }
 

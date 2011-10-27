@@ -133,4 +133,10 @@
   <data name="YUITestSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\yuitestsuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="JasmineHarness" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\jasmineharness.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="QUnitHarness" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\qunitharness.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>
