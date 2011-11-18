@@ -21,8 +21,6 @@ namespace Chutzpah
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private readonly Regex TestRunnerRegex = new Regex(@"^qunit.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
             this.fileSystem = fileSystem;
@@ -42,7 +40,9 @@ namespace Chutzpah
                 throw new ArgumentNullException("file");
             }
 
-            var fileKind = fileProbe.GetPathType(file);
+            var pathInfo = fileProbe.GetPathInfo(file);
+            var fileKind = pathInfo.Type;
+            var filePath = pathInfo.FullPath;
 
             if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
             {
@@ -50,8 +50,6 @@ namespace Chutzpah
             }
 
             stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
-
-            string filePath = fileProbe.FindFilePath(file);
 
             if (filePath == null)
             {

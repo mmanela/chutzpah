@@ -8,7 +8,9 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
     'use strict';
 
     var page = new WebPage(),
-        logs = [];
+        logs = [],
+        testFile = null,
+        timeOut = null;
 
     function LogEntry(message, line, source) {
         this.message = message;
@@ -62,7 +64,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
             console.log('Unable to access network');
             phantom.exit();
         } else {
-            waitFor(waitCondition, gatherTests);
+            waitFor(waitCondition, gatherTests, timeOut);
         }
     }
 
@@ -71,7 +73,11 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
         phantom.exit();
     }
 
+    testFile = phantom.args[0];
+    timeOut = parseInt(phantom.args[1]);
+    timeOut = timeOut === 'NaN' ? null : timeOut;
+
     page.onConsoleMessage = addToLog;
 
-    page.open(phantom.args[0], pageOpenHandler);
+    page.open(testFile, pageOpenHandler);
 };

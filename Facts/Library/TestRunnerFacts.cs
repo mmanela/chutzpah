@@ -130,6 +130,29 @@ namespace Chutzpah.Facts
                 Assert.Equal("json", fileResult.BrowserOutput);
             }
 
+
+            [Fact]
+            public void Will_pass_timeout_option_to_test_runner()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                BrowserTestFileResult fileResult = null;
+                var testResults = new List<TestResult> { new TestResult() };
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html", TestRunner = "runner" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(@"path\tests.html", null, out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html""" + @" 5000";
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns("json");
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+
+                TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html",new TestOptions{TimeOutMilliseconds = 5000});
+
+                Assert.Equal(1, res.TotalCount);
+                Assert.Equal(context, fileResult.TestContext);
+                Assert.Equal("json", fileResult.BrowserOutput);
+            }
+
             [Fact]
             public void Will_run_test_files_found_from_given_folder_path()
             {

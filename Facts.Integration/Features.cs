@@ -57,6 +57,31 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(6, result.TotalCount);
         }
 
+
+        [Fact]
+        public void Will_execute_nothing_if_test_takes_longer_than_timeout()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js"}, new TestOptions{ TimeOutMilliseconds = 500});
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(0, result.PassedCount);
+            Assert.Equal(0, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_execute_test_if_test_takes_less_than_timeout()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TimeOutMilliseconds = 1500 });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
         [Fact]
         public void Will_get_file_position_for_qunit_test_without_module()
         {

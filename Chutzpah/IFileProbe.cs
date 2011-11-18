@@ -31,10 +31,10 @@ namespace Chutzpah
         IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths);
 
         /// <summary>
-        /// Gets the type of the path.
+        /// Gets the type and full path of the path.
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <returns>The type of name the path points to.</returns>
-        PathType GetPathType(string path);
+        /// <returns>The type and full path the path points to.</returns>
+        PathInfo GetPathInfo(string path);
     }
 }

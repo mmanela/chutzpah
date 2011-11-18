@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Chutzpah
 {
@@ -25,6 +26,8 @@ namespace Chutzpah
         public bool Silent { get; protected set; }
         
         public bool OpenInBrowser { get; protected set; }
+
+        public int? TimeOutMilliseconds { get; protected set; }
 
         public bool TeamCity { get; protected set; }
 
@@ -73,7 +76,7 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     OpenInBrowser = true;
-                }
+                }                
                 else if (optionName == "/silent")
                 {
                     GuardNoOptionValue(option);
@@ -83,7 +86,11 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     TeamCity = true;
-                }
+                }                        
+                else if (optionName == "/timeoutmilliseconds")
+                {
+                    AddTimeoutOption(option.Value);
+                }                
                 else if (optionName == "/file" || optionName == "/path")
                 {
                     AddFileOption(option.Value);
@@ -96,11 +103,25 @@ namespace Chutzpah
             }
         }
 
+        private void AddTimeoutOption(string value)
+        {
+            int timeout;
+            if(string.IsNullOrEmpty(value) || !int.TryParse(value,out timeout) || timeout < 0)
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /timeoutmilliseconds.  Expecting a postivie integer");
+            }
+
+            TimeOutMilliseconds = timeout;
+        }
+
         private void AddFileOption(string file)
         {
-            if (file == null)
+            if (string.IsNullOrEmpty(file))
+            {
                 throw new ArgumentException(
                     "missing argument for /file.  Expecting a file path to a test file (e.g. test.html)");
+            }
 
             Files.Add(file);
         }

@@ -78,7 +78,7 @@ namespace Chutzpah
                     if (testContextBuilder.TryBuildContext(testFile, options.StagingFolder, out testContext))
                     {
                         resultCount++;
-                        bool result = RunTestsFromHtmlFile(headlessBrowserPath, jsTestRunnerPath, testContext, testResults, callback);
+                        bool result = RunTestsFromHtmlFile(headlessBrowserPath, options, testContext, testResults, callback);
 
                         if (options.OpenInBrowser)
                         {
@@ -112,7 +112,7 @@ namespace Chutzpah
         }
 
         private bool RunTestsFromHtmlFile(string headlessBrowserPath,
-                                          string jsTestRunnerPath,
+                                          TestOptions options,
                                           TestContext testContext,
                                           List<TestResult> testResults,
                                           ITestMethodRunnerCallback callback)
@@ -121,8 +121,10 @@ namespace Chutzpah
 
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
-            string args = string.Format("\"{0}\" {1}", runnerPath, fileUrl);
-            string jsonResult = process.RunExecutableAndCaptureOutput(headlessBrowserPath, args);
+
+            string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath);
+
+            string jsonResult = process.RunExecutableAndCaptureOutput(headlessBrowserPath, runnerArgs);
 
             if (DebugEnabled)
                 Console.WriteLine(jsonResult);
@@ -139,6 +141,21 @@ namespace Chutzpah
             if (callback != null && !callback.FileFinished(testContext.InputTestFile, new TestResultsSummary(fileTests))) return false;
 
             return true;
+        }
+
+        private static string BuildRunnerArgs(TestOptions options, string fileUrl, string runnerPath)
+        {
+            string runnerArgs;
+            if (options.TimeOutMilliseconds.HasValue && options.TimeOutMilliseconds > 0)
+            {
+                runnerArgs = string.Format("\"{0}\" {1} {2}", runnerPath, fileUrl, options.TimeOutMilliseconds.Value);
+            }
+            else
+            {
+                runnerArgs = string.Format("\"{0}\" {1}", runnerPath, fileUrl);
+            }
+
+            return runnerArgs;
         }
 
         private static string BuildFileUrl(string absolutePath)

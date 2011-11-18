@@ -51,16 +51,16 @@ namespace Chutzpah
 
             foreach (var path in testPaths)
             {
-                var pathType = GetPathType(path);
+                var pathInfo = GetPathInfo(path);
 
-                switch (pathType)
+                switch (pathInfo.Type)
                 {
                     case PathType.Html:
                     case PathType.JavaScript:
-                        yield return path;
+                        yield return pathInfo.FullPath;
                         break;
                     case PathType.Folder:
-                        foreach (var item in fileSystem.GetFiles(path, "*.js", SearchOption.AllDirectories))
+                        foreach (var item in fileSystem.GetFiles(pathInfo.FullPath, "*.js", SearchOption.AllDirectories))
                         {
                             yield return item;
                         }
@@ -72,28 +72,25 @@ namespace Chutzpah
             }
         }
 
-        public PathType GetPathType(string path)
+        public PathInfo GetPathInfo(string path)
         {
-            if (IsFolder(path)) return PathType.Folder;
-            if (IsHtmlFile(path)) return PathType.Html;
-            if (IsJavaScriptFile(path)) return PathType.JavaScript;
-            return PathType.Other;
+            var fullPath = FindFolderPath(path);
+            if (fullPath != null) return new PathInfo{ FullPath = fullPath, Type = PathType.Folder};
+
+            fullPath = FindFilePath(path);
+            if (IsHtmlFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.Html };
+            if (IsJavaScriptFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.JavaScript };
+            return new PathInfo{ FullPath = fullPath, Type = PathType.Other};
         }
 
-        private bool IsFolder(string path)
-        {
-            path = FindFolderPath(path);
-            return path != null;
-        }
-
-        private bool IsHtmlFile(string fileName)
+        private static bool IsHtmlFile(string fileName)
         {
             string ext = Path.GetExtension(fileName);
             return ext != null &&
                    (ext.Equals(".html", StringComparison.OrdinalIgnoreCase) || ext.Equals(".htm", StringComparison.OrdinalIgnoreCase));
         }
 
-        private bool IsJavaScriptFile(string fileName)
+        private static bool IsJavaScriptFile(string fileName)
         {
             string ext = Path.GetExtension(fileName);
             return ext != null && ext.Equals(".js", StringComparison.OrdinalIgnoreCase);

@@ -21,7 +21,7 @@ namespace Chutzpah.Facts
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new string[] { "qunit.js", "qunit.css" });
                 frameworkMock.Setup(x => x.GetFixtureContent(It.IsAny<string>())).Returns("<div> some <a>fixture</a> content </div>");
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
-                Mock<IFileProbe>().Setup(x => x.GetPathType(It.IsAny<string>())).Returns(PathType.JavaScript);
+                Mock<IFileProbe>().Setup(x => x.GetPathInfo(It.IsAny<string>())).Returns<string>(x => new PathInfo{ FullPath = x, Type = PathType.JavaScript});
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
                 Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns(string.Empty);
                 Mock<IFileSystemWrapper>().Setup(x => x.GetRandomFileName()).Returns("unique");
@@ -102,7 +102,7 @@ namespace Chutzpah.Facts
             public void Will_throw_if_test_file_is_not_a_js_or_html_file()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathType("test.blah")).Returns(PathType.Other);
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo{ Type = PathType.Other});
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.blah"));
 
@@ -113,7 +113,7 @@ namespace Chutzpah.Facts
             public void Will_throw_if_test_file_does_not_exist()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns((string)null);
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.js"));
 
@@ -125,7 +125,9 @@ namespace Chutzpah.Facts
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"C:\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\test.js" });
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
@@ -139,7 +141,9 @@ namespace Chutzpah.Facts
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("testThing.html")).Returns(@"C:\testThing.html");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("testThing.html"))
+                    .Returns(new PathInfo { Type = PathType.Html, FullPath = @"C:\testThing.html" });
 
                 var context = creator.ClassUnderTest.BuildContext("testThing.html");
 
@@ -177,7 +181,9 @@ namespace Chutzpah.Facts
             public void Will_copy_test_file_to_temporary_folder()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns("contents");
 
@@ -204,7 +210,9 @@ namespace Chutzpah.Facts
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileContents);
@@ -228,7 +236,9 @@ namespace Chutzpah.Facts
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                 .Setup(x => x.GetPathInfo("test.js"))
+                 .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileWithQUnitContents);
@@ -249,7 +259,9 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileContents);
@@ -272,8 +284,10 @@ namespace Chutzpah.Facts
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\"); 
+                creator.Mock<IFileProbe>()
+                     .Setup(x => x.GetPathInfo("test.js"))
+                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileContents);
@@ -299,7 +313,9 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileContents);
@@ -332,7 +348,6 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileContents);
@@ -342,7 +357,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
                     .Returns(@"path\common.js");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathType("test.js")).Returns(PathType.JavaScript);
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
@@ -362,7 +377,6 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("testFile.html")).Returns(@"path\testFile.html");
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\testFile.html"))
                     .Returns(TestHTMLFileContents);
@@ -372,7 +386,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
                     .Returns(@"path\common.js");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathType("testFile.html")).Returns(PathType.Html);
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("testFile.html")).Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
 
                 var context = creator.ClassUnderTest.BuildContext("testFile.html");
 
@@ -408,7 +422,9 @@ namespace Chutzpah.Facts
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
                 string TestFileContents = @"/// <reference path=""http://a.com/lib.js"" />";
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestFileContents);
@@ -428,7 +444,6 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("testFile.html")).Returns(@"path\testFile.html");
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\testFile.html"))
                     .Returns(TestHTMLFileContents);
@@ -438,7 +453,9 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
                     .Returns(@"path\common.js");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathType("testFile.html")).Returns(PathType.Html);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("testFile.html"))
+                    .Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
 
                 var context = creator.ClassUnderTest.BuildContext("testFile.html");
 

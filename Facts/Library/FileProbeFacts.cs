@@ -116,7 +116,7 @@ namespace Chutzpah.Facts
             }
         }
 
-        public class GetPathType
+        public class GetPathInfo
         {
             [Fact]
             public void Will_return_folder_type_for_folder()
@@ -124,29 +124,34 @@ namespace Chutzpah.Facts
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(@"C:\someFolder")).Returns(true);
 
-                var type = probe.ClassUnderTest.GetPathType(@"C:\someFolder");
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder");
 
-                Assert.Equal(PathType.Folder, type);
+                Assert.Equal(PathType.Folder, info.Type);
+                Assert.Equal(@"C:\someFolder", info.FullPath);
             }
 
             [Fact]
             public void Will_return_html_type_for_html_file()
             {
                 var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.html")).Returns(true);
 
-                var type = probe.ClassUnderTest.GetPathType(@"C:\someFolder\a.html");
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.html");
 
-                Assert.Equal(PathType.Html, type);
+                Assert.Equal(PathType.Html, info.Type);
+                Assert.Equal(@"C:\someFolder\a.html", info.FullPath);
             }
 
             [Fact]
             public void Will_return_JavaScript_type_for_js_file()
             {
                 var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.js")).Returns(true);
 
-                var type = probe.ClassUnderTest.GetPathType(@"C:\someFolder\a.js");
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.js");
 
-                Assert.Equal(PathType.JavaScript, type);
+                Assert.Equal(PathType.JavaScript, info.Type);
+                Assert.Equal(@"C:\someFolder\a.js", info.FullPath);
             }
 
             [Fact]
@@ -154,13 +159,14 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var type = probe.ClassUnderTest.GetPathType(@"C:\someFolder\a.blah");
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.blah");
 
-                Assert.Equal(PathType.Other, type);
+                Assert.Equal(PathType.Other, info.Type);
+                Assert.Null(info.FullPath);
             }
         }
 
-        public class FindTestableFiles
+        public class FindScriptFiles
         {
             [Fact]
             public void Will_return_empty_list_if_paths_is_null()
@@ -176,6 +182,8 @@ namespace Chutzpah.Facts
             public void Will_return_files_that_are_html_or_js()
             {
                 var probe = new TestableFileProbe();
+
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
                 var paths = new List<string>
                             {
                                 "a.js",
@@ -186,8 +194,8 @@ namespace Chutzpah.Facts
                 var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(2, res.Count());
-                Assert.Contains("a.js", res);
-                Assert.Contains("b.html", res);
+                Assert.Contains(@"someDirName\a.js", res);
+                Assert.Contains(@"someDirName\b.html", res);
             }
 
             [Fact]
