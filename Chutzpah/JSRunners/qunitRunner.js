@@ -94,6 +94,6 @@
     try {
         chutzpah.runner(testsComplete, testsEvaluator);
     } catch (e) {
-        phantom.exit();
+        phantom.exit(2); // Unkown error
     }
-}());
+} ());

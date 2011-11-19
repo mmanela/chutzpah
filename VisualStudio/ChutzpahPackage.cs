@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using Chutzpah.VisualStudio.RunnerCallback;
+using Chutzpah.VisualStudio.Settings;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio;
@@ -35,6 +37,7 @@ namespace Chutzpah.VisualStudio
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
+    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
@@ -50,6 +53,8 @@ namespace Chutzpah.VisualStudio
         IProcessHelper processHelper;
         private readonly object syncLock = new object();
         private bool testingInProgress;
+
+        public ChutzpahSettings Settings { get; private set; }
 
         // Keeps track of last staging folder
         // This will allow the open in browser path to stay the same so
@@ -89,6 +94,8 @@ namespace Chutzpah.VisualStudio
 
             processHelper = new ProcessHelper();
             Logger = new Logger(this);
+            Settings = GetDialogPage(typeof(ChutzpahSettings)) as ChutzpahSettings;
+
             statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
             runnerCallback = new VisualStudioRunnerCallback(dte, statusBar);
 
@@ -261,7 +268,7 @@ namespace Chutzpah.VisualStudio
                             {
                                 try
                                 {
-                                    var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder }, runnerCallback);
+                                    var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder, TimeOutMilliseconds = Settings.TimeoutMilliseconds }, runnerCallback);
                                     if (summary.Tests.Any())
                                     {
                                         stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
@@ -451,5 +458,6 @@ namespace Chutzpah.VisualStudio
             }
             return codeDoc;
         }
+
     }
 }

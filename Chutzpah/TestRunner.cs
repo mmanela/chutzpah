@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -55,14 +56,13 @@ namespace Chutzpah
         public TestResultsSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null)
         {
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
-            string jsTestRunnerPath = fileProbe.FindFilePath(TestRunnerJsName);
 
             if (testPaths == null)
                 throw new ArgumentNullException("testPaths");
             if (headlessBrowserPath == null)
                 throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
-            if (jsTestRunnerPath == null)
-                throw new FileNotFoundException("Unable to find test runner js file: " + TestRunnerJsName);
+            if (fileProbe.FindFilePath(TestRunnerJsName) == null)
+                throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
             if (callback != null) callback.TestSuiteStarted();
 
@@ -124,12 +124,16 @@ namespace Chutzpah
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath);
 
-            string jsonResult = process.RunExecutableAndCaptureOutput(headlessBrowserPath, runnerArgs);
+            var result = process.RunExecutableAndCaptureOutput(headlessBrowserPath, runnerArgs);
 
             if (DebugEnabled)
-                Console.WriteLine(jsonResult);
+                Console.WriteLine(result.StandardOutput);
 
-            IEnumerable<TestResult> fileTests = testResultsBuilder.Build(new BrowserTestFileResult(testContext, jsonResult));
+
+            HandleTestProcessExitCode(result.ExitCode, testContext.InputTestFile);
+
+
+            IEnumerable<TestResult> fileTests = testResultsBuilder.Build(new BrowserTestFileResult(testContext, result.StandardOutput));
             testResults.AddRange(fileTests);
 
             if (callback != null)
@@ -141,6 +145,21 @@ namespace Chutzpah
             if (callback != null && !callback.FileFinished(testContext.InputTestFile, new TestResultsSummary(fileTests))) return false;
 
             return true;
+        }
+
+        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile)
+        {
+            switch ((TestProcessExitCode)exitCode)
+            {
+                case TestProcessExitCode.AllPassed:
+                case TestProcessExitCode.SomeFailed:
+                    return;
+                case TestProcessExitCode.Timeout:
+                    throw new ChutzpahTimeoutException("Timeout occured when running " + inputTestFile);
+                default:
+                    throw new ChutzpahException("Unkown error occured when running " + inputTestFile);
+
+            }
         }
 
         private static string BuildRunnerArgs(TestOptions options, string fileUrl, string runnerPath)

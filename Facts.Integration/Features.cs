@@ -57,7 +57,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(6, result.TotalCount);
         }
 
-
         [Fact]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {

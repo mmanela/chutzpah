@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="Exceptions\ChutzpahException.cs" />
+    <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
     <Compile Include="FileProbe.cs" />
     <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
@@ -65,8 +67,10 @@
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\PathInfo.cs" />
+    <Compile Include="Models\ProcessResult.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
     <Compile Include="Models\PathType.cs" />
+    <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />

@@ -29,7 +29,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
                 condition = testFx();
             } else {
                 if (!condition) {
-                    phantom.exit(1);
+                    phantom.exit(3); // Timeout
                 } else {
                     onReady();
                     clearInterval(interval);
@@ -56,7 +56,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
                     console.log('#_#End#_#');
                     phantom.exit((parseInt(testSummary.failedCount, 10) > 0) ? 1 : 0);
                 } else {
-                    phantom.exit();
+                    phantom.exit(2); // Unkown error
                 }
             };
 

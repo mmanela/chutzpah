@@ -120,6 +120,9 @@
     <Compile Include="ILogger.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="RunnerCallback\VisualStudioRunnerCallback.cs" />
+    <Compile Include="Settings\ChutzpahSettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="TestFileType.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>

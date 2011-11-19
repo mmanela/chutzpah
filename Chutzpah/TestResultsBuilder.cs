@@ -22,7 +22,8 @@ namespace Chutzpah
         public IEnumerable<TestResult> Build(BrowserTestFileResult browserTestFileResult)
         {
             if (browserTestFileResult == null) throw new ArgumentNullException("browserTestFileResult");
-            if (string.IsNullOrWhiteSpace(browserTestFileResult.BrowserOutput)) throw new ArgumentNullException("browserTestFileResult.BrowserOutput");
+            if (string.IsNullOrWhiteSpace(browserTestFileResult.BrowserOutput)) 
+                throw new ArgumentNullException("browserTestFileResult.BrowserOutput");
 
             var referencedFile = browserTestFileResult.TestContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testResults = new List<TestResult>();
