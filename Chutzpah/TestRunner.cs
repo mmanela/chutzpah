@@ -157,7 +157,7 @@ namespace Chutzpah
                 case TestProcessExitCode.Timeout:
                     throw new ChutzpahTimeoutException("Timeout occured when running " + inputTestFile);
                 default:
-                    throw new ChutzpahException("Unkown error occured when running " + inputTestFile);
+                    throw new ChutzpahException("Unknown error occured when running " + inputTestFile);
 
             }
         }

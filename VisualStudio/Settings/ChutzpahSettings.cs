@@ -30,7 +30,7 @@ namespace Chutzpah.VisualStudio.Settings
         [Browsable(true)]
         [Category("General")]
         [DisplayName("Test file timeout (ms)")]
-        [Description("How long to wait for a given test file to finsih before timing out. (Defaults to 3000 ms)")]
+        [Description("How long to wait for a given test file to finish before timing out? (Defaults to 3000 ms)")]
         public int? TimeoutMilliseconds { get; set; }
 
 
