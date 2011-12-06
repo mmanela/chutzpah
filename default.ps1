@@ -4,7 +4,7 @@ properties {
   $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
-  $version = "1.3.0." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
+  $version = "1.3.1." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . vsvars2010.ps1 

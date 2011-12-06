@@ -4,9 +4,9 @@
 
     public static class RegexPatterns
     {
-        public static Regex QUnitTestAndModuleRegex = new Regex(@"(\bmodule[\t ]*\([\t ]*[""'](?<Module>.*)[""'])|(\btest[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
+        public static Regex QUnitTestAndModuleRegex = new Regex(@"(\bmodule[\t ]*\([\t ]*[""'](?<Module>.*)[""'])|(\b(test|asyncTest)[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
 
-        public static Regex QUnitTestRegex = new Regex(@"((?<!\.)\btest[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
+        public static Regex QUnitTestRegex = new Regex(@"((?<!\.)\b(test|asyncTest)[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
 
         public static Regex JasmineTestAndModuleRegex = new Regex(@"(\bdescribe\s*\(\s*[""'](?<Module>.*)[""'])|(\bit\s*\(\s*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
 

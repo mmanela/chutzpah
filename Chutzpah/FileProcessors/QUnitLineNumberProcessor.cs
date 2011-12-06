@@ -1,14 +1,14 @@
-﻿namespace Chutzpah.FileProcessors
-{
-    using Chutzpah.Models;
-    using Chutzpah.Wrappers;
+﻿using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
+namespace Chutzpah.FileProcessors
+{
     /// <summary>
     /// Reads a QUnit test file and determines the line number of each test
     /// </summary>
     public class QUnitLineNumberProcessor : IQUnitReferencedFileProcessor
     {
-        private IFileSystemWrapper fileSystem;
+        private readonly IFileSystemWrapper fileSystem;
 
         public QUnitLineNumberProcessor(IFileSystemWrapper fileSystem)
         {
@@ -22,8 +22,7 @@
                 return;
             }
 
-            string currentModuleName = string.Empty;
-            var lines = this.fileSystem.GetLines(referencedFile.StagedPath);
+            var lines = fileSystem.GetLines(referencedFile.StagedPath);
             int lineNum = 1;
 
             foreach (var line in lines)

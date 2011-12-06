@@ -57,6 +57,19 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(6, result.TotalCount);
         }
 
+
+        [Fact]
+        public void Will_execute_async_test()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(new List<string> { @"JS\Test\asyncTest.js" });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(2, result.PassedCount);
+            Assert.Equal(2, result.TotalCount);
+        }
+
         [Fact]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {

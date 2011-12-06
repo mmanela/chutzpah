@@ -14,6 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine</tags>
         <releaseNotes>
+          * Fixed issue with QUnit asyncTest
           * Added support for the Jasmine testing framework
           * Added option to set test file timeout
           * Fixed bug where text fixture content wasn't copied

@@ -35,7 +35,7 @@ namespace Chutzpah.Facts
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, StagedPath = "path" };
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
                 {
-                    "//js file", "test (\"test1\", function(){}); ", "module ( \"module1\");", "  test('test2', function(){});"
+                    "//js file", "test (\"test1\", function(){}); ", "module ( \"module1\");", "  asyncTest('test2', function(){});"
                 });
 
                 processor.ClassUnderTest.Process(file);
