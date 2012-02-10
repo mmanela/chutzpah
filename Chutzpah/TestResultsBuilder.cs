@@ -45,7 +45,7 @@ namespace Chutzpah
                 test.Message = htmlUtility.DecodeJavaScript(rawTest.Message);
                 test.Passed = rawTest.Passed;
 
-                if (referencedFile != null)
+                if (referencedFile != null && referencedFile.FilePositions.Contains(testIndex))
                 {
                     var position = referencedFile.FilePositions[testIndex];
                     test.Line = position.Line;

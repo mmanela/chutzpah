@@ -11,3 +11,4 @@ syntax: glob
 *.cache
 *.Cache
 *.StyleCop
+Chutzpah.sln.DotSettings.user

@@ -190,6 +190,59 @@ namespace Chutzpah.Facts
                 Assert.Equal(0, test.Line);
                 Assert.Equal(0, test.Column);
             }
+
+            [Fact]
+            public void Will_set_test_index_is_out_of_range()
+            {
+                var builder = new TestableTestResultsBuilder();
+                builder.Mock<IHtmlUtility>()
+                    .Setup(x => x.DecodeJavaScript(It.IsAny<string>()))
+                    .Returns<string>(x => x);
+                var referencedFile = new ReferencedFile
+                {
+                    IsFileUnderTest = true,
+                    Path = "inputTestFile",
+                    FilePositions = new FilePositions()
+                };
+                referencedFile.FilePositions.Add(1, 3);
+                builder.Mock<IJsonSerializer>()
+                    .Setup(x => x.Deserialize<JsonTestOutput>("json"))
+                    .Returns(new JsonTestOutput
+                    {
+                        Results = new[]
+                                                   {
+                                                       new JsonTestCase
+                                                           {
+                                                               Passed = false,
+                                                               Name = "name",
+                                                               Module = "module",
+                                                               Expected = "10",
+                                                               Actual = "4",
+                                                               Message = "message"
+                                                           }
+                                                           ,new JsonTestCase
+                                                           {
+                                                               Passed = false,
+                                                               Name = "name",
+                                                               Module = "module",
+                                                               Expected = "10",
+                                                               Actual = "4",
+                                                               Message = "message"
+                                                           }
+                                                   }
+                    });
+
+                var tests = builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext
+                {
+                    TestHarnessPath = "htmlTestFile",
+                    InputTestFile = "inputTestFile",
+                    ReferencedJavaScriptFiles = new[] { referencedFile }
+                }, "json"));
+
+                var test = tests.ElementAt(1);
+                Assert.Equal(0, test.Line);
+                Assert.Equal(0, test.Column);
+            }
         }
     }
 }

@@ -19,6 +19,11 @@
             }
         }
 
+        public bool Contains(int index)
+        {
+            return index >= 0 && index < positions.Count;
+        }
+
         public void Add(int line, int column)
         {
             this.positions.Add(new FilePosition(line, column));
