@@ -46,6 +46,18 @@ task Run-IntegrationTests {
     exec { & $xUnit "Facts.Integration\bin\$configuration\Facts.Integration.Chutzpah.dll" }
 }
 
+task Run-Phantom {
+  $type = $arg1;
+  if(-not $type){
+    $type = "qunit";
+  }
+  $phantom = "3rdParty\Phantom\phantomjs.exe";
+  $testFilePath = Resolve-Path "Facts.Integration/JS/Test/basic-$($type).html";
+  $testFilePath = $testFilePath.Path.Replace("\","/");
+  
+  exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner.js" "file:///$testFilePath" }
+}
+
 
 task Package-NuGet {
     $nugetTools = "$nugetDir\tools"

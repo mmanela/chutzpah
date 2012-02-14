@@ -1,4 +1,4 @@
-﻿/*globals phantom, WebPage, console*/
+﻿/*globals phantom, require, console*/
 var chutzpah = {};
 
 chutzpah.runner = function (testsComplete, testsEvaluator) {
@@ -7,7 +7,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
     /// <param name="testsEvaluator" type="Function">Function that returns a chutzpah.TestOutput containing the results of the test suite.</param>
     'use strict';
 
-    var page = new WebPage(),
+    var page = require('webpage').create(),
         logs = [],
         testFile = null,
         timeOut = null;
