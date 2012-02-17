@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Chutzpah.Exceptions;
 using Chutzpah.Facts.Mocks;
 using Chutzpah.Models;
@@ -14,7 +15,7 @@ namespace Chutzpah.Facts
     {
         private class TestableTestRunner : Testable<TestRunner>
         {
-            public static string DefaultPhantomArgs = "\"runner.js\"" + @" ""file:///D:/harnessPath.html"" execution";
+            public static string ExecutionPhantomArgs = "\"runner.js\"" + @" ""file:///D:/harnessPath.html"" execution";
             public TestableTestRunner()
             {
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns("");
@@ -56,6 +57,64 @@ namespace Chutzpah.Facts
                 var result = runner.ClassUnderTest.GetTestContext(string.Empty);
 
                 Assert.Null(result);
+            }
+        }
+
+        public class DiscoverTests
+        {
+            [Fact]
+            public void Will_throw_if_test_files_collection_is_null()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                var ex = Record.Exception(() => runner.ClassUnderTest.DiscoverTests((IEnumerable<string>)null)) as ArgumentNullException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_headless_browser_does_not_exist()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns((string)null);
+
+                var ex = Record.Exception(() => runner.ClassUnderTest.DiscoverTests("someFile")) as FileNotFoundException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_test_runner_js_does_not_exist()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns((string)null);
+
+                var ex = Record.Exception(() => runner.ClassUnderTest.DiscoverTests("someFile")) as FileNotFoundException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_run_test_file_and_return_test_results_model()
+            {
+                TestableTestRunner runner = new TestableTestRunner();
+                BrowserTestFileResult fileResult = null;
+                var testResults = new List<TestCase> { new TestCase() };
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html", TestRunner = "runner" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(@"path\tests.html",null, out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" discovery";
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns(new ProcessResult(0, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Discovery))
+                    .Callback<BrowserTestFileResult, TestRunnerMode>((x, y) => fileResult = x)
+                    .Returns(testResults);
+
+                var res = runner.ClassUnderTest.DiscoverTests(@"path\tests.html");
+
+                Assert.Equal(1, res.Count());
+                Assert.Equal(context, fileResult.TestContext);
+                Assert.Equal("json", fileResult.BrowserOutput);
             }
         }
 
@@ -103,7 +162,6 @@ namespace Chutzpah.Facts
                     .Setup(x => x.TryBuildContext(@"path\tests.html", "staging", out context))
                     .Returns(true)
                     .Verifiable();
-                string args = TestRunner.TestRunnerJsName + @" file:///D:/harnessPath.html";
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { StagingFolder = "staging" }, testCallback.Object);
 
@@ -123,7 +181,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution";
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Callback<BrowserTestFileResult, TestRunnerMode>((x,y) => fileResult = x).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
 
@@ -131,7 +189,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(context, fileResult.TestContext);
                 Assert.Equal("json", fileResult.BrowserOutput);
             }
-
 
             [Fact]
             public void Will_pass_timeout_option_to_test_runner()
@@ -146,7 +203,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution" + @" 5000";
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Callback<BrowserTestFileResult, TestRunnerMode>((x, y) => fileResult = x).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html",new TestOptions{TimeOutMilliseconds = 5000});
 
@@ -168,7 +225,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution";
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", args)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Callback<BrowserTestFileResult, TestRunnerMode>((x, y) => fileResult = x).Returns(testResults);
                 runner.Mock<IFileProbe>()
                     .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }))
                     .Returns(new List<string> { @"path\tests.html" });
@@ -194,8 +251,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(x => fileResult = x).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput("browserPath", TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult(0, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Callback<BrowserTestFileResult, TestRunnerMode>((x, y) => fileResult = x).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { OpenInBrowser = true });
 
@@ -220,7 +277,7 @@ namespace Chutzpah.Facts
                 string args2 = "\"jsPath2\"" + @" ""file:///D:/harnessPath2.htm"" execution";
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args1)).Returns(new ProcessResult(0, "json1"));
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args2)).Returns(new ProcessResult(0, "json2"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Callback<BrowserTestFileResult>(fileResults.Add).Returns(testResults);
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Callback<BrowserTestFileResult, TestRunnerMode>((x,y) => fileResults.Add(x)).Returns(testResults);
                 runner.Mock<IFileProbe>()
                     .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }))
                     .Returns(new List<string> { @"path\tests1.html", @"path\tests2.htm" });
@@ -261,7 +318,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 string args = "jsPath" + @" file:///D:/harnessPath.html";
                 runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(It.IsAny<string>(), args)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
 
@@ -296,8 +353,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult(0, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html", @"path\tests.html" }, testCallback.Object);
 
@@ -318,8 +375,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
 
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult(0, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html", @"path\tests.html" }, testCallback.Object);
 
@@ -342,8 +399,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult(0, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult(0, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests1.html", @"path\tests2.html" }, testCallback.Object);
 
@@ -364,8 +421,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult((int)TestProcessExitCode.Timeout, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult((int)TestProcessExitCode.Timeout, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html"}, testCallback.Object);
 
@@ -386,8 +443,8 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
 
-                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.DefaultPhantomArgs)).Returns(new ProcessResult((int)TestProcessExitCode.Unknown, "json"));
-                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>())).Returns(testResults);
+                runner.Mock<IProcessHelper>().Setup(x => x.RunExecutableAndCaptureOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs)).Returns(new ProcessResult((int)TestProcessExitCode.Unknown, "json"));
+                runner.Mock<ITestResultsBuilder>().Setup(x => x.Build(It.IsAny<BrowserTestFileResult>(), TestRunnerMode.Execution)).Returns(testResults);
 
                 TestResultsSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
 

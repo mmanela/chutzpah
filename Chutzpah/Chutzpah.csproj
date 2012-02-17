@@ -70,7 +70,8 @@
     <Compile Include="Models\ProcessResult.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
     <Compile Include="Models\PathType.cs" />
-    <Compile Include="Models\TestMode.cs" />
+    <Compile Include="Models\TestCase.cs" />
+    <Compile Include="Models\TestRunnerMode.cs" />
     <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="TestContextBuilder.cs" />

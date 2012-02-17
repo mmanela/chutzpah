@@ -19,45 +19,61 @@ namespace Chutzpah
             this.htmlUtility = htmlUtility;
         }
 
-        public IEnumerable<TestResult> Build(BrowserTestFileResult browserTestFileResult)
+
+        public IEnumerable<TestCase> Build(BrowserTestFileResult browserTestFileResult, TestRunnerMode testRunnerMode)
         {
             if (browserTestFileResult == null) throw new ArgumentNullException("browserTestFileResult");
-            if (string.IsNullOrWhiteSpace(browserTestFileResult.BrowserOutput)) 
+            if (string.IsNullOrWhiteSpace(browserTestFileResult.BrowserOutput))
                 throw new ArgumentNullException("browserTestFileResult.BrowserOutput");
 
             var referencedFile = browserTestFileResult.TestContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
-            var testResults = new List<TestResult>();
+            var testResults = new List<TestCase>();
 
             string json = ParseJsonResultFromBrowserOutput(browserTestFileResult.BrowserOutput);
 
             var rawResults = jsonSerializer.Deserialize<JsonTestOutput>(json);
             var testIndex = 0;
 
-            foreach (JsonTestCase rawTest in rawResults.Results)
+            foreach (JsonTestCase rawTest in rawResults.TestCases)
             {
-                var test = new TestResult();
-                test.InputTestFile = browserTestFileResult.TestContext.InputTestFile;
-                test.HtmlTestFile = browserTestFileResult.TestContext.TestHarnessPath;
-                test.ModuleName = htmlUtility.DecodeJavaScript(rawTest.Module);
-                test.TestName = htmlUtility.DecodeJavaScript(rawTest.Name);
-                test.Actual = htmlUtility.DecodeJavaScript(rawTest.Actual);
-                test.Expected = htmlUtility.DecodeJavaScript(rawTest.Expected);
-                test.Message = htmlUtility.DecodeJavaScript(rawTest.Message);
-                test.Passed = rawTest.Passed;
+                var result =   testRunnerMode == TestRunnerMode.Execution
+                    ? BuildTestResult(browserTestFileResult, rawTest)
+                    : BuildTestCase<TestCase>(browserTestFileResult, rawTest);
+
 
                 if (referencedFile != null && referencedFile.FilePositions.Contains(testIndex))
                 {
                     var position = referencedFile.FilePositions[testIndex];
-                    test.Line = position.Line;
-                    test.Column = position.Column;
+                    result.Line = position.Line;
+                    result.Column = position.Column;
                 }
 
                 testIndex++;
-                testResults.Add(test);
+                testResults.Add(result);
             }
 
 
             return testResults;
+        }
+
+        private TestResult BuildTestResult(BrowserTestFileResult browserTestFileResult, JsonTestCase rawTest)
+        {
+            var test = BuildTestCase<TestResult>(browserTestFileResult, rawTest);
+            test.Actual = htmlUtility.DecodeJavaScript(rawTest.Actual);
+            test.Expected = htmlUtility.DecodeJavaScript(rawTest.Expected);
+            test.Message = htmlUtility.DecodeJavaScript(rawTest.Message);
+            test.Passed = rawTest.Passed;
+            return test;
+        }
+
+        private T BuildTestCase<T>(BrowserTestFileResult browserTestFileResult, JsonTestCase rawTest) where T : TestCase, new()
+        {
+            var test = new T();
+            test.InputTestFile = browserTestFileResult.TestContext.InputTestFile;
+            test.HtmlTestFile = browserTestFileResult.TestContext.TestHarnessPath;
+            test.ModuleName = htmlUtility.DecodeJavaScript(rawTest.Module);
+            test.TestName = htmlUtility.DecodeJavaScript(rawTest.Name);
+            return test;
         }
 
         private static string ParseJsonResultFromBrowserOutput(string browserResult)

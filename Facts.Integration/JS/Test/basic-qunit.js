@@ -17,13 +17,13 @@
   module("mathLib");
 
   test("will add 5 to number", function () {
-      var res = mathLib.add5(10)
+      var res = mathLib.add5(10);
 
       equals(res, 15, "should add 5");
   });
 
   test("will multiply 5 to number", function () {
-      var res = mathLib.mult5(10)
+      var res = mathLib.mult5(10);
 
       equals(res, 55, "should multiply by 5");
   });

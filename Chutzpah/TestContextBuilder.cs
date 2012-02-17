@@ -30,7 +30,7 @@ namespace Chutzpah
 
         public TestContext BuildContext(string file)
         {
-            return this.BuildContext(file, null);
+            return BuildContext(file, null);
         }
 
         public TestContext BuildContext(string file, string stagingFolder)
@@ -61,7 +61,7 @@ namespace Chutzpah
 
             IFrameworkDefinition definition;
 
-            if (this.TryDetectFramework(testFileText, out definition))
+            if (TryDetectFramework(testFileText, out definition))
             {
                 if (!fileSystem.FolderExists(stagingFolder))
                 {
@@ -81,12 +81,12 @@ namespace Chutzpah
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
 
-                this.CopyReferencedFiles(referencedFiles, definition);
+                CopyReferencedFiles(referencedFiles, definition);
 
                 foreach (var item in definition.FileDependencies)
                 {
                     var itemPath = Path.Combine(stagingFolder, item);
-                    this.CreateIfDoesNotExist(itemPath, "Chutzpah.TestFiles." + item);
+                    CreateIfDoesNotExist(itemPath, "Chutzpah.TestFiles." + item);
                 }
 
                 var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
@@ -105,22 +105,22 @@ namespace Chutzpah
 
         public bool TryBuildContext(string file, out TestContext context)
         {
-            return this.TryBuildContext(file, null, out context);
+            return TryBuildContext(file, null, out context);
         }
 
         public bool TryBuildContext(string file, string stagingFolder, out TestContext context)
         {
-            context = this.BuildContext(file, stagingFolder);
+            context = BuildContext(file, stagingFolder);
             return context != null;
         }
 
         private bool TryDetectFramework(string content, out IFrameworkDefinition definition)
         {
-            definition = this.frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false));
+            definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false));
 
             if (definition == null)
             {
-                definition = this.frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true));
+                definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true));
             }
 
             return definition != null;

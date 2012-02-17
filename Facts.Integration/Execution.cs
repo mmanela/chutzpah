@@ -6,7 +6,7 @@ using Xunit.Extensions;
 
 namespace Chutzpah.Facts.Integration
 {
-    public class Features
+    public class Execution
     {
         public static IEnumerable<object[]> TestScripts
         {

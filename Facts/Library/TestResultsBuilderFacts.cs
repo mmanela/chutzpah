@@ -24,7 +24,7 @@ namespace Chutzpah.Facts
             {
                 var builder = new TestableTestResultsBuilder();
 
-                var model = Record.Exception(() => builder.ClassUnderTest.Build(null)) as ArgumentNullException;
+                var model = Record.Exception(() => builder.ClassUnderTest.Build(null, TestRunnerMode.Execution)) as ArgumentNullException;
 
                 Assert.NotNull(model);
             }
@@ -35,7 +35,7 @@ namespace Chutzpah.Facts
                 var builder = new TestableTestResultsBuilder();
 
                 var model =
-                    Record.Exception(() => builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), null))) as
+                    Record.Exception(() => builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), null), TestRunnerMode.Execution)) as
                     ArgumentNullException;
 
                 Assert.NotNull(model);
@@ -50,13 +50,52 @@ namespace Chutzpah.Facts
                             #_#End#_#";
                 builder.Mock<IJsonSerializer>().Setup(x => x.Deserialize<JsonTestOutput>("json")).Returns(new JsonTestOutput()).Verifiable();
 
-                builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), json));
+                builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext(), json), TestRunnerMode.Execution);
 
                 builder.Mock<IJsonSerializer>().Verify();
             }
 
             [Fact]
-            public void Will_map_deserialized_json_to_test_result_model()
+            public void Will_map_deserialized_json_to_test_result_model_when_TestRunner_mode_is_discovery()
+            {
+                var builder = new TestableTestResultsBuilder();
+                builder.Mock<IHtmlUtility>()
+                    .Setup(x => x.DecodeJavaScript(It.IsAny<string>()))
+                    .Returns<string>(x => "Decoded " + x);
+                builder.Mock<IJsonSerializer>()
+                    .Setup(x => x.Deserialize<JsonTestOutput>("json"))
+                    .Returns(new JsonTestOutput
+                    {
+                        TestCases = new[]
+                                                   {
+                                                       new JsonTestCase
+                                                           {
+                                                               Name = "name1"
+                                                           },
+                                                       new JsonTestCase
+                                                           {
+                                                               Name = "name2",
+                                                               Module = "module2"
+                                                           }
+                                                   }
+                    });
+
+                var tests = builder.ClassUnderTest
+                            .Build(new BrowserTestFileResult(new TestContext { TestHarnessPath = "htmlTestFile", InputTestFile = "inputTestFile" }, "json"), TestRunnerMode.Discovery);
+
+                Assert.Equal(2, tests.Count());
+                Assert.Equal("Decoded name1", tests.ElementAt(0).TestName);
+                Assert.Equal("htmlTestFile", tests.ElementAt(0).HtmlTestFile);
+                Assert.Equal("inputTestFile", tests.ElementAt(0).InputTestFile);
+
+                Assert.Equal("Decoded name2", tests.ElementAt(1).TestName);
+                Assert.Equal("Decoded module2", tests.ElementAt(1).ModuleName);
+                Assert.Equal("htmlTestFile", tests.ElementAt(1).HtmlTestFile);
+                Assert.Equal("inputTestFile", tests.ElementAt(1).InputTestFile);
+            }
+
+            [Fact]
+            public void Will_map_deserialized_json_to_test_result_model_when_TestRunner_mode_is_execution()
             {
                 var builder = new TestableTestResultsBuilder();
                 builder.Mock<IHtmlUtility>()
@@ -66,7 +105,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                                  {
-                                     Results = new[]
+                                     TestCases = new[]
                                                    {
                                                        new JsonTestCase
                                                            {
@@ -85,7 +124,9 @@ namespace Chutzpah.Facts
                                                    }
                                  });
 
-                var tests = builder.ClassUnderTest.Build(new BrowserTestFileResult(new TestContext { TestHarnessPath = "htmlTestFile", InputTestFile = "inputTestFile" }, "json"));
+                var tests = builder.ClassUnderTest
+                            .Build(new BrowserTestFileResult(new TestContext { TestHarnessPath = "htmlTestFile", InputTestFile = "inputTestFile" }, "json"), TestRunnerMode.Execution)
+                            .Cast<TestResult>();
 
                 Assert.Equal(2, tests.Count());
                 Assert.True(tests.ElementAt(0).Passed);
@@ -121,7 +162,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                                  {
-                                     Results = new[]
+                                     TestCases = new[]
                                                    {
                                                        new JsonTestCase
                                                            {
@@ -140,7 +181,7 @@ namespace Chutzpah.Facts
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
                     ReferencedJavaScriptFiles = new[] { referencedFile }
-                }, "json"));
+                }, "json"), TestRunnerMode.Execution);
 
                 var test = tests.ElementAt(0);
                 Assert.Equal(1, test.Line);
@@ -165,7 +206,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                     {
-                        Results = new[]
+                        TestCases = new[]
                                                    {
                                                        new JsonTestCase
                                                            {
@@ -184,7 +225,7 @@ namespace Chutzpah.Facts
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
                     ReferencedJavaScriptFiles = new[] { referencedFile }
-                }, "json"));
+                }, "json"), TestRunnerMode.Execution);
 
                 var test = tests.ElementAt(0);
                 Assert.Equal(0, test.Line);
@@ -209,7 +250,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Deserialize<JsonTestOutput>("json"))
                     .Returns(new JsonTestOutput
                     {
-                        Results = new[]
+                        TestCases = new[]
                                                    {
                                                        new JsonTestCase
                                                            {
@@ -237,7 +278,7 @@ namespace Chutzpah.Facts
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
                     ReferencedJavaScriptFiles = new[] { referencedFile }
-                }, "json"));
+                }, "json"), TestRunnerMode.Execution);
 
                 var test = tests.ElementAt(1);
                 Assert.Equal(0, test.Line);

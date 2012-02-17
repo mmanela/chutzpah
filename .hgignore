@@ -13,3 +13,4 @@ syntax: glob
 *.StyleCop
 Chutzpah.sln.DotSettings.user
 */TestResults/*
+*.user

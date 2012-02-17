@@ -36,7 +36,7 @@
             }
 
             testResults = {
-                results: [],
+                testCases: [],
                 logs: [],
                 errors: [],
                 failedCount: 0
@@ -63,7 +63,7 @@
                         result.message = messageNode.innerText;
                     }
 
-                    testResults.results.push(result);
+                    testResults.testCases.push(result);
                 }
             } catch (ex) {
                 testResults.errors.push(JSON.stringify(ex, null, 4));

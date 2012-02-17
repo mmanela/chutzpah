@@ -5,6 +5,6 @@ namespace Chutzpah
 {
     public interface ITestResultsBuilder
     {
-        IEnumerable<TestResult> Build(BrowserTestFileResult browserTestFileResult);
+        IEnumerable<TestCase> Build(BrowserTestFileResult browserTestFileResult, TestRunnerMode testRunnerMode);
     }
 }
