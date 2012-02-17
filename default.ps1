@@ -31,11 +31,11 @@ task Run-Chutzpah -depends  Build-Solution {
 }
 
 task Clean-Solution {
-    exec { msbuild Chutzpah.sln /t:Clean /v:quiet }
+    exec { msbuild Chutzpah.VS2010.sln /t:Clean /v:quiet }
 }
 
 task Build-Solution {
-    exec { msbuild Chutzpah.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+    exec { msbuild Chutzpah.VS2010.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Run-UnitTests {
