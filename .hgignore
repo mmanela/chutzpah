@@ -12,3 +12,4 @@ syntax: glob
 *.Cache
 *.StyleCop
 Chutzpah.sln.DotSettings.user
+*/TestResults/*
