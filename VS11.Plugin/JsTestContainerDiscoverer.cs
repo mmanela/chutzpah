@@ -27,7 +27,7 @@ namespace VS11.Plugin
 				__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
 			return loadedProjects.SelectMany(proj => VsSolutionHelper.GetProjectItems(proj))
-				.Where(item => Path.GetExtension(item) == ".js")
+                .Where(item => ".js".Equals(Path.GetExtension(item), StringComparison.OrdinalIgnoreCase))
 				.Select(item => new JsTestContainer(item, Constants.ExecutorUri));
 		}
 	}

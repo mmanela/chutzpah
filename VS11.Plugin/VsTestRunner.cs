@@ -15,32 +15,6 @@ namespace VS11.Plugin
 	[DefaultExecutorUri(Constants.ExecutorUriString)]
 	public class VsTestRunner : ITestExecutor, ITestDiscoverer
 	{
-		class DiscoveryCallback : ITestMethodRunnerCallback
-		{
-			private IMessageLogger logger;
-			private ITestCaseDiscoverySink discoverySink;
-
-			public DiscoveryCallback(ITestCaseDiscoverySink discoverySink, IMessageLogger logger)
-			{
-				this.discoverySink = discoverySink;
-				this.logger = logger;
-			}
-
-			// We're basically gonna ignore these for discovery purposes
-			public void TestSuiteStarted() { }
-			public void TestSuiteFinished(Chutzpah.Models.TestResultsSummary testResultsSummary) { }
-			public void ExceptionThrown(Exception exception, string fileName) { }
-			public bool FileStart(string fileName) { return true; }
-			public bool FileFinished(string fileName, Chutzpah.Models.TestResultsSummary testResultsSummary) { return true; }
-
-			public void TestFinished(Chutzpah.Models.TestResult result)
-			{
-				var testCase = result.ToVsTestCase();
-
-				discoverySink.SendTestCase(testCase);
-			}
-		}
-
 		class ExecutionCallback : ITestMethodRunnerCallback
 		{
 			private IFrameworkHandle frameworkHandle;
@@ -79,9 +53,12 @@ namespace VS11.Plugin
 		// The parameters on this might not match what you see if you are on a //build/ drop
 		public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
 		{
-			var chutzpahRunner = TestRunner.Create(false);
-			var callback = new DiscoveryCallback(discoverySink, logger);
-			chutzpahRunner.RunTests(sources, callback);
+            var chutzpahRunner = TestRunner.Create();
+            foreach (var testCase in chutzpahRunner.DiscoverTests(sources))
+            {
+                var vsTestCase = testCase.ToVsTestCase();
+                discoverySink.SendTestCase(vsTestCase);
+            }
 		}
 
 		public void Cancel()
@@ -92,7 +69,7 @@ namespace VS11.Plugin
 		// The parameters on this might not match what you see if you are on a //build/ drop
 		public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
 		{
-			var chutzpahRunner = TestRunner.Create(false);
+			var chutzpahRunner = TestRunner.Create();
 			var callback = new ExecutionCallback(frameworkHandle);
 			chutzpahRunner.RunTests(sources, callback);
 		}

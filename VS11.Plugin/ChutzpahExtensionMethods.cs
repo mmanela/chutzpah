@@ -8,13 +8,13 @@ namespace VS11.Plugin
 {
 	public static class ChutzpahExtensionMethods
 	{
-		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase ToVsTestCase(this Chutzpah.Models.TestResult result)
+		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase ToVsTestCase(this Chutzpah.Models.TestCase testCase)
 		{
-			return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase(result.ModuleName + "." + result.TestName, Constants.ExecutorUri, result.InputTestFile)
+			return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase(testCase.ModuleName + "." + testCase.TestName, Constants.ExecutorUri, testCase.InputTestFile)
 			{
-				CodeFilePath = result.InputTestFile,
-				DisplayName = result.ModuleName + " " + result.TestName,
-				LineNumber = result.Line,
+				CodeFilePath = testCase.InputTestFile,
+				DisplayName = testCase.ModuleName + " " + testCase.TestName,
+				LineNumber = testCase.Line,
 			};
 		}
 
