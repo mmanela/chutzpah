@@ -1,73 +1,109 @@
 ﻿/// <reference path="chutzpah.js" />
-/*globals phantom, chutzpah*/
+/*globals phantom, chutzpah, jasmine*/
 
 (function () {
     'use strict';
 
-    phantom.injectJs('chutzpah.js');
+    phantom.injectJs('chutzpahRunner.js');
 
     function testsComplete() {
+
+        // If in discovery mode we know all tests at load time
+        if (window.chutzpah.testMode === 'discovery') {
+            return true;
+        }
+
         return !document.body.getElementsByClassName('running').length;
     }
 
     function testsEvaluator() {
-        var i,
-            length,
-            specNode,
-            nameNode,
-            messageNode,
-            testResults,
-            specs = document.body.getElementsByClassName('spec'),
-            passed,
-            name,
-            fullName,
-            module,
-            testCase;
+        function getTestResults() {
+            var i,
+                length,
+                specNode,
+                nameNode,
+                messageNode,
+                testResults,
+                specs = document.body.getElementsByClassName('spec'),
+                passed,
+                name,
+                fullName,
+                module,
+                result;
 
-        function attributeValue(node, attribute) {
-            return node.attributes.getNamedItem(attribute).nodeValue;
-        }
-
-        testResults = {
-            results: [],
-            logs: [],
-            errors: [],
-            failedCount: 0
-        };
-
-        try {
-            for (i = 0, length = specs.length; i < length; i += 1) {
-                specNode = specs[i];
-                nameNode = specNode.getElementsByClassName('description')[0];
-                passed = attributeValue(specNode, 'class').match(/passed/) ? true : false;
-                name = nameNode.innerText;
-                fullName = attributeValue(nameNode, 'title');
-                module = fullName.substr(0, (fullName.length - name.length) - 2);
-
-                testCase = {
-                    passed: passed,
-                    name: name,
-                    module: module
-                };
-
-                if (!passed) {
-                    testResults.failedCount += 1;
-                    messageNode = specNode.getElementsByClassName('resultMessage')[0];
-                    testCase.message = messageNode.innerText;
-                }
-
-                testResults.results.push(testCase);
+            function attributeValue(node, attribute) {
+                return node.attributes.getNamedItem(attribute).nodeValue;
             }
-        } catch (e) {
-            testResults.errors.push(JSON.stringify(e, null, 4));
+
+            testResults = {
+                results: [],
+                logs: [],
+                errors: [],
+                failedCount: 0
+            };
+
+            try {
+                for (i = 0, length = specs.length; i < length; i += 1) {
+                    specNode = specs[i];
+                    nameNode = specNode.getElementsByClassName('description')[0];
+                    passed = attributeValue(specNode, 'class').match(/passed/) ? true : false;
+                    name = nameNode.innerText;
+                    fullName = attributeValue(nameNode, 'title');
+                    module = fullName.substr(0, (fullName.length - name.length) - 2);
+
+                    result = {
+                        passed: passed,
+                        name: name,
+                        module: module
+                    };
+
+                    if (!passed) {
+                        testResults.failedCount += 1;
+                        messageNode = specNode.getElementsByClassName('resultMessage')[0];
+                        result.message = messageNode.innerText;
+                    }
+
+                    testResults.results.push(result);
+                }
+            } catch (ex) {
+                testResults.errors.push(JSON.stringify(ex, null, 4));
+            }
+
+            return testResults;
         }
 
-        return testResults;
+        // Grab test case information from jasmine object model
+        function getTestCases() {
+            var testCases = [],
+                suites = jasmine.getEnv().currentRunner_.suites_,
+                suite,
+                spec,
+                i,
+                j;
+            
+            for (i = 0; i < suites.length; i++) {
+                suite = suites[i];
+                for (j = 0; j < suite.specs_.length; j++) {
+                    spec = suite.specs_[j];
+                    testCases.push({ module: suite.description, name: spec.description });
+                }
+            }
+
+            return { testCases: testCases };
+        }
+
+        if (window.chutzpah.testMode === 'discovery') {
+            return getTestCases();
+        }
+        else {
+            return getTestResults();
+        }
     }
+
 
     try {
         chutzpah.runner(testsComplete, testsEvaluator);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }
-}());
+} ());

@@ -20,7 +20,7 @@
         {
             get
             {
-                return new string[] { this.FrameworkKey + ".js", this.FrameworkKey + ".css" };
+                return new string[] { "chutzpah.js", FrameworkKey + ".js", FrameworkKey + ".css" };
             }
         }
 

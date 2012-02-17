@@ -17,13 +17,16 @@ describe("stringLib", function () {
 });
 
 describe("mathLib", function () {
+    beforeEach(function () {
+        console.log("beforeEach");
+    });
     it("will add 5 to number", function () {
-        var res = mathLib.add5(10)
+        var res = mathLib.add5(10);
         expect(res).toEqual(15);
     });
 
     it("will multiply 5 to number", function () {
-        var res = mathLib.mult5(10)
+        var res = mathLib.mult5(10);
         expect(res).toEqual(55);
     });
 });

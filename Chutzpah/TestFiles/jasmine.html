@@ -2,48 +2,39 @@
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <title>Jasmine Spec Runner</title>
+    <title>Jasmine Spec Runner</title>
+    <link rel="shortcut icon" type="image/png" href="jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="jasmine.css">
+    <script type="text/javascript" src="jasmine.js"></script>
+    <script type="text/javascript" src="jasmine-html.js"></script>
+    <script type="text/javascript" src="chutzpah.js"></script>
+    @@ReferencedFiles@@
+    <script type="text/javascript">
+        (function () {
+            var jasmineEnv = jasmine.getEnv();
+            jasmineEnv.updateInterval = 1000;
+            
+            var trivialReporter = new jasmine.TrivialReporter();
 
-  <link rel="shortcut icon" type="image/png" href="jasmine_favicon.png">
+            jasmineEnv.addReporter(trivialReporter);
 
-  <link rel="stylesheet" type="text/css" href="jasmine.css">
-  <script type="text/javascript" src="jasmine.js"></script>
-  <script type="text/javascript" src="jasmine-html.js"></script>
+            jasmineEnv.specFilter = function (spec) {
+                return trivialReporter.specFilter(spec);
+            };
 
-  @@ReferencedFiles@@
+            var currentWindowOnload = window.onload;
 
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
+            window.onload = function () {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }
+                window.chutzpah.runJasmine();
+            };
 
-      var trivialReporter = new jasmine.TrivialReporter();
-
-      jasmineEnv.addReporter(trivialReporter);
-
-      jasmineEnv.specFilter = function(spec) {
-        return trivialReporter.specFilter(spec);
-      };
-
-      var currentWindowOnload = window.onload;
-
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
-
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
-
-    })();
-  </script>
-
+        })();
+    </script>
 </head>
-
 <body>
-@@FixtureContent@@
+    @@FixtureContent@@
 </body>
 </html>
