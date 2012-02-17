@@ -12,7 +12,7 @@ namespace Chutzpah
         private const int TestableFileSearchLimit = 100;
 
         public static string HeadlessBrowserName = "phantomjs.exe";
-        public static string TestRunnerJsName = @"JSRunners\chutzpah.js";
+        public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
 
         private readonly IProcessHelper process;
         private readonly ITestResultsBuilder testResultsBuilder;
@@ -122,7 +122,7 @@ namespace Chutzpah
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
 
-            string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath);
+            string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, TestMode.Execution);
 
             var result = process.RunExecutableAndCaptureOutput(headlessBrowserPath, runnerArgs);
 
@@ -162,16 +162,17 @@ namespace Chutzpah
             }
         }
 
-        private static string BuildRunnerArgs(TestOptions options, string fileUrl, string runnerPath)
+        private static string BuildRunnerArgs(TestOptions options, string fileUrl, string runnerPath, TestMode testmode)
         {
             string runnerArgs;
+            var testModeStr = testmode.ToString().ToLowerInvariant();
             if (options.TimeOutMilliseconds.HasValue && options.TimeOutMilliseconds > 0)
             {
-                runnerArgs = string.Format("\"{0}\" {1} {2}", runnerPath, fileUrl, options.TimeOutMilliseconds.Value);
+                runnerArgs = string.Format("\"{0}\" {1} {2} {3}", runnerPath, fileUrl, testModeStr, options.TimeOutMilliseconds.Value);
             }
             else
             {
-                runnerArgs = string.Format("\"{0}\" {1}", runnerPath, fileUrl);
+                runnerArgs = string.Format("\"{0}\" {1} {2}", runnerPath, fileUrl, testModeStr);
             }
 
             return runnerArgs;
