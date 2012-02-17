@@ -6,38 +6,36 @@
 
   <script type="text/javascript" src="jasmine.js"></script>
   <script type="text/javascript" src="jasmine-html.js"></script>
+   <script type="text/javascript" src="../../../Chutzpah/TestFiles/chutzpah.js"></script>
 
   <script type="text/javascript" src="../Code/code.js"></script>
   <script type="text/javascript" src="basic-jasmine.js"></script>
 
 
   <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
+      (function () {
+          var jasmineEnv = jasmine.getEnv();
+          jasmineEnv.updateInterval = 1000;
 
-      var trivialReporter = new jasmine.TrivialReporter();
+          var trivialReporter = new jasmine.TrivialReporter();
 
-      jasmineEnv.addReporter(trivialReporter);
+          jasmineEnv.addReporter(trivialReporter);
 
-      jasmineEnv.specFilter = function(spec) {
-        return trivialReporter.specFilter(spec);
-      };
+          jasmineEnv.specFilter = function (spec) {
+              return trivialReporter.specFilter(spec);
+          };
 
-      var currentWindowOnload = window.onload;
+          var currentWindowOnload = window.onload;
 
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
+          window.onload = function () {
+              if (currentWindowOnload) {
+                  currentWindowOnload();
+              }
+              window.chutzpah.runJasmine();
+          };
 
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
 
-    })();
+      })();
   </script>
 
 </head>

@@ -10,6 +10,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
     var page = require('webpage').create(),
         logs = [],
         testFile = null,
+        testMode = null,
         timeOut = null;
 
     function LogEntry(message, line, source) {
@@ -19,7 +20,7 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
     }
 
     function waitFor(testFx, onReady, timeOutMillis) {
-        var maxtimeOutMillis = timeOutMillis || 3001,
+        var maxtimeOutMillis = timeOutMillis,
             start = new Date().getTime(),
             condition = false,
             interval;
@@ -50,12 +51,13 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
                 var testSummary = page.evaluate(testsEvaluator);
 
                 if (testSummary) {
-                    testSummary.logs = testSummary.logs.concat(logs);
+                    testSummary.logs = logs;
                     console.log('#_#Begin#_#');
                     console.log(JSON.stringify(testSummary, null, 4));
                     console.log('#_#End#_#');
                     phantom.exit((parseInt(testSummary.failedCount, 10) > 0) ? 1 : 0);
                 } else {
+                    console.log("Unknown error");
                     phantom.exit(2); // Unkown error
                 }
             };
@@ -68,16 +70,24 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
         }
     }
 
-    if (phantom.args.length === 0 || phantom.args.length > 2) {
+    if (phantom.args.length === 0) {
         console.log('Error: too few arguments');
         phantom.exit();
     }
 
     testFile = phantom.args[0];
-    timeOut = parseInt(phantom.args[1]);
-    timeOut = timeOut === 'NaN' ? null : timeOut;
-
+    testMode = phantom.args[1] || "execution";
+    timeOut = parseInt(phantom.args[2]) || 3001;
     page.onConsoleMessage = addToLog;
+
+    page.onInitialized = function () {
+        if (testMode === 'discovery') {
+            page.evaluate(function () { window.chutzpah = { testMode: 'discovery' }; });
+        }
+        else {
+            page.evaluate(function () { window.chutzpah = { testMode: 'execution' }; });
+        }
+    };
 
     page.open(testFile, pageOpenHandler);
 };
