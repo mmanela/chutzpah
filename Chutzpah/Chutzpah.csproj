@@ -30,6 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>../chutzpah.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.2\lib\HtmlAgilityPack.dll</HintPath>
