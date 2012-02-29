@@ -14,8 +14,8 @@
     <ProjectGuid>{BD1F2D08-D667-4B0D-8775-B14DCD582D7E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VS11.Plugin</RootNamespace>
-    <AssemblyName>VS11.Plugin</AssemblyName>
+    <RootNamespace>Chutzpah.VS11</RootNamespace>
+    <AssemblyName>Chutzpah.VS11</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -23,6 +23,8 @@
     <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>../chutzpah.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,17 +43,17 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-		<StartAction>Program</StartAction>
-		<StartProgram>devenv.exe</StartProgram>
-		<StartArguments>/rootsuffix Exp</StartArguments>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-		<StartAction>Program</StartAction>
-		<StartProgram>devenv.exe</StartProgram>
-		<StartArguments>/rootsuffix Exp</StartArguments>
-	</PropertyGroup>
-	<ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartAction>Program</StartAction>
+    <StartProgram>devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <StartAction>Program</StartAction>
+    <StartProgram>devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+  </PropertyGroup>
+  <ItemGroup>
     <Compile Include="ChutzpahExtensionMethods.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JsTestContainer.cs" />
@@ -61,6 +63,10 @@
     <Compile Include="VsTestRunner.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="EULA.rtf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -89,6 +95,12 @@
       <Project>{5e8ee6d2-52a1-46ee-bd2b-449b0b8fda6f}</Project>
       <Name>Chutzpah</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="chetTimes.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />

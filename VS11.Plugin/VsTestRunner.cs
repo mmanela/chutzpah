@@ -35,7 +35,8 @@ namespace VS11.Plugin
 			public void TestFinished(Chutzpah.Models.TestResult result)
 			{
 				var testCase = result.ToVsTestCase();
-				var vsresult = result.ToVsTestResult();
+                var vsresult = result.ToVsTestResult();
+                var outcome = result.ToVsTestOutcome();
 
 				// The test case is starting
 				frameworkHandle.RecordStart(testCase);
@@ -44,7 +45,7 @@ namespace VS11.Plugin
 				frameworkHandle.RecordResult(vsresult);
 
 				// The test case is done
-				frameworkHandle.RecordEnd(testCase, result.ToVsTestOutcome());
+                frameworkHandle.RecordEnd(testCase, outcome);
 			}
 
 		}

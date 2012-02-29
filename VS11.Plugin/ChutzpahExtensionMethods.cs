@@ -10,7 +10,7 @@ namespace VS11.Plugin
 	{
 		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase ToVsTestCase(this Chutzpah.Models.TestCase testCase)
 		{
-			return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase(testCase.ModuleName + "." + testCase.TestName, Constants.ExecutorUri, testCase.InputTestFile)
+            return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase(BuildFullyQualifiedName(testCase), Constants.ExecutorUri, testCase.InputTestFile)
 			{
 				CodeFilePath = testCase.InputTestFile,
 				DisplayName = testCase.ModuleName + " " + testCase.TestName,
@@ -33,5 +33,11 @@ namespace VS11.Plugin
 		{
 			return result.Passed ? Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed : Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Failed;
 		}
+
+        private static string BuildFullyQualifiedName(Chutzpah.Models.TestCase testCase)
+        {
+            var parts = new[] { testCase.ModuleName, testCase.TestName, testCase.InputTestFile}.Where(x => !String.IsNullOrEmpty(x));
+            return String.Join("::", parts);
+        }
 	}
 }

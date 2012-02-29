@@ -19,10 +19,10 @@
             window.chutzpah.testCases = [];
             window.chutzpah.currentModule = null;
 
-            window.module = function (name) {
+            window.module = QUnit.module = function (name) {
                 window.chutzpah.currentModule = name;
             };
-            window.test = window.asyncTest = function (name) {
+            window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
                 window.chutzpah.testCases.push({ module: window.chutzpah.currentModule, name: name });
             };
         }
