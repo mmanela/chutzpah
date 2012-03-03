@@ -70,7 +70,7 @@
                 </Strings>
             </Button>
 
-           <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0101" type="Button">
+           <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0100" type="Button">
                 <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>

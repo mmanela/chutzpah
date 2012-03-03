@@ -123,20 +123,29 @@ namespace Chutzpah.VisualStudio
             if (IsFile(item))
             {
                 var filename = item.FileNames[0];
-                if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
-                {
-                    return TestFileType.JS;
-                }
-
-                if (filename.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) ||
-                    filename.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
-                {
-                    return TestFileType.HTML;
-                }
+                return GetFileType(filename);
             }
-            else if (IsFolder(item))
+            
+            if (IsFolder(item))
             {
                 return TestFileType.Folder;
+            }
+
+            return TestFileType.Other;
+        }
+
+
+        private TestFileType GetFileType(string filename)
+        {
+            if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+            {
+                return TestFileType.JS;
+            }
+
+            if (filename.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) ||
+                filename.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+            {
+                return TestFileType.HTML;
             }
 
             return TestFileType.Other;
@@ -231,6 +240,15 @@ namespace Chutzpah.VisualStudio
                     }
                 }
             }
+            else if (activeWindow.ObjectKind == EnvDTE.Constants.vsDocumentKindText)
+            {
+               var fileType = GetFileType(activeWindow.Document.FullName);
+               if (!allowedTypes.Contains(fileType))
+               {
+                   menuCommand.Visible = false;
+                   return;
+               }
+            }
 
             menuCommand.Visible = true;
         }
@@ -276,7 +294,7 @@ namespace Chutzpah.VisualStudio
                                         stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
                                     }
                                 }
-                                catch(Exception e) 
+                                catch (Exception e)
                                 {
                                     Logger.Log("Error while running tests", "ChutzpahPackage", e);
                                 }

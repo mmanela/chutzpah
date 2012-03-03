@@ -156,6 +156,7 @@
   <ItemGroup>
     <VSCTCompile Include="Chutzpah.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
+      <SubType>Designer</SubType>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
