@@ -97,6 +97,9 @@
 
     <CommandPlacements>
         <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
+            <Parent guid="guidJsEdVs11Grp" id="IDM_JS_SOURCE_VS11"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
             <Parent guid="guidHtmEdGrp" id="IDM_HTM_SOURCE_SCRIPT"/>
         </CommandPlacement>
         <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0000">
@@ -138,6 +141,10 @@
 
         <GuidSymbol name="guidCssEdGrp" value="{A764E896-518D-11d2-9A89-00C04F79EFC3}">
             <IDSymbol name="IDM_CTX_SOURCE" value="0x102" />
+        </GuidSymbol>
+
+        <GuidSymbol name="guidJsEdVs11Grp" value="{D309F791-903F-11D0-9EFC-00A0C911004F}">
+            <IDSymbol name="IDM_JS_SOURCE_VS11" value ="0x040D"/>
         </GuidSymbol>
 
         <GuidSymbol name="guidHtmEdGrp"  value="{d7e8c5e1-bdb8-11d0-9c88-0000f8040a53}">
