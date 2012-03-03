@@ -161,6 +161,8 @@ namespace Chutzpah.VisualStudio
                 try
                 {
                     var testContext = testRunner.GetTestContext(selectedFile, new TestOptions { StagingFolder = stagingFolder });
+                    if (testContext == null) continue;
+
                     stagingFolder = Path.GetDirectoryName(testContext.TestHarnessPath);
                     LaunchFileInBrowser(testContext.TestHarnessPath);
                 }
