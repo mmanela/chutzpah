@@ -59,7 +59,7 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node or set it to <Icon guid="guidOfficeIcon" id="msotcidNoIcon" /> -->
 
-            <Button guid="guidChutzpahCmdSetString" id="cmdidRunJSTests" priority="0x0100" type="Button">
+            <Button guid="guidChutzpahCmdSetString" id="cmdidRunJSTests" priority="0x0000" type="Button">
                 <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
                 <Icon guid="guidImages" id="chet1" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
@@ -70,7 +70,7 @@
                 </Strings>
             </Button>
 
-           <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0100" type="Button">
+           <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0001" type="Button">
                 <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>

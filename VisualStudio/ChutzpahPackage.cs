@@ -109,7 +109,6 @@ namespace Chutzpah.VisualStudio
                 var runJsTestMenuCmd = new OleMenuCommand(RunJSTestCmdCallback, runJsTestsCmd);
                 runJsTestMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
                 mcs.AddCommand(runJsTestMenuCmd);
-
                 // Command - Run JS tests in browser
                 var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunInBrowser);
                 var runJsTestInBrowserMenuCmd = new OleMenuCommand(RunJSTestInBrowserCmdCallback, runJsTestsInBrowserCmd);
@@ -185,7 +184,7 @@ namespace Chutzpah.VisualStudio
         private void RunJSTestCmdCallback(object sender, EventArgs e)
         {
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
             {
                 RunTestsInSolutionFolderNodeCallback(sender, e);
             }
@@ -240,7 +239,7 @@ namespace Chutzpah.VisualStudio
                     }
                 }
             }
-            else if (activeWindow.ObjectKind == EnvDTE.Constants.vsDocumentKindText)
+            else if (activeWindow.ObjectKind == Constants.vsDocumentKindText)
             {
                var fileType = GetFileType(activeWindow.Document.FullName);
                if (!allowedTypes.Contains(fileType))
