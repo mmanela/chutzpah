@@ -48,6 +48,8 @@ namespace Chutzpah.Facts
 @"
 <html>
     <head>
+        <link rel=""stylesheet"" href=""style.css"" type=""text/css""/>
+        <link rel=""stylesheet"" href=""qunit.css"" type=""text/css""/>
         <script type=""text/javascript"" src=""qunit.js""></script>
         <script type=""text/javascript"" src=""../../js/common.js""></script>
         <script type=""text/javascript"" src=""lib.js""></script>
@@ -62,6 +64,7 @@ namespace Chutzpah.Facts
         const string TestJSFileContents =
 @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/common.js"" />
+                        /// <reference path=""../../js/style.css"" />
                         some javascript code
                         ";
 
@@ -405,7 +408,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_replace_referenced_file_place_holder_in_html_template_with_referenced_files_from_js_test_file()
+            public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced__cssfiles_from_js_test_file()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 string text = null;
@@ -430,11 +433,35 @@ namespace Chutzpah.Facts
                 string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"common.js");
                 Assert.Contains(scriptStatement1, text);
                 Assert.Contains(scriptStatement2, text);
-                Assert.DoesNotContain("@@ReferencedFiles@@", text);
+                Assert.DoesNotContain("@@ReferencedJSFiles@@", text);
             }
 
             [Fact]
-            public void Will_replace_referenced_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
+            public void Will_replace_referenced_css_file_place_holder_in_html_template_with_referenced_css_files_from_js_test_file()
+            {
+                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"style.css")))
+                    .Returns(@"path\style.css");
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                string styleStatemenet = TestContextBuilder.GetStyleStatement(@"style.css");
+                Assert.Contains(styleStatemenet, text);
+                Assert.DoesNotContain("@@ReferencedCSSFiles@@", text);
+            }
+
+            [Fact]
+            public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 string text = null;
@@ -459,7 +486,31 @@ namespace Chutzpah.Facts
                 string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"common.js");
                 Assert.Contains(scriptStatement1, text);
                 Assert.Contains(scriptStatement2, text);
-                Assert.DoesNotContain("@@ReferencedFiles@@", text);
+                Assert.DoesNotContain("@@ReferencedJSFiles@@", text);
+            }
+
+            [Fact]
+            public void Will_replace_referenced_css_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
+            {
+                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\testFile.html"))
+                    .Returns(TestHTMLFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"style.css")))
+                    .Returns(@"path\style.css");
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("testFile.html")).Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
+
+                var context = creator.ClassUnderTest.BuildContext("testFile.html");
+
+                string styleStatemenet = TestContextBuilder.GetStyleStatement(@"style.css");
+                Assert.Contains(styleStatemenet, text);
+                Assert.DoesNotContain("@@ReferencedCSSFiles@@", text);
             }
 
             [Fact]

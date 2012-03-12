@@ -19,7 +19,7 @@ namespace Chutzpah
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*(<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)|(<\s*link\s*.*?href\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
@@ -228,14 +228,25 @@ namespace Chutzpah
 
         private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
-            var referenceReplacement = new StringBuilder();
+            var referenceJsReplacement = new StringBuilder();
+            var referenceCssReplacement = new StringBuilder();
             foreach (ReferencedFile referencedFile in referencedFiles)
             {
                 var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
-                referenceReplacement.AppendLine(GetScriptStatement(referencePath));
+                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+                {
+
+                    referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
+                }
+                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+                {
+
+                    referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
+                }
             }
 
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedFiles@@", referenceReplacement.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@FixtureContent@@", fixtureContent);
 
 
@@ -245,6 +256,12 @@ namespace Chutzpah
         public static string GetScriptStatement(string path)
         {
             const string format = @"<script type=""text/javascript"" src=""{0}""></script>";
+            return string.Format(format, path);
+        }
+
+        public static string GetStyleStatement(string path)
+        {
+            const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
             return string.Format(format, path);
         }
 
