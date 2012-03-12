@@ -7,7 +7,7 @@
 (function () {
 
     function runJasmine() {
-        if (!chutzpah || chutzpah.testMode === 'execution') {
+        if (!window.chutzpah || !window.chutzpah.testMode || window.chutzpah.testMode === 'execution') {
             // Only execute the tests when in execution mode
             jasmine.getEnv().execute();
         }
