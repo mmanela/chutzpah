@@ -8,11 +8,24 @@ namespace Chutzpah.Facts.Integration
 {
     public class Execution
     {
-        public static IEnumerable<object[]> TestScripts
+        public static IEnumerable<object[]> ReferencesTestScripts
         {
             get
             {
-                return new object[][]
+                return new []
+                {
+                    new object[] { @"JS\Test\references-qunit.js" },
+                    new object[] { @"JS\Test\references-jasmine.js" }
+                };
+            }
+        }
+
+
+        public static IEnumerable<object[]> BasicTestScripts
+        {
+            get
+            {
+                return new []
                 {
                     new object[] { @"JS\Test\basic-qunit.js" },
                     new object[] { @"JS\Test\basic-jasmine.js" }
@@ -21,7 +34,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("TestScripts")]
+        [PropertyData("BasicTestScripts")]
         public void Will_run_tests_from_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -31,6 +44,19 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
+        }
+
+        [Theory]
+        [PropertyData("ReferencesTestScripts")]
+        public void Will_expand_references_in_a_js_file(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(scriptPath);
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
         }
 
         [Fact]

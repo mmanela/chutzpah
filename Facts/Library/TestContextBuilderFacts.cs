@@ -65,6 +65,18 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+        const string TestJSFileWithReferencesContents =
+@"/// <reference path=""../../js/references.js"" />
+                        some javascript code
+                        ";
+        const string ReferencesFile =
+@"/// <reference path=""lib.js"" />";
+
+        const string ReferencesFileInfiniteLoop =
+@"/// <reference path=""../../js/references.js"" />";
+
+
+
         const string TestJSFileWithQUnitContents =
 @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/common.js"" />
@@ -208,7 +220,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_copy_files_referenced_from_test_file_to_temporary_folder()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                var creator = new TestContextBuilderCreator();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("test.js"))
@@ -229,6 +241,59 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\lib.js", FileAttributes.Normal));
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\common.js", true));
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\common.js", FileAttributes.Normal));
+            }
+
+            [Fact]
+            public void Will_copy_files_referenced_from_referenced_files()
+            {
+                var creator = new TestContextBuilderCreator();
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
+                    .Returns(@"path\references.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
+                    .Returns(@"path\lib.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo {Type = PathType.JavaScript, FullPath = @"path\test.js"});
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithReferencesContents);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\references.js"))
+                    .Returns(ReferencesFile);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\lib.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\references.js", @"C:\temp\references.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\references.js", FileAttributes.Normal));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\lib.js", FileAttributes.Normal));
+            }
+
+            [Fact(Timeout = 5000)]
+            public void Will_stop_infinite_loop_when_processing_referenced_files()
+            {
+                var creator = new TestContextBuilderCreator();
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
+                    .Returns(@"path\references.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithReferencesContents);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\references.js"))
+                    .Returns(ReferencesFileInfiniteLoop);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\references.js", @"C:\temp\references.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.SetFileAttributes(@"C:\temp\references.js", FileAttributes.Normal));
             }
 
             [Fact]

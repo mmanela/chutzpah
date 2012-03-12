@@ -41,23 +41,23 @@ namespace Chutzpah
             }
 
             var pathInfo = fileProbe.GetPathInfo(file);
-            var fileKind = pathInfo.Type;
-            var filePath = pathInfo.FullPath;
+            var testFileKind = pathInfo.Type;
+            var testFilePath = pathInfo.FullPath;
 
-            if (fileKind != PathType.JavaScript && fileKind != PathType.Html)
+            if (testFileKind != PathType.JavaScript && testFileKind != PathType.Html)
             {
                 throw new ArgumentException("Expecting a .js or .html file");
             }
 
             stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
 
-            if (filePath == null)
+            if (testFilePath == null)
             {
                 throw new FileNotFoundException("Unable to find file: " + file);
             }
 
             var testFileName = Path.GetFileName(file);
-            var testFileText = fileSystem.GetText(filePath);
+            var testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
 
@@ -68,15 +68,15 @@ namespace Chutzpah
                     fileSystem.CreateDirectory(stagingFolder);
                 }
 
-                var referencedFiles = GetReferencedFiles(definition, fileKind, testFileText, filePath, stagingFolder);
+                var referencedFiles = GetReferencedFiles(definition, testFileKind, testFileText, testFilePath, stagingFolder);
                 var fixtureContent = "";
 
-                if (fileKind == PathType.JavaScript)
+                if (testFileKind == PathType.JavaScript)
                 {
                     var stagedFilePath = Path.Combine(stagingFolder, testFileName);
-                    referencedFiles.Add(new ReferencedFile { Path = filePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+                    referencedFiles.Add(new ReferencedFile { Path = testFilePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
                 }
-                else if (fileKind == PathType.Html)
+                else if (testFileKind == PathType.Html)
                 {
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
@@ -93,7 +93,7 @@ namespace Chutzpah
 
                 return new TestContext
                 {
-                    InputTestFile = filePath,
+                    InputTestFile = testFilePath,
                     TestHarnessPath = testHtmlFilePath,
                     ReferencedJavaScriptFiles = referencedFiles,
                     TestRunner = definition.TestRunner
@@ -146,11 +146,26 @@ namespace Chutzpah
             }
         }
 
-        private IList<ReferencedFile> GetReferencedFiles(IFrameworkDefinition definition, PathType testFileType, string testFileText, string testFilePath, string stagingFolder)
+        /// <summary>
+        /// Scans the test file extracting all referenced files from it. These will later be copied to the staging directory
+        /// </summary>
+        /// <param name="definition">Test framework defintition</param>
+        /// <param name="testFileType">The type of testing file (JS or HTML)</param>
+        /// <param name="textToParse">The content of the file to parse and extract from</param>
+        /// <param name="testFilePath">Path to the file under test</param>
+        /// <param name="stagingFolder">Folder where files are staged for testing</param>
+        /// <returns></returns>
+        private IList<ReferencedFile> GetReferencedFiles(IFrameworkDefinition definition, PathType testFileType, string textToParse, string testFilePath, string stagingFolder)
+        {
+            var referencedFiles = new List<ReferencedFile>();
+            GetReferencedFiles(referencedFiles, definition, testFileType, textToParse, testFilePath, stagingFolder);
+            return referencedFiles;
+        }
+
+        private void GetReferencedFiles(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string testFilePath, string stagingFolder)
         {
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
-            var files = new List<ReferencedFile>();
-            foreach (Match match in regex.Matches(testFileText))
+            foreach (Match match in regex.Matches(textToParse))
             {
                 if (match.Success)
                 {
@@ -168,20 +183,34 @@ namespace Chutzpah
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(testFilePath), referencePath);
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
-                        if (absolutePath != null)
+                        if (absolutePath != null && !referencedFiles.Any(x => x.Path.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
                             var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, stagingFolder);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
-                            files.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
+                            referencedFiles.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
+                            ExpandNestedReferences(referencedFiles, definition, absolutePath, testFilePath, stagingFolder);
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        files.Add(new ReferencedFile { Path = referencePath, StagedPath = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, StagedPath = referencePath, IsLocal = false });
                     }
                 }
             }
-            return files;
+        }
+
+        private void ExpandNestedReferences(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string pathToReferencedFile, string testFilePath, string stagingFolder)
+        {
+            try
+            {
+                var textToParse = fileSystem.GetText(pathToReferencedFile);
+                GetReferencedFiles(referencedFiles, definition, PathType.JavaScript, textToParse, testFilePath, stagingFolder);
+
+            }
+            catch (IOException)
+            {
+                // Unable to get file text
+            }
         }
 
         private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IFrameworkDefinition definition)
