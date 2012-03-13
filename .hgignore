@@ -14,3 +14,6 @@ syntax: glob
 Chutzpah.sln.DotSettings.user
 TestResults
 *.user
+_build/
+_nuget/
+_package/

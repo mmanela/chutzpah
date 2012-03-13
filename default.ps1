@@ -4,7 +4,9 @@ properties {
   $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
-  $version = "1.3.2." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
+  $packageDir = "$baseDir\_package"
+  $mainVersion = "1.3.2"
+  $version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . vsvars2010.ps1 
@@ -14,7 +16,7 @@ properties {
 
 # Aliases
 task Default -depends Run-Build
-task Package -depends Clean-Solution, Update-AssemblyInfoFiles, Build-Solution, Package-NuGet
+task Package -depends Clean-Solution,Clean-PackageFiles, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
 task Build -depends Run-Build
 task Clean -depends Clean-Solution
 
@@ -28,6 +30,12 @@ task Update-AssemblyInfoFiles {
 
 task Run-Chutzpah -depends  Build-Solution {
   exec { & .\ConsoleRunner\bin\$configuration\chutzpah.console.exe ConsoleRunner\JS\test.html /file ConsoleRunner\JS\tests.js}
+}
+
+task Clean-PackageFiles {
+    clean $nugetDir
+    clean $filesDir
+    clean $packageDir
 }
 
 task Clean-Solution {
@@ -61,24 +69,37 @@ task Run-Phantom {
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner.js" "file:///$testFilePath" $mode }
 }
 
+task Package-Files -depends Clean-PackageFiles {
+    
+    create $filesDir, $packageDir
+    copy-item "$baseDir\License.txt" -destination $filesDir
+    roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
+    
+    cd $filesDir
+    exec { &"$baseDir\3rdParty\Zip\zip.exe" -r -9 "$packageDir\Chutzpah.$mainVersion.zip" *.* }
+    cd $baseDir
+    
+    # Copy over Vsix Files
+    copy-item "$baseDir\VisualStudio\bin\$configuration\chutzpah.visualstudio.vsix" -destination $packageDir
+    copy-item "$baseDir\VS11.Plugin\bin\$configuration\chutzpah.vs11.vsix" -destination $packageDir
+}
 
-task Package-NuGet {
+task Package-NuGet -depends Clean-PackageFiles {
     $nugetTools = "$nugetDir\tools"
     $nuspec = "$baseDir\Chutzpah.nuspec"
     
-    clean $nugetDir
-    create $nugetDir, $nugetTools
+    create $nugetDir, $nugetTools, $packageDir
     
     copy-item "$baseDir\License.txt", $nuspec -destination $nugetDir
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     $v = new-object -TypeName System.Version -ArgumentList $version
     regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)
-    exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $nugetDir }
+    exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
 }
 
 task Push-Nuget {
   $v = new-object -TypeName System.Version -ArgumentList $version
-	exec { .\Tools\nuget.exe push $nugetDir\Chutzpah.$($v.ToString(3)).nupkg }
+	exec { .\Tools\nuget.exe push $packageDir\Chutzpah.$($v.ToString(3)).nupkg }
 }
 
 
@@ -89,7 +110,9 @@ task ? -Description "Help information" {
 
 function create([string[]]$paths) {
   foreach ($path in $paths) {
-    new-item -path $path -type directory | out-null
+    if(-not (Test-Path $path)) {
+      new-item -path $path -type directory | out-null
+    }
   }
 }
 
