@@ -1,0 +1,3 @@
+﻿function sameName() {
+    return "same";
+}

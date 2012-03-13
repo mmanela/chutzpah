@@ -68,7 +68,8 @@ namespace Chutzpah
                     fileSystem.CreateDirectory(stagingFolder);
                 }
 
-                var referencedFiles = GetReferencedFiles(definition, testFileKind, testFileText, testFilePath, stagingFolder);
+                var referencedFiles = new List<ReferencedFile>();
+                    
                 var fixtureContent = "";
 
                 if (testFileKind == PathType.JavaScript)
@@ -80,6 +81,8 @@ namespace Chutzpah
                 {
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
+
+                GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath, stagingFolder);
 
                 CopyReferencedFiles(referencedFiles, definition);
 
@@ -149,19 +152,13 @@ namespace Chutzpah
         /// <summary>
         /// Scans the test file extracting all referenced files from it. These will later be copied to the staging directory
         /// </summary>
+        /// <param name="referencedFiles">The list of referenced files</param>
         /// <param name="definition">Test framework defintition</param>
         /// <param name="testFileType">The type of testing file (JS or HTML)</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
         /// <param name="testFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
-        private IList<ReferencedFile> GetReferencedFiles(IFrameworkDefinition definition, PathType testFileType, string textToParse, string testFilePath, string stagingFolder)
-        {
-            var referencedFiles = new List<ReferencedFile>();
-            GetReferencedFiles(referencedFiles, definition, testFileType, textToParse, testFilePath, stagingFolder);
-            return referencedFiles;
-        }
-
         private void GetReferencedFiles(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string testFilePath, string stagingFolder)
         {
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
@@ -185,7 +182,7 @@ namespace Chutzpah
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null && !referencedFiles.Any(x => x.Path.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, stagingFolder);
+                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, referencedFiles);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
                             referencedFiles.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
                             ExpandNestedReferences(referencedFiles, definition, absolutePath, testFilePath, stagingFolder);
@@ -230,7 +227,7 @@ namespace Chutzpah
         {
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
-            foreach (ReferencedFile referencedFile in referencedFiles)
+            foreach (ReferencedFile referencedFile in referencedFiles.OrderBy(x => x.IsFileUnderTest))
             {
                 var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
                 if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
@@ -265,10 +262,13 @@ namespace Chutzpah
             return string.Format(format, path);
         }
 
-        private string MakeUniqueIfNeeded(string fileName, string directoryPath)
+        /// <summary>
+        /// Scan the files referenced so far and change current filename to prevent conflicts.
+        /// This is needed since we don't preserve directory hierarchy. We flatten the tree.
+        /// </summary>
+        private string MakeUniqueIfNeeded(string fileName, IEnumerable<ReferencedFile> referencedFiles)
         {
-            var filePath = Path.Combine(directoryPath, fileName);
-            if (fileSystem.FileExists(filePath))
+            if (referencedFiles.Any(x => fileName.Equals(Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase)))
             {
                 var randomFileName = fileSystem.GetRandomFileName();
                 return string.Format("{0}_{1}", randomFileName, fileName);

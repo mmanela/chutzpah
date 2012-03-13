@@ -84,6 +84,18 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_run_tests_with_dependencies_having_the_same_name()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestResultsSummary result = testRunner.RunTests(new List<string> { @"JS\Test\sameName.js" });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
         public void Will_copy_over_css_references_from_js_file()
         {
             var testRunner = TestRunner.Create();

@@ -324,8 +324,6 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestContextBuilderCreator();
                 var definition = creator.Mock<IFrameworkDefinition>();
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\");
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("test.js"))
@@ -342,34 +340,32 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
-                definition.Verify(x => x.Process(It.Is<ReferencedFile>(f => f.Path == @"path\lib.js" && f.StagedPath == @"C:\temp\unique_lib.js")));
-                definition.Verify(x => x.Process(It.Is<ReferencedFile>(f => f.Path == @"path\common.js" && f.StagedPath == @"C:\temp\unique_common.js")));
+                definition.Verify(x => x.Process(It.Is<ReferencedFile>(f => f.Path == @"path\lib.js" && f.StagedPath == @"C:\temp\lib.js")));
+                definition.Verify(x => x.Process(It.Is<ReferencedFile>(f => f.Path == @"path\common.js" && f.StagedPath == @"C:\temp\common.js")));
             }
 
             [Fact]
-            public void Will_copy_files_referenced_from_test_file_to_temporary_folder_if_they_already_exists()
+            public void Will_make_names_unique_of_files_with_duplicate_names()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\lib.js")).Returns(true);
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\common.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder()).Returns(@"C:\temp\"); 
                 creator.Mock<IFileProbe>()
-                     .Setup(x => x.GetPathInfo("test.js"))
-                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                     .Setup(x => x.GetPathInfo("common.js"))
+                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\common.js" });
                 creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Setup(x => x.GetText(@"path\common.js"))
                     .Returns(TestJSFileContents);
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
                     .Returns(@"path\lib.js");
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
-                   .Returns(@"path\common.js");
+                   .Returns(@"path\child\common.js");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("common.js");
 
-                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\unique_lib.js", true));
-                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\common.js", @"C:\temp\unique_common.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\lib.js", @"C:\temp\lib.js", true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\child\common.js", @"C:\temp\unique_common.js", true));
             }
 
             [Fact]
@@ -408,7 +404,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced__cssfiles_from_js_test_file()
+            public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_css_files_from_js_test_file()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();
                 string text = null;
