@@ -14,7 +14,12 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine</tags>
         <releaseNotes>
-          * Fixed issue with index out of range excpetion (workitem#31)
+          * Support for retrieving JS dependencies through references.js 
+          * Adding reference to a css file should add it to HTML test harness 
+          * Upgrade to Phantom 1.3 
+          * Tests fail if source file has the same name as test file 
+          * Run in browser results in blank page for Jasmine Tests 
+          * Prevent temporary folder explosion 
         </releaseNotes>
     </metadata>
 </package>
