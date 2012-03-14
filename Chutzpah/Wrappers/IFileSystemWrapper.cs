@@ -6,7 +6,7 @@ namespace Chutzpah.Wrappers
 {
     public interface IFileSystemWrapper
     {
-        string GetTemporaryFolder();
+        string GetTemporaryFolder(string leaf);
         void MoveFile(string sourceFilename, string destFilename);
         void CopyFile(string sourceFilename, string destFilename, bool overwrite=true);
         void MoveDirectory(string sourceDirectory, string destDirectory);

@@ -11,10 +11,10 @@ namespace Chutzpah.Wrappers
             return Path.GetRandomFileName();
         }
 
-        public string GetTemporaryFolder()
+        public string GetTemporaryFolder(string leaf)
         {
             var folder = Path.GetTempPath();
-            var tempFolder = Path.Combine(folder, Path.GetRandomFileName());
+            var tempFolder = Path.Combine(folder, leaf);
             Directory.CreateDirectory(tempFolder);
             return tempFolder;
         }

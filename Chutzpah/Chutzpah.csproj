@@ -95,6 +95,8 @@
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestResultsBuilder.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
+    <Compile Include="Utility\Hasher.cs" />
+    <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />

@@ -56,11 +56,6 @@ namespace Chutzpah.VisualStudio
 
         public ChutzpahSettings Settings { get; private set; }
 
-        // Keeps track of last staging folder
-        // This will allow the open in browser path to stay the same so
-        // you can just hit refresh
-        string stagingFolder;
-
         /// <summary>
         /// Default constructor of the package.
         /// Inside this method you can place any initialization code that does not require 
@@ -168,10 +163,8 @@ namespace Chutzpah.VisualStudio
             {
                 try
                 {
-                    var testContext = testRunner.GetTestContext(selectedFile, new TestOptions { StagingFolder = stagingFolder });
+                    var testContext = testRunner.GetTestContext(selectedFile);
                     if (testContext == null) continue;
-
-                    stagingFolder = Path.GetDirectoryName(testContext.TestHarnessPath);
                     LaunchFileInBrowser(testContext.TestHarnessPath);
                 }
                 catch (FileNotFoundException ex)
@@ -287,11 +280,7 @@ namespace Chutzpah.VisualStudio
                             {
                                 try
                                 {
-                                    var summary = testRunner.RunTests(filePaths, new TestOptions { StagingFolder = stagingFolder, TimeOutMilliseconds = Settings.TimeoutMilliseconds }, runnerCallback);
-                                    if (summary.Tests.Any())
-                                    {
-                                        stagingFolder = Path.GetDirectoryName(summary.Tests.Last().HtmlTestFile);
-                                    }
+                                    testRunner.RunTests(filePaths, new TestOptions { TimeOutMilliseconds = Settings.TimeoutMilliseconds }, runnerCallback);
                                 }
                                 catch (Exception e)
                                 {
@@ -332,7 +321,7 @@ namespace Chutzpah.VisualStudio
                 }
                 else if (projectNode != null)
                 {
-                    filePaths.Add(projectNode.FullName);
+                    filePaths.Add(Path.GetDirectoryName(projectNode.FullName));
                 }
             }
             return filePaths;

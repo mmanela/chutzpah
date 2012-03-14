@@ -44,7 +44,7 @@ namespace Chutzpah
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
-            return testContextBuilder.BuildContext(testFile, options.StagingFolder);
+            return testContextBuilder.BuildContext(testFile);
         }
 
         public TestContext GetTestContext(string testFile)
@@ -116,7 +116,7 @@ namespace Chutzpah
                 {
                     TestContext testContext;
 
-                    if (testContextBuilder.TryBuildContext(testFile, options.StagingFolder, out testContext))
+                    if (testContextBuilder.TryBuildContext(testFile, out testContext))
                     {
                         resultCount++;
                         bool result = InvokeTestRunner(headlessBrowserPath,

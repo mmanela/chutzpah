@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -15,25 +16,22 @@ namespace Chutzpah
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
+        private readonly IHasher hasher;
         private IEnumerable<IFrameworkDefinition> frameworkDefinitions;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*(<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)|(<\s*link\s*.*?href\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
+        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IHasher hasher, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
+            this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
         }
 
         public TestContext BuildContext(string file)
-        {
-            return BuildContext(file, null);
-        }
-
-        public TestContext BuildContext(string file, string stagingFolder)
         {
             if (string.IsNullOrWhiteSpace(file))
             {
@@ -49,13 +47,12 @@ namespace Chutzpah
                 throw new ArgumentException("Expecting a .js or .html file");
             }
 
-            stagingFolder = string.IsNullOrEmpty(stagingFolder) ? fileSystem.GetTemporaryFolder() : stagingFolder;
-
             if (testFilePath == null)
             {
                 throw new FileNotFoundException("Unable to find file: " + file);
             }
 
+            var stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
             var testFileName = Path.GetFileName(file);
             var testFileText = fileSystem.GetText(testFilePath);
 
@@ -108,12 +105,7 @@ namespace Chutzpah
 
         public bool TryBuildContext(string file, out TestContext context)
         {
-            return TryBuildContext(file, null, out context);
-        }
-
-        public bool TryBuildContext(string file, string stagingFolder, out TestContext context)
-        {
-            context = BuildContext(file, stagingFolder);
+            context = BuildContext(file);
             return context != null;
         }
 

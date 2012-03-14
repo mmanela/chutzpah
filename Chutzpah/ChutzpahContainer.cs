@@ -3,6 +3,7 @@
     using Chutzpah.FileProcessors;
     using Chutzpah.FrameworkDefinitions;
     using StructureMap;
+    using Chutzpah.Utility;
 
     public class ChutzpahContainer
     {
@@ -18,6 +19,7 @@
             var container = new Container();
             container.Configure(config =>
             {
+                config.For<IHasher>().Singleton().Use<Hasher>();
                 config.Scan(scan =>
                 {
                     scan.TheCallingAssembly();
