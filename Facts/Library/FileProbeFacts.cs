@@ -15,6 +15,7 @@ namespace Chutzpah.Facts
             public TestableFileProbe()
             {
                 Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("someDirName");
+                Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Returns<string>(x => x);
             }
         }
 
@@ -35,12 +36,13 @@ namespace Chutzpah.Facts
             {
                 var prob = new TestableFileProbe();
                 prob.Mock<IEnvironmentWrapper>().Setup(x => x.GetExeuctingAssemblyPath()).Returns(@"c:\dir\thing.exe");
-                prob.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"c:\dir\path.html")).Returns(true);
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"c:\dir\full\path.html")).Returns(true);
                 prob.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(@"c:\dir\thing.exe")).Returns(@"c:\dir");
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(@"c:\dir\path.html")).Returns(@"c:\dir\full\path.html");
 
                 var path = prob.ClassUnderTest.FindFilePath("path.html");
 
-                Assert.Equal(@"c:\dir\path.html", path);
+                Assert.Equal(@"c:\dir\full\path.html", path);
             }
 
             [Fact]
@@ -84,12 +86,13 @@ namespace Chutzpah.Facts
             {
                 var prob = new TestableFileProbe();
                 prob.Mock<IEnvironmentWrapper>().Setup(x => x.GetExeuctingAssemblyPath()).Returns(@"c:\dir\thing.exe");
-                prob.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(@"c:\dir\path")).Returns(true);
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(@"c:\dir\full\path")).Returns(true);
                 prob.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(@"c:\dir\thing.exe")).Returns(@"c:\dir");
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(@"c:\dir\path")).Returns(@"c:\dir\full\path");
 
                 var path = prob.ClassUnderTest.FindFolderPath("path");
 
-                Assert.Equal(@"c:\dir\path", path);
+                Assert.Equal(@"c:\dir\full\path", path);
             }
 
             [Fact]
@@ -183,6 +186,7 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Returns<string>(x => @"somePath\" + x);
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
                 var paths = new List<string>
                             {
@@ -194,8 +198,8 @@ namespace Chutzpah.Facts
                 var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(2, res.Count());
-                Assert.Contains(@"someDirName\a.js", res);
-                Assert.Contains(@"someDirName\b.html", res);
+                Assert.Contains(@"somePath\a.js", res);
+                Assert.Contains(@"somePath\b.html", res);
             }
 
             [Fact]

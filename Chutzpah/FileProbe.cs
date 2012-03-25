@@ -32,15 +32,15 @@ namespace Chutzpah
             if (string.IsNullOrWhiteSpace(path))
                 return null;
 
-            var executingPath = environment.GetExeuctingAssemblyPath();
-            var executingDir = fileSystem.GetDirectoryName(executingPath);
-            var filePath = Path.Combine(executingDir, path);
-            if (pathExists(filePath))
-                return filePath;
-
             var currentDirFilePath = fileSystem.GetFullPath(path);
             if (pathExists(currentDirFilePath))
                 return currentDirFilePath;
+
+            var executingPath = environment.GetExeuctingAssemblyPath();
+            var executingDir = fileSystem.GetDirectoryName(executingPath);
+            var filePath = fileSystem.GetFullPath(Path.Combine(executingDir, path));
+            if (pathExists(filePath))
+                return filePath;
 
             return null;
         }

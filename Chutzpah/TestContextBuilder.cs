@@ -148,10 +148,10 @@ namespace Chutzpah
         /// <param name="definition">Test framework defintition</param>
         /// <param name="testFileType">The type of testing file (JS or HTML)</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
-        /// <param name="testFilePath">Path to the file under test</param>
+        /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
-        private void GetReferencedFiles(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string testFilePath, string stagingFolder)
+        private void GetReferencedFiles(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
         {
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
@@ -170,14 +170,14 @@ namespace Chutzpah
 
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
-                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(testFilePath), referencePath);
+                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null && !referencedFiles.Any(x => x.Path.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
                             var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, referencedFiles);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
                             referencedFiles.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
-                            ExpandNestedReferences(referencedFiles, definition, absolutePath, testFilePath, stagingFolder);
+                            ExpandNestedReferences(referencedFiles, definition, absolutePath, stagingFolder);
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
@@ -188,12 +188,12 @@ namespace Chutzpah
             }
         }
 
-        private void ExpandNestedReferences(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string pathToReferencedFile, string testFilePath, string stagingFolder)
+        private void ExpandNestedReferences(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string currentFilePath, string stagingFolder)
         {
             try
             {
-                var textToParse = fileSystem.GetText(pathToReferencedFile);
-                GetReferencedFiles(referencedFiles, definition, PathType.JavaScript, textToParse, testFilePath, stagingFolder);
+                var textToParse = fileSystem.GetText(currentFilePath);
+                GetReferencedFiles(referencedFiles, definition, PathType.JavaScript, textToParse, currentFilePath, stagingFolder);
 
             }
             catch (IOException)
