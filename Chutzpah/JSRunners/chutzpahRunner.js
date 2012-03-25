@@ -61,11 +61,8 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
                     phantom.exit(2); // Unkown error
                 }
             };
-
-        if (status !== 'success') {
-            console.log('Unable to access network');
-            phantom.exit();
-        } else {
+        
+        if (status === 'success') {
             waitFor(waitCondition, gatherTests, timeOut);
         }
     }
