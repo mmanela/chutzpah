@@ -153,5 +153,16 @@ namespace Chutzpah.Facts.Integration
 
             Assert.Equal(4, result.Count());
         }
+
+
+        [Fact]
+        public void Will_get_correct_module_name_for_nested_jasmine_suites()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(@"JS\Test\nestedJasmine.js");
+
+            Assert.Equal("nested.jasmine hello", result.First().ModuleName);
+        }
     }
 }

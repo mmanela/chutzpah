@@ -72,6 +72,15 @@
             return testResults;
         }
 
+        function getFullSuiteName(suite) {
+            var description = suite.description;
+            if (suite.parentSuite) {
+                description = getFullSuiteName(suite.parentSuite) + " " + description;
+            }
+
+            return description;
+        }
+
         // Grab test case information from jasmine object model
         function getTestCases() {
             var testCases = [],
@@ -83,9 +92,10 @@
             
             for (i = 0; i < suites.length; i++) {
                 suite = suites[i];
+                var suiteName = getFullSuiteName(suite);
                 for (j = 0; j < suite.specs_.length; j++) {
                     spec = suite.specs_[j];
-                    testCases.push({ module: suite.description, name: spec.description });
+                    testCases.push({ module: suiteName, name: spec.description });
                 }
             }
 
