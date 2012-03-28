@@ -3,7 +3,7 @@
     <Identifier Id="0a3da9d8-a5b6-4fb9-b423-ef87ff203628">
         <Name>Chutzpah - A JavaScript Test Runner</Name>
         <Author>Matthew Manela</Author>
-        <Version>1.4.0</Version>
+        <Version>1.4.1</Version>
         <Description xml:space="preserve">Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
         <Locale>1033</Locale>
         <MoreInfoUrl>http://chutzpah.codeplex.com/</MoreInfoUrl>

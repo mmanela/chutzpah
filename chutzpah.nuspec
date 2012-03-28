@@ -14,12 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine</tags>
         <releaseNotes>
-          * Support for retrieving JS dependencies through references.js 
-          * Adding reference to a css file should add it to HTML test harness 
-          * Upgrade to Phantom 1.3 
-          * Tests fail if source file has the same name as test file 
-          * Run in browser results in blank page for Jasmine Tests 
-          * Prevent temporary folder explosion 
+          * Fixed test discovery reporting incorrect suite name for nested jasmine suites
+          * Fixed issue causing expected and actual results to not show for QUnit tests
+          * Fixed referenced file expansion
+          * Fixed bug when running on tests using IFrames
         </releaseNotes>
     </metadata>
 </package>
