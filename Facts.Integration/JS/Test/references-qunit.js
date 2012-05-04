@@ -10,4 +10,5 @@
      var res2 = calculator.multiply(5, num);
 
      equal(res1, res2);
+     ok(window.rightOrder);
  });

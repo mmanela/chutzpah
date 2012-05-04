@@ -7,6 +7,7 @@ namespace Chutzpah.Models
         public ReferencedFile()
         {
             FilePositions = new FilePositions();
+            ReferencedFiles = new List<ReferencedFile>();
         }
 
         public bool IsFileUnderTest { get; set; }
@@ -14,5 +15,6 @@ namespace Chutzpah.Models
         public string Path { get; set; }
         public bool IsLocal { get; set; }
         public FilePositions FilePositions { get; set; }
+        public IList<ReferencedFile> ReferencedFiles { get; set; }
     }
 }

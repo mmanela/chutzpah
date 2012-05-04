@@ -349,6 +349,43 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_put_recursively_referenced_files_before_parent_file_in_test_harness()
+            {
+                var creator = new TestContextBuilderCreator();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
+                    .Returns(@"path\references.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
+                    .Returns(@"path\lib.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithReferencesContents);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\references.js"))
+                    .Returns(ReferencesFile);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"lib.js");
+                string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"references.js");
+                string scriptStatement3 = TestContextBuilder.GetScriptStatement(@"test.js");
+                var pos1 = text.IndexOf(scriptStatement1);
+                var pos2 = text.IndexOf(scriptStatement2);
+                var pos3 = text.IndexOf(scriptStatement3);
+                Assert.True(pos1 < pos2);
+                Assert.True(pos2 < pos3);
+
+            }
+
+            [Fact]
             public void Will_put_test_js_file_at_end_of_references_in_html_template_with_test_file()
             {
                 TestContextBuilderCreator creator = new TestContextBuilderCreator();

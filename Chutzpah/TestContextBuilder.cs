@@ -66,7 +66,7 @@ namespace Chutzpah
                 }
 
                 var referencedFiles = new List<ReferencedFile>();
-                    
+
                 var fixtureContent = "";
 
                 if (testFileKind == PathType.JavaScript)
@@ -151,8 +151,18 @@ namespace Chutzpah
         /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
-        private void GetReferencedFiles(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
+        private void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
         {
+            var result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)), definition, testFileType, textToParse, currentFilePath, stagingFolder);
+            var flattenedReferenceTree = from root in result
+                                         from flattened in FlattenReferenceGraph(root)
+                                         select flattened;
+            referencedFiles.AddRange(flattenedReferenceTree);
+        }
+
+        private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
+        {
+            var referencedFiles = new List<ReferencedFile>();
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
             {
@@ -172,12 +182,14 @@ namespace Chutzpah
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
-                        if (absolutePath != null && !referencedFiles.Any(x => x.Path.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
+                        if (absolutePath != null && !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, referencedFiles);
+                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, discoveredPaths);
                             var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
-                            referencedFiles.Add(new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true });
-                            ExpandNestedReferences(referencedFiles, definition, absolutePath, stagingFolder);
+                            var referencedFile = new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true };
+                            referencedFiles.Add(referencedFile);
+                            discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
+                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath, stagingFolder);
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
@@ -186,20 +198,24 @@ namespace Chutzpah
                     }
                 }
             }
+
+            return referencedFiles;
         }
 
-        private void ExpandNestedReferences(IList<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string currentFilePath, string stagingFolder)
+        private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths, IFrameworkDefinition definition, string currentFilePath, string stagingFolder)
         {
             try
             {
                 var textToParse = fileSystem.GetText(currentFilePath);
-                GetReferencedFiles(referencedFiles, definition, PathType.JavaScript, textToParse, currentFilePath, stagingFolder);
+                return GetReferencedFiles(discoveredPaths, definition, PathType.JavaScript, textToParse, currentFilePath, stagingFolder);
 
             }
             catch (IOException)
             {
                 // Unable to get file text
             }
+
+            return new List<ReferencedFile>();
         }
 
         private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IFrameworkDefinition definition)
@@ -215,10 +231,23 @@ namespace Chutzpah
             }
         }
 
+        private static IEnumerable<ReferencedFile> FlattenReferenceGraph(ReferencedFile rootFile)
+        {
+            var flattenedFileList = new List<ReferencedFile>();
+            foreach (var childFile in rootFile.ReferencedFiles)
+            {
+                flattenedFileList.AddRange(FlattenReferenceGraph(childFile));
+            }
+            flattenedFileList.Add(rootFile);
+
+            return flattenedFileList;
+        }
+
         private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
+
             foreach (ReferencedFile referencedFile in referencedFiles.OrderBy(x => x.IsFileUnderTest))
             {
                 var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
@@ -258,9 +287,9 @@ namespace Chutzpah
         /// Scan the files referenced so far and change current filename to prevent conflicts.
         /// This is needed since we don't preserve directory hierarchy. We flatten the tree.
         /// </summary>
-        private string MakeUniqueIfNeeded(string fileName, IEnumerable<ReferencedFile> referencedFiles)
+        private string MakeUniqueIfNeeded(string fileName, IEnumerable<string> discoveredPaths)
         {
-            if (referencedFiles.Any(x => fileName.Equals(Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase)))
+            if (discoveredPaths.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.OrdinalIgnoreCase)))
             {
                 var randomFileName = fileSystem.GetRandomFileName();
                 return string.Format("{0}_{1}", randomFileName, fileName);

@@ -10,5 +10,6 @@ describe("References Testing", function () {
         var res2 = calculator.multiply(5, num);
 
         expect(res1).toEqual(res2);
+        expect(window.rightOrder).toBeTruthy();
     });
 });
