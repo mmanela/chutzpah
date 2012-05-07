@@ -14,10 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine</tags>
         <releaseNotes>
-          * Fixed test discovery reporting incorrect suite name for nested jasmine suites
-          * Fixed issue causing expected and actual results to not show for QUnit tests
-          * Fixed referenced file expansion
-          * Fixed bug when running on tests using IFrames
+          * Preserve Dependency Order of referenced files
         </releaseNotes>
     </metadata>
 </package>

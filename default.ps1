@@ -5,7 +5,7 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "1.4.1"
+  $mainVersion = "1.4.2"
   $version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
