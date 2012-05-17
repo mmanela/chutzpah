@@ -86,9 +86,6 @@ namespace VS11.Plugin
 				return null;
 			}
 		}
-		/// <summary>
-		/// Get the canonical name
-		/// </summary>
 		public static string GetCanonicalName(uint itemId, IVsHierarchy hierarchy)
 		{
 			string strRet = string.Empty;

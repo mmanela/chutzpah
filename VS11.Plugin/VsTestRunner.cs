@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Chutzpah;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace VS11.Plugin
+namespace Chutzpah.VS11
 {
 	[FileExtension(".js")]
 	[ExtensionUri(Constants.ExecutorUriString)]
@@ -64,10 +61,10 @@ namespace VS11.Plugin
 
 		public void Cancel()
 		{
-			// Noop - Not sure if we can do this...
+            // Will add code here when streaming tests is implemented
 		}
 
-		// The parameters on this might not match what you see if you are on a //build/ drop
+		
 		public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
 		{
 			var chutzpahRunner = TestRunner.Create();
@@ -75,7 +72,6 @@ namespace VS11.Plugin
 			chutzpahRunner.RunTests(sources, callback);
 		}
 
-		// The parameters on this might not match what you see if you are on a //build/ drop
 		public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
 		{
 			// We'll just punt and run everything in each file that contains the selected tests

@@ -1,42 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace VS11.Plugin
+namespace Chutzpah.VS11
 {
-	public static class ChutzpahExtensionMethods
-	{
-		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase ToVsTestCase(this Chutzpah.Models.TestCase testCase)
-		{
-            return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase(BuildFullyQualifiedName(testCase), Constants.ExecutorUri, testCase.InputTestFile)
-			{
-				CodeFilePath = testCase.InputTestFile,
-                DisplayName = GetTestDisplayText(testCase),
-				LineNumber = testCase.Line,
-			};
-		}
+    public static class ChutzpahExtensionMethods
+    {
+        public static TestCase ToVsTestCase(this Chutzpah.Models.TestCase testCase)
+        {
+            return new TestCase(BuildFullyQualifiedName(testCase), Constants.ExecutorUri, testCase.InputTestFile)
+                       {
+                           CodeFilePath = testCase.InputTestFile,
+                           DisplayName = GetTestDisplayText(testCase),
+                           LineNumber = testCase.Line,
+                       };
+        }
 
-		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult ToVsTestResult(this Chutzpah.Models.TestResult result)
-		{
-			var testCase = result.ToVsTestCase();
-			return new Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult(testCase)
-			{
-				DisplayName = testCase.DisplayName,
-                ErrorMessage = GetTestFailureMessage(result),
-				Outcome = result.ToVsTestOutcome()
-			};
-		}
+        public static TestResult ToVsTestResult(this Chutzpah.Models.TestResult result)
+        {
+            var testCase = result.ToVsTestCase();
+            return new TestResult(testCase)
+                       {
+                           DisplayName = testCase.DisplayName,
+                           ErrorMessage = GetTestFailureMessage(result),
+                           Outcome = result.ToVsTestOutcome()
+                       };
+        }
 
-		public static Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome ToVsTestOutcome(this Chutzpah.Models.TestResult result)
-		{
-			return result.Passed ? Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed : Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Failed;
-		}
+        public static TestOutcome ToVsTestOutcome(this Chutzpah.Models.TestResult result)
+        {
+            return result.Passed ? TestOutcome.Passed : TestOutcome.Failed;
+        }
 
         private static string BuildFullyQualifiedName(Chutzpah.Models.TestCase testCase)
         {
-            var parts = new[] { testCase.ModuleName, testCase.TestName, testCase.InputTestFile}.Where(x => !String.IsNullOrEmpty(x));
+            var parts = new[] {testCase.ModuleName, testCase.TestName, testCase.InputTestFile}.Where(x => !String.IsNullOrEmpty(x));
             return String.Join("::", parts);
         }
 
@@ -59,5 +57,5 @@ namespace VS11.Plugin
 
             return errorString;
         }
-	}
+    }
 }

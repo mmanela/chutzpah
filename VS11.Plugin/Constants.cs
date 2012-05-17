@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VS11.Plugin
+namespace Chutzpah.VS11
 {
 	static class Constants
 	{
