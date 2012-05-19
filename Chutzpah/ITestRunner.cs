@@ -36,5 +36,6 @@ namespace Chutzpah
 
         IEnumerable<TestCase> DiscoverTests(string testPath);
         IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths);
+        bool IsTestFile(string testFile);
     }
 }

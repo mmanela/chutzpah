@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Chutzpah.VS11.EventWatchers;
@@ -16,6 +17,7 @@ namespace Chutzpah.VS11
     public class JsTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
+        private readonly ITestRunner testRunner;
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
@@ -36,12 +38,29 @@ namespace Chutzpah.VS11
 
         [ImportingConstructor]
         public JsTestContainerDiscoverer(
-            [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener)
+            :this(
+                serviceProvider, 
+                solutionListener,
+                testFilesUpdateWatcher,
+                testFilesAddRemoveListener,
+                TestRunner.Create())
         {
+        }
+
+        public JsTestContainerDiscoverer(
+            IServiceProvider serviceProvider,
+            ISolutionEventsListener solutionListener,
+            ITestFilesUpdateWatcher testFilesUpdateWatcher,
+            ITestFileAddRemoveListener testFilesAddRemoveListener,
+            ITestRunner testRunner)
+        {
+            Debugger.Break();
             this.serviceProvider = serviceProvider;
+            this.testRunner = testRunner;
             this.solutionListener = solutionListener;
             this.testFilesUpdateWatcher = testFilesUpdateWatcher;
             this.testFilesAddRemoveListener = testFilesAddRemoveListener;
@@ -148,9 +167,11 @@ namespace Chutzpah.VS11
 
         private IEnumerable<ITestContainer> GetTestContainers(IVsProject project)
         {
-            return VsSolutionHelper.GetProjectItems(project)
-                .Where(item => ".js".Equals(Path.GetExtension(item), StringComparison.OrdinalIgnoreCase))
-                .Select(item => new JsTestContainer(this, item, Constants.ExecutorUri));
+            return from item in VsSolutionHelper.GetProjectItems(project)
+                   where ".js".Equals(Path.GetExtension(item), StringComparison.OrdinalIgnoreCase)
+                         && testRunner.IsTestFile(item)
+                   select new JsTestContainer(this, item, Constants.ExecutorUri);
+
         }
 
         public void Dispose()

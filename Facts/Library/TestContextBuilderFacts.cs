@@ -12,11 +12,11 @@ namespace Chutzpah.Facts
 {
     public class TestContextBuilderFacts
     {
-        private class TestContextBuilderCreator : Testable<TestContextBuilder>
+        private class TestableTestContextBuilder : Testable<TestContextBuilder>
         {
-            public TestContextBuilderCreator()
+            public TestableTestContextBuilder()
             {
-                var frameworkMock = this.Mock<IFrameworkDefinition>();
+                var frameworkMock = Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new string[] { "qunit.js", "qunit.css" });
@@ -89,12 +89,73 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+
+        public class IsTestFile
+        {
+            [Fact]
+            public void Will_return_false_if_test_file_is_null()
+            {
+                var creator = new TestableTestContextBuilder();
+
+                var result = creator.ClassUnderTest.IsTestFile(null);
+
+                Assert.False(result);
+            }
+
+            [Fact]
+            public void Will_return_false_test_file_is_not_a_js_or_html_file()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo {Type = PathType.Other});
+
+                var result = creator.ClassUnderTest.IsTestFile("test.blah");
+
+                Assert.False(result);
+            }
+
+            [Fact]
+            public void Will_return_false_if_test_file_does_not_exist()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo {Type = PathType.JavaScript, FullPath = null});
+
+                var result = creator.ClassUnderTest.IsTestFile("test.js");
+                
+                Assert.False(result);
+            }
+
+            [Fact]
+            public void Will_return_false_if_test_framework_not_detected()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
+                creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(false);
+
+                var result = creator.ClassUnderTest.IsTestFile("test.js");
+
+                Assert.False(result);
+            }
+
+            [Fact]
+            public void Will_return_false_if_test_framework_detected()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo {Type = PathType.JavaScript, FullPath = null});
+                creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
+
+                var result = creator.ClassUnderTest.IsTestFile("test.js");
+                
+                Assert.False(result);
+            }
+
+        }
+
         public class BuildContext
         {
             [Fact]
             public void Will_throw_if_test_file_is_null()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext(null));
 
@@ -104,7 +165,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_throw_if_test_file_is_not_a_js_or_html_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo{ Type = PathType.Other});
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.blah"));
@@ -115,7 +176,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_throw_if_test_file_does_not_exist()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.js"));
@@ -124,9 +185,25 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_return_null_if_test_framework_not_determined()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IHasher>().Setup(x => x.Hash(@"C:\test.js")).Returns("test.JS_hash");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder("test.JS_hash")).Returns(@"C:\temp2\");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\test.js" });
+                creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(false);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                Assert.Null(context);
+            }
+
+            [Fact]
             public void Will_save_generated_test_html_file_to_temporary_folder_and_return_path_for_js_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IHasher>().Setup(x => x.Hash(@"C:\test.js")).Returns("test.JS_hash");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder("test.JS_hash")).Returns(@"C:\temp2\");
                 creator.Mock<IFileProbe>()
@@ -143,7 +220,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_save_generated_test_html_file_to_temporary_folder_and_return_path_for_html_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("testThing.html"))
                     .Returns(new PathInfo { Type = PathType.Html, FullPath = @"C:\testThing.html" });
@@ -158,7 +235,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_save_qunit_file_to_temporary_folder()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.js")).Returns(false);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"pa\test.js")).Returns(TestJSFileContents);
 
@@ -170,7 +247,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_save_qunit_css_file_to_temporary_folder()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.css")).Returns(false);
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
@@ -181,7 +258,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_copy_test_file_to_temporary_folder()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IHasher>().Setup(x => x.Hash(@"path\test.js")).Returns("test.JS_hash");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder("test.JS_hash")).Returns(@"C:\temp2\");
                 creator.Mock<IFileProbe>()
@@ -197,7 +274,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_set_js_test_file_to_file_under_test()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns("contents");
 
@@ -209,7 +286,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_copy_files_referenced_from_test_file_to_temporary_folder()
             {
-                var creator = new TestContextBuilderCreator();
+                var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("test.js"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
@@ -234,7 +311,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_copy_files_referenced_from_referenced_files()
             {
-                var creator = new TestContextBuilderCreator();
+                var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
                     .Returns(@"path\references.js");
@@ -262,7 +339,7 @@ namespace Chutzpah.Facts
             [Fact(Timeout = 5000)]
             public void Will_stop_infinite_loop_when_processing_referenced_files()
             {
-                var creator = new TestContextBuilderCreator();
+                var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
                     .Returns(@"path\references.js");
@@ -285,7 +362,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_not_copy_referenced_file_if_it_is_the_test_runner()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                  .Setup(x => x.GetPathInfo("test.js"))
                  .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
@@ -304,7 +381,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_run_referenced_files_through_definition_processor()
             {
-                var creator = new TestContextBuilderCreator();
+                var creator = new TestableTestContextBuilder();
                 var definition = creator.Mock<IFrameworkDefinition>();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("test.js"))
@@ -328,7 +405,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_make_names_unique_of_files_with_duplicate_names()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                      .Setup(x => x.GetPathInfo("common.js"))
                      .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\common.js" });
@@ -351,7 +428,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_put_recursively_referenced_files_before_parent_file_in_test_harness()
             {
-                var creator = new TestContextBuilderCreator();
+                var creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -388,7 +465,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_put_test_js_file_at_end_of_references_in_html_template_with_test_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -422,7 +499,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_css_files_from_js_test_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -450,7 +527,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_referenced_css_file_place_holder_in_html_template_with_referenced_css_files_from_js_test_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -473,7 +550,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -501,7 +578,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_referenced_css_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -524,7 +601,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_not_copy_referenced_path_if_not_a_file()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string TestFileContents = @"/// <reference path=""http://a.com/lib.js"" />";
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
                 creator.Mock<IFileSystemWrapper>()
@@ -539,7 +616,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_referenced_file_place_holder_with_referenced_uri()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
@@ -561,7 +638,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_replace_text_fixture_place_holder_with_existing_fixture()
             {
-                TestContextBuilderCreator creator = new TestContextBuilderCreator();
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string text = null;
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))

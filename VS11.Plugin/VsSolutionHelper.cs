@@ -12,14 +12,14 @@ namespace VS11.Plugin
 	{
 		public static IEnumerable<IVsHierarchy> EnumerateLoadedProjects(this IVsSolution solution, __VSENUMPROJFLAGS enumFlags)
 		{
-			Guid prjType = Guid.Empty;
+			var prjType = Guid.Empty;
 			IEnumHierarchies ppHier;
 
-			int hr = solution.GetProjectEnum((uint)enumFlags, ref prjType, out ppHier);
+			var hr = solution.GetProjectEnum((uint)enumFlags, ref prjType, out ppHier);
 			if (ErrorHandler.Succeeded(hr) && ppHier != null)
 			{
 				uint fetched = 0;
-				IVsHierarchy[] hierarchies = new IVsHierarchy[1];
+				var hierarchies = new IVsHierarchy[1];
 				while (ppHier.Next(1, hierarchies, out fetched) == VSConstants.S_OK)
 				{
 					yield return hierarchies[0];
@@ -29,10 +29,10 @@ namespace VS11.Plugin
 		public static IEnumerable<string> GetProjectItems(IVsProject project)
 		{
 			// Each item in VS OM is IVSHierarchy. 
-			IVsHierarchy hierarchy = (IVsHierarchy)project;
-
+			var hierarchy = (IVsHierarchy)project;
 			return GetProjectItems(hierarchy, VSConstants.VSITEMID_ROOT);
 		}
+
 		public static IEnumerable<string> GetProjectItems(IVsHierarchy project, uint itemId)
 		{
 			object pVar = GetPropertyValue((int)__VSHPROPID.VSHPROPID_FirstChild, itemId, project);
@@ -49,6 +49,7 @@ namespace VS11.Plugin
 				childId = GetItemId(pVar);
 			}
 		}
+
 		public static uint GetItemId(object pvar)
 		{
 			if (pvar == null) return VSConstants.VSITEMID_NIL;
@@ -59,6 +60,7 @@ namespace VS11.Plugin
 			if (pvar is long) return (uint)(long)pvar;
 			return VSConstants.VSITEMID_NIL;
 		}
+
 		public static object GetPropertyValue(int propid, uint itemId, IVsHierarchy vsHierarchy)
 		{
 			if (itemId == VSConstants.VSITEMID_NIL)
@@ -86,6 +88,7 @@ namespace VS11.Plugin
 				return null;
 			}
 		}
+
 		public static string GetCanonicalName(uint itemId, IVsHierarchy hierarchy)
 		{
 			string strRet = string.Empty;

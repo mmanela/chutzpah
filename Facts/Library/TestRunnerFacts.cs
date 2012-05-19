@@ -48,6 +48,32 @@ namespace Chutzpah.Facts
             }
         }
 
+
+        public class IsTestFile
+        {
+            [Fact]
+            public void Will_true_if_test_file()
+            {
+                var runner = new TestableTestRunner();
+                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js")).Returns(true);
+
+                var result = runner.ClassUnderTest.IsTestFile("a.js");
+
+                Assert.True(result);
+            }
+
+            [Fact]
+            public void Will_false_if_not_test_file()
+            {
+                var runner = new TestableTestRunner();
+                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js")).Returns(false);
+
+                var result = runner.ClassUnderTest.IsTestFile("a.js");
+
+                Assert.False(result);
+            }
+        }
+
         public class DiscoverTests
         {
             [Fact]

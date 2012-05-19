@@ -17,7 +17,7 @@ namespace Chutzpah
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
         private readonly IHasher hasher;
-        private IEnumerable<IFrameworkDefinition> frameworkDefinitions;
+        private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
 
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -107,6 +107,28 @@ namespace Chutzpah
         {
             context = BuildContext(file);
             return context != null;
+        }
+
+        public bool IsTestFile(string file)
+        {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return false;
+            }
+
+            var pathInfo = fileProbe.GetPathInfo(file);
+            var testFileKind = pathInfo.Type;
+            var testFilePath = pathInfo.FullPath;
+
+            if (testFilePath == null || testFileKind != PathType.JavaScript && testFileKind != PathType.Html)
+            {
+                return false;
+            }
+
+            var testFileText = fileSystem.GetText(testFilePath);
+
+            IFrameworkDefinition definition;
+            return TryDetectFramework(testFileText, out definition);
         }
 
         private bool TryDetectFramework(string content, out IFrameworkDefinition definition)

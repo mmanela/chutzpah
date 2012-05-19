@@ -9,9 +9,7 @@ using Chutzpah.Wrappers;
 namespace Chutzpah
 {
     public class TestRunner : ITestRunner
-    {
-        private const int TestableFileSearchLimit = 100;
-
+    {   
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
 
@@ -50,6 +48,11 @@ namespace Chutzpah
         public TestContext GetTestContext(string testFile)
         {
             return GetTestContext(testFile, new TestOptions());
+        }
+
+        public bool IsTestFile(string testFile)
+        {
+            return testContextBuilder.IsTestFile(testFile);
         }
 
         public IEnumerable<TestCase> DiscoverTests(string testPath)
@@ -134,7 +137,7 @@ namespace Chutzpah
                         // Limit the number of files we can scan to attempt to build a context for
                         // This is important in the case of folder scanning where many JS files may not be
                         // test files.
-                        if (!result || resultCount >= TestableFileSearchLimit) break;
+                        if (!result || resultCount >= options.FileSearchLimit) break;
                     }
                 }
                 catch (Exception e)
