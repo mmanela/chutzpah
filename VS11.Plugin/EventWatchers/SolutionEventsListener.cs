@@ -18,7 +18,9 @@ namespace Chutzpah.VS11.EventWatchers
         /// <summary>
         /// Fires an event when a project is opened/closed/loaded/unloaded
         /// </summary>
-        public event EventHandler<SolutionEventsListenerEventArgs> SolutionChanged;
+        public event EventHandler<SolutionEventsListenerEventArgs> SolutionProjectChanged;
+
+        public event EventHandler SolutionUnloaded;
 
         [ImportingConstructor]
         public SolutionEventsListener([Import(typeof(SVsServiceProvider))]IServiceProvider serviceProvider)
@@ -47,31 +49,57 @@ namespace Chutzpah.VS11.EventWatchers
             }
         }
 
-        public void OnSolutionUpdated(IVsProject project, SolutionChangedReason reason)
+        public void OnSolutionProjectUpdated(IVsProject project, SolutionChangedReason reason)
         {
-            if (this.SolutionChanged != null && project != null)
+            if (SolutionProjectChanged != null && project != null)
             {
-                this.SolutionChanged(this, new SolutionEventsListenerEventArgs(project, reason));
+                SolutionProjectChanged(this, new SolutionEventsListenerEventArgs(project, reason));
             }
         }
 
+        public void OnSolutionUnloaded()
+        {
+            if(SolutionUnloaded != null)
+            {
+                SolutionUnloaded(this, new System.EventArgs());
+            }
+        }
+
+
+        /// <summary>
+        /// This event is called when a project has been reloaded. This happens when you choose to unload a project 
+        /// (often to edit its .proj file) and then reload it.
+        /// </summary>
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
             var project = pRealHierarchy as IVsProject;
-            OnSolutionUpdated(project, SolutionChangedReason.Load);
+            OnSolutionProjectUpdated(project, SolutionChangedReason.Load);
             return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// This gets called when a project is unloaded
+        /// </summary>
         public int OnBeforeUnloadProject(IVsHierarchy pRealHierarchy, IVsHierarchy pStubHierarchy)
         {
             var project = pRealHierarchy as IVsProject;
-            OnSolutionUpdated(project, SolutionChangedReason.Unload);
+            OnSolutionProjectUpdated(project, SolutionChangedReason.Unload);
             return VSConstants.S_OK;
         }
 
+	    public int OnAfterCloseSolution(object pUnkReserved)
+        {
+            return VSConstants.S_OK;
+        }
 
         // Unused events...
 
+        /// <summary>
+        /// This gets called when a project is opened
+        /// </summary>
+        /// <param name="pHierarchy"></param>
+        /// <param name="fAdded">0 if alreay part of solution, 1 if it is being added to the solution</param>
+        /// <returns></returns>
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
             return VSConstants.S_OK;
@@ -88,11 +116,6 @@ namespace Chutzpah.VS11.EventWatchers
         }
 
         public int OnBeforeCloseSolution(object pUnkReserved)
-        {
-            return VSConstants.S_OK;
-        }
-
-        public int OnAfterCloseSolution(object pUnkReserved)
         {
             return VSConstants.S_OK;
         }

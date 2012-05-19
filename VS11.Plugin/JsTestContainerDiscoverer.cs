@@ -21,7 +21,8 @@ namespace Chutzpah.VS11
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
-
+        private bool fullContainerSearchNeeded;
+        private List<ITestContainer> cachedContainers; 
 
         public event EventHandler TestContainersUpdated;
 
@@ -58,7 +59,8 @@ namespace Chutzpah.VS11
             ITestFileAddRemoveListener testFilesAddRemoveListener,
             ITestRunner testRunner)
         {
-            Debugger.Break();
+            fullContainerSearchNeeded = true;
+            cachedContainers = new List<ITestContainer>();
             this.serviceProvider = serviceProvider;
             this.testRunner = testRunner;
             this.solutionListener = solutionListener;
@@ -69,7 +71,8 @@ namespace Chutzpah.VS11
             this.testFilesAddRemoveListener.TestFileChanged += OnProjectItemChanged;
             this.testFilesAddRemoveListener.StartListeningForTestFileChanges();
 
-            this.solutionListener.SolutionChanged += OnSolutionChanged;
+            this.solutionListener.SolutionUnloaded += SolutionListenerOnSolutionUnloaded;
+            this.solutionListener.SolutionProjectChanged += OnSolutionProjectChanged;
             this.solutionListener.StartListeningForChanges();
 
             this.testFilesUpdateWatcher.FileChangedEvent += OnProjectItemChanged;
@@ -87,16 +90,24 @@ namespace Chutzpah.VS11
             }
         }
 
+
+        /// <summary>
+        /// The solution was unloaded so we need to indicate that next time containers are requested we do a full search
+        /// </summary>
+        private void SolutionListenerOnSolutionUnloaded(object sender, EventArgs eventArgs)
+        {
+            fullContainerSearchNeeded = true;
+        }
+
+
         /// <summary>
         /// Handler to react to project load/unload events.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnSolutionChanged(object sender, SolutionEventsListenerEventArgs e)
+        private void OnSolutionProjectChanged(object sender, SolutionEventsListenerEventArgs e)
         {
             if (e != null)
             {
-                var containers = GetTestContainers(e.Project);
+                var containers = FindTestContainers(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
                     UpdateFileWatcher(containers, true);
@@ -123,13 +134,23 @@ namespace Chutzpah.VS11
                 {
                     case TestFileChangedReason.Added:
                         testFilesUpdateWatcher.AddWatch(e.File);
+                        if(IsTestFile(e.File))
+                        {
+                            AddOrUpdateTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
+                        }
                         break;
                     case TestFileChangedReason.Removed:
-                        testFilesUpdateWatcher.RemoveWatch(e.File);
+                        testFilesUpdateWatcher.RemoveWatch(e.File);                        
+                        if(IsTestFile(e.File))
+                        {
+                            RemoveTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
+                        }
                         break;
-                    default:
-                        //In changed case file watcher observed a file changed event
-                        //In this case we just have to fire TestContainerChnaged event
+                    case TestFileChangedReason.Changed:
+                        if(IsTestFile(e.File))
+                        {
+                            AddOrUpdateTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
+                        }
                         break;
                 }
 
@@ -148,30 +169,61 @@ namespace Chutzpah.VS11
                 if (isAdd)
                 {
                     testFilesUpdateWatcher.AddWatch(container.Source);
+                    AddOrUpdateTestContainer(container);
                 }
                 else
                 {
                     testFilesUpdateWatcher.RemoveWatch(container.Source);
+                    RemoveTestContainer(container);
                 }
             }
         }
 
+        private void AddOrUpdateTestContainer(ITestContainer container)
+        {
+            RemoveTestContainer(container);
+            cachedContainers.Add(container);
+        }
+
+        private void RemoveTestContainer(ITestContainer container)
+        {
+            var index = cachedContainers.FindIndex(x => x.Source.Equals(container.Source, StringComparison.OrdinalIgnoreCase));
+            if (index >= 0)
+            {
+                cachedContainers.RemoveAt(index);
+            }
+        }
 
         private IEnumerable<ITestContainer> GetTestContainers()
+        {
+            if(fullContainerSearchNeeded)
+            {
+                cachedContainers = FindTestContainers();
+                fullContainerSearchNeeded = false;
+            }
+
+            return cachedContainers;
+        } 
+
+        private List<ITestContainer> FindTestContainers()
         {
             var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
-            return loadedProjects.SelectMany(GetTestContainers);
+            return loadedProjects.SelectMany(FindTestContainers).ToList();
         }
 
-        private IEnumerable<ITestContainer> GetTestContainers(IVsProject project)
+        private IEnumerable<ITestContainer> FindTestContainers(IVsProject project)
         {
             return from item in VsSolutionHelper.GetProjectItems(project)
-                   where ".js".Equals(Path.GetExtension(item), StringComparison.OrdinalIgnoreCase)
-                         && testRunner.IsTestFile(item)
+                   where IsTestFile(item)
                    select new JsTestContainer(this, item, Constants.ExecutorUri);
 
+        }
+
+        private bool IsTestFile(string path)
+        {
+            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase) && testRunner.IsTestFile(path);
         }
 
         public void Dispose()
@@ -202,7 +254,7 @@ namespace Chutzpah.VS11
 
                 if (solutionListener != null)
                 {
-                    solutionListener.SolutionChanged -= OnSolutionChanged;
+                    solutionListener.SolutionProjectChanged -= OnSolutionProjectChanged;
                     solutionListener.StopListeningForChanges();
                     solutionListener = null;
                 }

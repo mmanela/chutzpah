@@ -10,12 +10,24 @@ namespace Chutzpah.VS11.EventWatchers
     [Export(typeof(ITestFilesUpdateWatcher))]
     public class TestFilesUpdateWatcher : IDisposable, ITestFilesUpdateWatcher
     {
-        private IDictionary<string, FileSystemWatcher> fileWatchers;
+        private class FileWatcherInfo
+        {
+            public FileWatcherInfo(FileSystemWatcher watcher)
+            {
+                Watcher = watcher;
+                LastEventTime = DateTime.MinValue;
+            }
+
+            public FileSystemWatcher Watcher { get; set; }
+            public DateTime LastEventTime { get; set; }
+        }
+
+        private IDictionary<string, FileWatcherInfo> fileWatchers;
         public event EventHandler<TestFileChangedEventArgs> FileChangedEvent;
 
         public TestFilesUpdateWatcher()
         {
-            fileWatchers = new Dictionary<string, FileSystemWatcher>(StringComparer.OrdinalIgnoreCase);
+            fileWatchers = new Dictionary<string, FileWatcherInfo>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void AddWatch(string path)
@@ -27,14 +39,14 @@ namespace Chutzpah.VS11.EventWatchers
                 var directoryName = Path.GetDirectoryName(path);
                 var fileName = Path.GetFileName(path);
 
-                FileSystemWatcher watcher;
-                if (!fileWatchers.TryGetValue(path, out watcher))
+                FileWatcherInfo watcherInfo;
+                if (!fileWatchers.TryGetValue(path, out watcherInfo))
                 {
-                    watcher = new FileSystemWatcher(directoryName, fileName);
-                    fileWatchers.Add(path, watcher);
+                    watcherInfo = new FileWatcherInfo(new FileSystemWatcher(directoryName, fileName));
+                    fileWatchers.Add(path, watcherInfo);
 
-                    watcher.Changed += OnChanged;
-                    watcher.EnableRaisingEvents = true;
+                    watcherInfo.Watcher.Changed += OnChanged;
+                    watcherInfo.Watcher.EnableRaisingEvents = true;
                 }
             }
         }
@@ -45,25 +57,31 @@ namespace Chutzpah.VS11.EventWatchers
 
             if (!String.IsNullOrEmpty(path))
             {
-                FileSystemWatcher watcher;
-                if (fileWatchers.TryGetValue(path, out watcher))
+                FileWatcherInfo watcherInfo;
+                if (fileWatchers.TryGetValue(path, out watcherInfo))
                 {
-                    watcher.EnableRaisingEvents = false;
+                    watcherInfo.Watcher.EnableRaisingEvents = false;
 
                     fileWatchers.Remove(path);
 
-                    watcher.Changed -= OnChanged;
-                    watcher.Dispose();
-                    watcher = null;
+                    watcherInfo.Watcher.Changed -= OnChanged;
+                    watcherInfo.Watcher.Dispose();
+                    watcherInfo.Watcher = null;
                 }
             }
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            if (FileChangedEvent != null)
+            FileWatcherInfo watcherInfo;
+            if (FileChangedEvent != null && fileWatchers.TryGetValue(e.FullPath, out watcherInfo))
             {
-                FileChangedEvent(sender, new TestFileChangedEventArgs(e.FullPath, TestFileChangedReason.Changed));
+                // Only fire update if enough time has passed since last update to prevent duplicate events
+                if (DateTime.Now.Subtract(watcherInfo.LastEventTime).TotalMilliseconds > 500)
+                {
+                    watcherInfo.LastEventTime = DateTime.Now;
+                    FileChangedEvent(sender, new TestFileChangedEventArgs(e.FullPath, TestFileChangedReason.Changed));
+                }
             }
         }
 
@@ -81,10 +99,10 @@ namespace Chutzpah.VS11.EventWatchers
             {
                 foreach (var fileWatcher in fileWatchers.Values)
                 {
-                    if (fileWatcher != null)
+                    if (fileWatcher != null && fileWatcher.Watcher != null)
                     {
-                        fileWatcher.Changed -= OnChanged;
-                        fileWatcher.Dispose();
+                        fileWatcher.Watcher.Changed -= OnChanged;
+                        fileWatcher.Watcher.Dispose();
                     }
                 }
 
