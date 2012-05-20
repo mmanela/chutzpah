@@ -76,10 +76,11 @@ namespace Chutzpah.VS11.EventWatchers
             FileWatcherInfo watcherInfo;
             if (FileChangedEvent != null && fileWatchers.TryGetValue(e.FullPath, out watcherInfo))
             {
+                var writeTime = File.GetLastWriteTime(e.FullPath);
                 // Only fire update if enough time has passed since last update to prevent duplicate events
-                if (DateTime.Now.Subtract(watcherInfo.LastEventTime).TotalMilliseconds > 500)
+                if (writeTime.Subtract(watcherInfo.LastEventTime).TotalMilliseconds > 500)
                 {
-                    watcherInfo.LastEventTime = DateTime.Now;
+                    watcherInfo.LastEventTime = writeTime;
                     FileChangedEvent(sender, new TestFileChangedEventArgs(e.FullPath, TestFileChangedReason.Changed));
                 }
             }

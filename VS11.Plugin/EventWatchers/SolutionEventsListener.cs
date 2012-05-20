@@ -88,7 +88,8 @@ namespace Chutzpah.VS11.EventWatchers
         }
 
 	    public int OnAfterCloseSolution(object pUnkReserved)
-        {
+	    {
+	        OnSolutionUnloaded();
             return VSConstants.S_OK;
         }
 

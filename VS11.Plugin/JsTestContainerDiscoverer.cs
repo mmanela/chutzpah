@@ -13,7 +13,7 @@ using VS11.Plugin;
 
 namespace Chutzpah.VS11
 {
-    [Export(typeof (ITestContainerDiscoverer))]
+    [Export(typeof(ITestContainerDiscoverer))]
     public class JsTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
@@ -21,8 +21,8 @@ namespace Chutzpah.VS11
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
-        private bool fullContainerSearchNeeded;
-        private List<ITestContainer> cachedContainers; 
+        private bool initialContainerSearch;
+        private List<ITestContainer> cachedContainers;
 
         public event EventHandler TestContainersUpdated;
 
@@ -43,8 +43,8 @@ namespace Chutzpah.VS11
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener)
-            :this(
-                serviceProvider, 
+            : this(
+                serviceProvider,
                 solutionListener,
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
@@ -59,7 +59,7 @@ namespace Chutzpah.VS11
             ITestFileAddRemoveListener testFilesAddRemoveListener,
             ITestRunner testRunner)
         {
-            fullContainerSearchNeeded = true;
+            initialContainerSearch = true;
             cachedContainers = new List<ITestContainer>();
             this.serviceProvider = serviceProvider;
             this.testRunner = testRunner;
@@ -80,11 +80,14 @@ namespace Chutzpah.VS11
 
         /// <summary>
         /// Fire Events to Notify testcontainerdiscoverer listeners that containers have changed.
-        /// This is the push notification VS uses to update the unit test window
+        /// This is the push notification VS uses to update the unit test window.
+        /// 
+        /// The initialContainerSearch check is meant to prevent us from notifying VS about updates 
+        /// until it is ready
         /// </summary>
         private void OnTestContainersChanged()
         {
-            if (TestContainersUpdated != null)
+            if (TestContainersUpdated != null && !initialContainerSearch)
             {
                 TestContainersUpdated(this, EventArgs.Empty);
             }
@@ -96,7 +99,7 @@ namespace Chutzpah.VS11
         /// </summary>
         private void SolutionListenerOnSolutionUnloaded(object sender, EventArgs eventArgs)
         {
-            fullContainerSearchNeeded = true;
+            initialContainerSearch = true;
         }
 
 
@@ -107,14 +110,14 @@ namespace Chutzpah.VS11
         {
             if (e != null)
             {
-                var containers = FindTestContainers(e.Project);
+                var files = FindJsFiles(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
-                    UpdateFileWatcher(containers, true);
+                    UpdateFileWatcher(files, true);
                 }
                 else if (e.ChangedReason == SolutionChangedReason.Unload)
                 {
-                    UpdateFileWatcher(containers, false);
+                    UpdateFileWatcher(files, false);
                 }
             }
 
@@ -123,6 +126,30 @@ namespace Chutzpah.VS11
             // The UTE will query all the TestContainerDiscoverers once the solution is loaded.
         }
 
+
+
+        /// <summary>
+        /// After a project is loaded or unloaded either add or remove from the file watcher
+        /// all test potential items inside that project
+        /// </summary>
+        private void UpdateFileWatcher(IEnumerable<string> files, bool isAdd)
+        {
+            foreach (var file in files)
+            {
+                if (isAdd)
+                {
+                    testFilesUpdateWatcher.AddWatch(file);
+                    AddTestContainerIfTestFile(file);
+                }
+                else
+                {
+                    testFilesUpdateWatcher.RemoveWatch(file);
+                    RemoveTestContainer(file);
+                }
+            }
+        }
+
+
         /// <summary>
         /// Handler to react to test file Add/remove/rename andcontents changed events
         /// </summary>
@@ -130,27 +157,23 @@ namespace Chutzpah.VS11
         {
             if (e != null)
             {
+                // Don't do anything for files we are sure can't be test files
+                if (!IsJsFile(e.File)) return;
+
                 switch (e.ChangedReason)
                 {
                     case TestFileChangedReason.Added:
                         testFilesUpdateWatcher.AddWatch(e.File);
-                        if(IsTestFile(e.File))
-                        {
-                            AddOrUpdateTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
-                        }
+                        AddTestContainerIfTestFile(e.File);
+
                         break;
                     case TestFileChangedReason.Removed:
-                        testFilesUpdateWatcher.RemoveWatch(e.File);                        
-                        if(IsTestFile(e.File))
-                        {
-                            RemoveTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
-                        }
+                        testFilesUpdateWatcher.RemoveWatch(e.File);
+                        RemoveTestContainer(e.File);
+
                         break;
                     case TestFileChangedReason.Changed:
-                        if(IsTestFile(e.File))
-                        {
-                            AddOrUpdateTestContainer(new JsTestContainer(this, e.File, Constants.ExecutorUri));
-                        }
+                        AddTestContainerIfTestFile(e.File);
                         break;
                 }
 
@@ -159,35 +182,30 @@ namespace Chutzpah.VS11
         }
 
         /// <summary>
-        /// After a project is loaded or unloaded either add or remove from the file watcher
-        /// all test items inside that project
+        /// Adds a test container for the given file if it is a test file.
+        /// This will first remove any existing container for that file
         /// </summary>
-        private void UpdateFileWatcher(IEnumerable<ITestContainer> containers, bool isAdd)
+        /// <param name="file"></param>
+        private void AddTestContainerIfTestFile(string file)
         {
-            foreach (var container in containers)
+            var isTestFile = IsTestFile(file);
+            RemoveTestContainer(file); // Remove if there is an existing container
+
+            // If this is a test file
+            if (isTestFile)
             {
-                if (isAdd)
-                {
-                    testFilesUpdateWatcher.AddWatch(container.Source);
-                    AddOrUpdateTestContainer(container);
-                }
-                else
-                {
-                    testFilesUpdateWatcher.RemoveWatch(container.Source);
-                    RemoveTestContainer(container);
-                }
+                var container = new JsTestContainer(this, file, Constants.ExecutorUri);
+                cachedContainers.Add(container);
             }
         }
 
-        private void AddOrUpdateTestContainer(ITestContainer container)
+        /// <summary>
+        /// Will remove a test container for a given file path
+        /// </summary>
+        /// <param name="file"></param>
+        private void RemoveTestContainer(string file)
         {
-            RemoveTestContainer(container);
-            cachedContainers.Add(container);
-        }
-
-        private void RemoveTestContainer(ITestContainer container)
-        {
-            var index = cachedContainers.FindIndex(x => x.Source.Equals(container.Source, StringComparison.OrdinalIgnoreCase));
+            var index = cachedContainers.FindIndex(x => x.Source.Equals(file, StringComparison.OrdinalIgnoreCase));
             if (index >= 0)
             {
                 cachedContainers.RemoveAt(index);
@@ -196,34 +214,39 @@ namespace Chutzpah.VS11
 
         private IEnumerable<ITestContainer> GetTestContainers()
         {
-            if(fullContainerSearchNeeded)
+            if (initialContainerSearch)
             {
-                cachedContainers = FindTestContainers();
-                fullContainerSearchNeeded = false;
+                var jsFiles = FindJsFiles();
+                UpdateFileWatcher(jsFiles, true);
+                initialContainerSearch = false;
             }
 
             return cachedContainers;
-        } 
-
-        private List<ITestContainer> FindTestContainers()
-        {
-            var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
-            var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
-
-            return loadedProjects.SelectMany(FindTestContainers).ToList();
         }
 
-        private IEnumerable<ITestContainer> FindTestContainers(IVsProject project)
+        private IEnumerable<string> FindJsFiles()
+        {
+            var solution = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
+            var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
+
+            return loadedProjects.SelectMany(FindJsFiles).ToList();
+        }
+
+        private IEnumerable<string> FindJsFiles(IVsProject project)
         {
             return from item in VsSolutionHelper.GetProjectItems(project)
                    where IsTestFile(item)
-                   select new JsTestContainer(this, item, Constants.ExecutorUri);
+                   select item;
+        }
 
+        private static bool IsJsFile(string path)
+        {
+            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
         }
 
         private bool IsTestFile(string path)
         {
-            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase) && testRunner.IsTestFile(path);
+            return IsJsFile(path) && testRunner.IsTestFile(path);
         }
 
         public void Dispose()
