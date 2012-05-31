@@ -67,6 +67,12 @@ namespace Chutzpah.VS11
 		
 		public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
 		{
+            if (runContext.IsDataCollectionEnabled)
+            {
+                // DataCollectors like Code Coverage are currently unavailable for JavaScript
+                frameworkHandle.SendMessage(TestMessageLevel.Warning, "DataCollectors like Code Coverage are unavailable for JavaScript");
+            }
+
 			var chutzpahRunner = TestRunner.Create();
 			var callback = new ExecutionCallback(frameworkHandle);
 			chutzpahRunner.RunTests(sources, callback);

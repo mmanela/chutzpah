@@ -216,6 +216,7 @@ namespace Chutzpah.VS11
         {
             if (initialContainerSearch)
             {
+                cachedContainers.Clear();
                 var jsFiles = FindJsFiles();
                 UpdateFileWatcher(jsFiles, true);
                 initialContainerSearch = false;
