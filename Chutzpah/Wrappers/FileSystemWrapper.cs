@@ -143,7 +143,7 @@ namespace Chutzpah.Wrappers
 
         public string GetText(string path)
         {
-            return File.ReadAllText(path);
+            return Retry(() => File.ReadAllText(path));
         }
 
         public string[] GetLines(string path)
@@ -154,6 +154,24 @@ namespace Chutzpah.Wrappers
         public void Save(string path, string contents)
         {
             File.WriteAllText(path,contents);
+        }
+
+        private T Retry<T>(Func<T> action, int maxCount = 3)
+        {
+            var count = 0;
+            while (count++ < maxCount)
+            {
+                try
+                {
+                    return action();
+                }
+                catch(IOException)
+                {
+                    if (count >= maxCount) throw;
+                }
+            }
+
+            throw new IOException("Unable to perform IO operation");
         }
 
     }

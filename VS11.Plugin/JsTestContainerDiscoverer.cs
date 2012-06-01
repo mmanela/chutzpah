@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Chutzpah.VS11.EventWatchers;
@@ -13,16 +12,18 @@ using VS11.Plugin;
 
 namespace Chutzpah.VS11
 {
-    [Export(typeof(ITestContainerDiscoverer))]
+
+    [Export(typeof (ITestContainerDiscoverer))]
     public class JsTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
+        private readonly ILogger logger;
         private readonly ITestRunner testRunner;
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
         private bool initialContainerSearch;
-        private List<ITestContainer> cachedContainers;
+        private readonly List<ITestContainer> cachedContainers;
 
         public event EventHandler TestContainersUpdated;
 
@@ -39,12 +40,14 @@ namespace Chutzpah.VS11
 
         [ImportingConstructor]
         public JsTestContainerDiscoverer(
-            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
+            ILogger logger,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener)
             : this(
                 serviceProvider,
+                logger,
                 solutionListener,
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
@@ -54,6 +57,7 @@ namespace Chutzpah.VS11
 
         public JsTestContainerDiscoverer(
             IServiceProvider serviceProvider,
+            ILogger logger,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener,
@@ -62,6 +66,7 @@ namespace Chutzpah.VS11
             initialContainerSearch = true;
             cachedContainers = new List<ITestContainer>();
             this.serviceProvider = serviceProvider;
+            this.logger = logger;
             this.testRunner = testRunner;
             this.solutionListener = solutionListener;
             this.testFilesUpdateWatcher = testFilesUpdateWatcher;
@@ -125,7 +130,6 @@ namespace Chutzpah.VS11
             // This will cause us to fire this event too early before the UTE is ready to process containers and will result in an exception.
             // The UTE will query all the TestContainerDiscoverers once the solution is loaded.
         }
-
 
 
         /// <summary>
@@ -227,7 +231,7 @@ namespace Chutzpah.VS11
 
         private IEnumerable<string> FindJsFiles()
         {
-            var solution = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
+            var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
             return loadedProjects.SelectMany(FindJsFiles).ToList();
@@ -247,7 +251,16 @@ namespace Chutzpah.VS11
 
         private bool IsTestFile(string path)
         {
-            return IsJsFile(path) && testRunner.IsTestFile(path);
+            try
+            {
+                return IsJsFile(path) && testRunner.IsTestFile(path);
+            }
+            catch (IOException e)
+            {
+                logger.Log("IO error when detecting a test file","Test Container Discovery",e);
+            }
+
+            return false;
         }
 
         public void Dispose()
@@ -265,7 +278,7 @@ namespace Chutzpah.VS11
                 if (testFilesUpdateWatcher != null)
                 {
                     testFilesUpdateWatcher.FileChangedEvent -= OnProjectItemChanged;
-                    ((IDisposable)testFilesUpdateWatcher).Dispose();
+                    ((IDisposable) testFilesUpdateWatcher).Dispose();
                     testFilesUpdateWatcher = null;
                 }
 
