@@ -48,6 +48,10 @@ task Build-Solution {
     exec { msbuild Chutzpah.VS2012.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
+task Run-PerfTester {
+    exec { & "PerfTester\bin\$configuration\chutzpah.perftester.exe" > perf_results.txt }
+}
+
 task Run-UnitTests {
     exec { & $xUnit "Facts\bin\$configuration\Facts.Chutzpah.dll" }
 }
