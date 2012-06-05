@@ -63,6 +63,7 @@
     <Compile Include="EventWatchers\ITestFilesUpdateWatcher.cs" />
     <Compile Include="JsTestContainer.cs" />
     <Compile Include="JsTestContainerDiscoverer.cs" />
+    <Compile Include="JsTestDiscoverer.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
@@ -70,7 +71,7 @@
     <Compile Include="EventWatchers\TestFileAddRemoveListener.cs" />
     <Compile Include="EventWatchers\TestFilesUpdateWatcher.cs" />
     <Compile Include="VsSolutionHelper.cs" />
-    <Compile Include="VsTestRunner.cs" />
+    <Compile Include="JsTestExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EULA.rtf">

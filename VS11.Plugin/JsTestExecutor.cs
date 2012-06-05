@@ -7,10 +7,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS11
 {
-	[FileExtension(".js")]
-	[ExtensionUri(Constants.ExecutorUriString)]
-	[DefaultExecutorUri(Constants.ExecutorUriString)]
-	public class VsTestRunner : ITestExecutor, ITestDiscoverer
+    [ExtensionUri(Constants.ExecutorUriString)]
+	public class JsTestExecutor : ITestExecutor
 	{
 		class ExecutionCallback : ITestMethodRunnerCallback
 		{
@@ -47,17 +45,6 @@ namespace Chutzpah.VS11
 
 		}
 
-
-		// The parameters on this might not match what you see if you are on a //build/ drop
-		public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
-		{
-            var chutzpahRunner = TestRunner.Create();
-            foreach (var testCase in chutzpahRunner.DiscoverTests(sources))
-            {
-                var vsTestCase = testCase.ToVsTestCase();
-                discoverySink.SendTestCase(vsTestCase);
-            }
-		}
 
 		public void Cancel()
 		{
