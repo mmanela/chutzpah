@@ -49,7 +49,9 @@ task Build-Solution {
 }
 
 task Run-PerfTester {
-    exec { & "PerfTester\bin\$configuration\chutzpah.perftester.exe" > perf_results.txt }
+    $result = & "PerfTester\bin\$configuration\chutzpah.perftester.exe"
+    Write-Output $result
+    $result | Out-File "perf_results.txt" -Encoding ASCII
 }
 
 task Run-UnitTests {

@@ -21,7 +21,7 @@
             public void Will_get_skip_if_file_is_not_under_test()
             {
                 var processor = new TestableJasmineLineNumberProcessor();
-                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, StagedPath = "path" };
+                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, Path = "path" };
 
                 processor.ClassUnderTest.Process(file);
 
@@ -32,7 +32,7 @@
             public void Will_get_line_number_for_tests()
             {
                 var processor = new TestableJasmineLineNumberProcessor();
-                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, StagedPath = "path" };
+                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
                 {
                     "//js file",
@@ -54,7 +54,7 @@
             public void Will_get_line_number_for_test_with_quotes_in_title()
             {
                 var processor = new TestableJasmineLineNumberProcessor();
-                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, StagedPath = "path" };
+                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
                 {
                     "describe ( 'modu\"le\\'1', function () {",

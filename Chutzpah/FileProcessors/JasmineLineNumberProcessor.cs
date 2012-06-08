@@ -19,7 +19,7 @@
                 return;
             }
 
-            var lines = this.fileSystem.GetLines(referencedFile.StagedPath);
+            var lines = this.fileSystem.GetLines(referencedFile.Path);
             int lineNum = 1;
 
             foreach (var line in lines)

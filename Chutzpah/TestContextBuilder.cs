@@ -53,7 +53,6 @@ namespace Chutzpah
             }
 
             var stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
-            var testFileName = Path.GetFileName(file);
             var testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
@@ -71,17 +70,17 @@ namespace Chutzpah
 
                 if (testFileKind == PathType.JavaScript)
                 {
-                    var stagedFilePath = Path.Combine(stagingFolder, testFileName);
-                    referencedFiles.Add(new ReferencedFile { Path = testFilePath, StagedPath = stagedFilePath, IsLocal = true, IsFileUnderTest = true });
+                    var fileUnderTest = new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
+                    referencedFiles.Add(fileUnderTest);
+                    definition.Process(fileUnderTest);
                 }
                 else if (testFileKind == PathType.Html)
                 {
                     fixtureContent = definition.GetFixtureContent(testFileText);
                 }
 
-                GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath, stagingFolder);
+                GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath);
 
-                CopyReferencedFiles(referencedFiles, definition);
 
                 foreach (var item in definition.FileDependencies)
                 {
@@ -173,16 +172,16 @@ namespace Chutzpah
         /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
-        private void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
+        private void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath)
         {
-            var result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)), definition, testFileType, textToParse, currentFilePath, stagingFolder);
+            var result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)), definition, testFileType, textToParse, currentFilePath);
             var flattenedReferenceTree = from root in result
                                          from flattened in FlattenReferenceGraph(root)
                                          select flattened;
             referencedFiles.AddRange(flattenedReferenceTree);
         }
 
-        private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath, string stagingFolder)
+        private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath)
         {
             var referencedFiles = new List<ReferencedFile>();
             var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
@@ -206,17 +205,15 @@ namespace Chutzpah
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null && !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var uniqueFileName = MakeUniqueIfNeeded(referenceFileName, discoveredPaths);
-                            var stagedPath = Path.Combine(stagingFolder, uniqueFileName);
-                            var referencedFile = new ReferencedFile { Path = absolutePath, StagedPath = stagedPath, IsLocal = true };
+                            var referencedFile = new ReferencedFile { Path = absolutePath, IsLocal = true };
                             referencedFiles.Add(referencedFile);
                             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
-                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath, stagingFolder);
+                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath);
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile { Path = referencePath, StagedPath = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
             }
@@ -224,12 +221,12 @@ namespace Chutzpah
             return referencedFiles;
         }
 
-        private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths, IFrameworkDefinition definition, string currentFilePath, string stagingFolder)
+        private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths, IFrameworkDefinition definition, string currentFilePath)
         {
             try
             {
                 var textToParse = fileSystem.GetText(currentFilePath);
-                return GetReferencedFiles(discoveredPaths, definition, PathType.JavaScript, textToParse, currentFilePath, stagingFolder);
+                return GetReferencedFiles(discoveredPaths, definition, PathType.JavaScript, textToParse, currentFilePath);
 
             }
             catch (IOException)
@@ -238,19 +235,6 @@ namespace Chutzpah
             }
 
             return new List<ReferencedFile>();
-        }
-
-        private void CopyReferencedFiles(IEnumerable<ReferencedFile> referencedFiles, IFrameworkDefinition definition)
-        {
-            foreach (var referencedFile in referencedFiles)
-            {
-                if (referencedFile.IsLocal)
-                {
-                    fileSystem.CopyFile(referencedFile.Path, referencedFile.StagedPath);
-                    fileSystem.SetFileAttributes(referencedFile.StagedPath, FileAttributes.Normal);
-                    definition.Process(referencedFile);
-                }
-            }
         }
 
         private static IEnumerable<ReferencedFile> FlattenReferenceGraph(ReferencedFile rootFile)
@@ -272,7 +256,7 @@ namespace Chutzpah
 
             foreach (ReferencedFile referencedFile in referencedFiles.OrderBy(x => x.IsFileUnderTest))
             {
-                var referencePath = referencedFile.IsLocal ? Path.GetFileName(referencedFile.StagedPath) : referencedFile.StagedPath;
+                var referencePath = referencedFile.Path;
                 if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
                 {
 
@@ -303,21 +287,6 @@ namespace Chutzpah
         {
             const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
             return string.Format(format, path);
-        }
-
-        /// <summary>
-        /// Scan the files referenced so far and change current filename to prevent conflicts.
-        /// This is needed since we don't preserve directory hierarchy. We flatten the tree.
-        /// </summary>
-        private string MakeUniqueIfNeeded(string fileName, IEnumerable<string> discoveredPaths)
-        {
-            if (discoveredPaths.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.OrdinalIgnoreCase)))
-            {
-                var randomFileName = fileSystem.GetRandomFileName();
-                return string.Format("{0}_{1}", randomFileName, fileName);
-            }
-
-            return fileName;
         }
     }
 }
