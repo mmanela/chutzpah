@@ -2,5 +2,6 @@
 
 test("A console log", function () {
     console.log("hello");
+    expect(0);
 });
 
