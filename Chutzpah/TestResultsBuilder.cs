@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
+    public class TestCaseStreamReader
+    {
+        public IEnumerable<TestCase> Read(Stream stream)
+        {
+            throw new NotImplementedException();
+        }    
+    }
+
     public class TestResultsBuilder : ITestResultsBuilder
     {
         private readonly IJsonSerializer jsonSerializer;

@@ -14,18 +14,65 @@
     }
 
     function setupQUnit() {
+        var activeTestCase = null;
+        window.chutzpah.isRunning = true;
+        window.chutzpah.testCases = [];
+        
         if (window.chutzpah && window.chutzpah.testMode === 'discovery') {
-            // In discovery mode override QUnit's functions
-            window.chutzpah.testCases = [];
             window.chutzpah.currentModule = null;
+
+            // In discovery mode override QUnit's functions
 
             window.module = QUnit.module = function (name) {
                 window.chutzpah.currentModule = name;
             };
             window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
-                window.chutzpah.testCases.push({ module: window.chutzpah.currentModule, name: name });
+                var testCase = { module: window.chutzpah.currentModule, name: name };
+                log({ type: "TestDone", testCase: testCase });
             };
         }
+        
+        QUnit.begin(function() {
+            // Testing began
+            log({ type: "FileStart" });
+        });
+
+        QUnit.testStart(function(info) {
+            var newTestCase = { module: info.module, name: info.name, testResults: [] };
+            window.chutzpah.testCases.push(newTestCase);
+            activeTestCase = newTestCase;
+            log({ type: "TestStart", testCase: activeTestCase });
+        });
+
+        QUnit.log(function(info) {
+            if (info.result !== undefined) {
+                var testResult = { };
+                testResult.result = info.result;
+                testResult.actual = info.actual;
+                testResult.expected = info.expected;
+                testResult.message = info.message;
+
+                activeTestCase.testResults.push(testResult);
+            }
+        });
+
+        QUnit.testDone(function(info) {
+            // Log test case when done. This will get picked up by phantom and streamed to chutzpah.
+            log({ type: "TestDone", testCase: activeTestCase });
+        });
+
+        QUnit.done(function(info) {
+            window.chutzpah.testingTime = info.runtime;
+
+            log({ type: "FileDone", runtime: info.runtime, failed: info.failed, passed: info.passed });
+            window.chutzpah.isRunning = false;
+        });
+        
+
+    }
+    
+    function log(obj) {
+        console.log(JSON.stringify(obj));
     }
 
     if (window.QUnit) {
