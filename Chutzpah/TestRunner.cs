@@ -9,7 +9,7 @@ using Chutzpah.Wrappers;
 namespace Chutzpah
 {
     public class TestRunner : ITestRunner
-    {   
+    {
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
 
@@ -57,12 +57,12 @@ namespace Chutzpah
 
         public IEnumerable<TestCase> DiscoverTests(string testPath)
         {
-            return DiscoverTests(new[] {testPath});
+            return DiscoverTests(new[] { testPath });
         }
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths)
         {
-            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, null);
+            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, new EmptyRunnerCallback());
             return summary.Tests;
         }
 
@@ -89,12 +89,12 @@ namespace Chutzpah
                                            ITestMethodRunnerCallback callback = null)
         {
 
-
-            if (callback != null) callback.TestSuiteStarted();
+            callback = callback ?? new EmptyRunnerCallback();
+            callback.TestSuiteStarted();
 
             var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback);
 
-            if (callback != null) callback.TestSuiteFinished(summary);
+            callback.TestSuiteFinished(summary);
             return summary;
         }
 
@@ -108,7 +108,7 @@ namespace Chutzpah
             if (fileProbe.FindFilePath(TestRunnerJsName) == null)
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
-            var summary = new TestCaseSummary();
+            var overallSummary = new TestCaseSummary();
             var resultCount = 1;
             foreach (string testFile in fileProbe.FindScriptFiles(testPaths))
             {
@@ -124,7 +124,7 @@ namespace Chutzpah
                                                         testContext,
                                                         testRunnerMode,
                                                         callback);
-                        summary.Append(summary);
+                        overallSummary.Append(testSummary);
 
                         if (options.OpenInBrowser)
                         {
@@ -139,12 +139,11 @@ namespace Chutzpah
                 }
                 catch (Exception e)
                 {
-                    if (callback != null)
-                        callback.ExceptionThrown(e, testFile);
+                    callback.ExceptionThrown(e, testFile);
                 }
             }
 
-            return summary;
+            return overallSummary;
         }
 
         private TestCaseSummary InvokeTestRunner(string headlessBrowserPath,
@@ -161,7 +160,7 @@ namespace Chutzpah
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
 
             Func<StreamReader, TestCaseSummary> streamProcessor =
-                stream => testCaseStreamReader.Read(stream, testContext, testRunnerMode, callback, DebugEnabled);
+                stream => testCaseStreamReader.Read(stream, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
             HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile);
@@ -171,7 +170,7 @@ namespace Chutzpah
 
         private static void HandleTestProcessExitCode(int exitCode, string inputTestFile)
         {
-            switch ((TestProcessExitCode) exitCode)
+            switch ((TestProcessExitCode)exitCode)
             {
                 case TestProcessExitCode.AllPassed:
                 case TestProcessExitCode.SomeFailed:

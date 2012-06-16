@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 namespace Chutzpah.Models.JS
 {
-    public class JsErrors : JsRunnerOutput
+    public class JsError : JsRunnerOutput
     {
-        public IEnumerable<TestError> Errors { get; set; }
+        public TestError Error { get; set; }
     }
 }

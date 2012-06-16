@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 namespace Chutzpah.Models
 {
-    public class JsLogs : JsRunnerOutput
+    public class JsLog : JsRunnerOutput
     {
-        public IEnumerable<TestLog> Logs { get; set; }
+        public TestLog Log { get; set; }
     }
 }

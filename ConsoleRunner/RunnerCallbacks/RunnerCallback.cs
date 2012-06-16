@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Chutzpah.Models;
 
 namespace Chutzpah.RunnerCallbacks
@@ -16,11 +17,45 @@ namespace Chutzpah.RunnerCallbacks
         public virtual void ExceptionThrown(Exception exception, string fileName)
         {
             Console.WriteLine();
-            Console.WriteLine("ERROR OCCURRED:");
+            Console.WriteLine("CHUTZPAH ERROR:");
             Console.WriteLine(exception.ToString());
             Console.WriteLine("WHILE RUNNING:");
             Console.WriteLine(fileName);
             Console.WriteLine();
+        }
+
+        public void FileError(TestError error)
+        {
+            Console.WriteLine();
+            Console.WriteLine("TEST FILE ERROR:");
+            Console.WriteLine(error.Message);
+            foreach(var item in error.Stack)
+            {
+                var message = "";
+                if (!string.IsNullOrEmpty(item.Function))
+                {
+                    message += "at " + item.Function + " ";
+                }
+                if (!string.IsNullOrEmpty(item.File))
+                {
+                    message += "in " + item.File;
+                }
+                if(!string.IsNullOrEmpty(item.Line))
+                {
+                    message += ":line " + item.Line;
+                }
+                
+                Console.WriteLine(message);
+            }
+
+            Console.WriteLine("WHILE RUNNING:");
+            Console.WriteLine(error.InputTestFile);
+            Console.WriteLine();
+        }
+
+        public void FileLog(TestLog log)
+        {
+            Console.WriteLine("Log Message: {0} from {1}",log.Message, log.InputTestFile);
         }
 
         public virtual void FileStarted(string fileName)
@@ -69,7 +104,7 @@ namespace Chutzpah.RunnerCallbacks
         {
             
             var errorString = "";
-            foreach (var result in testCase.TestResults)
+            foreach (var result in testCase.TestResults.Where(x => !x.Passed))
             {
                 if (result.Expected != null || result.Actual != null)
                 {

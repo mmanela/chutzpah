@@ -37,45 +37,44 @@ chutzpah.runner = function (areTestsComplete) {
     function wrap(txt) {
         return '#_#' + txt + '#_# ';
     }
+    
+    function writeEvent(eventObj, json) {
+        switch (eventObj.type) {
+            case 'FileStart':
+            case 'TestStart':
+            case 'TestDone':
+            case 'Log':
+            case 'Error':
+                console.log(wrap(eventObj.type) + json);
+                break;
+                
+            case 'FileDone':
+                console.log(wrap(eventObj.type) + json);
+                phantom.exit(eventObj.failed > 0 ? 1 : 0);
+                break;
+               
+            default:
+                break;
+        }
+    }
 
     function captureLogMessage(message) {
         try {
             var obj = JSON.parse(message);
             if (!obj || !obj.type) throw "Unknown object";
+            writeEvent(obj, message);
 
-            switch (obj.type) {
-                case 'FileStart':
-
-                    console.log(wrap(obj.type) + message);
-                    break;
-
-                case 'TestStart':
-                case 'TestDone':
-                    console.log(wrap(obj.type) + message);
-                    break;
-
-                case 'FileDone':
-                    console.log(wrap(obj.type) + message);
-
-                    var logsObj = { type: "Logs", Logs:logs };
-                    var errorsObj = { type: "Errors", Errors: errors };
-                    console.log(wrap(logsObj.type) + JSON.stringify(logsObj));
-                    console.log(wrap(errorsObj.type) + JSON.stringify(errorsObj));
-                    phantom.exit(obj.failed  > 0 ? 1 : 0);
-                    break;
-
-                default:
-                    break;
-            }
         }
         catch (e) {
             // The message was not a test status object so log as message
-            logs.push({message: message});
+            var log = { type: 'Log', log: { message: message } };
+            writeEvent(log, JSON.stringify(log));
         }
     }
 
     function onError(msg, stack) {
-        errors.push({ message: msg, stack: stack });
+        var error = { type: 'Error', error: { message: msg, stack: stack } };
+        writeEvent(error, JSON.stringify(error));
     }
 
     function pageOpenHandler(status) {

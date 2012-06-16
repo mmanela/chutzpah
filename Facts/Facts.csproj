@@ -65,7 +65,7 @@
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
-    <Compile Include="Library\TestResultsBuilderFacts.cs" />
+    <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\TestRunnerFacts.cs" />

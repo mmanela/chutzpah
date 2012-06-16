@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chutzpah.Models;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
 namespace Chutzpah.VS11
 {
@@ -18,16 +20,47 @@ namespace Chutzpah.VS11
 			{
 				this.frameworkHandle = frameworkHandle;
 			}
-
-			// And we'll ignore these for execution
-			// What we need, but don't have, is TestStarted
+            
 			public void TestSuiteStarted() { }
-			public void TestSuiteFinished(Chutzpah.Models.TestCaseSummary testResultsSummary) { }
-			public void ExceptionThrown(Exception exception, string fileName) { }
-			public void FileStarted(string fileName) { }
-			public void FileFinished(string fileName, Chutzpah.Models.TestCaseSummary testResultsSummary) { }
+			public void TestSuiteFinished(TestCaseSummary testResultsSummary) { }
 
-            public void TestStarted(Chutzpah.Models.TestCase test)
+
+            public void FileError(TestError error)
+            {
+                var stack = "";
+                foreach (var item in error.Stack)
+                {
+                    if (!string.IsNullOrEmpty(item.Function))
+                    {
+                        stack += "at " + item.Function + " ";
+                    }
+                    if (!string.IsNullOrEmpty(item.File))
+                    {
+                        stack += "in " + item.File;
+                    }
+                    if (!string.IsNullOrEmpty(item.Line))
+                    {
+                        stack += ":line " + item.Line;
+                    }
+                }
+
+               frameworkHandle.SendMessage(TestMessageLevel.Error,string.Format("Test File Error:\n{0}\n {1}\nWhile Running:{2}\n\n", error.Message, stack, error.InputTestFile));
+            }
+
+            public void FileLog(TestLog log)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Informational,string.Format("Log Message: {0} from {1}\n", log.Message, log.InputTestFile));
+            }
+
+            public void ExceptionThrown(Exception exception, string fileName)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Error,string.Format("Chutzpah Error:\n{0}\n While Running:{1}\n\n", exception, fileName);
+            }
+
+		    public void FileStarted(string fileName) { }
+			public void FileFinished(string fileName, TestCaseSummary testResultsSummary) { }
+
+            public void TestStarted(Models.TestCase test)
             {
                 var testCase = test.ToVsTestCase();
 
@@ -35,7 +68,7 @@ namespace Chutzpah.VS11
                 frameworkHandle.RecordStart(testCase);
 			    
 			}
-			public void TestFinished(Chutzpah.Models.TestCase test)
+			public void TestFinished(Models.TestCase test)
 			{
                 var testCase = test.ToVsTestCase();
                 var results = test.ToVsTestResults();
@@ -56,7 +89,6 @@ namespace Chutzpah.VS11
 
 		public void Cancel()
 		{
-            // Will add code here when streaming tests is implemented
 		}
 
 		
