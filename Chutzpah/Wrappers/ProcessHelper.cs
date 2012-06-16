@@ -1,11 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using Chutzpah.Models;
 
 namespace Chutzpah.Wrappers
 {
     public class ProcessHelper : IProcessHelper
     {
-        public ProcessResult RunExecutableAndCaptureOutput(string exePath, string arguments)
+        public ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<StreamReader,T> streamProcessor)
         {
             var p = new Process();
             p.StartInfo.UseShellExecute = false;
@@ -14,9 +16,9 @@ namespace Chutzpah.Wrappers
             p.StartInfo.FileName = exePath;
             p.StartInfo.Arguments = arguments;
             p.Start();
-            var output = p.StandardOutput.ReadToEnd();
+            var output = streamProcessor(p.StandardOutput);
             p.WaitForExit();
-            return new ProcessResult(p.ExitCode, output);
+            return new ProcessResult<T>(p.ExitCode, output);
         }
 
         public void LaunchFileInBrowser(string file)

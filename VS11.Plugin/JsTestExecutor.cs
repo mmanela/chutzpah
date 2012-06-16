@@ -22,24 +22,32 @@ namespace Chutzpah.VS11
 			// And we'll ignore these for execution
 			// What we need, but don't have, is TestStarted
 			public void TestSuiteStarted() { }
-			public void TestSuiteFinished(Chutzpah.Models.TestResultsSummary testResultsSummary) { }
+			public void TestSuiteFinished(Chutzpah.Models.TestCaseSummary testResultsSummary) { }
 			public void ExceptionThrown(Exception exception, string fileName) { }
-			public bool FileStart(string fileName) { return true; }
-			public bool FileFinished(string fileName, Chutzpah.Models.TestResultsSummary testResultsSummary) { return true; }
+			public void FileStarted(string fileName) { }
+			public void FileFinished(string fileName, Chutzpah.Models.TestCaseSummary testResultsSummary) { }
 
-			public void TestFinished(Chutzpah.Models.TestResult result)
+            public void TestStarted(Chutzpah.Models.TestCase test)
+            {
+                var testCase = test.ToVsTestCase();
+
+                // The test case is starting
+                frameworkHandle.RecordStart(testCase);
+			    
+			}
+			public void TestFinished(Chutzpah.Models.TestCase test)
 			{
-				var testCase = result.ToVsTestCase();
-                var vsresult = result.ToVsTestResult();
-                var outcome = result.ToVsTestOutcome();
-
-				// The test case is starting
-				frameworkHandle.RecordStart(testCase);
+                var testCase = test.ToVsTestCase();
+                var results = test.ToVsTestResults();
+                var outcome = ChutzpahExtensionMethods.ToVsTestOutcome(test.Passed);
 	
 				// Record a result (there can be many)
-				frameworkHandle.RecordResult(vsresult);
+                foreach (var result in results)
+                {
+                    frameworkHandle.RecordResult(result);
+                }
 
-				// The test case is done
+			    // The test case is done
                 frameworkHandle.RecordEnd(testCase, outcome);
 			}
 

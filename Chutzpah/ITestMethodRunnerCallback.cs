@@ -7,14 +7,16 @@ namespace Chutzpah
     {
         void TestSuiteStarted();
 
-        void TestSuiteFinished(TestResultsSummary testResultsSummary);
+        void TestSuiteFinished(TestCaseSummary testResultsSummary);
 
         void ExceptionThrown(Exception exception, string fileName);
 
-        bool FileStart(string fileName);
+        void FileStarted(string fileName);
 
-        bool FileFinished(string fileName, TestResultsSummary testResultsSummary);
+        void FileFinished(string fileName, TestCaseSummary testResultsSummary);
 
-        void TestFinished(TestResult result);
+        void TestStarted(TestCase testCase);
+
+        void TestFinished(TestCase testCase);
     }
 }

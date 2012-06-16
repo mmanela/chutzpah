@@ -14,7 +14,7 @@ namespace Chutzpah.RunnerCallbacks
             this.silent = silent;
         }
 
-        public override void TestSuiteFinished(TestResultsSummary testResultsSummary)
+        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
 
             if (!silent)
@@ -27,7 +27,7 @@ namespace Chutzpah.RunnerCallbacks
             base.TestSuiteFinished(testResultsSummary);
         }
 
-        public override bool FileFinished(string fileName, TestResultsSummary testResultsSummary)
+        public override void FileFinished(string fileName, TestCaseSummary testResultsSummary)
         {
             if (!silent)
                 Console.Write("\r");
@@ -39,24 +39,24 @@ namespace Chutzpah.RunnerCallbacks
 
             PrintRunningTestCount();
 
-            return base.FileFinished(fileName, testResultsSummary);
+            base.FileFinished(fileName, testResultsSummary);
         }
 
-        protected override void TestFailed(TestResult result)
+        protected override void TestFailed(TestCase testCase)
         {
             if (!silent)
                 Console.Write("\r");
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("{0} [FAIL]", GetTestDisplayText(result));
+            Console.WriteLine("{0} [FAIL]", GetTestDisplayText(testCase));
             Console.ResetColor();
 
-            Console.WriteLine(Indent(GetTestFailureMessage(result)));
+            Console.WriteLine(Indent(GetTestFailureMessage(testCase)));
 
             Console.WriteLine();
         }
 
-        protected override void TestComplete(TestResult result)
+        protected override void TestComplete(TestCase testCase)
         {
             ++testCount;
             PrintRunningTestCount();

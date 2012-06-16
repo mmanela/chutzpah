@@ -9,7 +9,7 @@ namespace Chutzpah.RunnerCallbacks
         {
         }
 
-        public virtual void TestSuiteFinished(TestResultsSummary testResultsSummary)
+        public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
         }
 
@@ -23,63 +23,64 @@ namespace Chutzpah.RunnerCallbacks
             Console.WriteLine();
         }
 
-        public virtual bool FileStart(string fileName)
+        public virtual void FileStarted(string fileName)
         {
-            return true;
         }
 
-        public virtual bool FileFinished(string fileName, TestResultsSummary testResultsSummary)
+        public virtual void FileFinished(string fileName, TestCaseSummary testResultsSummary)
         {
-            return true;
         }
 
-        public void TestFinished(TestResult result)
+        public virtual void TestStarted(TestCase testCase)
         {
-            TestStarted(result);
-            if (result.Passed)
-                TestPassed(result);
-            if (!result.Passed)
-                TestFailed(result);
 
-            TestComplete(result);
         }
 
-        protected virtual void TestComplete(TestResult result)
+        public virtual void TestFinished(TestCase testCase)
+        {
+            if (testCase.Passed)
+                TestPassed(testCase);
+            if (!testCase.Passed)
+                TestFailed(testCase);
+
+            TestComplete(testCase);
+        }
+
+        protected virtual void TestComplete(TestCase testCase)
+        {
+
+        }
+
+        protected virtual void TestFailed(TestCase testCase)
+        {
+        }
+
+        protected virtual void TestPassed(TestCase testCase)
+        {
+        }
+
+
+        protected string GetTestDisplayText(TestCase testCase)
+        {
+            return string.IsNullOrWhiteSpace(testCase.ModuleName) ? testCase.TestName : string.Format("{0}:{1}", testCase.ModuleName, testCase.TestName);
+        }
+
+        protected string GetTestFailureMessage(TestCase testCase)
         {
             
-        }
-
-        protected virtual void TestFailed(TestResult result)
-        {
-        }
-
-        protected virtual void TestStarted(TestResult result)
-        {
-        }        
-        
-        protected virtual void TestPassed(TestResult result)
-        {
-        }
-
-
-        protected string GetTestDisplayText(TestResult result)
-        {
-            return string.IsNullOrWhiteSpace(result.ModuleName) ? result.TestName : string.Format("{0}:{1}", result.ModuleName, result.TestName);
-        }
-
-        protected string GetTestFailureMessage(TestResult result)
-        {
             var errorString = "";
-            if (result.Expected != null || result.Actual != null)
+            foreach (var result in testCase.TestResults)
             {
-                errorString += string.Format("Expected: {0}, Actual: {1}", result.Expected, result.Actual);
+                if (result.Expected != null || result.Actual != null)
+                {
+                    errorString += string.Format("Expected: {0}, Actual: {1}\n", result.Expected, result.Actual);
+                }
+                else if (!string.IsNullOrWhiteSpace(result.Message))
+                {
+                    errorString += string.Format("{0}", result.Message);
+                }
             }
-            else if(!string.IsNullOrWhiteSpace(result.Message))
-            {
-                errorString += string.Format("{0}", result.Message);
-            }
-
-            errorString += string.Format("\n\tin {0}({1},{2}) at {3}\n\n", result.InputTestFile, result.Line, result.Column, GetTestDisplayText(result));
+            errorString += string.Format("\n\tin {0}({1},{2}) at {3}\n\n", testCase.InputTestFile, testCase.Line, testCase.Column, GetTestDisplayText(testCase));
 
             return errorString;
         }

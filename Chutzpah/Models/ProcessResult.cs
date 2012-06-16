@@ -1,6 +1,6 @@
 ﻿namespace Chutzpah.Models
 {
-    public class ProcessResult
+    public class ProcessResult<T>
     {
         public ProcessResult(){}
 
@@ -9,12 +9,12 @@
             ExitCode = exitCode;
         }
 
-        public ProcessResult(int exitCode, string standardOutput) : this(exitCode)
+        public ProcessResult(int exitCode, T result) : this(exitCode)
         {
-            StandardOutput = standardOutput;
+            Model = result;
         }
 
         public int ExitCode { get; set; }
-        public string StandardOutput { get; set; }
+        public T Model { get; set; }
     }
 }

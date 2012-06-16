@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -6,30 +7,33 @@ namespace Chutzpah.VS11
 {
     public static class ChutzpahExtensionMethods
     {
-        public static TestCase ToVsTestCase(this Chutzpah.Models.TestCase testCase)
+        public static TestCase ToVsTestCase(this Chutzpah.Models.TestCase test)
         {
-            return new TestCase(BuildFullyQualifiedName(testCase), Constants.ExecutorUri, testCase.InputTestFile)
+            return new TestCase(BuildFullyQualifiedName(test), Constants.ExecutorUri, test.InputTestFile)
                        {
-                           CodeFilePath = testCase.InputTestFile,
-                           DisplayName = GetTestDisplayText(testCase),
-                           LineNumber = testCase.Line,
+                           CodeFilePath = test.InputTestFile,
+                           DisplayName = GetTestDisplayText(test),
+                           LineNumber = test.Line,
                        };
         }
 
-        public static TestResult ToVsTestResult(this Chutzpah.Models.TestResult result)
+        public static IEnumerable<TestResult> ToVsTestResults(this Models.TestCase test)
         {
-            var testCase = result.ToVsTestCase();
-            return new TestResult(testCase)
-                       {
-                           DisplayName = testCase.DisplayName,
-                           ErrorMessage = GetTestFailureMessage(result),
-                           Outcome = result.ToVsTestOutcome()
-                       };
+            var testCase = test.ToVsTestCase();
+            var results = test.TestResults.Select(result =>
+                new TestResult(testCase)
+                           {
+                               DisplayName = testCase.DisplayName,
+                               ErrorMessage = GetTestFailureMessage(result),
+                               Outcome = ToVsTestOutcome(result.Passed)
+                           });
+
+            return results;
         }
 
-        public static TestOutcome ToVsTestOutcome(this Chutzpah.Models.TestResult result)
+        public static TestOutcome ToVsTestOutcome(bool passed)
         {
-            return result.Passed ? TestOutcome.Passed : TestOutcome.Failed;
+            return passed  ? TestOutcome.Passed : TestOutcome.Failed;
         }
 
         private static string BuildFullyQualifiedName(Chutzpah.Models.TestCase testCase)

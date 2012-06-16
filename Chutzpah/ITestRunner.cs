@@ -28,10 +28,10 @@ namespace Chutzpah
         TestContext GetTestContext(string testFile, TestOptions options);
 
 
-        TestResultsSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null);
-        TestResultsSummary RunTests(string testPath, TestOptions options, ITestMethodRunnerCallback callback = null);
-        TestResultsSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null);
-        TestResultsSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null);
+        TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null);
+        TestCaseSummary RunTests(string testPath, TestOptions options, ITestMethodRunnerCallback callback = null);
+        TestCaseSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null);
+        TestCaseSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null);
 
 
         IEnumerable<TestCase> DiscoverTests(string testPath);

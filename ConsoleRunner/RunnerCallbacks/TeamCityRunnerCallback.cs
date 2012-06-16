@@ -7,7 +7,7 @@ namespace Chutzpah.RunnerCallbacks
     {
         private const string ChutzpahJavascriptTestSuiteName = "JavaScript Tests";
 
-        public override void TestSuiteFinished(TestResultsSummary summary)
+        public override void TestSuiteFinished(TestCaseSummary summary)
         {
             base.TestSuiteFinished(summary);
 
@@ -19,31 +19,31 @@ namespace Chutzpah.RunnerCallbacks
             Console.WriteLine("##teamcity[testSuiteStarted name='{0}']",Escape(ChutzpahJavascriptTestSuiteName));
         }
 
-        protected override void TestFailed(TestResult result)
+        protected override void TestFailed(TestCase testCase)
         {
             Console.WriteLine(
                 "##teamcity[testFailed name='{0}' details='{1}']",
-                Escape(GetTestDisplayText(result)),
-                Escape(GetTestFailureMessage(result))
+                Escape(GetTestDisplayText(testCase)),
+                Escape(GetTestFailureMessage(testCase))
                 );
 
-            WriteOutput(GetTestDisplayText(result), GetTestFailureMessage(result));
+            WriteOutput(GetTestDisplayText(testCase), GetTestFailureMessage(testCase));
         }
 
-        protected override void TestComplete(TestResult result)
+        protected override void TestComplete(TestCase testCase)
         {
-            WriteFinished(GetTestDisplayText(result), 0);
+            WriteFinished(GetTestDisplayText(testCase), 0);
         }
 
-        protected override void TestPassed(TestResult result)
+        protected override void TestPassed(TestCase testCase)
         {
-            WriteOutput(GetTestDisplayText(result), "Passed");
+            WriteOutput(GetTestDisplayText(testCase), "Passed");
         }
 
-        protected override void TestStarted(TestResult result)
+        public override void TestStarted(TestCase testCase)
         {
             Console.WriteLine(
-                "##teamcity[testStarted name='{0}']", Escape(GetTestDisplayText(result)));
+                "##teamcity[testStarted name='{0}']", Escape(GetTestDisplayText(testCase)));
         }
 
         // Helpers

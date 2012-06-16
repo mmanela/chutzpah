@@ -1,10 +1,12 @@
-﻿using Chutzpah.Models;
+﻿using System;
+using System.IO;
+using Chutzpah.Models;
 
 namespace Chutzpah.Wrappers
 {
     public interface IProcessHelper
     {
-        ProcessResult RunExecutableAndCaptureOutput(string exePath, string arguments);
         void LaunchFileInBrowser(string file);
+        ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<StreamReader,T> streamProcessor);
     }
 }

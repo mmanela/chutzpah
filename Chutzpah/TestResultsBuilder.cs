@@ -2,19 +2,82 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Chutzpah.Models;
+using Chutzpah.Models.JS;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
-    public class TestCaseStreamReader
+    public interface ITestCaseStreamReader
     {
-        public IEnumerable<TestCase> Read(Stream stream)
+        TestCaseSummary Read(StreamReader stream, TestContext testContext, TestRunnerMode testRunnerMode, ITestMethodRunnerCallback callback, bool debugEnabled);
+    }
+
+    public class TestCaseStreamReader : ITestCaseStreamReader
+    {        
+        private readonly IJsonSerializer jsonSerializer;
+        private readonly Regex prefixRegex = new Regex("^#_#(?<type>[a-z]+)#_#(?<json>.*)",RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        public TestCaseStreamReader()
         {
-            throw new NotImplementedException();
+            this.jsonSerializer = new JsonSerializer();
+        }
+
+        public TestCaseSummary Read(StreamReader stream, TestContext testContext, TestRunnerMode testRunnerMode, ITestMethodRunnerCallback callback, bool debugEnabled)
+        {
+            if (stream == null) throw new ArgumentNullException("stream");
+            if (testContext == null) throw new ArgumentNullException("testContext");
+
+            var summary = new TestCaseSummary();
+            string line;
+            while((line = stream.ReadLine()) != null)
+            {
+                var match = prefixRegex.Match(line);
+                if(!match.Success) continue;
+                var type = match.Groups["type"].Value;
+                var json = match.Groups["json"].Value;
+
+                JsTestCase jsTestCase = null;
+                switch (type)
+                {
+                    case "FileStart":
+                        callback.FileStarted(testContext.InputTestFile);
+                        break;
+
+                    case "FileDone":
+                        callback.FileFinished(testContext.InputTestFile, summary);
+                        break;
+
+                    case "TestStart":
+                        jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
+                        callback.TestStarted(jsTestCase.TestCase);
+                        break;
+
+                    case "TestDone":
+                        jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
+                        callback.TestFinished(jsTestCase.TestCase);
+                        summary.Tests.Add(jsTestCase.TestCase);
+                        break;
+
+                    case "Logs":
+                        var logs = jsonSerializer.Deserialize<JsLogs>(json);
+                        summary.AppendLogs(logs.Logs);
+                        break;
+
+                    case "Errors":
+                        var errors = jsonSerializer.Deserialize<JsErrors>(json);
+                        summary.AppendErrors(errors.Errors);
+                        break;
+                }
+
+            }
+
+            return summary;
         }    
     }
 
+    /*
     public class TestResultsBuilder : ITestResultsBuilder
     {
         private readonly IJsonSerializer jsonSerializer;
@@ -98,4 +161,5 @@ namespace Chutzpah
             return json;
         }
     }
+     */
 }

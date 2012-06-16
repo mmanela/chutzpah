@@ -13,18 +13,6 @@ chutzpah.runner = function (areTestsComplete) {
         testMode = null,
         timeOut = null;
 
-    function LogEntry(message, line, source) {
-        this.message = message;
-        this.line = line;
-        this.source = source;
-    }
-
-    function FileError(message, stack) {
-        this.message = message;
-        this.stack = stack;
-    }
-
-
     function waitFor(testIfDone, timeOutMillis) {
         var maxtimeOutMillis = timeOutMillis,
             start = new Date().getTime(),
@@ -50,13 +38,15 @@ chutzpah.runner = function (areTestsComplete) {
         return '#_#' + txt + '#_# ';
     }
 
-    function captureLogMessage(message, line, source) {
+    function captureLogMessage(message) {
         try {
             var obj = JSON.parse(message);
             if (!obj || !obj.type) throw "Unknown object";
 
             switch (obj.type) {
                 case 'FileStart':
+
+                    console.log(wrap(obj.type) + message);
                     break;
 
                 case 'TestStart':
@@ -66,8 +56,11 @@ chutzpah.runner = function (areTestsComplete) {
 
                 case 'FileDone':
                     console.log(wrap(obj.type) + message);
-                    console.log(wrap("logs") + JSON.stringify(logs));
-                    console.log(wrap("errors") + JSON.stringify(errors));
+
+                    var logsObj = { type: "Logs", Logs:logs };
+                    var errorsObj = { type: "Errors", Errors: errors };
+                    console.log(wrap(logsObj.type) + JSON.stringify(logsObj));
+                    console.log(wrap(errorsObj.type) + JSON.stringify(errorsObj));
                     phantom.exit(obj.failed  > 0 ? 1 : 0);
                     break;
 
@@ -77,12 +70,12 @@ chutzpah.runner = function (areTestsComplete) {
         }
         catch (e) {
             // The message was not a test status object so log as message
-            logs.push(new LogEntry(message, line, source));
+            logs.push({message: message});
         }
     }
 
     function onError(msg, stack) {
-        errors.push(new FileError(msg, stack));
+        errors.push({ message: msg, stack: stack });
     }
 
     function pageOpenHandler(status) {

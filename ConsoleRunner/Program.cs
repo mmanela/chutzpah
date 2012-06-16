@@ -95,7 +95,7 @@ namespace Chutzpah
             Console.WriteLine("chutzpah.dll:     Version {0}", chutzpahAssemblyName.Version);
             Console.WriteLine();
 
-            TestResultsSummary testResultsSummary = null;
+            TestCaseSummary testResultsSummary = null;
             try
             {
 

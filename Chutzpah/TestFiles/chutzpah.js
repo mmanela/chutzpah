@@ -27,7 +27,7 @@
                 window.chutzpah.currentModule = name;
             };
             window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
-                var testCase = { module: window.chutzpah.currentModule, name: name };
+                var testCase = { moduleName: window.chutzpah.currentModule, testName: name };
                 log({ type: "TestDone", testCase: testCase });
             };
         }
@@ -38,7 +38,7 @@
         });
 
         QUnit.testStart(function(info) {
-            var newTestCase = { module: info.module, name: info.name, testResults: [] };
+            var newTestCase = { moduleName: info.module, testName: info.name, testResults: [] };
             window.chutzpah.testCases.push(newTestCase);
             activeTestCase = newTestCase;
             log({ type: "TestStart", testCase: activeTestCase });
@@ -47,7 +47,7 @@
         QUnit.log(function(info) {
             if (info.result !== undefined) {
                 var testResult = { };
-                testResult.result = info.result;
+                testResult.passed = info.result;
                 testResult.actual = info.actual;
                 testResult.expected = info.expected;
                 testResult.message = info.message;
@@ -64,7 +64,7 @@
         QUnit.done(function(info) {
             window.chutzpah.testingTime = info.runtime;
 
-            log({ type: "FileDone", runtime: info.runtime, failed: info.failed, passed: info.passed });
+            log({ type: "FileDone", timetaken: info.runtime, failed: info.failed, passed: info.passed });
             window.chutzpah.isRunning = false;
         });
         

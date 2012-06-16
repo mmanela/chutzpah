@@ -72,6 +72,13 @@
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
+    <Compile Include="Models\JS\JsErrors.cs" />
+    <Compile Include="Models\JS\JsLogs.cs" />
+    <Compile Include="Models\TestError.cs" />
+    <Compile Include="Models\JS\JsFileDone.cs" />
+    <Compile Include="Models\TestLog.cs" />
+    <Compile Include="Models\JS\JsRunnerOutput.cs" />
+    <Compile Include="Models\JS\JsTestCase.cs" />
     <Compile Include="Models\PathInfo.cs" />
     <Compile Include="Models\ProcessResult.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
@@ -109,7 +116,7 @@
     <Compile Include="Wrappers\ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\TestResultsSummary.cs" />
+    <Compile Include="Models\TestCaseSummary.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TestFiles\chutzpah.js" />
