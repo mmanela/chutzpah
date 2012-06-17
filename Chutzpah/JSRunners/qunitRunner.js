@@ -7,7 +7,7 @@
     phantom.injectJs('chutzpahRunner.js');
 
     function testsComplete() {
-        return !window.chutzpah.isRunning;
+        return window.chutzpah.isRunning === false;
     }
 
     try {

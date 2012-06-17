@@ -53,11 +53,13 @@ namespace Chutzpah
 
                         case "TestStart":
                             jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
+                            jsTestCase.TestCase.InputTestFile = testContext.InputTestFile;
                             callback.TestStarted(jsTestCase.TestCase);
                             break;
 
                         case "TestDone":
                             jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
+                            jsTestCase.TestCase.InputTestFile = testContext.InputTestFile;
                             AddLineNumber(referencedFile, testIndex, jsTestCase);
                             testIndex++;
                             callback.TestFinished(jsTestCase.TestCase);

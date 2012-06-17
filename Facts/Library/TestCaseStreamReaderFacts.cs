@@ -86,6 +86,7 @@ namespace Chutzpah.Facts
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
+                Assert.Equal("file", result.InputTestFile);
             }
 
             [Fact]
@@ -104,6 +105,7 @@ namespace Chutzpah.Facts
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
+                Assert.Equal("file", result.InputTestFile);
             }
 
             [Fact]
@@ -123,6 +125,7 @@ namespace Chutzpah.Facts
 
                 Assert.Equal(1, summary.Tests.Count);
                 Assert.Equal(1, summary.Tests[0].TestResults.Count);
+                Assert.Equal("file", summary.Tests[0].InputTestFile);
                 Assert.Equal("module", summary.Tests[0].ModuleName);
                 Assert.Equal("test", summary.Tests[0].TestName);
                 Assert.False(summary.Tests[0].Passed);
