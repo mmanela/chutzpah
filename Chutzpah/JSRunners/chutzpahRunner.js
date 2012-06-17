@@ -7,8 +7,6 @@ chutzpah.runner = function (areTestsComplete) {
     'use strict';
 
     var page = require('webpage').create(),
-        logs = [],
-        errors = [],
         testFile = null,
         testMode = null,
         timeOut = null;

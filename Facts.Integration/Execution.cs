@@ -27,8 +27,8 @@ namespace Chutzpah.Facts.Integration
             {
                 return new []
                 {
-                    new object[] { @"JS\Test\basic-qunit.js" },
-                   // new object[] { @"JS\Test\basic-jasmine.js" }
+                   new object[] { @"JS\Test\basic-qunit.js" },
+                   new object[] { @"JS\Test\basic-jasmine.js" }
                 };
             }
         }

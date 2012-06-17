@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
@@ -23,7 +24,9 @@ namespace Chutzpah
         {
             if (stream == null) throw new ArgumentNullException("stream");
             if (testContext == null) throw new ArgumentNullException("testContext");
-
+            
+            var referencedFile = testContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
+            var testIndex = 0;
             var summary = new TestCaseSummary();
             string line;
             while ((line = stream.ReadLine()) != null)
@@ -55,6 +58,8 @@ namespace Chutzpah
 
                         case "TestDone":
                             jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
+                            AddLineNumber(referencedFile, testIndex, jsTestCase);
+                            testIndex++;
                             callback.TestFinished(jsTestCase.TestCase);
                             summary.Tests.Add(jsTestCase.TestCase);
                             break;
@@ -79,6 +84,16 @@ namespace Chutzpah
             }
 
             return summary;
+        }
+
+        private static void AddLineNumber(ReferencedFile referencedFile, int testIndex, JsTestCase jsTestCase)
+        {
+            if (referencedFile != null && referencedFile.FilePositions.Contains(testIndex))
+            {
+                var position = referencedFile.FilePositions[testIndex];
+                jsTestCase.TestCase.Line = position.Line;
+                jsTestCase.TestCase.Column = position.Column;
+            }
         }
     }
 }

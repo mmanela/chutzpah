@@ -7,15 +7,8 @@
     phantom.injectJs('chutzpahRunner.js');
 
     function testsComplete() {
-
-        // If in discovery mode we know all tests at load time
-        if (window.chutzpah.testMode === 'discovery') {
-            return true;
-        }
-        
         return !window.chutzpah.isRunning;
     }
-
 
     try {
         chutzpah.runner(testsComplete);

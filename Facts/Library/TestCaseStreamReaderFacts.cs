@@ -194,6 +194,69 @@ namespace Chutzpah.Facts
                 Assert.Equal("file", summary.Logs[0].InputTestFile);
                 Assert.Equal("bye", summary.Logs[0].Message);
             }
+
+            [Fact]
+            public void Will_get_map_line_numbers_to_test_result()
+            {
+                var reader = new TestableTestCaseStreamReader(); 
+                var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var referencedFile = new ReferencedFile
+                {
+                    IsFileUnderTest = true,
+                    Path = "inputTestFile",
+                    FilePositions = new FilePositions()
+                };
+                referencedFile.FilePositions.Add(1, 3);
+                var context = new TestContext
+                {
+                    TestHarnessPath = "htmlTestFile",
+                    InputTestFile = "inputTestFile",
+                    ReferencedJavaScriptFiles = new[] { referencedFile }
+                };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestCase result = null;
+                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+
+                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("module", result.ModuleName);
+                Assert.Equal("test", result.TestName);
+                Assert.Equal(1, result.Line);
+                Assert.Equal(3, result.Column);
+            }
+
+            [Fact]
+            public void Will_set_line_position_to_zero_when_no_matching_file_position()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var referencedFile = new ReferencedFile
+                {
+                    IsFileUnderTest = true,
+                    Path = "inputTestFile",
+                    FilePositions = new FilePositions()
+                };
+                var context = new TestContext
+                {
+                    TestHarnessPath = "htmlTestFile",
+                    InputTestFile = "inputTestFile",
+                    ReferencedJavaScriptFiles = new[] { referencedFile }
+                };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestCase result = null;
+                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+
+                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("module", result.ModuleName);
+                Assert.Equal("test", result.TestName);
+                Assert.Equal(0, result.Line);
+                Assert.Equal(0, result.Column);
+            }
         }
     }
   

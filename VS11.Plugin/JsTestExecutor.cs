@@ -54,7 +54,7 @@ namespace Chutzpah.VS11
 
             public void ExceptionThrown(Exception exception, string fileName)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error,string.Format("Chutzpah Error:\n{0}\n While Running:{1}\n\n", exception, fileName);
+                frameworkHandle.SendMessage(TestMessageLevel.Error,string.Format("Chutzpah Error:\n{0}\n While Running:{1}\n\n", exception, fileName));
             }
 
 		    public void FileStarted(string fileName) { }
