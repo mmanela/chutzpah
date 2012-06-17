@@ -58,7 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChutzpahContainer.cs" />
-    <Compile Include="EmptyRunnerCallback.cs" />
     <Compile Include="Exceptions\ChutzpahException.cs" />
     <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
@@ -91,15 +90,13 @@
     <Compile Include="Models\TestRunnerMode.cs" />
     <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="RegexPatterns.cs" />
+    <Compile Include="RunnerCallback.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
     <Compile Include="ITestContextBuilder.cs" />
     <Compile Include="ITestMethodRunnerCallback.cs" />
     <Compile Include="ITestRunner.cs" />
     <Compile Include="Models\TestContext.cs" />
-    <Compile Include="Models\JsonLogOutput.cs" />
-    <Compile Include="Models\JsonTestCase.cs" />
-    <Compile Include="Models\JsonTestOutput.cs" />
     <Compile Include="Models\TestResult.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />

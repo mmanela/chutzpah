@@ -69,12 +69,14 @@ namespace Chutzpah
                         case "Log":
                             var log = jsonSerializer.Deserialize<JsLog>(json);
                             log.Log.InputTestFile = testContext.InputTestFile;
+                            callback.FileLog(log.Log);
                             summary.Logs.Add(log.Log);
                             break;
 
                         case "Error":
                             var error = jsonSerializer.Deserialize<JsError>(json);
                             error.Error.InputTestFile = testContext.InputTestFile;
+                            callback.FileError(error.Error);
                             summary.Errors.Add(error.Error);
                             break;
                     }

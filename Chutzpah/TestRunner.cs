@@ -62,7 +62,7 @@ namespace Chutzpah
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths)
         {
-            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, new EmptyRunnerCallback());
+            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, RunnerCallback.Empty);
             return summary.Tests;
         }
 
@@ -89,7 +89,7 @@ namespace Chutzpah
                                            ITestMethodRunnerCallback callback = null)
         {
 
-            callback = callback ?? new EmptyRunnerCallback();
+            callback = callback ?? RunnerCallback.Empty;
             callback.TestSuiteStarted();
 
             var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback);
@@ -152,8 +152,6 @@ namespace Chutzpah
                                        TestRunnerMode testRunnerMode,
                                        ITestMethodRunnerCallback callback)
         {
-            if (callback != null) callback.FileStarted(testContext.InputTestFile);
-
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
 

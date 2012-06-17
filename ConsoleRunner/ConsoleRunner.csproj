@@ -58,9 +58,9 @@
     <Compile Include="CommandLine.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunnerCallbacks\RunnerCallback.cs" />
-    <Compile Include="RunnerCallbacks\StandardRunnerCallback.cs" />
-    <Compile Include="RunnerCallbacks\TeamCityRunnerCallback.cs" />
+    <Compile Include="RunnerCallbacks\ConsoleRunnerCallback.cs" />
+    <Compile Include="RunnerCallbacks\StandardConsoleRunnerCallback.cs" />
+    <Compile Include="RunnerCallbacks\TeamCityConsoleRunnerCallback.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="JS\code.js">

@@ -99,7 +99,7 @@ namespace Chutzpah
             try
             {
 
-                var callback = commandLine.TeamCity ? (RunnerCallback)new TeamCityRunnerCallback() : new StandardRunnerCallback(commandLine.Silent);
+                var callback = commandLine.TeamCity ? (ConsoleRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent);
                 var testOptions = new TestOptions { OpenInBrowser = commandLine.OpenInBrowser, TimeOutMilliseconds =commandLine.TimeOutMilliseconds };
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
             }

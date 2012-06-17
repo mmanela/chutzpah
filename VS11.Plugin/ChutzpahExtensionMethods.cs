@@ -36,27 +36,31 @@ namespace Chutzpah.VS11
             return passed  ? TestOutcome.Passed : TestOutcome.Failed;
         }
 
-        private static string BuildFullyQualifiedName(Chutzpah.Models.TestCase testCase)
+        private static string BuildFullyQualifiedName(Models.TestCase testCase)
         {
             var parts = new[] {testCase.ModuleName, testCase.TestName, testCase.InputTestFile}.Where(x => !String.IsNullOrEmpty(x));
             return String.Join("::", parts);
         }
 
-        private static string GetTestDisplayText(Chutzpah.Models.TestCase testCase)
+        private static string GetTestDisplayText(Models.TestCase testCase)
         {
             return string.IsNullOrWhiteSpace(testCase.ModuleName) ? testCase.TestName : string.Format("{0} {1}", testCase.ModuleName, testCase.TestName);
         }
 
-        private static string GetTestFailureMessage(Chutzpah.Models.TestResult result)
+        private static string GetTestFailureMessage(Models.TestResult result)
         {
             var errorString = "";
-            if (result.Expected != null || result.Actual != null)
+            if (!string.IsNullOrWhiteSpace(result.Message))
+            {
+                errorString += string.Format("{0}", result.Message);
+            }
+            else if (result.Expected != null || result.Actual != null)
             {
                 errorString += string.Format("Expected: {0}, Actual: {1}", result.Expected, result.Actual);
             }
-            else if (!string.IsNullOrWhiteSpace(result.Message))
+            else
             {
-                errorString += string.Format("{0}", result.Message);
+                errorString += "Assert failed";
             }
 
             return errorString;

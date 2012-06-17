@@ -4,23 +4,18 @@ using Chutzpah.Models;
 
 namespace Chutzpah.RunnerCallbacks
 {
-    public class StandardRunnerCallback : RunnerCallback
+    public class StandardConsoleRunnerCallback : ConsoleRunnerCallback
     {
         readonly bool silent;
         int testCount;
 
-        public StandardRunnerCallback(bool silent)
+        public StandardConsoleRunnerCallback(bool silent)
         {
             this.silent = silent;
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
-
-            if (!silent)
-                Console.Write("\r");
-
-
             Console.WriteLine();
             Console.WriteLine("=== {0} total, {1} failed, took {2} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, 0);
 
@@ -29,8 +24,7 @@ namespace Chutzpah.RunnerCallbacks
 
         public override void FileFinished(string fileName, TestCaseSummary testResultsSummary)
         {
-            if (!silent)
-                Console.Write("\r");
+            ClearCounter();
 
             Console.WriteLine("File: {0}", fileName);
             Console.WriteLine(Indent("{0} total, {1} failed, took {2} seconds", 2), testResultsSummary.TotalCount, testResultsSummary.FailedCount, 0);
@@ -44,8 +38,7 @@ namespace Chutzpah.RunnerCallbacks
 
         protected override void TestFailed(TestCase testCase)
         {
-            if (!silent)
-                Console.Write("\r");
+            ClearCounter();
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("{0} [FAIL]", GetTestDisplayText(testCase));
@@ -60,6 +53,17 @@ namespace Chutzpah.RunnerCallbacks
         {
             ++testCount;
             PrintRunningTestCount();
+        }
+
+        void ClearCounter()
+        {
+            if (!silent)
+            {
+
+                Console.Write("\r");
+                Console.Write(" ".PadLeft(Console.BufferWidth));
+                Console.Write("\r");
+            }
         }
 
         void PrintRunningTestCount()

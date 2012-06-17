@@ -11,12 +11,12 @@
         var activeTestCase = null;
         window.chutzpah.isRunning = true;
         window.chutzpah.testCases = [];
-        
+
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
             self.reportRunnerStarting = function (runner) {
-                
+
                 // Testing began
                 log({ type: "FileStart" });
             };
@@ -27,7 +27,7 @@
                 window.chutzpah.isRunning = false;
             };
 
-            self.reportSuiteResults = function (suite) {};
+            self.reportSuiteResults = function (suite) { };
 
             self.reportSpecStarting = function (spec) {
                 var suiteName = getFullSuiteName(spec.suite);
@@ -48,7 +48,7 @@
                     testResult.message = result.message;
                     activeTestCase.testResults.push(testResult);
                 }
-                
+
                 // Log test case when done. This will get picked up by phantom and streamed to chutzpah.
                 log({ type: "TestDone", testCase: activeTestCase });
             };
@@ -67,7 +67,7 @@
             self.specFilter = function (spec) {
                 return true;
             };
-            
+
             function getFullSuiteName(suite) {
                 var description = suite.description;
                 if (suite.parentSuite) {
@@ -79,12 +79,12 @@
 
             return self;
         };
-        
-        if(window.chutzpah && window.chutzpah.testMode) {
+
+        if (window.chutzpah.testMode) {
             jasmine.getEnv().addReporter(new ChutzpahJasmineReporter());
         }
-        
-        if (window.chutzpah && window.chutzpah.testMode === 'discovery') {
+
+        if (window.chutzpah.testMode === 'discovery') {
             // If discovery mode overwrite execute to not run the test
             jasmine.Block.prototype.execute = function (onComplete) {
                 onComplete();
@@ -100,8 +100,8 @@
         var activeTestCase = null;
         window.chutzpah.isRunning = true;
         window.chutzpah.testCases = [];
-        
-        if (window.chutzpah && window.chutzpah.testMode === 'discovery') {
+
+        if (window.chutzpah.testMode === 'discovery') {
             window.chutzpah.currentModule = null;
 
             // In discovery mode override QUnit's functions
@@ -114,22 +114,22 @@
                 log({ type: "TestDone", testCase: testCase });
             };
         }
-        
-        QUnit.begin(function() {
+
+        QUnit.begin(function () {
             // Testing began
             log({ type: "FileStart" });
         });
 
-        QUnit.testStart(function(info) {
+        QUnit.testStart(function (info) {
             var newTestCase = { moduleName: info.module, testName: info.name, testResults: [] };
             window.chutzpah.testCases.push(newTestCase);
             activeTestCase = newTestCase;
             log({ type: "TestStart", testCase: activeTestCase });
         });
 
-        QUnit.log(function(info) {
+        QUnit.log(function (info) {
             if (info.result !== undefined) {
-                var testResult = { };
+                var testResult = {};
                 testResult.passed = info.result;
                 testResult.actual = info.actual;
                 testResult.expected = info.expected;
@@ -139,30 +139,32 @@
             }
         });
 
-        QUnit.testDone(function(info) {
+        QUnit.testDone(function (info) {
             // Log test case when done. This will get picked up by phantom and streamed to chutzpah.
             log({ type: "TestDone", testCase: activeTestCase });
         });
 
-        QUnit.done(function(info) {
+        QUnit.done(function (info) {
             window.chutzpah.testingTime = info.runtime;
 
-            log({ type: "FileDone", timetaken: info.runtime, passed: info.passed, failed: info.failed});
+            log({ type: "FileDone", timetaken: info.runtime, passed: info.passed, failed: info.failed });
             window.chutzpah.isRunning = false;
         });
-        
+
 
     }
-    
+
     function log(obj) {
         console.log(JSON.stringify(obj));
     }
+
+
+    window.chutzpah = window.chutzpah || {};
+    window.chutzpah.runJasmine = runJasmine;
 
     if (window.QUnit) {
         setupQUnit();
     }
 
-    window.chutzpah = window.chutzpah || { };
-    window.chutzpah.runJasmine = runJasmine;
 
 } ());

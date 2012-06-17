@@ -35,8 +35,9 @@ chutzpah.runner = function (areTestsComplete) {
     function wrap(txt) {
         return '#_#' + txt + '#_# ';
     }
-    
+
     function writeEvent(eventObj, json) {
+        
         switch (eventObj.type) {
             case 'FileStart':
             case 'TestStart':

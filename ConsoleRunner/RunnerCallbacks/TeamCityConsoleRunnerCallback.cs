@@ -3,7 +3,7 @@ using Chutzpah.Models;
 
 namespace Chutzpah.RunnerCallbacks
 {
-    public class TeamCityRunnerCallback : RunnerCallback
+    public class TeamCityConsoleRunnerCallback : ConsoleRunnerCallback
     {
         private const string ChutzpahJavascriptTestSuiteName = "JavaScript Tests";
 

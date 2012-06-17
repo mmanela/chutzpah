@@ -6,7 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Chutzpah.VisualStudio.RunnerCallback;
+using Chutzpah.VisualStudio.Callback;
 using Chutzpah.VisualStudio.Settings;
 using EnvDTE;
 using EnvDTE80;

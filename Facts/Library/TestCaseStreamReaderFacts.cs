@@ -108,6 +108,46 @@ namespace Chutzpah.Facts
                 Assert.Equal("file", result.InputTestFile);
             }
 
+
+            [Fact]
+            public void Will_fire_log_event()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                var json = @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""hi""}}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestLog result = null;
+                callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
+
+                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("hi", result.Message);
+                Assert.Equal("file", result.InputTestFile);
+            }
+
+            [Fact]
+            public void Will_fire_error_event()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                var json = @"#_#Error#_# {""type"":""Error"",""Error"":{""message"":""uhoh"", ""stack"":[{""file"":""errorFile"",""function"":""errorFunc"",""line"":22}]}}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestError result = null;
+                callback.Setup(x => x.FileError(It.IsAny<TestError>())).Callback<TestError>(t => result = t);
+
+                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("file", result.InputTestFile);
+                Assert.Equal("uhoh", result.Message);
+                Assert.Equal("errorFile", result.Stack[0].File);
+                Assert.Equal("errorFunc", result.Stack[0].Function);
+                Assert.Equal("22", result.Stack[0].Line);
+            }
+
             [Fact]
             public void Will_put_test_case_in_summary()
             {
