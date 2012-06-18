@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
 using Chutzpah.Wrappers;
-using Newtonsoft.Json;
 using JsonSerializer = Chutzpah.Wrappers.JsonSerializer;
 
 namespace Chutzpah
@@ -81,7 +81,7 @@ namespace Chutzpah
                             break;
                     }
                 }
-                catch (JsonSerializationException)
+                catch (SerializationException)
                 {
                     // Ignore malformed json and move on
                 }

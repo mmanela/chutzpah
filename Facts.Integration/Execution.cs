@@ -302,7 +302,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
-
         [Fact]
         public void Will_get_correct_module_name_for_nested_jasmine_suites()
         {

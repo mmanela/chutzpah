@@ -40,9 +40,8 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.2\lib\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.0.2.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.4.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap">
       <HintPath>..\packages\structuremap.2.6.2\lib\StructureMap.dll</HintPath>

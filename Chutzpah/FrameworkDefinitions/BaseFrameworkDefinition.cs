@@ -13,6 +13,8 @@
     /// </summary>
     public abstract class BaseFrameworkDefinition : IFrameworkDefinition
     {
+        private static readonly Regex FrameworkReferenceRegex = new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine))\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
@@ -74,8 +76,8 @@
                 return this.FrameworkSignature.IsMatch(fileContents);
             }
 
-            var referencePattern = new Regex(@"\<(script|reference).*(src|path)\s*=\s*[""'].*" + this.FrameworkKey + @"\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            return referencePattern.IsMatch(fileContents);
+            var match = FrameworkReferenceRegex.Match(fileContents);
+            return match.Success && match.Groups["framework"].Value.Equals(this.FrameworkKey,StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

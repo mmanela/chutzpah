@@ -4,7 +4,7 @@
 
 Samples: 25
 
-Average Time:   0.412 seconds
-Fastest Time:   0.381 seconds
-Slowest Time:   0.431 seconds
-Std Deviation:  0.013 seconds
+Average Time:   0.693 seconds
+Fastest Time:   0.681 seconds
+Slowest Time:   0.715 seconds
+Std Deviation:  0.010 seconds

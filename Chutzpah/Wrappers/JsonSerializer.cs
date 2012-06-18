@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿
 
 namespace Chutzpah.Wrappers
 {
@@ -6,7 +6,7 @@ namespace Chutzpah.Wrappers
     {
         public T Deserialize<T>(string response)
         {
-            return JsonConvert.DeserializeObject<T>(response);
+            return ServiceStack.Text.JsonSerializer.DeserializeFromString<T>(response);
         }
     }
 }
