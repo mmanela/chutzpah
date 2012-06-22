@@ -1,38 +1,29 @@
 ﻿/*globals phantom, require, console*/
 var chutzpah = {};
 
-chutzpah.runner = function (testsComplete, testsEvaluator) {
+chutzpah.runner = function (areTestsComplete) {
     /// <summary>Executes a test suite and evaluates the results using the provided functions.</summary>
-    /// <param name="testsComplete" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
-    /// <param name="testsEvaluator" type="Function">Function that returns a chutzpah.TestOutput containing the results of the test suite.</param>
+    /// <param name="areTestsComplete" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
     'use strict';
 
     var page = require('webpage').create(),
-        logs = [],
         testFile = null,
         testMode = null,
         timeOut = null;
 
-    function LogEntry(message, line, source) {
-        this.message = message;
-        this.line = line;
-        this.source = source;
-    }
-
-    function waitFor(testFx, onReady, timeOutMillis) {
+    function waitFor(testIfDone, timeOutMillis) {
         var maxtimeOutMillis = timeOutMillis,
             start = new Date().getTime(),
-            condition = false,
+            isDone = false,
             interval;
 
         function intervalHandler() {
-            if (!condition && (new Date().getTime() - start < maxtimeOutMillis)) {
-                condition = testFx();
+            if (!isDone && (new Date().getTime() - start < maxtimeOutMillis)) {
+                isDone = testIfDone();
             } else {
-                if (!condition) {
+                if (!isDone) {
                     phantom.exit(3); // Timeout
                 } else {
-                    onReady();
                     clearInterval(interval);
                 }
             }
@@ -41,29 +32,55 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
         interval = setInterval(intervalHandler, 100);
     }
 
-    function addToLog(message, line, source) {
-        logs.push(new LogEntry(message, line, source));
+    function wrap(txt) {
+        return '#_#' + txt + '#_# ';
+    }
+
+    function writeEvent(eventObj, json) {
+        
+        switch (eventObj.type) {
+            case 'FileStart':
+            case 'TestStart':
+            case 'TestDone':
+            case 'Log':
+            case 'Error':
+                console.log(wrap(eventObj.type) + json);
+                break;
+                
+            case 'FileDone':
+                console.log(wrap(eventObj.type) + json);
+                phantom.exit(eventObj.failed > 0 ? 1 : 0);
+                break;
+               
+            default:
+                break;
+        }
+    }
+
+    function captureLogMessage(message) {
+        try {
+            var obj = JSON.parse(message);
+            if (!obj || !obj.type) throw "Unknown object";
+            writeEvent(obj, message);
+
+        }
+        catch (e) {
+            // The message was not a test status object so log as message
+            var log = { type: 'Log', log: { message: message } };
+            writeEvent(log, JSON.stringify(log));
+        }
+    }
+
+    function onError(msg, stack) {
+        var error = { type: 'Error', error: { message: msg, stack: stack } };
+        writeEvent(error, JSON.stringify(error));
     }
 
     function pageOpenHandler(status) {
-        var waitCondition = function () { return page.evaluate(testsComplete); },
-            gatherTests = function () {
-                var testSummary = page.evaluate(testsEvaluator);
+        var waitCondition = function () { return page.evaluate(areTestsComplete); };
 
-                if (testSummary) {
-                    testSummary.logs = logs;
-                    console.log('#_#Begin#_#');
-                    console.log(JSON.stringify(testSummary, null, 4));
-                    console.log('#_#End#_#');
-                    phantom.exit((parseInt(testSummary.failedCount, 10) > 0) ? 1 : 0);
-                } else {
-                    console.log("Unknown error");
-                    phantom.exit(2); // Unkown error
-                }
-            };
-        
         if (status === 'success') {
-            waitFor(waitCondition, gatherTests, timeOut);
+            waitFor(waitCondition, timeOut);
         }
     }
 
@@ -74,8 +91,9 @@ chutzpah.runner = function (testsComplete, testsEvaluator) {
 
     testFile = phantom.args[0];
     testMode = phantom.args[1] || "execution";
-    timeOut = parseInt(phantom.args[2]) || 3001;
-    page.onConsoleMessage = addToLog;
+    timeOut = parseInt(phantom.args[2]) || 10001;
+    page.onConsoleMessage = captureLogMessage;
+    page.onError = onError;
 
     page.onInitialized = function () {
         if (testMode === 'discovery') {

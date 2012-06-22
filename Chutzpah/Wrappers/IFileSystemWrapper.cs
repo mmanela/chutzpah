@@ -31,5 +31,6 @@ namespace Chutzpah.Wrappers
         string GetText(string path);
         string[] GetLines(string path);
         string GetRandomFileName();
+        DateTime GetLastWriteTime(string path);
     }
 }

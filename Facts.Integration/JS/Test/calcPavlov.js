@@ -12,12 +12,12 @@ pavlov.specify("The behavior of a calculator", function () {
 
         given([2, 0], [3, 0], [4, 0]).
             it("returns zero when multiplying by zero", function (x, y) {
-                assert(0).equals(calculator.multiply(x, y));
+                assert(0).equal(calculator.multiply(x, y));
             });
 
         given([2, 1], [3, 1], [4, 1]).
             it("returns the multiplicand when multiplying by one", function (x, y) {
-                assert(x).equals(calculator.multiply(x, y));
+                assert(x).equal(calculator.multiply(x, y));
             });
     });
 });

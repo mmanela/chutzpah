@@ -61,6 +61,7 @@
     <Compile Include="EventWatchers\ISolutionEventsListener.cs" />
     <Compile Include="EventWatchers\ITestFileAddRemoveListener.cs" />
     <Compile Include="EventWatchers\ITestFilesUpdateWatcher.cs" />
+    <Compile Include="ExecutionCallback.cs" />
     <Compile Include="JsTestContainer.cs" />
     <Compile Include="JsTestContainerDiscoverer.cs" />
     <Compile Include="JsTestDiscoverer.cs" />

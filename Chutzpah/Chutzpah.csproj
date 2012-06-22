@@ -40,9 +40,8 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.2\lib\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.0.2.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.4.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap">
       <HintPath>..\packages\structuremap.2.6.2\lib\StructureMap.dll</HintPath>
@@ -60,6 +59,7 @@
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="Exceptions\ChutzpahException.cs" />
     <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FileProbe.cs" />
     <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
@@ -70,8 +70,17 @@
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
+    <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
+    <Compile Include="Models\JS\JsErrors.cs" />
+    <Compile Include="Models\JS\JsLogs.cs" />
+    <Compile Include="Models\Stack.cs" />
+    <Compile Include="Models\TestError.cs" />
+    <Compile Include="Models\JS\JsFileDone.cs" />
+    <Compile Include="Models\TestLog.cs" />
+    <Compile Include="Models\JS\JsRunnerOutput.cs" />
+    <Compile Include="Models\JS\JsTestCase.cs" />
     <Compile Include="Models\PathInfo.cs" />
     <Compile Include="Models\ProcessResult.cs" />
     <Compile Include="Models\ReferencedFile.cs" />
@@ -80,20 +89,16 @@
     <Compile Include="Models\TestRunnerMode.cs" />
     <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="RegexPatterns.cs" />
+    <Compile Include="RunnerCallback.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
     <Compile Include="ITestContextBuilder.cs" />
-    <Compile Include="Models\BrowserTestFileResult.cs" />
     <Compile Include="ITestMethodRunnerCallback.cs" />
-    <Compile Include="ITestResultsBuilder.cs" />
     <Compile Include="ITestRunner.cs" />
     <Compile Include="Models\TestContext.cs" />
-    <Compile Include="Models\JsonLogOutput.cs" />
-    <Compile Include="Models\JsonTestCase.cs" />
-    <Compile Include="Models\JsonTestOutput.cs" />
     <Compile Include="Models\TestResult.cs" />
     <Compile Include="TestOptions.cs" />
-    <Compile Include="TestResultsBuilder.cs" />
+    <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
@@ -109,18 +114,36 @@
     <Compile Include="Wrappers\ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\TestResultsSummary.cs" />
+    <Compile Include="Models\TestCaseSummary.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TestFiles\chutzpah.js" />
-    <EmbeddedResource Include="TestFiles\jasmine-html.js" />
-    <EmbeddedResource Include="TestFiles\jasmine.css" />
-    <EmbeddedResource Include="TestFiles\jasmine.js" />
-    <EmbeddedResource Include="TestFiles\jasmine_favicon.png" />
-    <EmbeddedResource Include="TestFiles\jasmine.html" />
-    <EmbeddedResource Include="TestFiles\qunit.js" />
-    <EmbeddedResource Include="TestFiles\qunit.html" />
-    <EmbeddedResource Include="TestFiles\qunit.css" />
+    <Content Include="TestFiles\chutzpah.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine-html.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine_favicon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\3rdParty\Phantom\phantomjs.exe">
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

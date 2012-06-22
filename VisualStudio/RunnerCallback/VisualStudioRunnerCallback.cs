@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Linq;
 using Chutzpah.Models;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Chutzpah.VisualStudio.RunnerCallback
+namespace Chutzpah.VisualStudio.Callback
 {
-    public class VisualStudioRunnerCallback : ITestMethodRunnerCallback
+    public class VisualStudioRunnerCallback : RunnerCallback
     {
         private readonly DTE2 dte;
         private readonly IVsStatusbar statusBar;
@@ -18,7 +19,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
             this.statusBar = statusBar;
         }
 
-        public virtual void TestSuiteStarted()
+        public override void TestSuiteStarted()
         {
             dte.ToolWindows.OutputWindow.Parent.Activate();
             dte.ToolWindows.ErrorList.Parent.Activate();
@@ -29,7 +30,7 @@ namespace Chutzpah.VisualStudio.RunnerCallback
             SetStatusBarMessage("Testing Started");
         }
 
-        public virtual void TestSuiteFinished(TestResultsSummary testResultsSummary)
+        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
             var statusBarText = string.Format("{0} passed, {1} failed, {2} total", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
             var text = string.Format("========== Total Tests: {0} passed, {1} failed, {2} total ==========\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
@@ -37,88 +38,50 @@ namespace Chutzpah.VisualStudio.RunnerCallback
             SetStatusBarMessage(statusBarText);
         }
 
-        public virtual void ExceptionThrown(Exception exception, string fileName)
-        {
-            testPane.OutputString(string.Format("Chutzpah Error Occured:\n{0}\n While Running:{1}\n\n", exception, fileName));
-        }
-
-        public virtual bool FileStart(string fileName)
+        public override void FileStarted(string fileName)
         {
             var text = string.Format("------ Test started: File: {0} ------\n", fileName);
             testPane.OutputString(text);
-            return true;
         }
 
-        public virtual bool FileFinished(string fileName, TestResultsSummary testResultsSummary)
+        public override void FileFinished(string fileName, TestCaseSummary testResultsSummary)
         {
             var text = string.Format("{0} passed, {1} failed, {2} total (chutzpah).\n\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
             testPane.OutputString(text);
-            return true;
         }
 
-        public void TestFinished(TestResult result)
-        {
-            TestStarted(result);
-            if (result.Passed)
-                TestPassed(result);
-            if (!result.Passed)
-                TestFailed(result);
-
-            TestComplete(result);
-        }
-
-        protected virtual void TestComplete(TestResult result)
-        {
-
-        }
-
-        protected virtual void TestFailed(TestResult result)
+        protected override void TestFailed(TestCase result)
         {
             var errorMessage = GetTestFailureMessage(result);
             WriteToOutputPaneAndErrorTaskList(result.InputTestFile, errorMessage, errorMessage, result.Line);
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
-        protected virtual void TestStarted(TestResult result)
-        {
-        }
-
-        protected virtual void TestPassed(TestResult result)
+        protected override void TestPassed(TestCase result)
         {
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
-        protected string GetTestDisplayText(TestResult result)
+        public override void FileError(TestError error)
         {
-            return string.IsNullOrWhiteSpace(result.ModuleName)
-                       ? result.TestName
-                       : string.Format("{0}+{1}", result.ModuleName, result.TestName);
+            testPane.OutputString(GetFileErrorMessage(error));
         }
 
-        protected string GetStatusBarMessage(TestResult result)
+        public override void FileLog(TestLog log)
+        {
+            testPane.OutputString(GetFileLogMessage(log));
+        }
+
+        public override void ExceptionThrown(Exception exception, string fileName)
+        {
+            testPane.OutputString(GetExceptionThrownMessage(exception, fileName));
+        }
+
+        protected string GetStatusBarMessage(TestCase result)
         {
             var title = GetTestDisplayText(result);
             return string.Format("{0} ({1})", title, result.Passed ? "passed" : "failed");
         }
-
-        protected string GetTestFailureMessage(TestResult result)
-        {
-            var title = GetTestDisplayText(result);
-            var failureMessage = string.Format("Test '{0}' failed\n", title);
-            if (result.Expected != null || result.Actual != null)
-            {
-                failureMessage += string.Format("Expected: {0}, Actual: {1}", result.Expected, result.Actual);
-            }
-            else if (!string.IsNullOrWhiteSpace(result.Message))
-            {
-                failureMessage += string.Format("{0}", result.Message);
-            }
-
-            failureMessage += string.Format("\n\tin {0}({1},{2}) at {3}\n\n", result.InputTestFile, result.Line, result.Column, title);
-
-            return failureMessage;
-        }
-
 
         private OutputWindowPane GetOutputPane(string title)
         {

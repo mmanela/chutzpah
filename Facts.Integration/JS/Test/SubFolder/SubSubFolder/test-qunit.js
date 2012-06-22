@@ -3,5 +3,5 @@
  test("A basic test", function () {
       ok(true, "this test is fine");
       var value = "hello";
-      equals("hello", value, "We expect value to be hello");
+      equal("hello", value, "We expect value to be hello");
   });

@@ -1,6 +1,6 @@
 ﻿namespace Chutzpah.Models
 {
-    public class TestResult : TestCase
+    public class TestResult
     {
         public bool Passed { get; set; }
         public string Expected { get; set; }

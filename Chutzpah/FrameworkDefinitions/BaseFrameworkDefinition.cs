@@ -1,4 +1,6 @@
-﻿namespace Chutzpah.FrameworkDefinitions
+﻿using System.IO;
+
+namespace Chutzpah.FrameworkDefinitions
 {
     using System;
     using System.Collections.Generic;
@@ -13,6 +15,8 @@
     /// </summary>
     public abstract class BaseFrameworkDefinition : IFrameworkDefinition
     {
+        private static readonly Regex FrameworkReferenceRegex = new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine))\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
@@ -20,7 +24,10 @@
         {
             get
             {
-                return new string[] { "chutzpah.js", FrameworkKey + ".js", FrameworkKey + ".css" };
+                return new [] { 
+                    "chutzpah.js", 
+                    string.Format("{0}\\{0}.js",FrameworkKey), 
+                    string.Format("{0}\\{0}.css",FrameworkKey) };
             }
         }
 
@@ -31,7 +38,7 @@
         {
             get
             {
-                return this.FrameworkKey + ".html";
+                return string.Format("{0}\\{0}.html", FrameworkKey);
             }
         }
 
@@ -74,8 +81,8 @@
                 return this.FrameworkSignature.IsMatch(fileContents);
             }
 
-            var referencePattern = new Regex(@"\<(script|reference).*(src|path)\s*=\s*[""'].*" + this.FrameworkKey + @"\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            return referencePattern.IsMatch(fileContents);
+            var match = FrameworkReferenceRegex.Match(fileContents);
+            return match.Success && match.Groups["framework"].Value.Equals(this.FrameworkKey,StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -85,9 +92,10 @@
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
         public virtual bool ReferenceIsDependency(string referenceFileName)
         {
-            if (!string.IsNullOrEmpty(referenceFileName))
+            var fileName = Path.GetFileName(referenceFileName);
+            if (!string.IsNullOrEmpty(fileName))
             {
-                return this.FileDependencies.Any(x => x.Equals(referenceFileName, StringComparison.InvariantCultureIgnoreCase));
+                return this.FileDependencies.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;

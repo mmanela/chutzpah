@@ -1,54 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
 namespace Chutzpah.VS11
 {
     [ExtensionUri(Constants.ExecutorUriString)]
 	public class JsTestExecutor : ITestExecutor
 	{
-		class ExecutionCallback : ITestMethodRunnerCallback
-		{
-			private IFrameworkHandle frameworkHandle;
-
-			public ExecutionCallback(IFrameworkHandle frameworkHandle)
-			{
-				this.frameworkHandle = frameworkHandle;
-			}
-
-			// And we'll ignore these for execution
-			// What we need, but don't have, is TestStarted
-			public void TestSuiteStarted() { }
-			public void TestSuiteFinished(Chutzpah.Models.TestResultsSummary testResultsSummary) { }
-			public void ExceptionThrown(Exception exception, string fileName) { }
-			public bool FileStart(string fileName) { return true; }
-			public bool FileFinished(string fileName, Chutzpah.Models.TestResultsSummary testResultsSummary) { return true; }
-
-			public void TestFinished(Chutzpah.Models.TestResult result)
-			{
-				var testCase = result.ToVsTestCase();
-                var vsresult = result.ToVsTestResult();
-                var outcome = result.ToVsTestOutcome();
-
-				// The test case is starting
-				frameworkHandle.RecordStart(testCase);
-	
-				// Record a result (there can be many)
-				frameworkHandle.RecordResult(vsresult);
-
-				// The test case is done
-                frameworkHandle.RecordEnd(testCase, outcome);
-			}
-
-		}
-
-
 		public void Cancel()
 		{
-            // Will add code here when streaming tests is implemented
 		}
 
 		

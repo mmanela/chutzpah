@@ -47,6 +47,11 @@ namespace Chutzpah.Wrappers
             return File.GetCreationTime(path);
         }
 
+        public DateTime GetLastWriteTime(string path)
+        {
+            return File.GetLastWriteTime(path);
+        }
+
         public DateTime GetLastAccessTime(string path)
         {
             return File.GetLastAccessTime(path);

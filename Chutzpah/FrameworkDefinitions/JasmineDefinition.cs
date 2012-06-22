@@ -20,7 +20,11 @@
         public JasmineDefinition(IEnumerable<IJasmineReferencedFileProcessor> fileProcessors)
         {
             this.fileProcessors = fileProcessors;
-            this.fileDependencies = base.FileDependencies.Concat(new string[] { "jasmine-html.js", "jasmine_favicon.png" });
+            this.fileDependencies = base.FileDependencies.Concat(new []
+                {
+                    "jasmine\\jasmine-html.js", 
+                    "jasmine\\jasmine_favicon.png"
+                });
         }
 
         /// <summary>

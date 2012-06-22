@@ -9,12 +9,12 @@ using Chutzpah.Wrappers;
 namespace Chutzpah
 {
     public class TestRunner : ITestRunner
-    {   
+    {
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
 
         private readonly IProcessHelper process;
-        private readonly ITestResultsBuilder testResultsBuilder;
+        private readonly ITestCaseStreamReader testCaseStreamReader;
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
 
@@ -28,12 +28,12 @@ namespace Chutzpah
         }
 
         public TestRunner(IProcessHelper process,
-                          ITestResultsBuilder testResultsBuilder,
+                          ITestCaseStreamReader testCaseStreamReader,
                           IFileProbe fileProbe,
                           ITestContextBuilder htmlTestFileCreator)
         {
             this.process = process;
-            this.testResultsBuilder = testResultsBuilder;
+            this.testCaseStreamReader = testCaseStreamReader;
             this.fileProbe = fileProbe;
             testContextBuilder = htmlTestFileCreator;
         }
@@ -57,22 +57,21 @@ namespace Chutzpah
 
         public IEnumerable<TestCase> DiscoverTests(string testPath)
         {
-            return DiscoverTests(new[] {testPath});
+            return DiscoverTests(new[] { testPath });
         }
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths)
         {
-            var testResults = new List<TestCase>();
-            ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, null, testResults);
-            return testResults;
+            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, RunnerCallback.Empty);
+            return summary.Tests;
         }
 
-        public TestResultsSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
+        public TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
             return RunTests(testPath, new TestOptions(), callback);
         }
 
-        public TestResultsSummary RunTests(string testPath,
+        public TestCaseSummary RunTests(string testPath,
                                            TestOptions options,
                                            ITestMethodRunnerCallback callback = null)
         {
@@ -80,28 +79,26 @@ namespace Chutzpah
         }
 
 
-        public TestResultsSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null)
+        public TestCaseSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null)
         {
             return RunTests(testPaths, new TestOptions(), callback);
         }
 
-        public TestResultsSummary RunTests(IEnumerable<string> testPaths,
+        public TestCaseSummary RunTests(IEnumerable<string> testPaths,
                                            TestOptions options,
                                            ITestMethodRunnerCallback callback = null)
         {
 
+            callback = callback ?? RunnerCallback.Empty;
+            callback.TestSuiteStarted();
 
-            if (callback != null) callback.TestSuiteStarted();
+            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback);
 
-            var testResults = new List<TestCase>();
-            ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback, testResults);
-
-            var summary = new TestResultsSummary(testResults.Cast<TestResult>());
-            if (callback != null) callback.TestSuiteFinished(summary);
+            callback.TestSuiteFinished(summary);
             return summary;
         }
 
-        private void ProcessTestPaths(IEnumerable<string> testPaths, TestOptions options, TestRunnerMode testRunnerMode, ITestMethodRunnerCallback callback, List<TestCase> testResults)
+        private TestCaseSummary ProcessTestPaths(IEnumerable<string> testPaths, TestOptions options, TestRunnerMode testRunnerMode, ITestMethodRunnerCallback callback)
         {
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
             if (testPaths == null)
@@ -111,7 +108,7 @@ namespace Chutzpah
             if (fileProbe.FindFilePath(TestRunnerJsName) == null)
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
-
+            var overallSummary = new TestCaseSummary();
             var resultCount = 1;
             foreach (string testFile in fileProbe.FindScriptFiles(testPaths))
             {
@@ -122,12 +119,12 @@ namespace Chutzpah
                     if (testContextBuilder.TryBuildContext(testFile, out testContext))
                     {
                         resultCount++;
-                        bool result = InvokeTestRunner(headlessBrowserPath,
+                        var testSummary = InvokeTestRunner(headlessBrowserPath,
                                                         options,
                                                         testContext,
-                                                        testResults,
                                                         testRunnerMode,
                                                         callback);
+                        overallSummary.Append(testSummary);
 
                         if (options.OpenInBrowser)
                         {
@@ -137,58 +134,41 @@ namespace Chutzpah
                         // Limit the number of files we can scan to attempt to build a context for
                         // This is important in the case of folder scanning where many JS files may not be
                         // test files.
-                        if (!result || resultCount >= options.FileSearchLimit) break;
+                        if (resultCount >= options.FileSearchLimit) break;
                     }
                 }
                 catch (Exception e)
                 {
-                    if (callback != null)
-                        callback.ExceptionThrown(e, testFile);
+                    callback.ExceptionThrown(e, testFile);
                 }
             }
+
+            return overallSummary;
         }
 
-        private bool InvokeTestRunner(string headlessBrowserPath,
+        private TestCaseSummary InvokeTestRunner(string headlessBrowserPath,
                                        TestOptions options,
                                        TestContext testContext,
-                                       List<TestCase> testResults,
                                        TestRunnerMode testRunnerMode,
                                        ITestMethodRunnerCallback callback)
         {
-            if (callback != null && !callback.FileStart(testContext.InputTestFile)) return false;
-
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
 
-            var result = process.RunExecutableAndCaptureOutput(headlessBrowserPath, runnerArgs);
+            Func<StreamReader, TestCaseSummary> streamProcessor =
+                stream => testCaseStreamReader.Read(stream, testContext, callback, DebugEnabled);
+            var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
-            if (DebugEnabled)
-                Console.WriteLine(result.StandardOutput);
+            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile);
 
-
-            HandleTestProcessExitCode(result.ExitCode, testContext.InputTestFile);
-
-
-            var fileTests = testResultsBuilder.Build(new BrowserTestFileResult(testContext, result.StandardOutput), testRunnerMode);
-            testResults.AddRange(fileTests);
-
-            if (callback != null)
-            {
-                foreach (TestResult test in fileTests)
-                    callback.TestFinished(test);
-            }
-
-            if (callback != null && !callback.FileFinished(testContext.InputTestFile, new TestResultsSummary(fileTests.Cast<TestResult>())))
-                return false;
-
-            return true;
+            return processResult.Model;
         }
 
         private static void HandleTestProcessExitCode(int exitCode, string inputTestFile)
         {
-            switch ((TestProcessExitCode) exitCode)
+            switch ((TestProcessExitCode)exitCode)
             {
                 case TestProcessExitCode.AllPassed:
                 case TestProcessExitCode.SomeFailed:

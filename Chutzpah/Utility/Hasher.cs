@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -6,17 +7,19 @@ namespace Chutzpah.Utility
 {
     public class Hasher : IHasher
     {
-        private MD5CryptoServiceProvider md5;
+        private readonly MD5CryptoServiceProvider md5;
+        private readonly string versionSalt;
 
         public Hasher()
         {
             md5 = new MD5CryptoServiceProvider();
+            versionSalt = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         public string Hash(string input)
         {
             if (String.IsNullOrEmpty(input)) return null;
-
+            input += versionSalt;
             return BytesToString(md5.ComputeHash(Encoding.UTF8.GetBytes(input)));
         }
 
