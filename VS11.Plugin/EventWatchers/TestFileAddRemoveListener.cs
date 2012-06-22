@@ -18,11 +18,11 @@ namespace Chutzpah.VS11.EventWatchers
         public event EventHandler<TestFileChangedEventArgs> TestFileChanged;
 
         [ImportingConstructor]
-        public TestFileAddRemoveListener([Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider)
+        public TestFileAddRemoveListener([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             ValidateArg.NotNull(serviceProvider, "serviceProvider");
 
-            projectDocTracker = serviceProvider.GetService<IVsTrackProjectDocuments2>(typeof (SVsTrackProjectDocuments));
+            projectDocTracker = serviceProvider.GetService<IVsTrackProjectDocuments2>(typeof(SVsTrackProjectDocuments));
         }
 
         public void StartListeningForTestFileChanges()
@@ -51,21 +51,24 @@ namespace Chutzpah.VS11.EventWatchers
                                               int[] rgFirstIndices,
                                               TestFileChangedReason reason)
         {
-            for (var index = 0; index < changedProjectCount; index++)
+            // The way these parameters work is:
+            // rgFirstIndices contains a list of the starting index into the changeProjectItems array for each project listed in the changedProjects list
+            // Example: if you get two projects, then rgFirstIndices should have two elements, the first element is probably zero since rgFirstIndices would start at zero.
+            // Then item two in the rgFirstIndices array is where in the changeProjectItems list that the second project's changed items reside.
+            int projItemIndex = 0;
+            for (int changeProjIndex = 0; changeProjIndex < changedProjectCount; changeProjIndex++)
             {
-                var projectItem = changedProjectItems[index];
-                var projectIndex = rgFirstIndices[index];
-                var project = changedProjects[projectIndex];
+                int endProjectIndex = ((changeProjIndex + 1) == changedProjectCount) ? changedProjectItems.Length : rgFirstIndices[changeProjIndex + 1];
 
-                if (project != null)
+                for (; projItemIndex < endProjectIndex; projItemIndex++)
                 {
-                    if (TestFileChanged != null)
+                    if (changedProjects[changeProjIndex] != null && TestFileChanged != null)
                     {
-                        TestFileChanged(this, new TestFileChangedEventArgs(projectItem, reason));
+                        TestFileChanged(this, new TestFileChangedEventArgs(changedProjectItems[projItemIndex], reason));
                     }
+
                 }
             }
-
             return VSConstants.S_OK;
         }
 
