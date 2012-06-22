@@ -117,15 +117,33 @@
     <Compile Include="Models\TestCaseSummary.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TestFiles\chutzpah.js" />
-    <EmbeddedResource Include="TestFiles\jasmine-html.js" />
-    <EmbeddedResource Include="TestFiles\jasmine.css" />
-    <EmbeddedResource Include="TestFiles\jasmine.js" />
-    <EmbeddedResource Include="TestFiles\jasmine_favicon.png" />
-    <EmbeddedResource Include="TestFiles\jasmine.html" />
-    <EmbeddedResource Include="TestFiles\qunit.js" />
-    <EmbeddedResource Include="TestFiles\qunit.html" />
-    <EmbeddedResource Include="TestFiles\qunit.css" />
+    <Content Include="TestFiles\chutzpah.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine-html.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine_favicon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\jasmine.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\QUnit\qunit.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\3rdParty\Phantom\phantomjs.exe">
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

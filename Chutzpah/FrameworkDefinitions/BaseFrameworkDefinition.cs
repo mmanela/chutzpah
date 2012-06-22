@@ -1,4 +1,6 @@
-﻿namespace Chutzpah.FrameworkDefinitions
+﻿using System.IO;
+
+namespace Chutzpah.FrameworkDefinitions
 {
     using System;
     using System.Collections.Generic;
@@ -22,7 +24,10 @@
         {
             get
             {
-                return new string[] { "chutzpah.js", FrameworkKey + ".js", FrameworkKey + ".css" };
+                return new [] { 
+                    "chutzpah.js", 
+                    string.Format("{0}\\{0}.js",FrameworkKey), 
+                    string.Format("{0}\\{0}.css",FrameworkKey) };
             }
         }
 
@@ -33,7 +38,7 @@
         {
             get
             {
-                return this.FrameworkKey + ".html";
+                return string.Format("{0}\\{0}.html", FrameworkKey);
             }
         }
 
@@ -87,9 +92,10 @@
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
         public virtual bool ReferenceIsDependency(string referenceFileName)
         {
-            if (!string.IsNullOrEmpty(referenceFileName))
+            var fileName = Path.GetFileName(referenceFileName);
+            if (!string.IsNullOrEmpty(fileName))
             {
-                return this.FileDependencies.Any(x => x.Equals(referenceFileName, StringComparison.InvariantCultureIgnoreCase));
+                return this.FileDependencies.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;

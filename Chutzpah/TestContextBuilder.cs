@@ -19,6 +19,8 @@ namespace Chutzpah
         private readonly IHasher hasher;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
 
+        private const string TestFileFolder = "TestFiles";
+
         private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*(<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)|(<\s*link\s*.*?href\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -81,11 +83,11 @@ namespace Chutzpah
 
                 GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath);
 
-
                 foreach (var item in definition.FileDependencies)
                 {
-                    var itemPath = Path.Combine(stagingFolder, item);
-                    CreateIfDoesNotExist(itemPath, "Chutzpah.TestFiles." + item);
+                    var sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
+                    var destinationPath = Path.Combine(stagingFolder, Path.GetFileName(item));
+                    CreateIfDoesNotExist(sourcePath, destinationPath);
                 }
 
                 var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
@@ -145,20 +147,19 @@ namespace Chutzpah
         private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
-            var testHtmlTemplate = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TestRunner>("Chutzpah.TestFiles." + definition.TestHarness);
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles, fixtureContent);
+            var templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
+            var testHtmlTemplate = fileSystem.GetText(templatePath);
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles, fixtureContent, definition);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
 
-        private void CreateIfDoesNotExist(string filePath, string embeddedPath)
+        private void CreateIfDoesNotExist(string sourcePath, string destinationPath)
         {
-            if (!fileSystem.FileExists(filePath))
+            if (!fileSystem.FileExists(destinationPath)
+                || fileSystem.GetLastWriteTime(sourcePath) > fileSystem.GetLastWriteTime(destinationPath))
             {
-                using (var stream = EmbeddedManifestResourceReader.GetEmbeddedResoureStream<TestRunner>(embeddedPath))
-                {
-                    fileSystem.Save(filePath, stream);
-                }
+                fileSystem.CopyFile(sourcePath,destinationPath);
             }
         }
 
@@ -249,25 +250,12 @@ namespace Chutzpah
             return flattenedFileList;
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent, IFrameworkDefinition definition)
         {
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
-
-            foreach (ReferencedFile referencedFile in referencedFiles.OrderBy(x => x.IsFileUnderTest))
-            {
-                var referencePath = referencedFile.Path;
-                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
-                {
-
-                    referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
-                }
-                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
-                {
-
-                    referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
-                }
-            }
+            var referencedFilePaths = referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x.Path);
+            BuildReferenceHtml(referencedFilePaths, referenceCssReplacement, referenceJsReplacement);
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
@@ -275,6 +263,25 @@ namespace Chutzpah
 
 
             return testHtmlTemplate;
+        }
+
+        private static void BuildReferenceHtml(IEnumerable<string> referencedFilePaths, StringBuilder referenceCssReplacement, StringBuilder referenceJsReplacement, StringBuilder referenceIconReplacement = null)
+        {
+            foreach (var referencePath in referencedFilePaths)
+            {
+                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) && referenceCssReplacement != null)
+                {
+                    referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
+                }
+                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && referenceJsReplacement != null)
+                {
+                    referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
+                }
+                else if (referencePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) && referenceIconReplacement != null)
+                {
+                    referenceIconReplacement.AppendLine(GetIconStatement(referencePath));
+                }
+            }
         }
 
         public static string GetScriptStatement(string path)
@@ -286,6 +293,12 @@ namespace Chutzpah
         public static string GetStyleStatement(string path)
         {
             const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
+            return string.Format(format, path);
+        }
+
+        public static string GetIconStatement(string path)
+        {
+            const string format = @"<link rel=""shortcut icon"" type=""image/png"" href=""{0}"">";
             return string.Format(format, path);
         }
     }
