@@ -25,7 +25,6 @@ namespace Chutzpah.FrameworkDefinitions
             get
             {
                 return new [] { 
-                    "chutzpah.js", 
                     string.Format("{0}\\{0}.js",FrameworkKey), 
                     string.Format("{0}\\{0}.css",FrameworkKey) };
             }

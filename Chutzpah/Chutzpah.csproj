@@ -117,9 +117,6 @@
     <Compile Include="Models\TestCaseSummary.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestFiles\chutzpah.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

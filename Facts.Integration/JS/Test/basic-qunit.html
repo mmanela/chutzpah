@@ -3,9 +3,16 @@
 
 <script type="text/javascript" src="../Code/code.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
-<script type="text/javascript" src="../../../Chutzpah/TestFiles/chutzpah.js"></script>
 <script type="text/javascript" src="basic-qunit.js"></script>
-
+    
+    <script>
+        // QUnit.config.autostart = false;
+        var old = window.onload;
+        window.onload = function () {
+            if (old) old();
+            console.log("window load html");
+        };
+    </script>
 </head>
 
 <body>

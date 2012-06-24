@@ -1,12 +1,16 @@
 ﻿/*globals phantom, require, console*/
 var chutzpah = {};
 
-chutzpah.runner = function (areTestsComplete) {
+chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) {
     /// <summary>Executes a test suite and evaluates the results using the provided functions.</summary>
-    /// <param name="areTestsComplete" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
+    /// <param name="onPageLoaded" type="Function">Callback function which is called when the page is loaded.</param>
+    /// <param name="isFrameworkLoaded" type="Function">Function that returns true of false if the test framework has been loaded.</param>
+    /// <param name="onFrameworkLoaded" type="Function">Callback function which is called when the test framework is loaded.</param>
+    /// <param name="isTestingDone" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
     'use strict';
 
     var page = require('webpage').create(),
+        testFrameworkLoaded = false,
         testFile = null,
         testMode = null,
         timeOut = null;
@@ -77,7 +81,9 @@ chutzpah.runner = function (areTestsComplete) {
     }
 
     function pageOpenHandler(status) {
-        var waitCondition = function () { return page.evaluate(areTestsComplete); };
+        page.evaluate(onPageLoaded);
+        
+        var waitCondition = function () { return page.evaluate(isTestingDone); };
 
         if (status === 'success') {
             waitFor(waitCondition, timeOut);
@@ -103,6 +109,16 @@ chutzpah.runner = function (areTestsComplete) {
             page.evaluate(function () { window.chutzpah = { testMode: 'execution' }; });
         }
     };
-
+    
+    page.onResourceReceived = function () {
+        if (!testFrameworkLoaded) {
+            var loaded = page.evaluate(isFrameworkLoaded);
+            if (loaded) {
+                testFrameworkLoaded = true;
+                page.evaluate(onFrameworkLoaded);
+            }
+        }
+    };
+ 
     page.open(testFile, pageOpenHandler);
 };
