@@ -18,6 +18,7 @@ namespace Chutzpah.Facts
             {
                 var frameworkMock = Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
+                frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new [] { "qunit.js" });
                 frameworkMock.Setup(x => x.GetFixtureContent(It.IsAny<string>())).Returns("<div> some <a>fixture</a> content </div>");
@@ -52,7 +53,7 @@ namespace Chutzpah.Facts
     @@ReferencedCSSFiles@@
     @@ReferencedJSFiles@@
 </head>
-<body><div id=""qunit-fixture"">@@FixtureContent@@</div></body></html>
+<body><div id=""qunit-fixture""></div></body></html>
 
 
 ";
@@ -229,18 +230,19 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_save_generated_test_html_file_to_temporary_folder_and_return_path_for_html_file()
+            public void Will_return_path_and_framework_for_html_file()
             {
-                TestableTestContextBuilder creator = new TestableTestContextBuilder();
+                var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("testThing.html"))
                     .Returns(new PathInfo { Type = PathType.Html, FullPath = @"C:\testThing.html" });
 
                 var context = creator.ClassUnderTest.BuildContext("testThing.html");
 
-                creator.Mock<IFileSystemWrapper>().Verify(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()));
-                Assert.Equal(@"C:\temp\test.html", context.TestHarnessPath);
+                Assert.Equal(@"qunitRunner.js", context.TestRunner);
+                Assert.Equal(@"C:\testThing.html", context.TestHarnessPath);
                 Assert.Equal(@"C:\testThing.html", context.InputTestFile);
+                Assert.Empty(context.ReferencedJavaScriptFiles);
             }
 
 
@@ -464,57 +466,6 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
-            {
-                TestableTestContextBuilder creator = new TestableTestContextBuilder();
-                string text = null;
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
-                    .Callback<string, string>((x, y) => text = y);
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\testFile.html"))
-                    .Returns(TestHTMLFileContents);
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
-                    .Returns(@"path\lib.js");
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
-                    .Returns(@"path\common.js");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("testFile.html")).Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
-
-                var context = creator.ClassUnderTest.BuildContext("testFile.html");
-
-                string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
-                string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\common.js");
-                Assert.Contains(scriptStatement1, text);
-                Assert.Contains(scriptStatement2, text);
-                Assert.DoesNotContain("@@ReferencedJSFiles@@", text);
-            }
-
-            [Fact]
-            public void Will_replace_referenced_css_file_place_holder_in_html_template_with_referenced_files_from_html_test_file()
-            {
-                TestableTestContextBuilder creator = new TestableTestContextBuilder();
-                string text = null;
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
-                    .Callback<string, string>((x, y) => text = y);
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\testFile.html"))
-                    .Returns(TestHTMLFileContents);
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"style.css")))
-                    .Returns(@"path\style.css");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("testFile.html")).Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
-
-                var context = creator.ClassUnderTest.BuildContext("testFile.html");
-
-                string styleStatemenet = TestContextBuilder.GetStyleStatement(@"path\style.css");
-                Assert.Contains(styleStatemenet, text);
-                Assert.DoesNotContain("@@ReferencedCSSFiles@@", text);
-            }
-
-            [Fact]
             public void Will_not_copy_referenced_path_if_not_a_file()
             {
                 TestableTestContextBuilder creator = new TestableTestContextBuilder();
@@ -551,32 +502,6 @@ namespace Chutzpah.Facts
                 Assert.Contains(scriptStatement, text);
             }
 
-            [Fact]
-            public void Will_replace_text_fixture_place_holder_with_existing_fixture()
-            {
-                TestableTestContextBuilder creator = new TestableTestContextBuilder();
-                string text = null;
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
-                    .Callback<string, string>((x, y) => text = y);
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\testFile.html"))
-                    .Returns(TestHTMLFileContents);
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
-                    .Returns(@"path\lib.js");
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
-                    .Returns(@"path\common.js");
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.GetPathInfo("testFile.html"))
-                    .Returns(new PathInfo { Type = PathType.Html, FullPath = @"path\testFile.html" });
-
-                var context = creator.ClassUnderTest.BuildContext("testFile.html");
-
-                Assert.Contains("<div> some <a>fixture</a> content </div>", text);
-                Assert.DoesNotContain("@@FixtureContent@@", text);
-            }
         }
     }
 }

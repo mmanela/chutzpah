@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../Code/RequireJS/require.js" />
 
-require({ baseUrl: '../../code/RequireJS' }, ['base/core', 'ui/screen'],
+requirejs(['base/core', 'ui/screen'],
     function(core, screen) {
 
         module("base/core");

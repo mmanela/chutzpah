@@ -1,0 +1,25 @@
+﻿define([
+	"vs/base/tests/all.test",
+	"vs/platform/tests/all.test",
+	"vs/editor/tests/all.test",
+	"vs/languages/coffeescript/tests/all.test",
+	"vs/languages/css/tests/all.test",
+	"vs/languages/cpp/tests/all.test",
+	"vs/languages/handlebars/tests/all.test",
+	"vs/languages/html/tests/all.test",
+	"vs/languages/java/tests/all.test",
+	"vs/languages/javascript/tests/all.test",
+	"vs/languages/jshtm/tests/all.test",
+	"vs/languages/markdown/tests/all.test",
+	"vs/languages/csharp/tests/all.test",
+	"vs/languages/razor/tests/all.test",
+	"vs/languages/php/tests/all.test",
+	"vs/languages/strada/tests/all.test",
+	"vs/languages/vb/tests/all.test",
+	"vs/languages/xml/tests/all.test",
+	"vs/languages/bat/tests/all.test",
+	"vs/workbench/tests/all.test",
+	"vs/monaco/tests/all.test"
+], function () {
+    QUnit.start();
+});

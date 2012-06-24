@@ -6,12 +6,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
-using Chutzpah.Wrappers;
 using Chutzpah.Utility;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
-
     public class TestContextBuilder : ITestContextBuilder
     {
         private readonly IFileSystemWrapper fileSystem;
@@ -21,9 +20,8 @@ namespace Chutzpah
 
         private const string TestFileFolder = "TestFiles";
 
-        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
+        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>", 
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private readonly Regex HtmlReferencePathRegex = new Regex(@"^\s*(<\s*script\s*.*?src\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)|(<\s*link\s*.*?href\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'].*?>)", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IHasher hasher, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
         {
@@ -61,6 +59,17 @@ namespace Chutzpah
 
             if (TryDetectFramework(testFileText, out definition))
             {
+                // For HTML test files we don't need to create a test harness to just return this file
+                if (testFileKind == PathType.Html)
+                {
+                    return new TestContext
+                        {
+                            InputTestFile = testFilePath,
+                            TestHarnessPath = testFilePath,
+                            TestRunner = definition.TestRunner
+                        };
+                }
+
                 if (!fileSystem.FolderExists(stagingFolder))
                 {
                     fileSystem.CreateDirectory(stagingFolder);
@@ -68,18 +77,9 @@ namespace Chutzpah
 
                 var referencedFiles = new List<ReferencedFile>();
 
-                var fixtureContent = "";
-
-                if (testFileKind == PathType.JavaScript)
-                {
-                    var fileUnderTest = new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
-                    referencedFiles.Add(fileUnderTest);
-                    definition.Process(fileUnderTest);
-                }
-                else if (testFileKind == PathType.Html)
-                {
-                    fixtureContent = definition.GetFixtureContent(testFileText);
-                }
+                var fileUnderTest = new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
+                referencedFiles.Add(fileUnderTest);
+                definition.Process(fileUnderTest);
 
                 GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath);
 
@@ -90,15 +90,15 @@ namespace Chutzpah
                     CreateIfDoesNotExist(sourcePath, destinationPath);
                 }
 
-                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles, fixtureContent);
+                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles);
 
                 return new TestContext
-                {
-                    InputTestFile = testFilePath,
-                    TestHarnessPath = testHtmlFilePath,
-                    ReferencedJavaScriptFiles = referencedFiles,
-                    TestRunner = definition.TestRunner
-                };
+                    {
+                        InputTestFile = testFilePath,
+                        TestHarnessPath = testHtmlFilePath,
+                        ReferencedJavaScriptFiles = referencedFiles,
+                        TestRunner = definition.TestRunner
+                    };
             }
 
             return null;
@@ -144,12 +144,14 @@ namespace Chutzpah
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent)
+        private string CreateTestHarness(IFrameworkDefinition definition,
+                                         string stagingFolder,
+                                         IEnumerable<ReferencedFile> referencedFiles)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             var templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             var testHtmlTemplate = fileSystem.GetText(templatePath);
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles, fixtureContent, definition);
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
@@ -159,7 +161,7 @@ namespace Chutzpah
             if (!fileSystem.FileExists(destinationPath)
                 || fileSystem.GetLastWriteTime(sourcePath) > fileSystem.GetLastWriteTime(destinationPath))
             {
-                fileSystem.CopyFile(sourcePath,destinationPath);
+                fileSystem.CopyFile(sourcePath, destinationPath);
             }
         }
 
@@ -173,7 +175,11 @@ namespace Chutzpah
         /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
-        private void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath)
+        private void GetReferencedFiles(List<ReferencedFile> referencedFiles,
+                                        IFrameworkDefinition definition,
+                                        PathType testFileType,
+                                        string textToParse,
+                                        string currentFilePath)
         {
             var result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)), definition, testFileType, textToParse, currentFilePath);
             var flattenedReferenceTree = from root in result
@@ -182,10 +188,14 @@ namespace Chutzpah
             referencedFiles.AddRange(flattenedReferenceTree);
         }
 
-        private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths, IFrameworkDefinition definition, PathType testFileType, string textToParse, string currentFilePath)
+        private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths,
+                                                         IFrameworkDefinition definition,
+                                                         PathType testFileType,
+                                                         string textToParse,
+                                                         string currentFilePath)
         {
             var referencedFiles = new List<ReferencedFile>();
-            var regex = testFileType == PathType.JavaScript ? JsReferencePathRegex : HtmlReferencePathRegex;
+            var regex = JsReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
             {
                 if (match.Success)
@@ -206,7 +216,7 @@ namespace Chutzpah
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null && !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var referencedFile = new ReferencedFile { Path = absolutePath, IsLocal = true };
+                            var referencedFile = new ReferencedFile {Path = absolutePath, IsLocal = true};
                             referencedFiles.Add(referencedFile);
                             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
                             referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath);
@@ -214,7 +224,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
                     }
                 }
             }
@@ -228,7 +238,6 @@ namespace Chutzpah
             {
                 var textToParse = fileSystem.GetText(currentFilePath);
                 return GetReferencedFiles(discoveredPaths, definition, PathType.JavaScript, textToParse, currentFilePath);
-
             }
             catch (IOException)
             {
@@ -250,7 +259,8 @@ namespace Chutzpah
             return flattenedFileList;
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate, IEnumerable<ReferencedFile> referencedFiles, string fixtureContent, IFrameworkDefinition definition)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate,
+                                                   IEnumerable<ReferencedFile> referencedFiles)
         {
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
@@ -259,13 +269,14 @@ namespace Chutzpah
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@FixtureContent@@", fixtureContent);
-
 
             return testHtmlTemplate;
         }
 
-        private static void BuildReferenceHtml(IEnumerable<string> referencedFilePaths, StringBuilder referenceCssReplacement, StringBuilder referenceJsReplacement, StringBuilder referenceIconReplacement = null)
+        private static void BuildReferenceHtml(IEnumerable<string> referencedFilePaths,
+                                               StringBuilder referenceCssReplacement,
+                                               StringBuilder referenceJsReplacement,
+                                               StringBuilder referenceIconReplacement = null)
         {
             foreach (var referencePath in referencedFilePaths)
             {
