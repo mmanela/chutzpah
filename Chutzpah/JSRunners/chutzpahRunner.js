@@ -13,16 +13,17 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         testFrameworkLoaded = false,
         testFile = null,
         testMode = null,
-        timeOut = null;
+        timeOut = null,
+        startTime = null;
 
     function waitFor(testIfDone, timeOutMillis) {
         var maxtimeOutMillis = timeOutMillis,
-            start = new Date().getTime(),
             isDone = false,
             interval;
 
         function intervalHandler() {
-            if (!isDone && (new Date().getTime() - start < maxtimeOutMillis)) {
+            var now = new Date().getTime();
+            if (!isDone && (now - startTime < maxtimeOutMillis)) {
                 isDone = testIfDone();
             } else {
                 if (!isDone) {
@@ -41,6 +42,10 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
     }
 
     function writeEvent(eventObj, json) {
+
+        // Everytime we get an event update the startTime. We want timeout to happen
+        // when were have gone quiet for too long
+        startTime = new Date().getTime();
         
         switch (eventObj.type) {
             case 'FileStart':
@@ -81,11 +86,13 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
     }
 
     function pageOpenHandler(status) {
-        page.evaluate(onPageLoaded);
-        
         var waitCondition = function () { return page.evaluate(isTestingDone); };
 
         if (status === 'success') {
+            // Initialize startTime, this will get updated everytime we recieve 
+            // content from the test framework
+            startTime = new Date().getTime();
+            page.evaluate(onPageLoaded);
             waitFor(waitCondition, timeOut);
         }
     }
@@ -97,7 +104,7 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
 
     testFile = phantom.args[0];
     testMode = phantom.args[1] || "execution";
-    timeOut = parseInt(phantom.args[2]) || 10001;
+    timeOut = parseInt(phantom.args[2]) || 5001;
     page.onConsoleMessage = captureLogMessage;
     page.onError = onError;
 
@@ -110,7 +117,7 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         }
     };
     
-    page.onResourceReceived = function () {
+    page.onResourceReceived = function (url) {
         if (!testFrameworkLoaded) {
             var loaded = page.evaluate(isFrameworkLoaded);
             if (loaded) {
@@ -120,5 +127,6 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         }
     };
  
+    console.log("before open");
     page.open(testFile, pageOpenHandler);
 };

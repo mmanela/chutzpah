@@ -49,6 +49,28 @@ namespace Chutzpah.RunnerCallbacks
             Console.WriteLine();
         }
 
+        public override void ExceptionThrown(Exception exception, string fileName)
+        {
+            ClearCounter();
+
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            var errorMessage = GetExceptionThrownMessage(exception, fileName);
+            Console.WriteLine(errorMessage);
+            Console.ResetColor();
+        }
+
+        public override void FileError(TestError error)
+        {
+            ClearCounter();
+
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            var errorMessage = GetFileErrorMessage(error);
+            Console.WriteLine(errorMessage);
+            Console.ResetColor();
+        }
+
         protected override void TestComplete(TestCase testCase)
         {
             ++testCount;

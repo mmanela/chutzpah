@@ -58,6 +58,7 @@ namespace Chutzpah
                 {
                     stack += string.Format(" (line {0})", item.Line);
                 }
+                stack += "\n";
             }
 
             return string.Format("JS Error: {0}\n {1}\nWhile Running:{2}\n\n", error.Message, stack, error.InputTestFile);

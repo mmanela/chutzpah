@@ -7,6 +7,7 @@
     phantom.injectJs('chutzpahRunner.js');
 
     function isTestingDone() {
+
         return window.chutzpah.isTestingFinished === true;
     }
     
@@ -15,7 +16,6 @@
     }
     
     function onQUnitLoaded() {
-
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -40,6 +40,7 @@
 
         QUnit.begin(function () {
             // Testing began
+            console.log("here");
             log({ type: "FileStart" });
         });
 
@@ -53,11 +54,13 @@
         QUnit.log(function (info) {
             if (info.result !== undefined) {
                 var testResult = {};
+                
                 testResult.passed = info.result;
-                testResult.actual = info.actual;
-                testResult.expected = info.expected;
-                testResult.message = info.message;
-
+                QUnit.jsDump.multiline = false; // Make jsDump use single line
+                testResult.actual = QUnit.jsDump.parse(info.actual);
+                testResult.expected = QUnit.jsDump.parse(info.expected);
+                testResult.message = info.message + "";
+                
                 activeTestCase.testResults.push(testResult);
             }
         });

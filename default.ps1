@@ -70,8 +70,7 @@ task Run-Phantom {
   }
   $phantom = "3rdParty\Phantom\phantomjs.exe";
   
-  $testFilePath = Resolve-Path "C:\Dev\chutzpah\Facts.Integration\JS\Test\requirejs\test.html";
-  #$testFilePath = Resolve-Path "Facts.Integration/JS/Test/basic-$($type).html";
+  $testFilePath = Resolve-Path "Facts.Integration/JS/Test/basic-$($type).html";
   $testFilePath = $testFilePath.Path.Replace("\","/");
   
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner.js" "file:///$testFilePath" $mode }
