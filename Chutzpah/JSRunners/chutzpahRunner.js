@@ -46,7 +46,6 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         // Everytime we get an event update the startTime. We want timeout to happen
         // when were have gone quiet for too long
         startTime = new Date().getTime();
-        
         switch (eventObj.type) {
             case 'FileStart':
             case 'TestStart':
@@ -89,6 +88,7 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         var waitCondition = function () { return page.evaluate(isTestingDone); };
 
         if (status === 'success') {
+
             // Initialize startTime, this will get updated everytime we recieve 
             // content from the test framework
             startTime = new Date().getTime();
@@ -126,7 +126,6 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
             }
         }
     };
- 
-    console.log("before open");
+
     page.open(testFile, pageOpenHandler);
 };

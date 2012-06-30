@@ -19,7 +19,7 @@ namespace Chutzpah.Facts
             public TestableTestRunner()
             {
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns("");
-                Mock<IFileProbe>().Setup(x => x.FindScriptFiles(It.IsAny<IEnumerable<string>>())).Returns<IEnumerable<string>>(x => x);
+                Mock<IFileProbe>().Setup(x => x.FindScriptFiles(It.IsAny<IEnumerable<string>>(), It.IsAny<TestingMode>())).Returns<IEnumerable<string>,TestingMode>((x,y) => x);
                 Mock<IProcessHelper>()
                     .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<StreamReader,TestCaseSummary>>()))
                     .Returns(new ProcessResult<TestCaseSummary>(0, new TestCaseSummary()));
@@ -205,6 +205,29 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_pass_testing_mode_option_to_test_runner()
+            {
+                var runner = new TestableTestRunner();
+                var summary = new TestCaseSummary() { Tests = new[] { new TestCase() } };
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html", TestRunner = "runner" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(@"path\tests.html", out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<IFileProbe>()
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }, TestingMode.HTML))
+                    .Returns(new List<string> { @"path\tests.html" });
+                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution";
+                runner.Mock<IProcessHelper>()
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<StreamReader, TestCaseSummary>>()))
+                 .Returns(new ProcessResult<TestCaseSummary>(0, summary));
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\testFolder", new TestOptions{ TestingMode = TestingMode.HTML});
+
+                Assert.Equal(1, res.TotalCount);
+            }
+
+            [Fact]
             public void Will_run_test_files_found_from_given_folder_path()
             {
                 var runner = new TestableTestRunner();
@@ -215,7 +238,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }))
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }, It.IsAny<TestingMode>()))
                     .Returns(new List<string> { @"path\tests.html" });
                 string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution";
                 runner.Mock<IProcessHelper>()
@@ -265,7 +288,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<StreamReader,TestCaseSummary>>()))
                     .Returns(new ProcessResult<TestCaseSummary>(0, summary));
                 runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }))
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }, It.IsAny<TestingMode>()))
                     .Returns(new List<string> { @"path\tests1.html", @"path\tests2.htm" });
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" });

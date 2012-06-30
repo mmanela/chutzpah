@@ -2,15 +2,8 @@
 using System.Globalization;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Chutzpah.VisualStudio
+namespace Chutzpah.VS.Common
 {
-    public enum LogType
-    {
-        Information,
-        Warning,
-        Error
-    }
-
     public class Logger : ILogger
     {
         private readonly IServiceProvider serviceProvider;

@@ -19,7 +19,7 @@
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
-        
+
         var activeTestCase = null;
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
@@ -40,7 +40,6 @@
 
         QUnit.begin(function () {
             // Testing began
-            console.log("here");
             log({ type: "FileStart" });
         });
 
@@ -59,7 +58,7 @@
                 QUnit.jsDump.multiline = false; // Make jsDump use single line
                 testResult.actual = QUnit.jsDump.parse(info.actual);
                 testResult.expected = QUnit.jsDump.parse(info.expected);
-                testResult.message = info.message + "";
+                testResult.message = (info.message || "") + "";
                 
                 activeTestCase.testResults.push(testResult);
             }

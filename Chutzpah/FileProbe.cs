@@ -45,7 +45,7 @@ namespace Chutzpah
             return null;
         }
 
-        public IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths)
+        public IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
         {
             if (testPaths == null) yield break;
 
@@ -56,7 +56,11 @@ namespace Chutzpah
                 switch (pathInfo.Type)
                 {
                     case PathType.Html:
+                        if (!testingMode.HasFlag(TestingMode.HTML)) break;
+                        yield return pathInfo.FullPath;
+                        break;
                     case PathType.JavaScript:
+                        if (!testingMode.HasFlag(TestingMode.JavaScript)) break;
                         yield return pathInfo.FullPath;
                         break;
                     case PathType.Folder:
@@ -65,8 +69,6 @@ namespace Chutzpah
                             yield return item;
                         }
 
-                        break;
-                    default:
                         break;
                 }
             }

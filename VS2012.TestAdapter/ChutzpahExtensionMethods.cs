@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace Chutzpah.VS11
+namespace Chutzpah.VS2012.TestAdapter
 {
     public static class ChutzpahExtensionMethods
     {
-        public static TestCase ToVsTestCase(this Chutzpah.Models.TestCase test)
+        public static TestCase ToVsTestCase(this Models.TestCase test)
         {
             return new TestCase(BuildFullyQualifiedName(test), Constants.ExecutorUri, test.InputTestFile)
                        {
@@ -50,6 +50,7 @@ namespace Chutzpah.VS11
         private static string GetTestFailureMessage(Models.TestResult result)
         {
             var errorString = "";
+            if (result.Passed) return errorString;
             if (!string.IsNullOrWhiteSpace(result.Message))
             {
                 errorString += string.Format("{0}", result.Message);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Chutzpah.VS11
+namespace Chutzpah.VS2012.TestAdapter
 {
 	static class Constants
 	{

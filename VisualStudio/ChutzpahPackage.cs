@@ -4,20 +4,18 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using Chutzpah.VS.Common;
+using Chutzpah.VS.Common.Settings;
 using Chutzpah.VisualStudio.Callback;
-using Chutzpah.VisualStudio.Settings;
+using Chutzpah.Wrappers;
 using EnvDTE;
 using EnvDTE80;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Constants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
-using System.Linq;
-using Chutzpah.Models;
-using Chutzpah.Wrappers;
 
 namespace Chutzpah.VisualStudio
 {
@@ -36,8 +34,8 @@ namespace Chutzpah.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true)]
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
-    [InstalledProductRegistration("#110", "#112", "1.4.3", IconResourceID = 400)]
-    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
+    [InstalledProductRegistration("#110", "#112", "2.0.0", IconResourceID = 400)]
+    [ProvideOptionPage(typeof (ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
@@ -50,7 +48,7 @@ namespace Chutzpah.VisualStudio
         internal ILogger Logger { get; private set; }
         private ITestMethodRunnerCallback runnerCallback;
         private IVsStatusbar statusBar;
-        IProcessHelper processHelper;
+        private IProcessHelper processHelper;
         private readonly object syncLock = new object();
         private bool testingInProgress;
 
@@ -77,7 +75,7 @@ namespace Chutzpah.VisualStudio
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             base.Initialize();
 
-            dte = (DTE2)GetService(typeof(DTE));
+            dte = (DTE2) GetService(typeof (DTE));
             if (dte == null)
             {
                 //if dte is null then we throw a excpetion
@@ -89,23 +87,23 @@ namespace Chutzpah.VisualStudio
 
             processHelper = new ProcessHelper();
             Logger = new Logger(this);
-            Settings = GetDialogPage(typeof(ChutzpahSettings)) as ChutzpahSettings;
+            Settings = GetDialogPage(typeof (ChutzpahSettings)) as ChutzpahSettings;
 
-            statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
+            statusBar = GetService(typeof (SVsStatusbar)) as IVsStatusbar;
             runnerCallback = new VisualStudioRunnerCallback(dte, statusBar);
 
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
-            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var mcs = GetService(typeof (IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
             {
                 // Command - Run JS Tests
-                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunJSTests);
+                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int) PkgCmdIDList.cmdidRunJSTests);
                 var runJsTestMenuCmd = new OleMenuCommand(RunJSTestCmdCallback, runJsTestsCmd);
                 runJsTestMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
                 mcs.AddCommand(runJsTestMenuCmd);
                 // Command - Run JS tests in browser
-                var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunInBrowser);
+                var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int) PkgCmdIDList.cmdidRunInBrowser);
                 var runJsTestInBrowserMenuCmd = new OleMenuCommand(RunJSTestInBrowserCmdCallback, runJsTestsInBrowserCmd);
                 runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsInBrowserCmdQueryStatus;
                 mcs.AddCommand(runJsTestInBrowserMenuCmd);
@@ -119,7 +117,7 @@ namespace Chutzpah.VisualStudio
                 var filename = item.FileNames[0];
                 return GetFileType(filename);
             }
-            
+
             if (IsFolder(item))
             {
                 return TestFileType.Folder;
@@ -149,14 +147,14 @@ namespace Chutzpah.VisualStudio
         {
             IEnumerable<string> selectedFiles = null;
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
             {
                 // We only support one file for opening in browser throuhg VS for now
                 selectedFiles = SearchForTestableFiles().Take(1);
             }
             else if (activeWindow.Kind == "Document")
             {
-                selectedFiles = new List<string> { CurrentDocumentPath };
+                selectedFiles = new List<string> {CurrentDocumentPath};
             }
 
             foreach (var selectedFile in selectedFiles)
@@ -206,14 +204,13 @@ namespace Chutzpah.VisualStudio
         private void SetCommandVisibility(OleMenuCommand menuCommand, params TestFileType[] allowedTypes)
         {
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == EnvDTE.Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
             {
-
                 Array activeItems = SolutionExplorerItems;
                 foreach (UIHierarchyItem item in activeItems)
                 {
-                    var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
-                    var projectNode = ((UIHierarchyItem)item).Object as Project;
+                    var projectItem = (item).Object as ProjectItem;
+                    var projectNode = (item).Object as Project;
 
                     TestFileType fileType = TestFileType.Other;
                     if (projectItem != null)
@@ -234,12 +231,12 @@ namespace Chutzpah.VisualStudio
             }
             else if (activeWindow.ObjectKind == Constants.vsDocumentKindText)
             {
-               var fileType = GetFileType(activeWindow.Document.FullName);
-               if (!allowedTypes.Contains(fileType))
-               {
-                   menuCommand.Visible = false;
-                   return;
-               }
+                var fileType = GetFileType(activeWindow.Document.FullName);
+                if (!allowedTypes.Contains(fileType))
+                {
+                    menuCommand.Visible = false;
+                    return;
+                }
             }
 
             menuCommand.Visible = true;
@@ -261,7 +258,7 @@ namespace Chutzpah.VisualStudio
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                RunTests(new[] { filePath });
+                RunTests(new[] {filePath});
             }
         }
 
@@ -277,20 +274,20 @@ namespace Chutzpah.VisualStudio
                         testingInProgress = true;
                         Task.Factory.StartNew(
                             () =>
-                            {
-                                try
                                 {
-                                    testRunner.RunTests(filePaths, new TestOptions { TimeOutMilliseconds = Settings.TimeoutMilliseconds }, runnerCallback);
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.Log("Error while running tests", "ChutzpahPackage", e);
-                                }
-                                finally
-                                {
-                                    testingInProgress = false;
-                                }
-                            });
+                                    try
+                                    {
+                                        testRunner.RunTests(filePaths, new TestOptions {TimeOutMilliseconds = Settings.TimeoutMilliseconds}, runnerCallback);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Logger.Log("Error while running tests", "ChutzpahPackage", e);
+                                    }
+                                    finally
+                                    {
+                                        testingInProgress = false;
+                                    }
+                                });
                     }
                 }
             }
@@ -307,8 +304,8 @@ namespace Chutzpah.VisualStudio
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
-                var projectNode = ((UIHierarchyItem)item).Object as Project;
+                var projectItem = ((UIHierarchyItem) item).Object as ProjectItem;
+                var projectNode = ((UIHierarchyItem) item).Object as Project;
 
                 if (projectItem != null)
                 {
@@ -333,7 +330,7 @@ namespace Chutzpah.VisualStudio
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                var projectItem = ((UIHierarchyItem) item).Object as ProjectItem;
                 if (projectItem != null)
                 {
                     string filePath = projectItem.FileNames[0];
@@ -350,8 +347,8 @@ namespace Chutzpah.VisualStudio
         {
             get
             {
-                var hierarchy = (UIHierarchy)dte.ToolWindows.GetToolWindow(Constants.vsWindowKindSolutionExplorer);
-                return (Array)hierarchy.SelectedItems;
+                var hierarchy = (UIHierarchy) dte.ToolWindows.GetToolWindow(Constants.vsWindowKindSolutionExplorer);
+                return (Array) hierarchy.SelectedItems;
             }
         }
 
@@ -466,6 +463,5 @@ namespace Chutzpah.VisualStudio
             }
             return codeDoc;
         }
-
     }
 }

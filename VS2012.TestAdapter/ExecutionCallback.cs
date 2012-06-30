@@ -3,7 +3,7 @@ using Chutzpah.Models;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace Chutzpah.VS11
+namespace Chutzpah.VS2012.TestAdapter
 {
     public class ExecutionCallback : RunnerCallback
     {

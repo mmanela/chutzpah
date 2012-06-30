@@ -66,6 +66,12 @@ namespace Chutzpah
             return summary.Tests;
         }
 
+        public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options)
+        {
+            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Discovery, RunnerCallback.Empty);
+            return summary.Tests;
+        }
+
         public TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
             return RunTests(testPath, new TestOptions(), callback);
@@ -110,7 +116,7 @@ namespace Chutzpah
 
             var overallSummary = new TestCaseSummary();
             var resultCount = 1;
-            foreach (string testFile in fileProbe.FindScriptFiles(testPaths))
+            foreach (string testFile in fileProbe.FindScriptFiles(testPaths, options.TestingMode))
             {
                 try
                 {

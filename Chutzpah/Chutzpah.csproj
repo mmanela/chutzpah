@@ -78,6 +78,7 @@
     <Compile Include="Models\Stack.cs" />
     <Compile Include="Models\TestError.cs" />
     <Compile Include="Models\JS\JsFileDone.cs" />
+    <Compile Include="Models\TestingMode.cs" />
     <Compile Include="Models\TestLog.cs" />
     <Compile Include="Models\JS\JsRunnerOutput.cs" />
     <Compile Include="Models\JS\JsTestCase.cs" />

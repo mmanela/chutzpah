@@ -3,12 +3,11 @@ using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
-namespace Chutzpah.VS11
+namespace Chutzpah.VS2012.TestAdapter
 {
     [ExtensionUri(Constants.ExecutorUriString)]
-	public class JsTestExecutor : ITestExecutor
+	public class ChutzpahTestExecutor : ITestExecutor
 	{
 		public void Cancel()
 		{
@@ -23,9 +22,13 @@ namespace Chutzpah.VS11
                 frameworkHandle.SendMessage(TestMessageLevel.Warning, "DataCollectors like Code Coverage are unavailable for JavaScript");
             }
 
+            var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
+            var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
+            var testOptions = new TestOptions { TimeOutMilliseconds = settings.TimeoutMilliseconds, TestingMode = settings.TestingMode };
+
 			var chutzpahRunner = TestRunner.Create();
 			var callback = new ExecutionCallback(frameworkHandle);
-			chutzpahRunner.RunTests(sources, callback);
+			chutzpahRunner.RunTests(sources,testOptions, callback);
 		}
 
 		public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)

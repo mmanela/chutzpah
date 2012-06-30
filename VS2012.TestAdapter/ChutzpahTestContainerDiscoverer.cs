@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using Chutzpah.Models;
+using Chutzpah.VS.Common;
 using Chutzpah.VS11.EventWatchers;
 using Chutzpah.VS11.EventWatchers.EventArgs;
 using Microsoft.VisualStudio.Shell;
@@ -10,14 +12,15 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using VS11.Plugin;
 
-namespace Chutzpah.VS11
+namespace Chutzpah.VS2012.TestAdapter
 {
 
     [Export(typeof (ITestContainerDiscoverer))]
-    public class JsTestContainerDiscoverer : ITestContainerDiscoverer
+    public class ChutzpahTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
-        private readonly ILogger logger;
+        private readonly IChutzpahSettingsMapper settingsMapper;
+        private readonly VS.Common.ILogger logger;
         private readonly ITestRunner testRunner;
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
@@ -39,15 +42,16 @@ namespace Chutzpah.VS11
 
 
         [ImportingConstructor]
-        public JsTestContainerDiscoverer(
+        public ChutzpahTestContainerDiscoverer(
             [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
-            ILogger logger,
+            IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener)
             : this(
                 serviceProvider,
-                logger,
+                settingsMapper,
+                new Logger(serviceProvider), 
                 solutionListener,
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
@@ -55,9 +59,10 @@ namespace Chutzpah.VS11
         {
         }
 
-        public JsTestContainerDiscoverer(
+        public ChutzpahTestContainerDiscoverer(
             IServiceProvider serviceProvider,
-            ILogger logger,
+            IChutzpahSettingsMapper settingsMapper,
+            VS.Common.ILogger logger,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
             ITestFileAddRemoveListener testFilesAddRemoveListener,
@@ -66,12 +71,12 @@ namespace Chutzpah.VS11
             initialContainerSearch = true;
             cachedContainers = new List<ITestContainer>();
             this.serviceProvider = serviceProvider;
+            this.settingsMapper = settingsMapper;
             this.logger = logger;
             this.testRunner = testRunner;
             this.solutionListener = solutionListener;
             this.testFilesUpdateWatcher = testFilesUpdateWatcher;
             this.testFilesAddRemoveListener = testFilesAddRemoveListener;
-
 
             this.testFilesAddRemoveListener.TestFileChanged += OnProjectItemChanged;
             this.testFilesAddRemoveListener.StartListeningForTestFileChanges();
@@ -115,7 +120,7 @@ namespace Chutzpah.VS11
         {
             if (e != null)
             {
-                var files = FindJsFiles(e.Project);
+                var files = FindTestFiles(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
                     UpdateFileWatcher(files, true);
@@ -162,7 +167,7 @@ namespace Chutzpah.VS11
             if (e != null)
             {
                 // Don't do anything for files we are sure can't be test files
-                if (!IsJsFile(e.File)) return;
+                if (!IsTestFile(e.File)) return;
 
                 switch (e.ChangedReason)
                 {
@@ -221,39 +226,63 @@ namespace Chutzpah.VS11
             if (initialContainerSearch)
             {
                 cachedContainers.Clear();
-                var jsFiles = FindJsFiles();
+                var jsFiles = FindTestFiles();
                 UpdateFileWatcher(jsFiles, true);
                 initialContainerSearch = false;
             }
 
-            return cachedContainers;
+            return FilterContainers(cachedContainers);
         }
 
-        private IEnumerable<string> FindJsFiles()
+        private IEnumerable<ITestContainer> FilterContainers(IEnumerable<ITestContainer> containers)
+        {
+            switch (settingsMapper.Settings.TestingMode)
+            {
+                case TestingMode.JavaScript:
+                    return containers.Where(x => HasJsExtension(x.Source));
+                case TestingMode.HTML:
+                    return containers.Where(x => HasHTMLFileExtension(x.Source));
+                default:
+                    return containers;
+            }
+        }
+
+        private IEnumerable<string> FindTestFiles()
         {
             var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
-            return loadedProjects.SelectMany(FindJsFiles).ToList();
+            return loadedProjects.SelectMany(FindTestFiles).ToList();
         }
 
-        private IEnumerable<string> FindJsFiles(IVsProject project)
+        private IEnumerable<string> FindTestFiles(IVsProject project)
         {
             return from item in VsSolutionHelper.GetProjectItems(project)
                    where IsTestFile(item)
                    select item;
         }
 
-        private static bool IsJsFile(string path)
+        private static bool HasJsExtension(string path)
         {
             return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool HasHTMLFileExtension(string path)
+        {
+            return ".html".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
+                   || ".htm".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool HasTestFileExtension(string path)
+        {
+            return HasHTMLFileExtension(path) || HasJsExtension(path);
         }
 
         private bool IsTestFile(string path)
         {
             try
             {
-                return IsJsFile(path) && testRunner.IsTestFile(path);
+                return HasTestFileExtension(path) && testRunner.IsTestFile(path);
             }
             catch (IOException e)
             {
