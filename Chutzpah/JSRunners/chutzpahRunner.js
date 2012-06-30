@@ -95,6 +95,9 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
             page.evaluate(onPageLoaded);
             waitFor(waitCondition, timeOut);
         }
+        else {
+            phantom.exit(2);
+        }
     }
 
     if (phantom.args.length === 0) {
