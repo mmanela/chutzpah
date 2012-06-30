@@ -127,5 +127,14 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         }
     };
 
+    // Since tests run inside of Phantom are not part of your websites domain
+    // lets loosen remote resource security restrictions to help with some testing scenarios
+
+    // Allows local files to make ajax calls to remote urls
+    page.settings.localToRemoteUrlAccessEnabled = true; //(default false) 
+
+    // Stops all security (for example you can access content in other domain IFrames)
+    page.settings.webSecurityEnabled = false; //(default true)
+
     page.open(testFile, pageOpenHandler);
 };

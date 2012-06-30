@@ -1,4 +1,4 @@
-﻿/// <reference path="http://code.jquery.com/jquery-1.5.2.min.js" />
+﻿/// <reference path="http://code.jquery.com/jquery.min.js" />
 
 $(function(){
 

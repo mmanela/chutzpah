@@ -325,5 +325,18 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.PassedCount);
             Assert.Equal(2, result.TotalCount);
         }
+
+        [Fact]
+        public void Will_execute_ajax_call_test()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(new List<string> { @"JS\Test\ajaxCall.js" });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
     }
 }
