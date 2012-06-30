@@ -52,6 +52,9 @@
     <Compile Include="Settings\ChutzpahSettings.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Settings\ChutzpahUTESettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Chutzpah\Chutzpah.csproj">

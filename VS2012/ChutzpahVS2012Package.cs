@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using Chutzpah.VS.Common;
 using Chutzpah.VS.Common.Settings;
-using Chutzpah.VS11;
 using Chutzpah.VS2012.TestAdapter;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace Chutzpah.VS2012
 {
@@ -25,7 +23,7 @@ namespace Chutzpah.VS2012
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 115, 116, true)]
+    [ProvideOptionPage(typeof (ChutzpahUTESettings), "Chutzpah", "Chutzpah Test Adapter Settings", 115, 116, true)]
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "2.0.0", IconResourceID = 400)]
@@ -35,16 +33,17 @@ namespace Chutzpah.VS2012
     public sealed class ChutzpahVS2012Package : Package
     {
         internal ILogger Logger { get; private set; }
-        public ChutzpahSettings Settings { get; private set; }
+        public ChutzpahUTESettings Settings { get; private set; }
         private IChutzpahSettingsMapper settingsMapper;
 
         private IComponentModel componentModel;
+
         public IComponentModel ComponentModel
         {
             get
             {
                 if (componentModel == null)
-                    componentModel = (IComponentModel)GetGlobalService(typeof(SComponentModel));
+                    componentModel = (IComponentModel) GetGlobalService(typeof (SComponentModel));
                 return componentModel;
             }
         }
@@ -59,13 +58,13 @@ namespace Chutzpah.VS2012
         /// </summary>
         public ChutzpahVS2012Package()
         {
-            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
+            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", ToString()));
         }
-
 
 
         /////////////////////////////////////////////////////////////////////////////
         // Overridden Package Implementation
+
         #region Package Members
 
         /// <summary>
@@ -74,23 +73,22 @@ namespace Chutzpah.VS2012
         /// </summary>
         protected override void Initialize()
         {
-            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             base.Initialize();
 
             Logger = new Logger(this);
-            Settings = GetDialogPage(typeof (ChutzpahSettings)) as ChutzpahSettings;
+            Settings = GetDialogPage(typeof (ChutzpahUTESettings)) as ChutzpahUTESettings;
             Settings.PropertyChanged += SettingsPropertyChanged;
 
             settingsMapper = ComponentModel.GetService<IChutzpahSettingsMapper>();
             settingsMapper.MapSettings(Settings);
         }
 
-        void SettingsPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void SettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             settingsMapper.MapSettings(Settings);
         }
 
         #endregion
-
     }
 }

@@ -31,7 +31,7 @@ namespace Chutzpah.VS2012.TestAdapter
             serializer = new XmlSerializer(typeof(ChutzpahAdapterSettings));
         }
 
-        public void MapSettings(ChutzpahSettings settings)
+        public void MapSettings(ChutzpahUTESettings settings)
         {
             Settings.TestingMode = settings.TestingMode;
             Settings.TimeoutMilliseconds = settings.TimeoutMilliseconds;

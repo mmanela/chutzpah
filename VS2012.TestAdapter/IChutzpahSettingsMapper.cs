@@ -4,7 +4,7 @@ namespace Chutzpah.VS2012.TestAdapter
 {
     public interface IChutzpahSettingsMapper
     {
-        void MapSettings(ChutzpahSettings settings);
+        void MapSettings(ChutzpahUTESettings settings);
         ChutzpahAdapterSettings Settings { get; }
     }
 }

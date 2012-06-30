@@ -44,6 +44,7 @@ namespace Chutzpah
         protected virtual string GetFileErrorMessage(TestError error)
         {
             var stack = "";
+            if (!error.Stack.Any()) stack += "\n";
             foreach (var item in error.Stack)
             {
                 if (!string.IsNullOrEmpty(item.Function))
@@ -61,7 +62,7 @@ namespace Chutzpah
                 stack += "\n";
             }
 
-            return string.Format("JS Error: {0}\n {1}\nWhile Running:{2}\n\n", error.Message, stack, error.InputTestFile);
+            return string.Format("JS Error: {0}\n {1}While Running:{2}\n\n", error.Message, stack, error.InputTestFile);
         }
 
         protected virtual string GetTestDisplayText(TestCase testCase)
