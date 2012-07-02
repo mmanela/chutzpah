@@ -12,6 +12,13 @@ using JsonSerializer = Chutzpah.Wrappers.JsonSerializer;
 
 namespace Chutzpah
 {
+    /// <summary>
+    /// Reads from the stream of test results writen by our phantom test runner. As events from this stream arrive we 
+    /// will derserialize them and publish them to the runner callback.
+    /// The reader keeps track of how long it has been since the last event has been revieved from the stream. If this is longer
+    /// than the configured test file timeout then we kill phantom since it is likely stuck in a infinite loop or error.
+    /// We make this timeout the test file timeout plus a small (generous) delay time to account for serialization. 
+    /// </summary>
     public class TestCaseStreamReader : ITestCaseStreamReader
     {
         private readonly IJsonSerializer jsonSerializer;
@@ -32,9 +39,10 @@ namespace Chutzpah
             if (testContext == null) throw new ArgumentNullException("testContext");
 
             lastTestEvent = DateTime.Now;
+            var timeout = testOptions.TestFileTimeoutMilliseconds + 500; // Add buffer to timeout to account for serialization
             var readerTask = Task<TestCaseSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
             while (readerTask.Status == TaskStatus.WaitingToRun
-               || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < testOptions.TestFileTimeoutMilliseconds))
+               || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))
             {
                 Thread.Sleep(100);
             }
