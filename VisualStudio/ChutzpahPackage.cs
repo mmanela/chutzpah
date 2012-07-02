@@ -14,7 +14,7 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Constants = EnvDTE.Constants;
+using DTEConstants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
 
 namespace Chutzpah.VisualStudio
@@ -147,7 +147,7 @@ namespace Chutzpah.VisualStudio
         {
             IEnumerable<string> selectedFiles = null;
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
                 // We only support one file for opening in browser throuhg VS for now
                 selectedFiles = SearchForTestableFiles().Take(1);
@@ -175,7 +175,7 @@ namespace Chutzpah.VisualStudio
         private void RunJSTestCmdCallback(object sender, EventArgs e)
         {
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
                 RunTestsInSolutionFolderNodeCallback(sender, e);
             }
@@ -204,7 +204,7 @@ namespace Chutzpah.VisualStudio
         private void SetCommandVisibility(OleMenuCommand menuCommand, params TestFileType[] allowedTypes)
         {
             var activeWindow = dte.ActiveWindow;
-            if (activeWindow.ObjectKind == Constants.vsWindowKindSolutionExplorer)
+            if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
                 Array activeItems = SolutionExplorerItems;
                 foreach (UIHierarchyItem item in activeItems)
@@ -229,7 +229,7 @@ namespace Chutzpah.VisualStudio
                     }
                 }
             }
-            else if (activeWindow.ObjectKind == Constants.vsDocumentKindText)
+            else if (activeWindow.ObjectKind == DTEConstants.vsDocumentKindText)
             {
                 var fileType = GetFileType(activeWindow.Document.FullName);
                 if (!allowedTypes.Contains(fileType))
@@ -277,7 +277,7 @@ namespace Chutzpah.VisualStudio
                                 {
                                     try
                                     {
-                                        testRunner.RunTests(filePaths, new TestOptions {TimeOutMilliseconds = Settings.TimeoutMilliseconds}, runnerCallback);
+                                        testRunner.RunTests(filePaths, new TestOptions {TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds}, runnerCallback);
                                     }
                                     catch (Exception e)
                                     {
@@ -347,7 +347,7 @@ namespace Chutzpah.VisualStudio
         {
             get
             {
-                var hierarchy = (UIHierarchy) dte.ToolWindows.GetToolWindow(Constants.vsWindowKindSolutionExplorer);
+                var hierarchy = (UIHierarchy)dte.ToolWindows.GetToolWindow(DTEConstants.vsWindowKindSolutionExplorer);
                 return (Array) hierarchy.SelectedItems;
             }
         }
@@ -380,7 +380,7 @@ namespace Chutzpah.VisualStudio
         {
             try
             {
-                return projectItem.Kind.Equals(Constants.vsProjectItemKindPhysicalFile);
+                return projectItem.Kind.Equals(DTEConstants.vsProjectItemKindPhysicalFile);
             }
             catch (Exception ex)
             {
@@ -395,7 +395,7 @@ namespace Chutzpah.VisualStudio
         {
             try
             {
-                return projectItem.Kind.Equals(Constants.vsProjectItemKindPhysicalFolder);
+                return projectItem.Kind.Equals(DTEConstants.vsProjectItemKindPhysicalFolder);
             }
             catch (Exception ex)
             {

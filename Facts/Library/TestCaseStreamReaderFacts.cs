@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -18,6 +19,22 @@ namespace Chutzpah.Facts
             }
         }
 
+        private class WaitingStreamReader : StreamReader
+        {
+            private readonly int waitTime;
+
+            public WaitingStreamReader(Stream stream, int waitTime)
+                : base(stream)
+            {
+                this.waitTime = waitTime;
+            }
+
+            public override string ReadLine()
+            {
+                Thread.Sleep(waitTime);
+                return null;
+            }
+        }
 
         public class Read
         {
@@ -26,7 +43,18 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var model = Record.Exception(() => reader.ClassUnderTest.Read(null, new TestContext(), null, true)) as ArgumentNullException;
+                var model = Record.Exception(() => reader.ClassUnderTest.Read(null, new TestOptions(), new TestContext(), null, true)) as ArgumentNullException;
+
+                Assert.NotNull(model);
+            }
+
+            [Fact]
+            public void Will_throw_argument_null_exception_if_testoptions_is_null()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
+
+                var model = Record.Exception(() => reader.ClassUnderTest.Read(processStream, null, new TestContext(), null, true)) as ArgumentNullException;
 
                 Assert.NotNull(model);
             }
@@ -35,9 +63,9 @@ namespace Chutzpah.Facts
             public void Will_throw_argument_null_exception_if_context_is_null()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var stream = new StreamReader(new MemoryStream());
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
 
-                var model = Record.Exception(() => reader.ClassUnderTest.Read(stream, null, null, true)) as ArgumentNullException;
+                var model = Record.Exception(() => reader.ClassUnderTest.Read(processStream, new TestOptions(), null, null, true)) as ArgumentNullException;
 
                 Assert.NotNull(model);
             }
@@ -49,9 +77,10 @@ namespace Chutzpah.Facts
                 var json = @"#_#FileStart#_# {""type"": ""FileStart""}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 callback.Verify(x => x.FileStarted("file"));
             }
@@ -63,9 +92,10 @@ namespace Chutzpah.Facts
                 var json = @"#_#FileDone#_# {""type"":""FileDone"",""timetaken"":10,""failed"":1,""passed"":2}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 callback.Verify(x => x.FileFinished("file", It.IsAny<TestCaseSummary>()));
             }
@@ -77,11 +107,12 @@ namespace Chutzpah.Facts
                 var json = @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestStarted(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
@@ -96,18 +127,18 @@ namespace Chutzpah.Facts
                 var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
                 Assert.Equal("file", result.InputTestFile);
             }
-
 
             [Fact]
             public void Will_fire_log_event()
@@ -116,11 +147,12 @@ namespace Chutzpah.Facts
                 var json = @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""hi""}}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
                 callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("hi", result.Message);
@@ -134,11 +166,12 @@ namespace Chutzpah.Facts
                 var json = @"#_#Error#_# {""type"":""Error"",""Error"":{""message"":""uhoh"", ""stack"":[{""file"":""errorFile"",""function"":""errorFunc"",""line"":22}]}}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestError result = null;
                 callback.Setup(x => x.FileError(It.IsAny<TestError>())).Callback<TestError>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("file", result.InputTestFile);
@@ -158,9 +191,10 @@ namespace Chutzpah.Facts
 ";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                var summary = reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
 
                 Assert.Equal(1, summary.Tests.Count);
@@ -186,9 +220,10 @@ namespace Chutzpah.Facts
 ";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                var summary = reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.Equal(2, summary.Logs.Count);
                 Assert.Equal("file", summary.Logs[0].InputTestFile);
@@ -206,9 +241,10 @@ namespace Chutzpah.Facts
 ";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                var summary = reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
                 
                 Assert.Equal(1, summary.Errors.Count);
                 Assert.Equal("file", summary.Errors[0].InputTestFile);
@@ -229,9 +265,10 @@ namespace Chutzpah.Facts
 ";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                var summary = reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.Equal(1, summary.Logs.Count);
                 Assert.Equal("file", summary.Logs[0].InputTestFile);
@@ -257,11 +294,12 @@ namespace Chutzpah.Facts
                     ReferencedJavaScriptFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
@@ -288,17 +326,52 @@ namespace Chutzpah.Facts
                     ReferencedJavaScriptFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
 
-                reader.ClassUnderTest.Read(stream, context, callback.Object, false);
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
                 Assert.Equal(0, result.Line);
                 Assert.Equal(0, result.Column);
+            }
+
+            [Fact]
+            public void Will_return_null_after_test_file_timeout_and_kill_process()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
+                var process = new Mock<IProcessWrapper>();
+                var processStream = new ProcessStream(process.Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 200 }, context, callback.Object, false);
+
+                Assert.Null(summary);
+                process.Verify(x => x.Kill());
+            }
+
+            [Fact]
+            public void Will_supress_errors_after_timeout_when_killing_process()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
+                var process = new Mock<IProcessWrapper>();
+                var processStream = new ProcessStream(process.Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                process.Setup(x => x.Kill()).Throws(new InvalidOperationException());
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 200 }, context, callback.Object, false);
+
+                Assert.Null(summary);
             }
         }
     }

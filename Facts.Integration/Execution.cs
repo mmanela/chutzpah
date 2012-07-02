@@ -12,7 +12,7 @@ namespace Chutzpah.Facts.Integration
         {
             get
             {
-                return new []
+                return new[]
                 {
                     new object[] { @"JS\Test\references-qunit.js" },
                     new object[] { @"JS\Test\references-jasmine.js" }
@@ -25,7 +25,7 @@ namespace Chutzpah.Facts.Integration
         {
             get
             {
-                return new []
+                return new[]
                 {
                    new object[] { @"JS\Test\basic-qunit.js" },
                    new object[] { @"JS\Test\basic-jasmine.js" }
@@ -131,12 +131,24 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
-        [Fact]
+        [Fact(Timeout = 2000)]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js"}, new TestOptions{ TimeOutMilliseconds = 500});
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(0, result.PassedCount);
+            Assert.Equal(0, result.TotalCount);
+        }
+
+        [Fact(Timeout = 2000)]
+        public void Will_execute_nothing_if_test_file_has_infinite_loop()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\spinWait.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
@@ -148,7 +160,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TimeOutMilliseconds = 1500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 1500 });
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);

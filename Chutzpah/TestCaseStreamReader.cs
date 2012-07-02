@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
 using Chutzpah.Wrappers;
@@ -15,23 +17,50 @@ namespace Chutzpah
         private readonly IJsonSerializer jsonSerializer;
         private readonly Regex prefixRegex = new Regex("^#_#(?<type>[a-z]+)#_#(?<json>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // Tracks the last time we got an event/update from phantom. 
+        private DateTime lastTestEvent;
+
         public TestCaseStreamReader()
         {
             jsonSerializer = new JsonSerializer();
         }
 
-        public TestCaseSummary Read(StreamReader stream, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        public TestCaseSummary Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
-            if (stream == null) throw new ArgumentNullException("stream");
+            if (processStream == null) throw new ArgumentNullException("processStream");
+            if (testOptions == null) throw new ArgumentNullException("testOptions");
             if (testContext == null) throw new ArgumentNullException("testContext");
-            
+
+            lastTestEvent = DateTime.Now;
+            var readerTask = Task<TestCaseSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
+            while (readerTask.Status == TaskStatus.WaitingToRun
+               || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < testOptions.TestFileTimeoutMilliseconds))
+            {
+                Thread.Sleep(100);
+            }
+
+            if (readerTask.IsCompleted)
+            {
+                return readerTask.Result;
+            }
+            else
+            {
+                // We timed out so kill the process
+                processStream.KillProcess();
+                return null;
+            }
+        }
+
+        private TestCaseSummary ReadFromStream(StreamReader stream, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        {
             var referencedFile = testContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testIndex = 0;
             var summary = new TestCaseSummary();
             string line;
             while ((line = stream.ReadLine()) != null)
             {
-                if(debugEnabled) Console.WriteLine(line);
+                lastTestEvent = DateTime.Now;
+                if (debugEnabled) Console.WriteLine(line);
 
                 var match = prefixRegex.Match(line);
                 if (!match.Success) continue;

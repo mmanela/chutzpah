@@ -8,7 +8,7 @@ function spinWait(millis) {
     while (curDate - date < millis);
 }
 
-test("Spin wait test", function () {
+test("Timeout test", function () {
     spinWait(1000);
     ok(true, "this test is just long enough");
 });

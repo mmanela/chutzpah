@@ -74,7 +74,7 @@ namespace Chutzpah
             Console.WriteLine("  /wait                  : Wait for input after completion");
             Console.WriteLine("  /debug                 : Print debugging information");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
-            Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to 3000)");
+            Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})",Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /path path             : Adds a path to a folder or file to the list of test paths to run.");
             Console.WriteLine("                         : Specify more than one to add multiple paths.");
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
@@ -100,7 +100,12 @@ namespace Chutzpah
             {
 
                 var callback = commandLine.TeamCity ? (ConsoleRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent);
-                var testOptions = new TestOptions { OpenInBrowser = commandLine.OpenInBrowser, TimeOutMilliseconds =commandLine.TimeOutMilliseconds };
+                var testOptions = new TestOptions
+                    {
+                        OpenInBrowser = commandLine.OpenInBrowser, 
+                        TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds
+                    };
+
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
             }
             catch (ArgumentException ex)

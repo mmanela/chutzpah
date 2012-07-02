@@ -15,7 +15,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
-            var testOptions = new TestOptions { TimeOutMilliseconds = settings.TimeoutMilliseconds, TestingMode = settings.TestingMode };
+            var testOptions = new TestOptions { TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds, TestingMode = settings.TestingMode };
 
             var chutzpahRunner = TestRunner.Create();
             foreach (var testCase in chutzpahRunner.DiscoverTests(sources, testOptions))

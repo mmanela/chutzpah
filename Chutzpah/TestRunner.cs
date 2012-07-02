@@ -115,16 +115,16 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
             var overallSummary = new TestCaseSummary();
-            var resultCount = 1;
+            var resultCount = 0;
             foreach (string testFile in fileProbe.FindScriptFiles(testPaths, options.TestingMode))
             {
                 try
                 {
                     TestContext testContext;
 
+                    resultCount++;
                     if (testContextBuilder.TryBuildContext(testFile, out testContext))
                     {
-                        resultCount++;
                         var testSummary = InvokeTestRunner(headlessBrowserPath,
                                                         options,
                                                         testContext,
@@ -136,12 +136,12 @@ namespace Chutzpah
                         {
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
-
-                        // Limit the number of files we can scan to attempt to build a context for
-                        // This is important in the case of folder scanning where many JS files may not be
-                        // test files.
-                        if (resultCount >= options.FileSearchLimit) break;
                     }
+
+                    // Limit the number of files we can scan to attempt to build a context for
+                    // This is important in the case of folder scanning where many JS files may not be
+                    // test files.
+                    if (resultCount >= options.FileSearchLimit) break;
                 }
                 catch (Exception e)
                 {
@@ -163,8 +163,8 @@ namespace Chutzpah
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
 
-            Func<StreamReader, TestCaseSummary> streamProcessor =
-                stream => testCaseStreamReader.Read(stream, testContext, callback, DebugEnabled);
+            Func<ProcessStream, TestCaseSummary> streamProcessor =
+                processStream => testCaseStreamReader.Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
             HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile);
@@ -190,13 +190,13 @@ namespace Chutzpah
         {
             string runnerArgs;
             var testModeStr = testRunnerMode.ToString().ToLowerInvariant();
-            if (options.TimeOutMilliseconds.HasValue && options.TimeOutMilliseconds > 0)
+            if (options.TestFileTimeoutMilliseconds.HasValue && options.TestFileTimeoutMilliseconds > 0)
             {
                 runnerArgs = string.Format("\"{0}\" {1} {2} {3}",
                                            runnerPath,
                                            fileUrl,
                                            testModeStr,
-                                           options.TimeOutMilliseconds.Value);
+                                           options.TestFileTimeoutMilliseconds.Value);
             }
             else
             {

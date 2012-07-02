@@ -4,10 +4,14 @@ namespace Chutzpah
 {
     public class TestOptions
     {
+        private int testFileTimeoutMilliseconds;
+
         public TestOptions()
         {
-            FileSearchLimit = 300;
+            FileSearchLimit = Constants.DefaultFileSeachLimit;
+            TestFileTimeoutMilliseconds = Constants.DefaultTestFileTimeout;
             TestingMode = TestingMode.All;
+
         }
 
         /// <summary>
@@ -18,7 +22,11 @@ namespace Chutzpah
         /// <summary>
         /// The time to wait for the tests to compelte in milliseconds
         /// </summary>
-        public int? TimeOutMilliseconds { get; set; }
+        public int? TestFileTimeoutMilliseconds
+        {
+            get { return testFileTimeoutMilliseconds; }
+            set { testFileTimeoutMilliseconds = value ?? Constants.DefaultTestFileTimeout; }
+        }
 
         /// <summary>
         /// Determines if we are testing JavaScript files (and creating harnesses for them), 
