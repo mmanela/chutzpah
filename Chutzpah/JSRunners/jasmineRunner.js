@@ -19,7 +19,8 @@
             console.log(JSON.stringify(obj));
         }
         
-        var activeTestCase = null;
+        var activeTestCase = null,
+            fileStartTime = null;
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
 
@@ -28,13 +29,16 @@
 
             self.reportRunnerStarting = function (runner) {
 
+                fileStartTime = new Date().getTime();
+                
                 // Testing began
                 log({ type: "FileStart" });
             };
 
             self.reportRunnerResults = function (runner) {
                 var res = jasmine.getEnv().currentRunner().results();
-                log({ type: "FileDone", timetaken: 0, passed: res.passedCount, failed: res.failedCount });
+                var timetaken = new Date().getTime() - fileStartTime;
+                log({ type: "FileDone", timetaken: timetaken, passed: res.passedCount, failed: res.failedCount });
                 window.chutzpah.isTestingFinished = true;
             };
 

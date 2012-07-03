@@ -74,7 +74,7 @@ namespace Chutzpah.Facts
             public void Will_fire_file_started_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = @"#_#FileStart#_# {""type"": ""FileStart""}";
+                var json = @"#_#FileStart#_# {""type"": ""FileStart"", ""timetaken"":88}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -94,10 +94,14 @@ namespace Chutzpah.Facts
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
+                TestCaseSummary result = null;
+                callback.Setup(x => x.FileFinished("file", It.IsAny<TestCaseSummary>())).Callback<string, TestCaseSummary>((f, t) => result = t); ;
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
-                callback.Verify(x => x.FileFinished("file", It.IsAny<TestCaseSummary>()));
+                Assert.NotNull(result);
+                Assert.Equal(10, result.TimeTakenMilliseconds);
+
             }
 
             [Fact]

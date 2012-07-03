@@ -21,7 +21,9 @@
         }
 
         var activeTestCase = null,
-            isGlobalError = false;
+            isGlobalError = false,
+            fileStartTime = null;
+        
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
 
@@ -42,6 +44,7 @@
 
         QUnit.begin(function () {
             // Testing began
+            fileStartTime = new Date().getTime();
             log({ type: "FileStart" });
         });
 
@@ -81,9 +84,9 @@
         });
 
         QUnit.done(function (info) {
-            window.chutzpah.testingTime = info.runtime;
 
-            log({ type: "FileDone", timetaken: info.runtime, passed: info.passed, failed: info.failed });
+            var timetaken = new Date().getTime() - fileStartTime;
+            log({ type: "FileDone", timetaken: timetaken, passed: info.passed, failed: info.failed });
             window.chutzpah.isTestingFinished = true;
         });
     }

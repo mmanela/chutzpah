@@ -17,7 +17,8 @@ namespace Chutzpah.RunnerCallbacks
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
             Console.WriteLine();
-            Console.WriteLine("=== {0} total, {1} failed, took {2} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, 0);
+            var seconds = testResultsSummary.TimeTakenMilliseconds / 1000.0;
+            Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
 
             base.TestSuiteFinished(testResultsSummary);
         }
@@ -27,7 +28,8 @@ namespace Chutzpah.RunnerCallbacks
             ClearCounter();
 
             Console.WriteLine("File: {0}", fileName);
-            Console.WriteLine(Indent("{0} total, {1} failed, took {2} seconds", 2), testResultsSummary.TotalCount, testResultsSummary.FailedCount, 0);
+            var seconds = testResultsSummary.TimeTakenMilliseconds / 1000.0;
+            Console.WriteLine(Indent("{0} total, {1} failed, took {2:n} seconds", 2), testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
             Console.WriteLine();
 
 

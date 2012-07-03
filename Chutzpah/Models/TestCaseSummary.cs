@@ -30,6 +30,10 @@ namespace Chutzpah.Models
         /// </summary>
         public IList<TestError> Errors { get; set; }
 
+        /// <summary>
+        /// The time in milliseconds to complete the tests
+        /// </summary>
+        public int TimeTakenMilliseconds { get; set; }
 
         /// <summary>
         /// Total count of all tests
@@ -65,6 +69,7 @@ namespace Chutzpah.Models
             AppendTests(summary.Tests);
             AppendLogs(summary.Logs);
             AppendErrors(summary.Errors);
+            TimeTakenMilliseconds += summary.TimeTakenMilliseconds;
         }
 
         internal void AppendTests(IEnumerable<TestCase> tests)
