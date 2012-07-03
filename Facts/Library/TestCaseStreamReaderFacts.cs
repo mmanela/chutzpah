@@ -100,7 +100,7 @@ namespace Chutzpah.Facts
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
-                Assert.Equal(10, result.TimeTakenMilliseconds);
+                Assert.Equal(10, result.TimeTaken);
 
             }
 

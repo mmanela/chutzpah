@@ -22,7 +22,8 @@
 
         var activeTestCase = null,
             isGlobalError = false,
-            fileStartTime = null;
+            fileStartTime = null,
+            testStartTime = null;
         
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
@@ -54,8 +55,9 @@
                 isGlobalError = true;
                 return;
             }
-
+            
             isGlobalError = false;
+            testStartTime = new Date().getTime();
             var newTestCase = { moduleName: info.module, testName: info.name, testResults: [] };
             window.chutzpah.testCases.push(newTestCase);
             activeTestCase = newTestCase;
@@ -79,7 +81,9 @@
 
         QUnit.testDone(function (info) {
             if (info.name === 'global failure') return;
-            // Log test case when done. This will get picked up by phantom and streamed to chutzpah.
+            // Log test case when done. This will get picked up by phantom and streamed to chutzpah
+            var timetaken = new Date().getTime() - testStartTime;
+            activeTestCase.timetaken = timetaken;
             log({ type: "TestDone", testCase: activeTestCase });
         });
 

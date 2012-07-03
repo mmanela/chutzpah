@@ -32,7 +32,7 @@ namespace Chutzpah.RunnerCallbacks
 
         protected override void TestComplete(TestCase testCase)
         {
-            WriteFinished(GetTestDisplayText(testCase), 0);
+            WriteFinished(GetTestDisplayText(testCase), testCase.TimeTaken);
         }
 
         protected override void TestPassed(TestCase testCase)
@@ -60,7 +60,7 @@ namespace Chutzpah.RunnerCallbacks
         static void WriteFinished(string name, double duration)
         {
             Console.WriteLine("##teamcity[testFinished name='{0}' duration='{1}']",
-                                          Escape(name), (int)(duration * 1000D));
+                                          Escape(name), duration);
         }
 
         static void WriteOutput(string name, string output)

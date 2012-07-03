@@ -18,6 +18,12 @@ namespace Chutzpah.Models
         public int Column { get; set; }
         public IList<TestResult> TestResults { get; set; }
 
+
+        /// <summary>
+        /// The time in milliseconds to complete the test
+        /// </summary>
+        public int TimeTaken { get; set; }
+
         public bool Passed { get { return TestResults.All(x => x.Passed); }}
     }
 }

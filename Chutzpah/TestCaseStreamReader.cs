@@ -86,7 +86,7 @@ namespace Chutzpah
 
                         case "FileDone":
                             var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
-                            summary.TimeTakenMilliseconds = jsFileDone.TimeTaken;
+                            summary.TimeTaken = jsFileDone.TimeTaken;
                             callback.FileFinished(testContext.InputTestFile, summary);
                             break;
 

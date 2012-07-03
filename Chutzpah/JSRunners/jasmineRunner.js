@@ -20,7 +20,8 @@
         }
         
         var activeTestCase = null,
-            fileStartTime = null;
+            fileStartTime = null,
+            testStartTime = null;
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
 
@@ -45,6 +46,7 @@
             self.reportSuiteResults = function (suite) { };
 
             self.reportSpecStarting = function (spec) {
+                testStartTime = new Date().getTime();
                 var suiteName = getFullSuiteName(spec.suite);
                 var specName = spec.description;
                 var newTestCase = { moduleName: suiteName, testName: specName, testResults: [] };
@@ -54,6 +56,8 @@
             };
 
             self.reportSpecResults = function (spec) {
+                var timetaken = new Date().getTime() - testStartTime;
+                activeTestCase.timetaken = timetaken;
                 var results = spec.results();
                 var resultItems = results.getItems();
                 for (var i = 0; i < resultItems.length; i++) {

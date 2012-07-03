@@ -41,14 +41,11 @@ namespace Chutzpah.VS2012.TestAdapter
         public override void TestFinished(TestCase test)
         {
             var testCase = test.ToVsTestCase();
-            var results = test.ToVsTestResults();
+            var result = test.ToVsTestResult();
             var outcome = ChutzpahExtensionMethods.ToVsTestOutcome(test.Passed);
 
-            // Record a result (there can be many)
-            foreach (var result in results)
-            {
-                frameworkHandle.RecordResult(result);
-            }
+
+            frameworkHandle.RecordResult(result);
 
             // The test case is done
             frameworkHandle.RecordEnd(testCase, outcome);
