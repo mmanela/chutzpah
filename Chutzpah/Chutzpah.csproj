@@ -72,6 +72,7 @@
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
+    <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\JS\JsErrors.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="Callbacks\RunnerCallback.cs" />
+    <Compile Include="TestCaseStreamReaderFactory.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />
     <Compile Include="ITestContextBuilder.cs" />

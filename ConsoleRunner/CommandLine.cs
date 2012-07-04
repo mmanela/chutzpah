@@ -24,10 +24,12 @@ namespace Chutzpah
         public bool Debug { get; protected set; }
 
         public bool Silent { get; protected set; }
-        
+
         public bool OpenInBrowser { get; protected set; }
 
         public int? TimeOutMilliseconds { get; protected set; }
+
+        public int Parallelism { get; protected set; }
 
         public bool TeamCity { get; protected set; }
 
@@ -76,7 +78,7 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     OpenInBrowser = true;
-                }                
+                }
                 else if (optionName == "/silent")
                 {
                     GuardNoOptionValue(option);
@@ -86,11 +88,15 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     TeamCity = true;
-                }                        
+                }
                 else if (optionName == "/timeoutmilliseconds")
                 {
                     AddTimeoutOption(option.Value);
-                }                
+                }
+                else if (optionName == "/parallelism")
+                {
+                    AddParallelismOption(option.Value);
+                }
                 else if (optionName == "/file" || optionName == "/path")
                 {
                     AddFileOption(option.Value);
@@ -103,10 +109,23 @@ namespace Chutzpah
             }
         }
 
+        private void AddParallelismOption(string value)
+        {
+            int parallelism;
+            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out parallelism) || parallelism < 0)
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /parallelism.  Expecting a postivie integer");
+            }
+
+            Parallelism = parallelism;
+
+        }
+
         private void AddTimeoutOption(string value)
         {
             int timeout;
-            if(string.IsNullOrEmpty(value) || !int.TryParse(value,out timeout) || timeout < 0)
+            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out timeout) || timeout < 0)
             {
                 throw new ArgumentException(
                     "invalid or missing argument for /timeoutmilliseconds.  Expecting a postivie integer");

@@ -250,6 +250,60 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class ParallelismOptionFacts
+        {
+            [Fact]
+            public void Will_set_to_number_passed_in()
+            {
+                var arguments = new[] { "test.html", "/parallelism", "3" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(3, commandLine.Parallelism);
+            }
+
+            [Fact]
+            public void Will_ignore_case()
+            {
+                var arguments = new[] { "test.html", "/ParaLLelisM", "3" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(3, commandLine.Parallelism);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_arg_given()
+            {
+                var arguments = new[] { "test.html", "/parallelism" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+
+            [Fact]
+            public void Will_throw_if_arg_is_negative()
+            {
+                var arguments = new[] { "test.html", "/parallelism", "-10" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_arg_is_not_a_number()
+            {
+                var arguments = new[] { "test.html", "/parallelism", "sdf" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+        }
+
         public class TeamCityArgumentFacts
         {
             [Fact, TeamCityEnvironmentRestore]

@@ -131,7 +131,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
-        [Fact(Timeout = 2000)]
+        [Fact(Timeout = 4000)]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {
             var testRunner = TestRunner.Create();
@@ -143,7 +143,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(0, result.TotalCount);
         }
 
-        [Fact(Timeout = 2000)]
+        [Fact(Timeout = 4000)]
         public void Will_execute_nothing_if_test_file_has_infinite_loop()
         {
             var testRunner = TestRunner.Create();

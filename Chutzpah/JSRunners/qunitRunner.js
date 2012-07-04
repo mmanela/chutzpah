@@ -37,6 +37,7 @@
                 window.chutzpah.currentModule = name;
             };
             window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
+
                 if (name === 'global failure') return;
                 var testCase = { moduleName: window.chutzpah.currentModule, testName: name };
                 log({ type: "TestDone", testCase: testCase });

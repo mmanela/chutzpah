@@ -1,16 +1,19 @@
-﻿using Chutzpah.Models;
+﻿using System;
+using Chutzpah.Models;
 
 namespace Chutzpah
 {
     public class TestOptions
     {
         private int testFileTimeoutMilliseconds;
+        private int maxDegreeOfParallelism;
 
         public TestOptions()
         {
             FileSearchLimit = Constants.DefaultFileSeachLimit;
             TestFileTimeoutMilliseconds = Constants.DefaultTestFileTimeout;
             TestingMode = TestingMode.All;
+            MaxDegreeOfParallelism = 1;
 
         }
 
@@ -37,6 +40,15 @@ namespace Chutzpah
         /// <summary>
         /// This is the max number of files to run tests for
         /// </summary>
-        public int FileSearchLimit { get; set; }
+        public int FileSearchLimit { get; set; }       
+        
+        /// <summary>
+        /// The maximum degree of parallelism to process test files
+        /// </summary>
+        public int MaxDegreeOfParallelism
+        {
+            get { return maxDegreeOfParallelism; }
+            set { maxDegreeOfParallelism = Math.Max(value, 1); }
+        }
     }
 }
