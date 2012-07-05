@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Chutzpah.Callbacks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -7,15 +8,15 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 namespace Chutzpah.VS2012.TestAdapter
 {
     [ExtensionUri(Constants.ExecutorUriString)]
-	public class ChutzpahTestExecutor : ITestExecutor
-	{
-		public void Cancel()
-		{
-		}
+    public class ChutzpahTestExecutor : ITestExecutor
+    {
+        public void Cancel()
+        {
+        }
 
-		
-		public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
-		{
+
+        public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        {
             if (runContext.IsDataCollectionEnabled)
             {
                 // DataCollectors like Code Coverage are currently unavailable for JavaScript
@@ -24,18 +25,23 @@ namespace Chutzpah.VS2012.TestAdapter
 
             var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
-            var testOptions = new TestOptions { TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds, TestingMode = settings.TestingMode };
+            var testOptions = new TestOptions
+                {
+                    TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
+                    TestingMode = settings.TestingMode,
+                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
+                };
 
-			var chutzpahRunner = TestRunner.Create();
-			var callback = new ExecutionCallback(frameworkHandle);
-			chutzpahRunner.RunTests(sources,testOptions, callback);
-		}
+            var chutzpahRunner = TestRunner.Create();
+            var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle)); 
+            chutzpahRunner.RunTests(sources, testOptions, callback);
+        }
 
-		public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
-		{
-			// We'll just punt and run everything in each file that contains the selected tests
-			var sources = tests.Select(test => test.Source).Distinct();
-			RunTests(sources, runContext, frameworkHandle);
-		}
-	}
+        public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        {
+            // We'll just punt and run everything in each file that contains the selected tests
+            var sources = tests.Select(test => test.Source).Distinct();
+            RunTests(sources, runContext, frameworkHandle);
+        }
+    }
 }

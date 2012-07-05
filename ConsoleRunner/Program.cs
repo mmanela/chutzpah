@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using Chutzpah.Callbacks;
 using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
 using System.Linq;
@@ -102,10 +103,7 @@ namespace Chutzpah
             {
 
                 var callback = commandLine.TeamCity ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent);
-                if(commandLine.Parallelism > 1)
-                {
-                    callback = new MultithreadedConsoleRunnerCallback(callback);
-                }
+                callback = new ParallelRunnerCallbackAdapter(callback);
 
                 var testOptions = new TestOptions
                     {

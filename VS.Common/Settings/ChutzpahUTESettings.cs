@@ -13,8 +13,15 @@ namespace Chutzpah.VS.Common.Settings
     [Guid("6C95E241-763D-4887-9F05-A6B95F36D031")]
     public class ChutzpahUTESettings : DialogPage, INotifyPropertyChanged
     {
+        public ChutzpahUTESettings()
+        {
+            maxDegreeOfParallelism = 1;
+        }
+
+
         private TestingMode? testingMode;
         private int? timeoutMilliseconds;
+        private int maxDegreeOfParallelism;
 
 
         [Browsable(true)]
@@ -45,11 +52,26 @@ namespace Chutzpah.VS.Common.Settings
             }
         }
 
+        [Browsable(true)]
+        [Category("UTE")]
+        [DisplayName("Max degree of Parallelism")]
+        [Description("The maximum amount of concurreny Chutzpah should use")]
+        public int MaxDegreeOfParallelism
+        {
+            get { return maxDegreeOfParallelism; }
+            set
+            {
+                maxDegreeOfParallelism = value;
+                OnPropertyChanged("MaxDegreeOfParallelism");
+            }
+        }
+
 
         public override void ResetSettings()
         {
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;
+            MaxDegreeOfParallelism = 1;
             base.ResetSettings();
         }
 

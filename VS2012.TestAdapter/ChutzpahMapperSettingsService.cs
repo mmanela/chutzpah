@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Xml.XPath;
@@ -35,6 +34,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             Settings.TestingMode = settings.TestingMode;
             Settings.TimeoutMilliseconds = settings.TimeoutMilliseconds;
+            Settings.MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism;
         }
 
         public IXPathNavigable AddRunSettings(IXPathNavigable inputRunSettingDocument, IRunSettingsConfigurationInfo configurationInfo, ILogger log)

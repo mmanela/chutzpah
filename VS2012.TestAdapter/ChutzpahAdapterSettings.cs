@@ -2,7 +2,6 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using Chutzpah.Models;
-using Chutzpah.VS.Common.Settings;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace Chutzpah.VS2012.TestAdapter
@@ -17,6 +16,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;
+            MaxDegreeOfParallelism = 1;
         }
 
         /// <summary>
@@ -28,6 +28,11 @@ namespace Chutzpah.VS2012.TestAdapter
         /// Determines if we are testing JavaScript files (and creating harnesses for them), testing html test harnesses directly or both
         /// </summary>
         public TestingMode TestingMode { get; set; }
+
+        /// <summary>
+        /// Determines the maximum degree of paralleism Chutzpah should use
+        /// </summary>
+        public int MaxDegreeOfParallelism { get; set; }
 
         public override XmlElement ToXml()
         {

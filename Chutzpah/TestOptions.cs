@@ -7,13 +7,15 @@ namespace Chutzpah
     {
         private int testFileTimeoutMilliseconds;
         private int maxDegreeOfParallelism;
+        private readonly int defaultParallelism;
 
         public TestOptions()
         {
             FileSearchLimit = Constants.DefaultFileSeachLimit;
             TestFileTimeoutMilliseconds = Constants.DefaultTestFileTimeout;
             TestingMode = TestingMode.All;
-            MaxDegreeOfParallelism = 1;
+            defaultParallelism = 1;
+            MaxDegreeOfParallelism = defaultParallelism;
 
         }
 
@@ -48,7 +50,17 @@ namespace Chutzpah
         public int MaxDegreeOfParallelism
         {
             get { return maxDegreeOfParallelism; }
-            set { maxDegreeOfParallelism = Math.Max(value, 1); }
+            set { maxDegreeOfParallelism = GetDegreeOfParallelism(value); }
+        }
+
+
+        /// <summary>
+        /// Get the degree of parallism making sure the value is no less than 1 and not more
+        /// then the number of processors
+        /// </summary>
+        private int GetDegreeOfParallelism(int value)
+        {
+            return Math.Min(Math.Max(value, defaultParallelism), Environment.ProcessorCount);
         }
     }
 }

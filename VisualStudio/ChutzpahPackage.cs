@@ -6,10 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Chutzpah.Callbacks;
 using Chutzpah.VS.Common;
 using Chutzpah.VS.Common.Settings;
 using Chutzpah.VisualStudio.Callback;
-using Chutzpah.Wrappers;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -90,7 +90,7 @@ namespace Chutzpah.VisualStudio
             Settings = GetDialogPage(typeof (ChutzpahSettings)) as ChutzpahSettings;
 
             statusBar = GetService(typeof (SVsStatusbar)) as IVsStatusbar;
-            runnerCallback = new VisualStudioRunnerCallback(dte, statusBar);
+            runnerCallback = new ParallelRunnerCallbackAdapter(new VisualStudioRunnerCallback(dte, statusBar));
 
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
@@ -277,7 +277,12 @@ namespace Chutzpah.VisualStudio
                                 {
                                     try
                                     {
-                                        testRunner.RunTests(filePaths, new TestOptions {TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds}, runnerCallback);
+                                        var options = new TestOptions
+                                                          {
+                                                              TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds,
+                                                              MaxDegreeOfParallelism = Settings.MaxDegreeOfParallelism
+                                                          };
+                                        testRunner.RunTests(filePaths, options, runnerCallback);
                                     }
                                     catch (Exception e)
                                     {
@@ -347,7 +352,7 @@ namespace Chutzpah.VisualStudio
         {
             get
             {
-                var hierarchy = (UIHierarchy)dte.ToolWindows.GetToolWindow(DTEConstants.vsWindowKindSolutionExplorer);
+                var hierarchy = (UIHierarchy) dte.ToolWindows.GetToolWindow(DTEConstants.vsWindowKindSolutionExplorer);
                 return (Array) hierarchy.SelectedItems;
             }
         }

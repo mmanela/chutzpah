@@ -1,14 +1,17 @@
 using System;
 using Chutzpah.Models;
 
-namespace Chutzpah.RunnerCallbacks
+namespace Chutzpah.Callbacks
 {
-    public class MultithreadedConsoleRunnerCallback : ITestMethodRunnerCallback
-    {
+    /// <summary>
+    /// Takes an existing ITestMethodRunnerCallback and makes it safe to be used on multiple threads
+    /// </summary>
+    public class ParallelRunnerCallbackAdapter : ITestMethodRunnerCallback
+    {        
         private static readonly object sync = new object();
         private readonly ITestMethodRunnerCallback nestedCallback;
 
-        public MultithreadedConsoleRunnerCallback(ITestMethodRunnerCallback nestedCallback)
+        public ParallelRunnerCallbackAdapter(ITestMethodRunnerCallback nestedCallback)
         {
             this.nestedCallback = nestedCallback;
         }
