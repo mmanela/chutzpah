@@ -76,6 +76,7 @@ namespace Chutzpah
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})",Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /parallelism           : Max degree of parallelism for Chuzpah. (Defaults to 1)");
+            Console.WriteLine("                         : If you specify more than 1 the test output may be a bit jumbled");
             Console.WriteLine("  /path path             : Adds a path to a folder or file to the list of test paths to run.");
             Console.WriteLine("                         : Specify more than one to add multiple paths.");
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
@@ -100,7 +101,12 @@ namespace Chutzpah
             try
             {
 
-                var callback = commandLine.TeamCity ? (ConsoleRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent);
+                var callback = commandLine.TeamCity ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent);
+                if(commandLine.Parallelism > 1)
+                {
+                    callback = new MultithreadedConsoleRunnerCallback(callback);
+                }
+
                 var testOptions = new TestOptions
                     {
                         OpenInBrowser = commandLine.OpenInBrowser, 
