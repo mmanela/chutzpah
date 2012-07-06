@@ -20,7 +20,8 @@
         public string TestRunner { get; set; }
 
         /// <summary>
-        /// The path to the generated test harness
+        /// The path to the test harness. This is either the InputTestFile when a html file or
+        /// it will be the generated test harness for .js files
         /// </summary>
         public string TestHarnessPath { get; set; }
 
