@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
 using Chutzpah.Wrappers;
-using JsonSerializer = Chutzpah.Wrappers.JsonSerializer;
 
 namespace Chutzpah
 {
@@ -22,14 +21,16 @@ namespace Chutzpah
     public class TestCaseStreamReader : ITestCaseStreamReader
     {
         private readonly IJsonSerializer jsonSerializer;
+        private readonly IFileProbe fileProbe;
         private readonly Regex prefixRegex = new Regex("^#_#(?<type>[a-z]+)#_#(?<json>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Tracks the last time we got an event/update from phantom. 
         private DateTime lastTestEvent;
 
-        public TestCaseStreamReader()
+        public TestCaseStreamReader(IJsonSerializer jsonSerializer, IFileProbe fileProbe)
         {
-            jsonSerializer = new JsonSerializer();
+            this.jsonSerializer = jsonSerializer;
+            this.fileProbe = fileProbe;
         }
 
         public TestCaseSummary Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
@@ -93,12 +94,14 @@ namespace Chutzpah
                         case "TestStart":
                             jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
                             jsTestCase.TestCase.InputTestFile = testContext.InputTestFile;
+                            ProcessTestFilePath(jsTestCase.TestCase);
                             callback.TestStarted(jsTestCase.TestCase);
                             break;
 
                         case "TestDone":
                             jsTestCase = jsonSerializer.Deserialize<JsTestCase>(json);
                             jsTestCase.TestCase.InputTestFile = testContext.InputTestFile;
+                            ProcessTestFilePath(jsTestCase.TestCase);
                             AddLineNumber(referencedFile, testIndex, jsTestCase);
                             testIndex++;
                             callback.TestFinished(jsTestCase.TestCase);
@@ -127,6 +130,24 @@ namespace Chutzpah
             }
 
             return summary;
+        }
+
+        /// <summary>
+        /// Test the returned test file path to see if it is real and get a normalized version of it.
+        /// If the file doesn't exist use the input test file instead.
+        /// </summary>
+        /// <param name="testCase"></param>
+        private void ProcessTestFilePath(TestCase testCase)
+        {
+            var path = fileProbe.FindFilePath(testCase.TestFile);
+            if(path == null)
+            {
+                testCase.TestFile = testCase.InputTestFile;
+            }
+            else
+            {
+                testCase.TestFile = path;
+            }
         }
 
         private static void AddLineNumber(ReferencedFile referencedFile, int testIndex, JsTestCase jsTestCase)

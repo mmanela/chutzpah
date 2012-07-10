@@ -29,10 +29,7 @@
             var self = this;
 
             self.reportRunnerStarting = function (runner) {
-
                 fileStartTime = new Date().getTime();
-                
-                // Testing began
                 log({ type: "FileStart" });
             };
 
@@ -49,7 +46,8 @@
                 testStartTime = new Date().getTime();
                 var suiteName = getFullSuiteName(spec.suite);
                 var specName = spec.description;
-                var newTestCase = { moduleName: suiteName, testName: specName, testResults: [] };
+                var path = window.chutzpah.getCurrentFilePath();
+                var newTestCase = { moduleName: suiteName, testName: specName, testResults: [], testFile: path };
                 window.chutzpah.testCases.push(newTestCase);
                 activeTestCase = newTestCase;
                 log({ type: "TestStart", testCase: activeTestCase });

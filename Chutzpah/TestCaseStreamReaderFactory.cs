@@ -4,7 +4,8 @@ namespace Chutzpah
     {
         public ITestCaseStreamReader Create()
         {
-            return new TestCaseStreamReader();
+            var reader = ChutzpahContainer.Current.GetInstance<ITestCaseStreamReader>();
+            return reader;
         } 
     }
 }

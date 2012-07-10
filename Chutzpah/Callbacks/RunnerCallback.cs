@@ -94,7 +94,7 @@ namespace Chutzpah
             }
 
 
-            errorString += string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);
+            errorString += string.Format("in {0} (line {1})\n\n", testCase.TestFile, testCase.Line);
 
             return errorString;
         }

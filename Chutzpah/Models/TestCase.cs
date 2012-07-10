@@ -10,8 +10,22 @@ namespace Chutzpah.Models
             TestResults = new List<TestResult>();
         }
 
-        public string HtmlTestFile { get; set; }
+        /// <summary>
+        /// The path to the html test harness used to run this test case
+        /// </summary>
+        public string HtmlTestHarness { get; set; }
+
+        /// <summary>
+        /// The path to the file the user provided to run this test. This could be the js file containing the test 
+        /// or it can be the html test harness which calls run the tests
+        /// </summary>
         public string InputTestFile { get; set; }
+
+        /// <summary>
+        /// The test file which contains the test
+        /// </summary>
+        public string TestFile { get; set; }
+
         public string ModuleName { get; set; }
         public string TestName { get; set; }
         public int Line { get; set; }

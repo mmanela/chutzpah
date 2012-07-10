@@ -23,7 +23,9 @@
         var activeTestCase = null,
             isGlobalError = false,
             fileStartTime = null,
-            testStartTime = null;
+            testStartTime = null,
+            cachedTestFunc = QUnit.test,
+            cachedAsyncTestFunc = QUnit.asyncTest;
         
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
@@ -36,16 +38,33 @@
             window.module = QUnit.module = function (name) {
                 window.chutzpah.currentModule = name;
             };
+            
             window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
 
                 if (name === 'global failure') return;
-                var testCase = { moduleName: window.chutzpah.currentModule, testName: name };
+                var path = window.chutzpah.getCurrentFilePath();
+                var testCase = { moduleName: window.chutzpah.currentModule, testName: name, testFile: path };
                 log({ type: "TestDone", testCase: testCase });
             };
         }
+        else {
+            window.test = QUnit.test = function () {
+                console.log("Test Override Stack: " + window.chutzpah.stack());
+                //var path = window.chutzpah.getCurrentFilePath();
+                //this.__Chutzpah_FilePath = path;
+                cachedTestFunc.apply(this, arguments);
+            };
+            
+            //window.asyncTest = QUnit.asyncTest = function (name) {
+            //    var path = window.chutzpah.getCurrentFilePath();
+            //    this.__Chutzpah_FilePath = path;
+            //    cachedAsyncTestFunc.apply(this, arguments);
+            //};
+
+
+        }
 
         QUnit.begin(function () {
-            // Testing began
             fileStartTime = new Date().getTime();
             log({ type: "FileStart" });
         });
@@ -59,10 +78,11 @@
             
             isGlobalError = false;
             testStartTime = new Date().getTime();
+            // var path = window.chutzpah.getCurrentFilePath();
+            console.log("Test Callback Stack: " + window.chutzpah.stack());
             var newTestCase = { moduleName: info.module, testName: info.name, testResults: [] };
             window.chutzpah.testCases.push(newTestCase);
             activeTestCase = newTestCase;
-            
             log({ type: "TestStart", testCase: activeTestCase });
         });
 

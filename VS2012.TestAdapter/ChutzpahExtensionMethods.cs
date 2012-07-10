@@ -8,9 +8,9 @@ namespace Chutzpah.VS2012.TestAdapter
     {
         public static TestCase ToVsTestCase(this Models.TestCase test)
         {
-            return new TestCase(BuildFullyQualifiedName(test), Constants.ExecutorUri, test.InputTestFile)
+            return new TestCase(BuildFullyQualifiedName(test), Constants.ExecutorUri, test.TestFile)
                 {
-                    CodeFilePath = test.InputTestFile,
+                    CodeFilePath = test.TestFile,
                     DisplayName = GetTestDisplayText(test),
                     LineNumber = test.Line,
                 };
@@ -51,7 +51,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private static string BuildFullyQualifiedName(Models.TestCase testCase)
         {
-            var parts = new[] {testCase.ModuleName, testCase.TestName, testCase.InputTestFile}.Where(x => !String.IsNullOrEmpty(x));
+            var parts = new[] {testCase.ModuleName, testCase.TestName, testCase.TestFile}.Where(x => !String.IsNullOrEmpty(x));
             return String.Join("::", parts);
         }
 

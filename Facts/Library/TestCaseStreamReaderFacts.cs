@@ -16,6 +16,8 @@ namespace Chutzpah.Facts
         {
             public TestableTestCaseStreamReader()
             {
+                Inject<IJsonSerializer>(new JsonSerializer());
+                Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
             }
         }
 
@@ -108,7 +110,8 @@ namespace Chutzpah.Facts
             public void Will_fire_test_started_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                reader.Mock<IFileProbe>().Setup(x => x.FindFilePath("someFile")).Returns("normalizedPath");
+                var json = @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[],""testFile"":""someFile"" }}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -122,13 +125,15 @@ namespace Chutzpah.Facts
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
                 Assert.Equal("file", result.InputTestFile);
+                Assert.Equal("normalizedPath", result.TestFile);
             }
 
             [Fact]
             public void Will_fire_test_finished_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                reader.Mock<IFileProbe>().Setup(x => x.FindFilePath("someFile")).Returns("normalizedPath");
+                var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[],""testFile"":""someFile"" }}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -142,6 +147,52 @@ namespace Chutzpah.Facts
                 Assert.Equal("module", result.ModuleName);
                 Assert.Equal("test", result.TestName);
                 Assert.Equal("file", result.InputTestFile);
+                Assert.Equal("normalizedPath", result.TestFile);
+            }
+
+
+            [Fact]
+            public void Will_use_input_test_file_path_if_test_file_doesnt_exist_in_test_started_event()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                reader.Mock<IFileProbe>().Setup(x => x.FindFilePath("someFile")).Returns((string)null);
+                var json = @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[],""testFile"":""someFile"" }}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestCase result = null;
+                callback.Setup(x => x.TestStarted(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("module", result.ModuleName);
+                Assert.Equal("test", result.TestName);
+                Assert.Equal("file", result.InputTestFile);
+                Assert.Equal("file", result.TestFile);
+            }
+
+            [Fact]
+            public void Will_use_input_test_file_path_if_test_file_doesnt_exist_in_test_finished_event()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                reader.Mock<IFileProbe>().Setup(x => x.FindFilePath("someFile")).Returns((string)null);
+                var json = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[],""testFile"":""someFile"" }}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestCase result = null;
+                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.NotNull(result);
+                Assert.Equal("module", result.ModuleName);
+                Assert.Equal("test", result.TestName);
+                Assert.Equal("file", result.InputTestFile);
+                Assert.Equal("file", result.TestFile);
             }
 
             [Fact]
@@ -203,7 +254,7 @@ namespace Chutzpah.Facts
 
                 Assert.Equal(1, summary.Tests.Count);
                 Assert.Equal(1, summary.Tests[0].TestResults.Count);
-                Assert.Equal("file", summary.Tests[0].InputTestFile);
+                Assert.Equal("file", summary.Tests[0].TestFile);
                 Assert.Equal("module", summary.Tests[0].ModuleName);
                 Assert.Equal("test", summary.Tests[0].TestName);
                 Assert.False(summary.Tests[0].Passed);

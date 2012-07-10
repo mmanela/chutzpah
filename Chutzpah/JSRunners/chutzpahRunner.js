@@ -47,6 +47,7 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         // when were have gone quiet for too long
         startTime = new Date().getTime();
         switch (eventObj.type) {
+            case 'FileInfo':
             case 'FileStart':
             case 'TestStart':
             case 'TestDone':
@@ -118,6 +119,57 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         else {
             page.evaluate(function () { window.chutzpah = { testMode: 'execution' }; });
         }
+
+        page.evaluate(function () {
+            function getFilePath(leftPart) {
+                var prefixes = ["file:///", "at"],
+                    prefixIdx,
+                    prefix,
+                    prefixFound = false;
+                
+                leftPart = leftPart.trim();
+                for (var i = 0; i < prefixes.length; i++) {
+                    prefix = prefixes[i];
+                    prefixIdx = leftPart.indexOf(prefix);
+                    console.log("Index of " + prefix + " is " + prefixIdx);
+                    if (prefixIdx >= 0) {
+                        prefixFound = true;
+                        leftPart = leftPart.substr(prefix.length + prefixIdx).trim();
+                        break;
+                    }
+                }
+
+                return prefixFound ? leftPart : null;
+            }
+
+            window.chutzpah.stack = function() {
+
+                try {
+                    throw new Error();
+                } catch(e) {
+                    return JSON.stringify(e.stack);
+                }
+            };
+            
+            window.chutzpah.getCurrentFilePath = function() {
+                try {
+                    throw new Error();
+                } catch (e) {
+                    try {
+                        var lines = e.stack.split('\n');
+                        var jsTestFileLine = lines[3];
+                        var sep = jsTestFileLine.lastIndexOf(':');
+                        var leftPart = jsTestFileLine.substr(0, sep);
+                        var file = getFilePath(leftPart);
+                        return file;
+                    }
+                    catch(e)
+                    {
+                        return null;
+                    }
+                }
+            };
+        });
     };
     
     page.onResourceReceived = function (url) {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chutzpah.Models;
@@ -67,6 +68,17 @@ namespace Chutzpah.Facts
 
                 Assert.Null(path);
             }
+
+            [Fact]
+            public void Will_return_null_if_exception_thrown()
+            {
+                var prob = new TestableFileProbe();
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Throws(new Exception());
+
+                var path = prob.ClassUnderTest.FindFilePath("somePath");
+
+                Assert.Null(path);
+            }
         }
 
         public class FindFolderPath
@@ -117,6 +129,18 @@ namespace Chutzpah.Facts
 
                 Assert.Null(path);
             }
+
+            [Fact]
+            public void Will_return_null_if_exception_thrown()
+            {
+                var prob = new TestableFileProbe();
+                prob.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Throws(new Exception());
+
+                var path = prob.ClassUnderTest.FindFolderPath("somePath");
+
+                Assert.Null(path);
+            }
+
         }
 
         public class GetPathInfo
