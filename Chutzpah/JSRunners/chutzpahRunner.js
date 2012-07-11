@@ -79,6 +79,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
     function captureLogMessage(message) {
         try {
+            message = message.trim();
             var obj = JSON.parse(message);
             if (!obj || !obj.type) throw "Unknown object";
             writeEvent(obj, message);
