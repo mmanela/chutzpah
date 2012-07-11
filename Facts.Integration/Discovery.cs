@@ -164,5 +164,29 @@ namespace Chutzpah.Facts.Integration
 
             Assert.Equal("nested.jasmine hello", result.First().ModuleName);
         }
+
+        [Fact]
+        public void Will_get_qunit_tests_from_a_html_file_when_using_old_version_of_qunit()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(@"JS\Test\oldCallbackQUnit.html");
+
+            Assert.Equal(4, result.Count());
+            Assert.Equal("A basic test", result.ElementAt(0).TestName);
+            Assert.Equal("will multiply 5 to number", result.ElementAt(3).TestName);
+            Assert.Equal("mathLib", result.ElementAt(3).ModuleName);
+        }
+
+        [Fact]
+        public void Will_get_test_from_qunit_html_file_with_inline_tests()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(@"JS\Test\inlineTests.html");
+
+            Assert.Equal(1, result.Count());
+            Assert.Equal("A basic test", result.ElementAt(0).TestName);
+        }
     }
 }

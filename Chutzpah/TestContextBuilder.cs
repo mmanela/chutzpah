@@ -52,7 +52,6 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find file: " + file);
             }
 
-            var stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
             var testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
@@ -70,6 +69,7 @@ namespace Chutzpah
                         };
                 }
 
+                var stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
                 if (!fileSystem.FolderExists(stagingFolder))
                 {
                     fileSystem.CreateDirectory(stagingFolder);

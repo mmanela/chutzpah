@@ -1,0 +1,24 @@
+<html>
+<head>
+
+<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+<script type="text/javascript" src="qunit.js"></script>
+    
+    <script>
+        window.onload = function() { console.log("window load"); };
+            test("A basic test", function () {
+                ok(true, "this test is fine");
+                var value = "hello";
+                equal("hello", value, "We expect value to be hello");
+            });
+    </script>
+</head>
+
+<body>
+ <h1 id="qunit-header">Unit Tests</h1>
+ <h2 id="qunit-banner"></h2>
+ <h2 id="qunit-userAgent"></h2>
+ <ol id="qunit-tests"></ol>
+ <div id="qunit-fixture">test markup, will be hidden</div>
+</body>
+</html>

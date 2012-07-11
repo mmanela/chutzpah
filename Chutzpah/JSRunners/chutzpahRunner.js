@@ -1,8 +1,9 @@
 ﻿/*globals phantom, require, console*/
 var chutzpah = {};
 
-chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) {
+chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) {
     /// <summary>Executes a test suite and evaluates the results using the provided functions.</summary>
+    /// <param name="onInitialized" type="Function">Callback function which is called when the page initialized but not loaded.</param>
     /// <param name="onPageLoaded" type="Function">Callback function which is called when the page is loaded.</param>
     /// <param name="isFrameworkLoaded" type="Function">Function that returns true of false if the test framework has been loaded.</param>
     /// <param name="onFrameworkLoaded" type="Function">Callback function which is called when the test framework is loaded.</param>
@@ -15,6 +16,17 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
         testMode = null,
         timeOut = null,
         startTime = null;
+
+    function trySetupTestFramework() {
+        if (!testFrameworkLoaded) {
+            var loaded = page.evaluate(isFrameworkLoaded);
+            if (loaded) {
+                testFrameworkLoaded = true;
+                page.evaluate(onFrameworkLoaded);
+            }
+        }
+    }
+
 
     function waitFor(testIfDone, timeOutMillis) {
         var maxtimeOutMillis = timeOutMillis,
@@ -92,6 +104,7 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
             // Initialize startTime, this will get updated everytime we recieve 
             // content from the test framework
             startTime = new Date().getTime();
+            trySetupTestFramework();
             page.evaluate(onPageLoaded);
             waitFor(waitCondition, timeOut);
         }
@@ -113,21 +126,22 @@ chutzpah.runner = function (onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, 
 
     page.onInitialized = function () {
         if (testMode === 'discovery') {
-            page.evaluate(function () { window.chutzpah = { testMode: 'discovery' }; });
+            page.evaluate(function () {
+                window.chutzpah = { testMode: 'discovery' };
+                onInitialized();
+            });
         }
         else {
-            page.evaluate(function () { window.chutzpah = { testMode: 'execution' }; });
+            page.evaluate(function () {
+                window.chutzpah = { testMode: 'execution' };
+                onInitialized();
+            });
         }
     };
     
+
     page.onResourceReceived = function (url) {
-        if (!testFrameworkLoaded) {
-            var loaded = page.evaluate(isFrameworkLoaded);
-            if (loaded) {
-                testFrameworkLoaded = true;
-                page.evaluate(onFrameworkLoaded);
-            }
-        }
+        trySetupTestFramework();
     };
 
     // Since tests run inside of Phantom are not part of your websites domain

@@ -6,8 +6,10 @@
     
     phantom.injectJs('chutzpahRunner.js');
 
-    function isTestingDone() {
+    function onInitialized() {
+    }
 
+    function isTestingDone() {
         return window.chutzpah.isTestingFinished === true;
     }
     
@@ -23,7 +25,9 @@
         var activeTestCase = null,
             isGlobalError = false,
             fileStartTime = null,
-            testStartTime = null;
+            testStartTime = null,
+            beginCallbackContent = QUnit.begin.toString(),
+            callback = {};
         
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
@@ -43,14 +47,14 @@
                 log({ type: "TestDone", testCase: testCase });
             };
         }
-
-        QUnit.begin(function () {
+        
+        callback.begin = function () {
             // Testing began
             fileStartTime = new Date().getTime();
             log({ type: "FileStart" });
-        });
+        };
 
-        QUnit.testStart(function (info) {
+        callback.testStart = function (info) {
 
             if (info.name === 'global failure') {
                 isGlobalError = true;
@@ -64,9 +68,9 @@
             activeTestCase = newTestCase;
             
             log({ type: "TestStart", testCase: activeTestCase });
-        });
+        };
 
-        QUnit.log(function (info) {
+        callback.log = function (info) {
             if (!isGlobalError && info.result !== undefined) {
                 var testResult = {};
                 
@@ -78,28 +82,75 @@
                 
                 activeTestCase.testResults.push(testResult);
             }
-        });
+        };
 
-        QUnit.testDone(function (info) {
+        callback.testDone = function (info) {
             if (info.name === 'global failure') return;
             // Log test case when done. This will get picked up by phantom and streamed to chutzpah
             var timetaken = new Date().getTime() - testStartTime;
             activeTestCase.timetaken = timetaken;
             log({ type: "TestDone", testCase: activeTestCase });
-        });
+        };
 
-        QUnit.done(function (info) {
-
+        callback.done = function (info) {
             var timetaken = new Date().getTime() - fileStartTime;
             log({ type: "FileDone", timetaken: timetaken, passed: info.passed, failed: info.failed });
             window.chutzpah.isTestingFinished = true;
-        });
+        };
+
+        /*
+            Check to see if we are running on a very old version of QUnit
+            in newer version the callbacks are register functions. In older versions
+            they are empty functions. The heuristic below is too look for 'config[key]'.
+            If we see that it is a newer version of qunit. Otherwise we need to do some more work. 
+        */
+        if (beginCallbackContent.indexOf('config[key]') < 0) {
+            var oldCallback = {
+                begin: QUnit.begin,
+                done: QUnit.done,
+                log: QUnit.log,
+                testStart: QUnit.testStart,
+                testDone: QUnit.testDone
+            };
+
+            // For each event, call out callback and then any existing registered callback
+            QUnit.begin = function() {
+                callback.begin.apply(this, arguments);
+                oldCallback.begin.apply(this, arguments);
+            };
+            QUnit.done = function () {
+                callback.done.apply(this, arguments);
+                oldCallback.done.apply(this, arguments);
+            };
+            QUnit.log = function () {
+                callback.log.apply(this, arguments);
+                oldCallback.log.apply(this, arguments);
+            };
+            QUnit.testStart = function () {
+                callback.testStart.apply(this, arguments);
+                oldCallback.testStart.apply(this, arguments);
+            };
+            QUnit.testDone = function () {
+                callback.testDone.apply(this, arguments);
+                oldCallback.testDone.apply(this, arguments);
+            };
+        }
+        else {
+            QUnit.begin(callback.begin);
+            QUnit.done(callback.done);
+            QUnit.log(callback.log);
+            QUnit.testStart(callback.testStart);
+            QUnit.testDone(callback.testDone);
+        }
+        
     }
     
-    function onPageLoaded() {}
+    function onPageLoaded() {
+        
+    }
 
     try {
-        chutzpah.runner(onPageLoaded, isQunitLoaded, onQUnitLoaded, isTestingDone);
+        chutzpah.runner(onInitialized, onPageLoaded, isQunitLoaded, onQUnitLoaded, isTestingDone);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }

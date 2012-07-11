@@ -350,5 +350,28 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_run_qunit_tests_from_a_html_file_when_using_old_version_of_qunit()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\oldCallbackQUnit.html");
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(3, result.PassedCount);
+            Assert.Equal(4, result.TotalCount);
+        }
+        
+        [Fact]
+        public void Will_run_qunit_html_file_with_inline_tests()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\inlineTests.html");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
     }
 }

@@ -6,6 +6,8 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
+    function onInitialized() {}
+    
     function isTestingDone() {
         return window.chutzpah.isTestingFinished === true;
     }
@@ -125,7 +127,7 @@
     }
 
     try {
-        chutzpah.runner(onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);
+        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }
