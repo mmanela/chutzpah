@@ -128,15 +128,15 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         if (testMode === 'discovery') {
             page.evaluate(function () {
                 window.chutzpah = { testMode: 'discovery' };
-                onInitialized();
             });
         }
         else {
             page.evaluate(function () {
                 window.chutzpah = { testMode: 'execution' };
-                onInitialized();
             });
         }
+        
+        page.evaluate(onInitialized);
     };
     
 
