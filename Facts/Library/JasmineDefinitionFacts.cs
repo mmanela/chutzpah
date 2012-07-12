@@ -128,31 +128,5 @@
             }
         }
 
-        public class GetFixtureNode
-        {
-            [Fact]
-            public void ReturnsFixtureContent_GivenCustomHarness()
-            {
-                var creator = new JasmineDefinitionCreator();
-                var expected = @"
-<div>My Test Fixture <span>Content</span></div>
-";
-
-                var actual = creator.ClassUnderTest.GetFixtureContent(Resources.JasmineHarness);
-
-                Assert.Equal(expected, actual);
-            }
-
-            [Fact]
-            public void ReturnsEmpty_GivenInvalidHarness()
-            {
-                var creator = new JasmineDefinitionCreator();
-                var harness = "I am not a valid test harness";
-
-                var actual = creator.ClassUnderTest.GetFixtureContent(harness);
-
-                Assert.Equal(string.Empty, actual);
-            }
-        }
     }
 }

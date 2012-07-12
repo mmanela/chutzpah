@@ -8,14 +8,13 @@ namespace Chutzpah.FrameworkDefinitions
     using System.Text.RegularExpressions;
     using Chutzpah.FileProcessors;
     using Chutzpah.Models;
-    using HtmlAgilityPack;
 
     /// <summary>
     /// Abstract definition that provides a convention based implementation of IFrameworkDefinition.
     /// </summary>
     public abstract class BaseFrameworkDefinition : IFrameworkDefinition
     {
-        private static readonly Regex FrameworkReferenceRegex = new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine))\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex FrameworkReferenceRegex = new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine)).*?\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
@@ -101,26 +100,6 @@ namespace Chutzpah.FrameworkDefinitions
         }
 
         /// <summary>
-        /// Returns the fixture content within a custom test harness.
-        /// </summary>
-        /// <param name="harnessText">The contents of a test harness.</param>
-        /// <returns>The fixture content from a test harness if it exists.</returns>
-        public virtual string GetFixtureContent(string harnessText)
-        {
-            var fixtureContent = string.Empty;
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(harnessText);
-            var testFixture = this.GetFixtureNode(htmlDocument);
-
-            if (testFixture != null)
-            {
-                fixtureContent = testFixture.InnerHtml;
-            }
-
-            return fixtureContent;
-        }
-
-        /// <summary>
         /// Processes a referenced file according to the framework's needs.
         /// </summary>
         /// <param name="referencedFile">A referenced file to process.</param>
@@ -134,12 +113,5 @@ namespace Chutzpah.FrameworkDefinitions
                 }
             }
         }
-
-        /// <summary>
-        /// Returns the node which will contain test fixture content.
-        /// </summary>
-        /// <param name="fixtureDocument">The document that contains the node.</param>
-        /// <returns>The parent node of text fixture content.</returns>
-        protected abstract HtmlNode GetFixtureNode(HtmlDocument fixtureDocument);
     }
 }

@@ -39,13 +39,6 @@
         bool ReferenceIsDependency(string referenceFileName);
 
         /// <summary>
-        /// Returns the fixture content within a custom test harness.
-        /// </summary>
-        /// <param name="harnessText">The contents of a test harness.</param>
-        /// <returns>The fixture content from a test harness if it exists.</returns>
-        string GetFixtureContent(string harnessText);
-
-        /// <summary>
         /// Processes a referenced file according to the framework's needs.
         /// </summary>
         /// <param name="referencedFile">A referenced file to process.</param>

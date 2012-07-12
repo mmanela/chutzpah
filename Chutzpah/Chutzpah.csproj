@@ -37,9 +37,6 @@
     <AssemblyOriginatorKeyFile>../chutzpah.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.2\lib\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>

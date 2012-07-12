@@ -21,7 +21,6 @@ namespace Chutzpah.Facts
                 frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new [] { "qunit.js" });
-                frameworkMock.Setup(x => x.GetFixtureContent(It.IsAny<string>())).Returns("<div> some <a>fixture</a> content </div>");
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
                 Mock<IFileProbe>().Setup(x => x.GetPathInfo(It.IsAny<string>())).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.JavaScript });
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder(It.IsAny<string>())).Returns(@"C:\temp\");
