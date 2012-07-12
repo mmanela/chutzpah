@@ -331,7 +331,18 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_qunit_require_js_test_where_test_file_uses_requirejs_command()
         {
             var testRunner = TestRunner.Create();
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\test.html");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(2, result.PassedCount);
+            Assert.Equal(2, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_run_jasmine_require_js_test_where_test_file_uses_requirejs_command()
+        {
+            var testRunner = TestRunner.Create();
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html");
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
