@@ -114,16 +114,21 @@
     }
 
     function onPageLoaded() {
+        var _cachedWindowLoad = window.onload;
+        window.onload = function () {
+            if (_cachedWindowLoad) {
+                _cachedWindowLoad();
+            }
+            
+            var jasmineEnv = jasmine.getEnv();
+            var runner = jasmineEnv.currentRunner();
 
-        var jasmineEnv = jasmine.getEnv();
-        var runner = jasmineEnv.currentRunner();
-        
-        // Check if runner hasn't been executed
-        // If so, run it
-        if(!runner.queue.running && runner.queue.index <= 0) {
-            jasmineEnv.execute();
-        }
-        
+            // Check if runner hasn't been executed
+            // If so, run it
+            if (!runner.queue.running && runner.queue.index <= 0) {
+                jasmineEnv.execute();
+            }
+        };
     }
 
     try {

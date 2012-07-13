@@ -51,6 +51,9 @@ namespace Chutzpah.Facts
 <!DOCTYPE html><html><head>
     @@ReferencedCSSFiles@@
     @@ReferencedJSFiles@@
+    @@TestJSFile@@
+    DIR:@@TestJSFileDir@@
+
 </head>
 <body><div id=""qunit-fixture""></div></body></html>
 
@@ -412,6 +415,33 @@ namespace Chutzpah.Facts
                 Assert.True(pos2 < pos3);
                 Assert.Equal(1, context.ReferencedJavaScriptFiles.Count(x => x.IsFileUnderTest));
             }
+
+            [Fact]
+            public void Will_put_normalzed_test_js_dir_in_html_template()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"this\path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"this\path\test.js"))
+                    .Returns(TestJSFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
+                    .Returns(@"path\lib.js");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
+                    .Returns(@"path\common.js");
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                Assert.True(text.Contains("DIR:this/path"));
+            }
+
 
             [Fact]
             public void Will_replace_referenced_js_file_place_holder_in_html_template_with_referenced_css_files_from_js_test_file()

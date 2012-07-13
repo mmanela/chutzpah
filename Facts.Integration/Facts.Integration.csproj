@@ -78,10 +78,28 @@
     <Content Include="JS\Code\RequireJS\base\core.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Code\RequireJS\test.html">
+    <Content Include="JS\Code\RequireJS\all.tests.jasmine.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\site.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\RequireJS\main.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\tests\base\base.qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\tests\base\base.jasmine.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\tests\ui\ui.jasmine.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\tests\ui\ui.qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\all.tests.qunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\RequireJS\ui\screen.js">
@@ -111,7 +129,16 @@
     <Content Include="JS\Test\oldCallbackQunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\requirejs\rjs-jasmine.js">
+    <Content Include="JS\Test\requirejs\rjs-qunit-solo.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\requirejs\testfiledependency.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\requirejs\rjs-jasmine-solo.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\requirejs\rjs-jasmine-html.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\requirejs\jasmine-test.html">
@@ -123,10 +150,7 @@
     <Content Include="JS\Test\nestedJasmine.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\requirejs\tests.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="JS\Test\requirejs\rjs-qunit.js">
+    <Content Include="JS\Test\requirejs\rjs-qunit-html.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\requirejs\qunit-test.html">

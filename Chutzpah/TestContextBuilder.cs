@@ -90,7 +90,7 @@ namespace Chutzpah
                     CreateIfDoesNotExist(sourcePath, destinationPath);
                 }
 
-                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, referencedFiles);
+                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder,testFilePath, referencedFiles);
 
                 return new TestContext
                     {
@@ -144,14 +144,13 @@ namespace Chutzpah
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition,
-                                         string stagingFolder,
-                                         IEnumerable<ReferencedFile> referencedFiles)
+        private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, string inputTestFilePath, IEnumerable<ReferencedFile> referencedFiles)
         {
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             var templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             var testHtmlTemplate = fileSystem.GetText(templatePath);
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, referencedFiles);
+            var inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\","/");
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
@@ -259,31 +258,39 @@ namespace Chutzpah
             return flattenedFileList;
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate,
-                                                   IEnumerable<ReferencedFile> referencedFiles)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate, string inputTestFileDir, IEnumerable<ReferencedFile> referencedFiles)
         {
+            var testJsReplacement = new StringBuilder();
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
-            var referencedFilePaths = referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x.Path);
-            BuildReferenceHtml(referencedFilePaths, referenceCssReplacement, referenceJsReplacement);
+            var referencedFilePaths = referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x);
+            BuildReferenceHtml(referencedFilePaths, referenceCssReplacement, testJsReplacement, referenceJsReplacement);
 
+            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFileDir@@", inputTestFileDir);
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
 
             return testHtmlTemplate;
         }
 
-        private static void BuildReferenceHtml(IEnumerable<string> referencedFilePaths,
+        private static void BuildReferenceHtml(IEnumerable<ReferencedFile> referencedFilePaths,
                                                StringBuilder referenceCssReplacement,
+                                               StringBuilder testJsReplacement,
                                                StringBuilder referenceJsReplacement,
                                                StringBuilder referenceIconReplacement = null)
         {
-            foreach (var referencePath in referencedFilePaths)
+            foreach (var referencedFile in referencedFilePaths)
             {
+                var referencePath = referencedFile.Path;
                 if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) && referenceCssReplacement != null)
                 {
                     referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
                 }
+                else if (referencedFile.IsFileUnderTest && referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
+                {
+                    testJsReplacement.AppendLine(GetScriptStatement(referencePath));
+                }                
                 else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && referenceJsReplacement != null)
                 {
                     referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));

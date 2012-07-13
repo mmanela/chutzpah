@@ -31,10 +31,9 @@
         
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
+        window.chutzpah.currentModule = null;
 
         if (window.chutzpah.testMode === 'discovery') {
-            window.chutzpah.currentModule = null;
-
             // In discovery mode override QUnit's functions
 
             window.module = QUnit.module = function (name) {
@@ -54,6 +53,14 @@
             log({ type: "FileStart" });
         };
 
+        callback.moduleStart = function(info) {
+            window.chutzpah.currentModule = info.name;
+        };
+        
+        callback.moduleDone = function (info) {
+            window.chutzpah.currentModule = null;
+        };
+
         callback.testStart = function (info) {
 
             if (info.name === 'global failure') {
@@ -63,7 +70,7 @@
             
             isGlobalError = false;
             testStartTime = new Date().getTime();
-            var newTestCase = { moduleName: info.module, testName: info.name, testResults: [] };
+            var newTestCase = { moduleName: info.module || window.chutzpah.currentModule, testName: info.name, testResults: [] };
             window.chutzpah.testCases.push(newTestCase);
             activeTestCase = newTestCase;
             
@@ -110,7 +117,9 @@
                 done: QUnit.done,
                 log: QUnit.log,
                 testStart: QUnit.testStart,
-                testDone: QUnit.testDone
+                testDone: QUnit.testDone,
+                moduleStart: QUnit.moduleStart,
+                moduleDone: QUnit.moduleDone
             };
 
             // For each event, call out callback and then any existing registered callback
@@ -133,6 +142,14 @@
             QUnit.testDone = function () {
                 callback.testDone.apply(this, arguments);
                 oldCallback.testDone.apply(this, arguments);
+            };
+            QUnit.moduleStart = function () {
+                callback.moduleStart.apply(this, arguments);
+                oldCallback.moduleStart.apply(this, arguments);
+            };
+            QUnit.moduleDone = function () {
+                callback.moduleDone.apply(this, arguments);
+                oldCallback.moduleDone.apply(this, arguments);
             };
         }
         else {
