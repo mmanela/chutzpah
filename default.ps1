@@ -88,7 +88,7 @@ task Package-Files -depends Clean-PackageFiles {
     
     # Copy over Vsix Files
     copy-item "$baseDir\VisualStudio\bin\$configuration\chutzpah.visualstudio.vsix" -destination $packageDir
-    copy-item "$baseDir\VS11.Plugin\bin\$configuration\chutzpah.vs11.vsix" -destination $packageDir
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.vsix" -destination $packageDir
 }
 
 task Package-NuGet -depends Clean-PackageFiles {

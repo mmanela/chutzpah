@@ -14,7 +14,17 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine</tags>
         <releaseNotes>
-          * Preserve Dependency Order of referenced files
+          * Added streaming of test results
+          * Added ability to run test files in parallel
+          * Changed behavior when running html files to run them in place
+          * Added options menu for the VS 2012 test adapter
+          * Added ability to choose between Html files, JS files or both in test adapter
+          * Added support for older versions of QUnit
+          * Updated callback API with new methods
+          * Added better error handling
+          * Upgraded version of Jasmine, QUnit and PhantomJS
+          * Added initial support for RequireJS
+          * Bug fixes
         </releaseNotes>
     </metadata>
 </package>

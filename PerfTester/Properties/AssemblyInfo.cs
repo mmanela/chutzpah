@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -8,10 +8,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("PerfTester")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MSIT")]
-[assembly: AssemblyProduct("PerfTester")]
-[assembly: AssemblyCopyright("Copyright © MSIT 2012")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("Matthew Manela")]
+[assembly: AssemblyProduct("Chutzpah")]
+[assembly: AssemblyCopyright("Copyright � Matthew Manela 2012")]
+[assembly: AssemblyTrademark("135:9a024588e06101e3599dc11554e6759ca4eb8d6a")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+// [assembly: AssemblyVersion("2.0.0.136")]
+[assembly: AssemblyVersion("2.0.0.136")]
+[assembly: AssemblyFileVersion("2.0.0.136")]
