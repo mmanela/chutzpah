@@ -364,5 +364,38 @@ namespace Chutzpah.Facts.ConsoleRunner
                 }
             }
         }
+
+        public class VSOutputArgumentFacts
+        {
+            [Fact]
+            public void VSOutput_Option_Not_Passed_VSOutput_False()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.VsOutput);
+            }
+
+            [Fact]
+            public void VSOutput_Option_Debug_Is_VSOutput()
+            {
+                var arguments = new[] { "test.html", "/vsoutput" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.VsOutput);
+            }
+
+            [Fact]
+            public void VSOutput_Option_Ignore_Case_VSOutput_Is_True()
+            {
+                var arguments = new[] { "test.html", "/VsOutpUt" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.VsOutput);
+            }
+        }
     }
 }

@@ -37,6 +37,8 @@ namespace Chutzpah
 
         public IList<string> Files { get; set; }
 
+        public bool VsOutput { get; protected set; }
+
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
             if (option.Value != null)
@@ -100,6 +102,11 @@ namespace Chutzpah
                 else if (optionName == "/file" || optionName == "/path")
                 {
                     AddFileOption(option.Value);
+                }
+                else if (optionName == "/vsoutput")
+                {
+                    GuardNoOptionValue(option);
+                    VsOutput = true;
                 }
                 else
                 {
