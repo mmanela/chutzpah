@@ -83,6 +83,7 @@ namespace Chutzpah
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
+            Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
             Console.WriteLine();
         }
 
