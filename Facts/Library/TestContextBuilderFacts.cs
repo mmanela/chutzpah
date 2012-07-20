@@ -3,10 +3,10 @@ using System.IO;
 using System.Linq;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
-using Chutzpah.Utility;
 
 namespace Chutzpah.Facts
 {
@@ -20,7 +20,7 @@ namespace Chutzpah.Facts
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>())).Returns(true);
                 frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
-                frameworkMock.Setup(x => x.FileDependencies).Returns(new [] { "qunit.js" });
+                frameworkMock.Setup(x => x.FileDependencies).Returns(new[] { "qunit.js" });
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
                 Mock<IFileProbe>().Setup(x => x.GetPathInfo(It.IsAny<string>())).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.JavaScript });
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder(It.IsAny<string>())).Returns(@"C:\temp\");
@@ -265,7 +265,7 @@ namespace Chutzpah.Facts
             public void Will_copy_test_dependency_to_temporary_folder_if_newer()
             {
                 var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"TestFiles\qunit.js")).Returns(new PathInfo{FullPath = @"path\qunit.js"});
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"TestFiles\qunit.js")).Returns(new PathInfo { FullPath = @"path\qunit.js" });
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.js")).Returns(true);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"pa\test.js")).Returns(TestJSFileContents);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetLastWriteTime(@"path\qunit.js")).Returns(DateTime.Now);
@@ -273,7 +273,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
-                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js",true));
+                creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true));
             }
 
             [Fact]
@@ -530,7 +530,49 @@ namespace Chutzpah.Facts
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"http://a.com/lib.js");
                 Assert.Contains(scriptStatement, text);
             }
+        }
 
+        public class GetAbsoluteFileUrl
+        {
+            [Fact]
+            public void Will_prepend_scheme_and_convert_slashes_of_a_path_without_a_scheme()
+            {
+                var actual = TestContextBuilder.GetAbsoluteFileUrl(@"D:\some\file\path.js");
+
+                Assert.Equal("file:///D:/some/file/path.js", actual);
+            }
+
+            [Fact]
+            public void Will_prepend_scheme_and_convert_slashes_of_a_path_containing_a_scheme()
+            {
+                var actual = TestContextBuilder.GetAbsoluteFileUrl(@"D:\some\http://.js");
+
+                Assert.Equal("file:///D:/some/http://.js", actual);
+            }
+
+            [Fact]
+            public void Will_not_prefix_a_path_using_http_scheme()
+            {
+                var actual = TestContextBuilder.GetAbsoluteFileUrl("http://someurl/x.js");
+
+                Assert.Equal("http://someurl/x.js", actual);
+            }
+
+            [Fact]
+            public void Will_not_prefix_a_path_using_https_scheme()
+            {
+                var actual = TestContextBuilder.GetAbsoluteFileUrl("https://anyurl/y.js");
+
+                Assert.Equal("https://anyurl/y.js", actual);
+            }
+
+            [Fact]
+            public void Will_not_prefix_a_path_using_file_scheme()
+            {
+                var actual = TestContextBuilder.GetAbsoluteFileUrl("file://Z:/path/z.js");
+
+                Assert.Equal("file://Z:/path/z.js", actual);
+            }
         }
     }
 }
