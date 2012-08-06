@@ -32,7 +32,7 @@ namespace Chutzpah
             jsonSerializer = new JsonSerializer();
         }
 
-        public TestCaseSummary Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        public TestFileSummary Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
             if (processStream == null) throw new ArgumentNullException("processStream");
             if (testOptions == null) throw new ArgumentNullException("testOptions");
@@ -40,7 +40,7 @@ namespace Chutzpah
 
             lastTestEvent = DateTime.Now;
             var timeout = testOptions.TestFileTimeoutMilliseconds + 500; // Add buffer to timeout to account for serialization
-            var readerTask = Task<TestCaseSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
+            var readerTask = Task<TestFileSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
             while (readerTask.Status == TaskStatus.WaitingToRun
                || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))
             {
@@ -59,11 +59,11 @@ namespace Chutzpah
             }
         }
 
-        private TestCaseSummary ReadFromStream(StreamReader stream, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        private TestFileSummary ReadFromStream(StreamReader stream, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
             var referencedFile = testContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testIndex = 0;
-            var summary = new TestCaseSummary();
+            var summary = new TestFileSummary(testContext.InputTestFile);
             string line;
             while ((line = stream.ReadLine()) != null)
             {
@@ -102,7 +102,7 @@ namespace Chutzpah
                             AddLineNumber(referencedFile, testIndex, jsTestCase);
                             testIndex++;
                             callback.TestFinished(jsTestCase.TestCase);
-                            summary.Tests.Add(jsTestCase.TestCase);
+                            summary.AddTestCase(jsTestCase.TestCase);
                             break;
 
                         case "Log":

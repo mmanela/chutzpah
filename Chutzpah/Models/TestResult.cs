@@ -6,5 +6,25 @@
         public string Expected { get; set; }
         public string Actual { get; set; }
         public string Message { get; set; }
+
+        public string GetFailureMessage()
+        {
+            if (Passed) return "";
+            var errorString = "";
+            if (!string.IsNullOrWhiteSpace(Message))
+            {
+                errorString = Message;
+            }
+            else if (Expected != null || Actual != null)
+            {
+                errorString = string.Format("Expected: {0}, Actual: {1}", Expected, Actual);
+            }
+            else
+            {
+                errorString = "Assert failed";
+            }
+
+            return errorString;
+        }
     }
 }

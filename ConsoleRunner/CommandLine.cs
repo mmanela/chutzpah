@@ -15,6 +15,7 @@ namespace Chutzpah
             for (var i = args.Length - 1; i >= 0; i--)
                 arguments.Push(args[i]);
 
+            UnmatchedArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Files = new List<string>();
             TeamCity = Environment.GetEnvironmentVariable(TeamcityProjectName) != null;
             Parse();
@@ -36,6 +37,8 @@ namespace Chutzpah
         public bool Wait { get; protected set; }
 
         public IList<string> Files { get; set; }
+
+        public IDictionary<string,string> UnmatchedArguments { get; set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
@@ -105,6 +108,10 @@ namespace Chutzpah
                 {
                     if (!optionName.StartsWith("/"))
                         throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
+                    else
+                    {
+                        UnmatchedArguments[optionName.Trim('/')] = option.Value;
+                    }
                 }
             }
         }

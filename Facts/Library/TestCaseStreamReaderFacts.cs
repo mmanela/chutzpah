@@ -94,8 +94,8 @@ namespace Chutzpah.Facts
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
-                TestCaseSummary result = null;
-                callback.Setup(x => x.FileFinished("file", It.IsAny<TestCaseSummary>())).Callback<string, TestCaseSummary>((f, t) => result = t); ;
+                TestFileSummary result = null;
+                callback.Setup(x => x.FileFinished("file", It.IsAny<TestFileSummary>())).Callback<string, TestFileSummary>((f, t) => result = t); ;
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 

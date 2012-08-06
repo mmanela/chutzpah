@@ -4,68 +4,28 @@ using System.Linq;
 namespace Chutzpah.Models
 {
     /// <summary>
-    /// Summary of the test cases
+    /// Summary of the test cases aggregated from all test files
     /// </summary>
-    public class TestCaseSummary
+    public class TestCaseSummary : BaseTestCaseSummary
     {
         public TestCaseSummary()
         {
-            Tests = new List<TestCase>();
-            Logs = new List<TestLog>();
-            Errors = new List<TestError>();
+            TestFileSummaries = new List<TestFileSummary>();
         }
 
         /// <summary>
-        /// Collection of test results
+        /// A mapping from module name to test case list
         /// </summary>
-        public IList<TestCase> Tests { get; set; }
-
-        /// <summary>
-        /// Log out put from test files
-        /// </summary>
-        public IList<TestLog> Logs { get; set; }
-
-        /// <summary>
-        /// Source errors from test files
-        /// </summary>
-        public IList<TestError> Errors { get; set; }
-
-        /// <summary>
-        /// The time in milliseconds to complete the tests
-        /// </summary>
-        public int TimeTaken { get; set; }
-
-        /// <summary>
-        /// Total count of all tests
-        /// </summary>
-        public int TotalCount
-        {
-            get { return Tests.Count(); }
-        }
-        
-        /// <summary>
-        /// Number of tests which passed
-        /// </summary>
-        public int PassedCount
-        {
-            get { return Tests.Count(x => x.Passed); }
-        }
- 
-        /// <summary>
-        /// Number of tests which failed
-        /// </summary>
-        public int FailedCount
-        {
-            get { return Tests.Count(x => !x.Passed); }
-        }
+        public List<TestFileSummary> TestFileSummaries { get; private set; }
 
         /// <summary>
         /// Appends another test case summary into the current instnace.
         /// This will combines the tests, logs and errors collections
         /// </summary>
         /// <param name="summary"></param>
-        internal void Append(TestCaseSummary summary)
+        public void Append(TestFileSummary summary)
         {
+            TestFileSummaries.Add(summary);
             AppendTests(summary.Tests);
             AppendLogs(summary.Logs);
             AppendErrors(summary.Errors);
@@ -74,7 +34,10 @@ namespace Chutzpah.Models
 
         internal void AppendTests(IEnumerable<TestCase> tests)
         {
-            Tests = Tests.Concat(tests).ToList();
+            foreach (var test in tests)
+            {
+                AddTestCase(test);
+            }
         }
 
         internal void AppendLogs(IEnumerable<TestLog> logs)
@@ -86,6 +49,5 @@ namespace Chutzpah.Models
         {
             Errors = Errors.Concat(errors).ToList();
         }
-
     }
 }

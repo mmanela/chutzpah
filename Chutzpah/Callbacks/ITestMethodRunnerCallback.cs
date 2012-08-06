@@ -27,7 +27,7 @@ namespace Chutzpah
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="testResultsSummary"></param>
-        void FileFinished(string fileName, TestCaseSummary testResultsSummary);
+        void FileFinished(string fileName, TestFileSummary testResultsSummary);
 
         /// <summary>
         /// A test started execution

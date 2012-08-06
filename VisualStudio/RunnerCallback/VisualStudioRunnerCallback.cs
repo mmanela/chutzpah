@@ -44,7 +44,7 @@ namespace Chutzpah.VisualStudio.Callback
             testPane.OutputString(text);
         }
 
-        public override void FileFinished(string fileName, TestCaseSummary testResultsSummary)
+        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
         {
             var text = string.Format("{0} passed, {1} failed, {2} total (chutzpah).\n\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
             testPane.OutputString(text);
@@ -80,7 +80,7 @@ namespace Chutzpah.VisualStudio.Callback
 
         protected string GetStatusBarMessage(TestCase result)
         {
-            var title = GetTestDisplayText(result);
+            var title = result.GetDisplayName();
             return string.Format("{0} ({1})", title, result.Passed ? "passed" : "failed");
         }
 

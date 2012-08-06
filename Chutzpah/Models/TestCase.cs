@@ -25,5 +25,10 @@ namespace Chutzpah.Models
         public int TimeTaken { get; set; }
 
         public bool Passed { get { return TestResults.All(x => x.Passed); }}
+
+        public string GetDisplayName()
+        {
+            return string.IsNullOrWhiteSpace(ModuleName) ? TestName : string.Format("{0}:{1}", ModuleName, TestName);
+        }
     }
 }
