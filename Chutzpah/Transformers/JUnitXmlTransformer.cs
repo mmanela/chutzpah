@@ -29,7 +29,7 @@ namespace Chutzpah.Transformers
             {
                 builder.AppendLine(
                     string.Format(@"  <testsuite name=""{0}"" tests=""{1}"" failures=""{2}"" time=""{3}"">",
-                                  Encode(file.Path), file.Tests.Count, file.Tests.Count(x => !x.Passed), file.TimeTaken/1000.0));
+                                  Encode(file.Path), file.Tests.Count, file.Tests.Count(x => !x.Passed), file.TimeTaken));
                 ;
                 foreach (TestCase test in file.Tests)
                 {
