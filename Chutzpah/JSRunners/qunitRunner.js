@@ -83,8 +83,10 @@
                 
                 testResult.passed = info.result;
                 QUnit.jsDump.multiline = false; // Make jsDump use single line
-                testResult.actual = QUnit.jsDump.parse(info.actual);
-                testResult.expected = QUnit.jsDump.parse(info.expected);
+                if (info.actual !== undefined || info.expected !== undefined) {
+                    testResult.actual = QUnit.jsDump.parse(info.actual);
+                    testResult.expected = QUnit.jsDump.parse(info.expected);
+                }
                 testResult.message = (info.message || "") + "";
                 
                 activeTestCase.testResults.push(testResult);
