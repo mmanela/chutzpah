@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using Chutzpah.Models;
 
 namespace Chutzpah.RunnerCallbacks
@@ -7,11 +8,13 @@ namespace Chutzpah.RunnerCallbacks
     public class StandardConsoleRunnerCallback : ConsoleRunnerCallback
     {
         readonly bool silent;
+        readonly bool vsoutput;
         int testCount;
 
-        public StandardConsoleRunnerCallback(bool silent)
+        public StandardConsoleRunnerCallback(bool silent, bool vsoutput)
         {
             this.silent = silent;
+            this.vsoutput = vsoutput;
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
@@ -39,16 +42,41 @@ namespace Chutzpah.RunnerCallbacks
         }
 
         protected override void TestFailed(TestCase testCase)
-        {
+        {            
             ClearCounter();
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("{0} [FAIL]", GetTestDisplayText(testCase));
-            Console.ResetColor();
-
+            Console.ResetColor();            
+            
             Console.WriteLine(Indent(GetTestFailureMessage(testCase)));
 
             Console.WriteLine();
+        }
+
+        protected override string GetTestFailureLocationString(TestCase testCase)
+        {            
+            if (vsoutput)
+            {
+                string s = String.Empty;
+
+                foreach (var result in testCase.TestResults.Where(x => !x.Passed))
+                {
+                    s += string.Format("{0}({1},{2}):{3} {4} {5}: {6}: {7}\n",
+                        testCase.InputTestFile,
+                        testCase.Line,
+                        testCase.Column,
+                        "",
+                        "error",
+                        "C0001",
+                        string.Format("Test '{0}' failed", GetTestDisplayText(testCase)),
+                        GetTestResultsString(result));
+                }
+
+                return s;
+            }
+
+            return base.GetTestFailureLocationString(testCase);
         }
 
         public override void ExceptionThrown(Exception exception, string fileName)

@@ -79,24 +79,33 @@ namespace Chutzpah
 
             foreach (var result in testCase.TestResults.Where(x => !x.Passed))
             {
-                if (!string.IsNullOrWhiteSpace(result.Message))
-                {
-                    errorString += string.Format("\t{0}\n", result.Message);
-                }
-                else if (result.Expected != null || result.Actual != null)
-                {
-                    errorString += string.Format("\tExpected: {0}, Actual: {1}\n", result.Expected, result.Actual);
-                }
-                else
-                {
-                    errorString += "\tAssert failed\n";
-                }
+                errorString += GetTestResultsString(result);
             }
 
-
-            errorString += string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);
+            errorString += GetTestFailureLocationString(testCase);
 
             return errorString;
+        }
+
+        protected virtual string GetTestResultsString(TestResult result)
+        {
+            if (!string.IsNullOrWhiteSpace(result.Message))
+            {
+                return string.Format("\t{0}\n", result.Message);
+            }
+            else if (result.Expected != null || result.Actual != null)
+            {
+                return string.Format("\tExpected: {0}, Actual: {1}\n", result.Expected, result.Actual);
+            }
+            else
+            {
+                return "\tAssert failed\n";
+            }            
+        }
+
+        protected virtual string GetTestFailureLocationString(TestCase testCase)
+        {
+            return string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);            
         }
     }
 }
