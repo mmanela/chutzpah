@@ -23,27 +23,27 @@ namespace Chutzpah.RunnerCallbacks
         {
             Console.WriteLine(
                 "##teamcity[testFailed name='{0}' details='{1}']",
-                Escape(GetTestDisplayText(testCase)),
+                Escape(testCase.GetDisplayName()),
                 Escape(GetTestFailureMessage(testCase))
                 );
 
-            WriteOutput(GetTestDisplayText(testCase), GetTestFailureMessage(testCase));
+            WriteOutput(testCase.GetDisplayName(), GetTestFailureMessage(testCase));
         }
 
         protected override void TestComplete(TestCase testCase)
         {
-            WriteFinished(GetTestDisplayText(testCase), testCase.TimeTaken);
+            WriteFinished(testCase.GetDisplayName(), testCase.TimeTaken);
         }
 
         protected override void TestPassed(TestCase testCase)
         {
-            WriteOutput(GetTestDisplayText(testCase), "Passed");
+            WriteOutput(testCase.GetDisplayName(), "Passed");
         }
 
         public override void TestStarted(TestCase testCase)
         {
             Console.WriteLine(
-                "##teamcity[testStarted name='{0}']", Escape(GetTestDisplayText(testCase)));
+                "##teamcity[testStarted name='{0}']", Escape(testCase.GetDisplayName()));
         }
 
         // Helpers

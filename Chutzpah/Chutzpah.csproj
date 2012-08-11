@@ -37,11 +37,15 @@
     <AssemblyOriginatorKeyFile>../chutzpah.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AntiXssLibrary">
+      <HintPath>..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>
-    <Reference Include="StructureMap">
-      <HintPath>..\packages\structuremap.2.6.2\lib\StructureMap.dll</HintPath>
+    <Reference Include="StructureMap, Version=2.6.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\structuremap.2.6.3\lib\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -71,6 +75,7 @@
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
+    <Compile Include="Models\BaseTestCaseSummary.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\JS\JsErrors.cs" />
@@ -78,6 +83,7 @@
     <Compile Include="Models\Stack.cs" />
     <Compile Include="Models\TestError.cs" />
     <Compile Include="Models\JS\JsFileDone.cs" />
+    <Compile Include="Models\TestFileSummary.cs" />
     <Compile Include="Models\TestingMode.cs" />
     <Compile Include="Models\TestLog.cs" />
     <Compile Include="Models\JS\JsRunnerOutput.cs" />
@@ -102,6 +108,9 @@
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
+    <Compile Include="Transformers\SummaryTransformer.cs" />
+    <Compile Include="Transformers\JUnitXmlTransformer.cs" />
+    <Compile Include="Transformers\SummaryTransformerFactory.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
@@ -163,6 +172,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

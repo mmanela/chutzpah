@@ -6,6 +6,7 @@ using Chutzpah.Callbacks;
 using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
 using System.Linq;
+using Chutzpah.Transformers;
 
 namespace Chutzpah
 {
@@ -15,7 +16,7 @@ namespace Chutzpah
         public static int Main(string[] args)
         {
             Console.WriteLine("Chutzpah console test runner ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
-            Console.WriteLine("Copyright (C) 2011 Matthew Manela (http://matthewmanela.com).");
+            Console.WriteLine("Copyright (C) 2012 Matthew Manela (http://matthewmanela.com).");
 
             if (args.Length == 0 || args[0] == "/?")
             {
@@ -83,7 +84,13 @@ namespace Chutzpah
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
-            Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
+			Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
+            
+			foreach (var transformer in SummaryTransformerFactory.GetTransformers())
+            {
+                Console.WriteLine("  /{0} filename        : {1}", transformer.Name,transformer.Description);
+            }
+
             Console.WriteLine();
         }
 
@@ -114,6 +121,8 @@ namespace Chutzpah
                     };
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
+
+                ProcessTestSummaryTransformers(commandLine, testResultsSummary);
             }
             catch (ArgumentException ex)
             {
@@ -121,6 +130,16 @@ namespace Chutzpah
             }
 
             return testResultsSummary.FailedCount;
+        }
+
+        private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
+        {
+            var transformers = SummaryTransformerFactory.GetTransformers();
+            foreach (var transformer in transformers.Where(x => commandLine.UnmatchedArguments.ContainsKey(x.Name)))
+            {
+                var path = commandLine.UnmatchedArguments[transformer.Name];
+                transformer.Transform(testResultsSummary, path);
+            }
         }
     }
 }

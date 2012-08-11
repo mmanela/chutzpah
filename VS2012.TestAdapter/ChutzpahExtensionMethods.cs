@@ -62,22 +62,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private static string GetTestFailureMessage(Models.TestResult result)
         {
-            var errorString = "";
-            if (result == null) return errorString;
-            if (!string.IsNullOrWhiteSpace(result.Message))
-            {
-                errorString += string.Format("{0}", result.Message);
-            }
-            else if (result.Expected != null || result.Actual != null)
-            {
-                errorString += string.Format("Expected: {0}, Actual: {1}", result.Expected, result.Actual);
-            }
-            else
-            {
-                errorString += "Assert failed";
-            }
-
-            return errorString;
+            if (result == null) return "";
+            return result.GetFailureMessage();
         }
     }
 }

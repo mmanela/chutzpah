@@ -120,7 +120,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             if (e != null)
             {
-                var files = FindTestFiles(e.Project);
+                var files = FindPotentialTestFiles(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
                     UpdateFileWatcher(files, true);
@@ -167,7 +167,7 @@ namespace Chutzpah.VS2012.TestAdapter
             if (e != null)
             {
                 // Don't do anything for files we are sure can't be test files
-                if (!IsTestFile(e.File)) return;
+                if (!HasTestFileExtension(e.File)) return;
 
                 switch (e.ChangedReason)
                 {
@@ -226,7 +226,7 @@ namespace Chutzpah.VS2012.TestAdapter
             if (initialContainerSearch)
             {
                 cachedContainers.Clear();
-                var jsFiles = FindTestFiles();
+                var jsFiles = FindPotentialTestFiles();
                 UpdateFileWatcher(jsFiles, true);
                 initialContainerSearch = false;
             }
@@ -247,18 +247,18 @@ namespace Chutzpah.VS2012.TestAdapter
             }
         }
 
-        private IEnumerable<string> FindTestFiles()
+        private IEnumerable<string> FindPotentialTestFiles()
         {
             var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
-            return loadedProjects.SelectMany(FindTestFiles).ToList();
+            return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
         }
 
-        private IEnumerable<string> FindTestFiles(IVsProject project)
+        private IEnumerable<string> FindPotentialTestFiles(IVsProject project)
         {
             return from item in VsSolutionHelper.GetProjectItems(project)
-                   where IsTestFile(item)
+                   where HasTestFileExtension(item)
                    select item;
         }
 

@@ -1,11 +1,19 @@
 Please see also http://code.google.com/p/phantomjs/wiki/ReleaseNotes.
 
+2012-07-22: Version 1.6.1
+
+    Bug fixes
+
+      * Don't build the deploy in debug mode (issue 599)
+      * Fixed building on Windows (issue 424)
+      * Fixed remote inspector when building statically (issue 430)
+
 2012-06-20: Version 1.6.0 "Lavender"
 
     New features
 
       * Added support for passing arguments to WebPage's evaluate (issue 132)
-      * Added callbacks for JavaScript onConfirm and onAlert (issue 133)
+      * Added callbacks for JavaScript onConfirm and onPrompt (issue 133)
       * Added stack trace when error occurs (issue 166)
       * Added initial support for cookies handling (issue 354)
       * Added support for header footer when printing the page (issue 410, 512)

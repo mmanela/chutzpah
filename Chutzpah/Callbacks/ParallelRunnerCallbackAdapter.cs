@@ -40,7 +40,7 @@ namespace Chutzpah.Callbacks
             }
         }
 
-        public void FileFinished(string fileName, TestCaseSummary testResultsSummary)
+        public void FileFinished(string fileName, TestFileSummary testResultsSummary)
         {
             lock (sync)
             {

@@ -26,7 +26,7 @@ namespace Chutzpah.RunnerCallbacks
             base.TestSuiteFinished(testResultsSummary);
         }
 
-        public override void FileFinished(string fileName, TestCaseSummary testResultsSummary)
+        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
         {
             ClearCounter();
 
@@ -46,9 +46,9 @@ namespace Chutzpah.RunnerCallbacks
             ClearCounter();
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("{0} [FAIL]", GetTestDisplayText(testCase));
-            Console.ResetColor();            
-            
+            Console.WriteLine("{0} [FAIL]", testCase.GetDisplayName());
+            Console.ResetColor();
+
             Console.WriteLine(Indent(GetTestFailureMessage(testCase)));
 
             Console.WriteLine();

@@ -20,7 +20,7 @@ namespace Chutzpah
 
         private const string TestFileFolder = "TestFiles";
 
-        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>", 
+        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
                                                               RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IHasher hasher, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
@@ -77,7 +77,7 @@ namespace Chutzpah
 
                 var referencedFiles = new List<ReferencedFile>();
 
-                var fileUnderTest = new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
+                var fileUnderTest = new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
@@ -90,7 +90,7 @@ namespace Chutzpah
                     CreateIfDoesNotExist(sourcePath, destinationPath);
                 }
 
-                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder,testFilePath, referencedFiles);
+                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, testFilePath, referencedFiles);
 
                 return new TestContext
                     {
@@ -149,7 +149,7 @@ namespace Chutzpah
             var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             var templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             var testHtmlTemplate = fileSystem.GetText(templatePath);
-            var inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\","/");
+            var inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
             string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
@@ -215,7 +215,7 @@ namespace Chutzpah
                         var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
                         if (absolutePath != null && !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var referencedFile = new ReferencedFile {Path = absolutePath, IsLocal = true};
+                            var referencedFile = new ReferencedFile { Path = absolutePath, IsLocal = true };
                             referencedFiles.Add(referencedFile);
                             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
                             referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath);
@@ -223,7 +223,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
             }
@@ -283,6 +283,7 @@ namespace Chutzpah
             foreach (var referencedFile in referencedFilePaths)
             {
                 var referencePath = referencedFile.Path;
+
                 if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) && referenceCssReplacement != null)
                 {
                     referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
@@ -290,7 +291,7 @@ namespace Chutzpah
                 else if (referencedFile.IsFileUnderTest && referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
                 {
                     testJsReplacement.AppendLine(GetScriptStatement(referencePath));
-                }                
+                }
                 else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && referenceJsReplacement != null)
                 {
                     referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
@@ -305,19 +306,29 @@ namespace Chutzpah
         public static string GetScriptStatement(string path)
         {
             const string format = @"<script type=""text/javascript"" src=""{0}""></script>";
-            return string.Format(format, path);
+            return string.Format(format, GetAbsoluteFileUrl(path));
         }
 
         public static string GetStyleStatement(string path)
         {
             const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
-            return string.Format(format, path);
+            return string.Format(format, GetAbsoluteFileUrl(path));
         }
 
         public static string GetIconStatement(string path)
         {
             const string format = @"<link rel=""shortcut icon"" type=""image/png"" href=""{0}"">";
-            return string.Format(format, path);
+            return string.Format(format, GetAbsoluteFileUrl(path));
+        }
+
+        public static string GetAbsoluteFileUrl(string path)
+        {
+            if (!RegexPatterns.SchemePrefixRegex.IsMatch(path))
+            {
+                return "file:///" + path.Replace('\\', '/');
+            }
+
+            return path;
         }
     }
 }

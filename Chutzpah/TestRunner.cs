@@ -160,7 +160,7 @@ namespace Chutzpah
             return overallSummary;
         }
 
-        private TestCaseSummary InvokeTestRunner(string headlessBrowserPath,
+        private TestFileSummary InvokeTestRunner(string headlessBrowserPath,
                                                  TestOptions options,
                                                  TestContext testContext,
                                                  TestRunnerMode testRunnerMode,
@@ -171,7 +171,7 @@ namespace Chutzpah
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
 
-            Func<ProcessStream, TestCaseSummary> streamProcessor =
+            Func<ProcessStream, TestFileSummary> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 

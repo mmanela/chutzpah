@@ -12,7 +12,7 @@ namespace Chutzpah
         public virtual void TestSuiteStarted(){}
         public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary){}
         public virtual void FileStarted(string fileName){}
-        public virtual void FileFinished(string fileName, TestCaseSummary testResultsSummary){}
+        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary){}
         public virtual void TestStarted(TestCase testCase){}
         public virtual void ExceptionThrown(Exception exception, string fileName){}
         public virtual void FileError(TestError error){}
@@ -65,47 +65,23 @@ namespace Chutzpah
             return string.Format("JS Error: {0}\n {1}While Running:{2}\n\n", error.Message, stack, error.InputTestFile);
         }
 
-        protected virtual string GetTestDisplayText(TestCase testCase)
-        {
-            return string.IsNullOrWhiteSpace(testCase.ModuleName) ? testCase.TestName : string.Format("{0}:{1}", testCase.ModuleName, testCase.TestName);
-        }
+
 
         protected virtual string GetTestFailureMessage(TestCase testCase)
         {
 
             var errorString = "";
 
-            errorString += string.Format("Test '{0}' failed\n", GetTestDisplayText(testCase));
+            errorString += string.Format("Test '{0}' failed\n", testCase.GetDisplayName());
 
             foreach (var result in testCase.TestResults.Where(x => !x.Passed))
             {
-                errorString += GetTestResultsString(result);
+                errorString += string.Format("\t{0}\n", result.GetFailureMessage());
             }
 
-            errorString += GetTestFailureLocationString(testCase);
+            errorString += string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);
 
             return errorString;
-        }
-
-        protected virtual string GetTestResultsString(TestResult result)
-        {
-            if (!string.IsNullOrWhiteSpace(result.Message))
-            {
-                return string.Format("\t{0}\n", result.Message);
-            }
-            else if (result.Expected != null || result.Actual != null)
-            {
-                return string.Format("\tExpected: {0}, Actual: {1}\n", result.Expected, result.Actual);
-            }
-            else
-            {
-                return "\tAssert failed\n";
-            }            
-        }
-
-        protected virtual string GetTestFailureLocationString(TestCase testCase)
-        {
-            return string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);            
         }
     }
 }

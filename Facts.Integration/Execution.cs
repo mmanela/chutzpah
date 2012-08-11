@@ -252,6 +252,18 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_run_qunit_passing_tests_that_has_a_reference_to_https_web_url()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\webReferenceSSL.js");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
         public void Will_run_multiple_files_and_aggregate_results()
         {
             var testRunner = TestRunner.Create();
