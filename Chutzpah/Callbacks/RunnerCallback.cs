@@ -79,9 +79,14 @@ namespace Chutzpah
                 errorString += string.Format("\t{0}\n", result.GetFailureMessage());
             }
 
-            errorString += string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);
+            errorString += GetTestFailureLocationString(testCase);
 
             return errorString;
         }
+
+        protected virtual string GetTestFailureLocationString(TestCase testCase)
+       {
+           return string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);            
+       }
     }
 }

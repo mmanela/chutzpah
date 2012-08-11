@@ -58,7 +58,7 @@ namespace Chutzpah.RunnerCallbacks
         {            
             if (vsoutput)
             {
-                string s = String.Empty;
+                var s = String.Empty;
 
                 foreach (var result in testCase.TestResults.Where(x => !x.Passed))
                 {
@@ -69,8 +69,8 @@ namespace Chutzpah.RunnerCallbacks
                         "",
                         "error",
                         "C0001",
-                        string.Format("Test '{0}' failed", GetTestDisplayText(testCase)),
-                        GetTestResultsString(result));
+                        string.Format("Test '{0}' failed", testCase.GetDisplayName()),
+                        result.GetFailureMessage());
                 }
 
                 return s;
