@@ -20,6 +20,17 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> CoffeeScriptTests
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { @"JS\Test\coffee-qunit.coffee" },
+                    new object[] { @"JS\Test\coffee-jasmine.coffee" }
+                };
+            }
+        }
 
         public static IEnumerable<object[]> BasicTestScripts
         {
@@ -40,6 +51,19 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(scriptPath);
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(3, result.PassedCount);
+            Assert.Equal(4, result.TotalCount);
+        }
+
+        [Theory]
+        [PropertyData("CoffeeScriptTests")]
+        public void Will_run_tests_from_a_coffee_script_file(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath);
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);

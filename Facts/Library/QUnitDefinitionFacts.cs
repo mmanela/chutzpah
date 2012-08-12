@@ -38,14 +38,29 @@
             public void ReturnsTrue_GivenQUnitSuiteAndDefinitiveDetection()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, false));
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, false, PathType.JavaScript));
             }
 
             [Fact]
             public void ReturnsTrue_GivenQUnitSuiteAndBestGuessDetection()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, true));
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, true, PathType.JavaScript));
+            }
+
+
+            [Fact]
+            public void ReturnsTrue_GivenCoffeeScriptQUnitSuiteAndDefinitiveDetection()
+            {
+                var creator = new QUnitDefinitionCreator();
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuiteCoffee, false, PathType.CoffeeScript));
+            }
+
+            [Fact]
+            public void ReturnsTrue_GivenCoffeeScriptQUnitSuiteAndBestGuessDetection()
+            {
+                var creator = new QUnitDefinitionCreator();
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuiteCoffee, true, PathType.CoffeeScript));
             }
 
             [Theory]
@@ -53,7 +68,7 @@
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false));
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false, PathType.JavaScript));
             }
 
             [Theory]
@@ -61,7 +76,7 @@
             public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true));
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true, PathType.JavaScript));
             }
         }
 

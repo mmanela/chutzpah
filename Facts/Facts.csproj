@@ -119,6 +119,12 @@
     <None Include="Resources\JasmineHarness.html" />
     <None Include="Resources\QUnitHarness.html" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\QUnitSuite.coffee" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\JasmineSuite.coffee" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

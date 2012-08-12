@@ -27,7 +27,7 @@ namespace Chutzpah.FileProcessors
 
             foreach (var line in lines)
             {
-                var match = RegexPatterns.QUnitTestRegex.Match(line);
+                var match = RegexPatterns.QUnitTestRegexJavaScript.Match(line);
 
                 while (match.Success)
                 {

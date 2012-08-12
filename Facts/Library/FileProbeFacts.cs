@@ -157,6 +157,19 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"C:\someFolder\a.js", info.FullPath);
             }
 
+
+            [Fact]
+            public void Will_return_CoffeeScript_type_for_coffee_file()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.coffee")).Returns(true);
+
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.coffee");
+
+                Assert.Equal(PathType.CoffeeScript, info.Type);
+                Assert.Equal(@"C:\someFolder\a.coffee", info.FullPath);
+            }
+
             [Fact]
             public void Will_return_Other_type_for_anything_else()
             {
@@ -205,7 +218,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_files_that_are_js_when_testing_mode_is_JavaScript()
+            public void Will_return_files_that_are_js_or_coffee_when_testing_mode_is_JavaScript()
             {
                 var probe = new TestableFileProbe();
 
@@ -214,6 +227,7 @@ namespace Chutzpah.Facts
                 var paths = new List<string>
                             {
                                 "a.js",
+                                "a.coffee",
                                 "b.html",
                                 "c.blah",
                                 "d.htm",
@@ -221,8 +235,9 @@ namespace Chutzpah.Facts
 
                 var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.JavaScript);
 
-                Assert.Equal(1, res.Count());
+                Assert.Equal(2, res.Count());
                 Assert.Contains(@"somePath\a.js", res);
+                Assert.Contains(@"somePath\a.coffee", res);
             }
 
             [Fact]
@@ -235,6 +250,7 @@ namespace Chutzpah.Facts
                 var paths = new List<string>
                             {
                                 "a.js",
+                                "a.coffee",
                                 "b.html",
                                 "c.blah",
                                 "d.htm",
@@ -248,14 +264,14 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_js_files_that_are_found_in_given_folder()
+            public void Will_return_js_or_coffee_files_that_are_found_in_given_folder()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
                 probe.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetFiles("folder", "*.js", SearchOption.AllDirectories))
-                    .Returns(new string[] { "subFile1.js", "subFile2.js" });
+                    .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
+                    .Returns(new string[] { "subFile1.js", "subFile2.coffee" });
                 var paths = new List<string>
                             {
                                 "folder"
@@ -265,6 +281,7 @@ namespace Chutzpah.Facts
 
                 Assert.Equal(2, res.Count());
                 Assert.Contains("subFile1.js", res);
+                Assert.Contains("subFile2.coffee", res);
             }
 
         }

@@ -20,9 +20,36 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+
+        public static IEnumerable<object[]> CoffeeScriptTests
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { @"JS\Test\coffee-qunit.coffee" },
+                    new object[] { @"JS\Test\coffee-jasmine.coffee" }
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("TestScripts")]
         public void Will_discover_tests_from_a_js_file(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+            testRunner.DebugEnabled = true;
+            var result = testRunner.DiscoverTests(scriptPath);
+
+            Assert.Equal(4, result.Count());
+            Assert.Equal("A basic test", result.ElementAt(0).TestName);
+            Assert.Equal("will multiply 5 to number", result.ElementAt(3).TestName);
+            Assert.Equal("mathLib", result.ElementAt(3).ModuleName);
+        }        
+        
+        [Theory]
+        [PropertyData("CoffeeScriptTests")]
+        public void Will_discover_tests_from_a_coffee_script_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
             testRunner.DebugEnabled = true;

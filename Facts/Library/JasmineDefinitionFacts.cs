@@ -39,7 +39,7 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, false));
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, false, PathType.JavaScript));
             }
 
             [Fact]
@@ -47,7 +47,23 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, true));
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, true, PathType.JavaScript));
+            }
+
+            [Fact]
+            public void ReturnsTrue_WithCoffeeScriptJasmineSuiteAndDefinitiveDetection()
+            {
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuiteCoffee, false, PathType.CoffeeScript));
+            }
+
+            [Fact]
+            public void ReturnsTrue_WithCoffeeScriptJasmineSuiteAndBestGuessDetection()
+            {
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuiteCoffee, true, PathType.CoffeeScript));
             }
 
             [Theory]
@@ -56,7 +72,7 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false));
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, false, PathType.JavaScript));
             }
 
             [Theory]
@@ -65,7 +81,7 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true));
+                Assert.False(creator.ClassUnderTest.FileUsesFramework(suite, true, PathType.JavaScript));
             }
         }
 

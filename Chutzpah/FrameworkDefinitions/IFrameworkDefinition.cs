@@ -1,4 +1,6 @@
-﻿namespace Chutzpah.FrameworkDefinitions
+﻿using System.Data.SqlTypes;
+
+namespace Chutzpah.FrameworkDefinitions
 {
     using System.Collections.Generic;
     using Chutzpah.Models;
@@ -28,8 +30,9 @@
         /// </summary>
         /// <param name="fileContents">Contents of the file as a string to test.</param>
         /// <param name="bestGuess">True if the method should fall back to best guess detection.</param>
+        /// <param name="pathType">The type of the file being tests</param>
         /// <returns>True if the file uses the framework, otherwise false.</returns>
-        bool FileUsesFramework(string fileContents, bool bestGuess);
+        bool FileUsesFramework(string fileContents, bool bestGuess, PathType pathType);
 
         /// <summary>
         /// Tests whether the given file is the framework itself or one of its core dependencies.

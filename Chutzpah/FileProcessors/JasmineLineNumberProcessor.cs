@@ -24,7 +24,7 @@
 
             foreach (var line in lines)
             {
-                var match = RegexPatterns.JasmineTestRegex.Match(line);
+                var match = RegexPatterns.JasmineTestRegexJavaScript.Match(line);
 
                 while (match.Success)
                 {

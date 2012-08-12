@@ -1,20 +1,43 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Chutzpah.FileProcessors;
+using Chutzpah.Models;
 
 namespace Chutzpah.FrameworkDefinitions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Chutzpah.FileProcessors;
-    using Chutzpah.Models;
-
     /// <summary>
     /// Abstract definition that provides a convention based implementation of IFrameworkDefinition.
     /// </summary>
     public abstract class BaseFrameworkDefinition : IFrameworkDefinition
     {
-        private static readonly Regex FrameworkReferenceRegex = new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine)).*?\.js[""']", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex FrameworkReferenceRegex =
+            new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine)).*?\.js[""']",
+                      RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Gets a short, file system friendly key for the framework library.
+        /// </summary>
+        protected abstract string FrameworkKey { get; }
+
+        /// <summary>
+        /// Gets a regular expression pattern to match a testable javascript file.
+        /// </summary>
+        protected abstract Regex FrameworkSignatureJavaScript { get; }
+
+        /// <summary>
+        /// Gets a regular expression pattern to match a testable coffeescript file.
+        /// </summary>
+        protected abstract Regex FrameworkSignatureCoffeeScript { get; }
+
+        /// <summary>
+        /// Gets a list of file processors to call within the Process method.
+        /// </summary>
+        protected abstract IEnumerable<IReferencedFileProcessor> FileProcessors { get; }
+
+        #region IFrameworkDefinition Members
 
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
@@ -23,9 +46,11 @@ namespace Chutzpah.FrameworkDefinitions
         {
             get
             {
-                return new [] { 
-                    string.Format("{0}\\{0}.js",FrameworkKey), 
-                    string.Format("{0}\\{0}.css",FrameworkKey) };
+                return new[]
+                           {
+                               string.Format("{0}\\{0}.js", FrameworkKey),
+                               string.Format("{0}\\{0}.css", FrameworkKey)
+                           };
             }
         }
 
@@ -34,10 +59,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// </summary>
         public virtual string TestHarness
         {
-            get
-            {
-                return string.Format("{0}\\{0}.html", FrameworkKey);
-            }
+            get { return string.Format("{0}\\{0}.html", FrameworkKey); }
         }
 
         /// <summary>
@@ -45,42 +67,27 @@ namespace Chutzpah.FrameworkDefinitions
         /// </summary>
         public virtual string TestRunner
         {
-            get
-            {
-                return @"JSRunners\" + this.FrameworkKey + "Runner.js";
-            }
+            get { return @"JSRunners\" + FrameworkKey + "Runner.js"; }
         }
-
-        /// <summary>
-        /// Gets a short, file system friendly key for the framework library.
-        /// </summary>
-        protected abstract string FrameworkKey { get; }
-
-        /// <summary>
-        /// Gets a regular expression pattern to match a testable file.
-        /// </summary>
-        protected abstract Regex FrameworkSignature { get; }
-
-        /// <summary>
-        /// Gets a list of file processors to call within the Process method.
-        /// </summary>
-        protected abstract IEnumerable<IReferencedFileProcessor> FileProcessors { get; }
 
         /// <summary>
         /// Tests whether the given file contents uses the framework.
         /// </summary>
         /// <param name="fileContents">Contents of the file as a string to test.</param>
         /// <param name="bestGuess">True if the method should fall back from definitive to best guess detection.</param>
+        /// <param name="pathType">The type of the file being tests</param>
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
-        public virtual bool FileUsesFramework(string fileContents, bool bestGuess)
+        public virtual bool FileUsesFramework(string fileContents, bool bestGuess, PathType pathType)
         {
             if (bestGuess)
             {
-                return this.FrameworkSignature.IsMatch(fileContents);
+                var regex = pathType == PathType.CoffeeScript ? FrameworkSignatureCoffeeScript : FrameworkSignatureJavaScript;
+                return regex.IsMatch(fileContents);
             }
 
-            var match = FrameworkReferenceRegex.Match(fileContents);
-            return match.Success && match.Groups["framework"].Value.Equals(this.FrameworkKey,StringComparison.OrdinalIgnoreCase);
+            Match match = FrameworkReferenceRegex.Match(fileContents);
+            return match.Success &&
+                   match.Groups["framework"].Value.Equals(FrameworkKey, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -90,10 +97,12 @@ namespace Chutzpah.FrameworkDefinitions
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
         public virtual bool ReferenceIsDependency(string referenceFileName)
         {
-            var fileName = Path.GetFileName(referenceFileName);
+            string fileName = Path.GetFileName(referenceFileName);
             if (!string.IsNullOrEmpty(fileName))
             {
-                return this.FileDependencies.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
+                return
+                    FileDependencies.Any(
+                        x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;
@@ -105,13 +114,15 @@ namespace Chutzpah.FrameworkDefinitions
         /// <param name="referencedFile">A referenced file to process.</param>
         public void Process(ReferencedFile referencedFile)
         {
-            if (this.FileProcessors != null)
+            if (FileProcessors != null)
             {
-                foreach (var item in this.FileProcessors)
+                foreach (IReferencedFileProcessor item in FileProcessors)
                 {
                     item.Process(referencedFile);
                 }
             }
         }
+
+        #endregion
     }
 }

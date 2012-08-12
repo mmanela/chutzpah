@@ -31,15 +31,27 @@
         }
 
         /// <summary>
-        /// Gets a regular expression pattern to match a testable QUnit file.
+        /// Gets a regular expression pattern to match a testable JavaScript QUnit file.
         /// </summary>
-        protected override Regex FrameworkSignature
+        protected override Regex FrameworkSignatureJavaScript
         {
             get
             {
-                return RegexPatterns.QUnitTestRegex;
+                return RegexPatterns.QUnitTestRegexJavaScript;
             }
         }
+
+        /// <summary>
+        /// Gets a regular expression pattern to match a testable CoffeeScript QUnit file.
+        /// </summary>
+        protected override Regex FrameworkSignatureCoffeeScript
+        {
+            get
+            {
+                return RegexPatterns.QUnitTestRegexCoffeeScript;
+            }
+        }
+
 
         /// <summary>
         /// Gets a list of file processors to call within the Process method.
