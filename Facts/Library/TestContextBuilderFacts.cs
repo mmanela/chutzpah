@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
+using Chutzpah.FileConverter;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -61,26 +62,26 @@ namespace Chutzpah.Facts
 ";
 
         const string TestJSFileContents =
-@"/// <reference path=""lib.js"" />
+            @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/common.js"" />
                         /// <reference path=""../../js/style.css"" />
                         some javascript code
                         ";
 
         const string TestJSFileWithReferencesContents =
-@"/// <reference path=""../../js/references.js"" />
+            @"/// <reference path=""../../js/references.js"" />
                         some javascript code
                         ";
         const string ReferencesFile =
-@"/// <reference path=""lib.js"" />";
+            @"/// <reference path=""lib.js"" />";
 
         const string ReferencesFileInfiniteLoop =
-@"/// <reference path=""../../js/references.js"" />";
+            @"/// <reference path=""../../js/references.js"" />";
 
 
 
         const string TestJSFileWithQUnitContents =
-@"/// <reference path=""lib.js"" />
+            @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/common.js"" />
                         /// <reference path=""../../js/qunit.js"" />
                         some javascript code
@@ -288,17 +289,14 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_set_coffee_test_file_to_file_under_test_and_save_to_staged_dir()
+            public void Will_pass_referenced_files_to_coffeescriptconverter()
             {
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"test.coffee")).Returns("coffee contents");
-                creator.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile("coffee contents")).Returns("js contents");
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee");
 
-                Assert.True(context.ReferencedJavaScriptFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
-                creator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(@"C:\temp\test.js", "js contents"));
+                creator.Mock<ICoffeeScriptFileConverter>().Verify(x => x.Convert(It.IsAny<ReferencedFile>()));
             }
 
             [Fact(Timeout = 5000)]
@@ -328,8 +326,8 @@ namespace Chutzpah.Facts
             {
                 TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>()
-                 .Setup(x => x.GetPathInfo("test.js"))
-                 .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileWithQUnitContents);

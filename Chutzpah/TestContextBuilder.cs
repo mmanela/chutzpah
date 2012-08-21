@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chutzpah.FileConverter;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -22,20 +23,20 @@ namespace Chutzpah
         private readonly IFileProbe fileProbe;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
-        private readonly ICoffeeScriptEngineWrapper coffeeScriptEngine;
+        private readonly ICoffeeScriptFileConverter coffeeScriptFileConverter;
         private readonly IHasher hasher;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
-                                  ICoffeeScriptEngineWrapper coffeeScriptEngine)
+                                  ICoffeeScriptFileConverter coffeeScriptFileConverter)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
-            this.coffeeScriptEngine = coffeeScriptEngine;
+            this.coffeeScriptFileConverter = coffeeScriptFileConverter;
         }
 
         #region ITestContextBuilder Members
@@ -87,11 +88,12 @@ namespace Chutzpah
 
                 var referencedFiles = new List<ReferencedFile>();
 
-                var fileUnderTest = GetFileUnderTest(testFileKind, testFileText, stagingFolder, testFilePath);
+                var fileUnderTest = GetFileUnderTest(testFilePath);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
+                ProcessCoffeeScriptFiles(referencedFiles);
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -118,21 +120,18 @@ namespace Chutzpah
             return null;
         }
 
-        private ReferencedFile GetFileUnderTest(PathType testFileKind, string testFileText, string stagingFolder, string testFilePath)
+        /// <summary>
+        /// Iterates over referenced files and process any which are coffeescript files
+        /// </summary>
+        /// <param name="referencedFiles"></param>
+        private void ProcessCoffeeScriptFiles(List<ReferencedFile> referencedFiles)
         {
-            ReferencedFile fileUnderTest;
-            if (testFileKind == PathType.CoffeeScript)
-            {
-                var compileText = coffeeScriptEngine.Compile(testFileText);
-                var destinationPath = Path.Combine(stagingFolder, Path.GetFileNameWithoutExtension(testFilePath) + ".js");
-                fileSystem.WriteAllText(destinationPath, compileText);
-                fileUnderTest = new ReferencedFile {Path = destinationPath, IsLocal = true, IsFileUnderTest = true};
-            }
-            else
-            {
-                fileUnderTest = new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
-            }
-            return fileUnderTest;
+            referencedFiles.ForEach(coffeeScriptFileConverter.Convert);
+        }
+
+        private ReferencedFile GetFileUnderTest(string testFilePath)
+        {
+            return new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
         }
 
         public bool TryBuildContext(string file, out TestContext context)

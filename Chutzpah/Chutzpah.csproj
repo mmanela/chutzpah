@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="FileConverter\CoffeeScriptFileConvertor.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\ChutzpahException.cs" />
     <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
@@ -138,9 +139,6 @@
     <Compile Include="Wrappers\ProcessWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestFiles\CoffeeScript\coffee-script.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
