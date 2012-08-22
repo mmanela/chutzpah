@@ -1,4 +1,4 @@
-﻿## <reference path="../code/code.js" />
+﻿## <reference path="../code/code.coffee" />
 
 describe "general", ->
   it "A basic test", ->
