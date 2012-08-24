@@ -23,10 +23,12 @@ namespace Chutzpah.Facts
             {
                 var converter = new TestableCoffeeScriptFileConverter();
                 var file = new ReferencedFile {Path = "somePath.js"};
+                var tempFiles = new List<string>();
 
-                converter.ClassUnderTest.Convert(file);
+                converter.ClassUnderTest.Convert(file, tempFiles);
 
                 Assert.Equal("somePath.js", file.Path);
+                Assert.Empty(tempFiles);
             }
 
             [Fact]
@@ -37,11 +39,13 @@ namespace Chutzpah.Facts
                 converter.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
                 converter.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
                 var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var tempFiles = new List<string>();
 
-                converter.ClassUnderTest.Convert(file);
+                converter.ClassUnderTest.Convert(file, tempFiles);
 
                 converter.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
                 Assert.Equal(resultPath, file.Path);
+                Assert.Contains(resultPath, tempFiles);
             }
             
         }

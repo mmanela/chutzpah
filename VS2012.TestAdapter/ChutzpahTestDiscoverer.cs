@@ -5,12 +5,20 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
+    [FileExtension(".coffee")]
     [FileExtension(".js")]
     [FileExtension(".htm")]
     [FileExtension(".html")]
     [DefaultExecutorUri(Constants.ExecutorUriString)]
     public class ChutzpahTestDiscoverer : ITestDiscoverer
     {
+        private readonly ITestRunner testRunner;
+
+        public ChutzpahTestDiscoverer()
+        {
+            testRunner = TestRunner.Create();
+        }
+
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
@@ -22,8 +30,7 @@ namespace Chutzpah.VS2012.TestAdapter
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
                 };
 
-            var chutzpahRunner = TestRunner.Create();
-            foreach (var testCase in chutzpahRunner.DiscoverTests(sources, testOptions))
+            foreach (var testCase in testRunner.DiscoverTests(sources, testOptions))
             {
                 var vsTestCase = testCase.ToVsTestCase();
                 discoverySink.SendTestCase(vsTestCase);

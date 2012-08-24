@@ -8,7 +8,13 @@ namespace Chutzpah.FileConverter
 {
     public interface ICoffeeScriptFileConverter
     {
-        void Convert(ReferencedFile referencedFile);
+        /// <summary>
+        /// If a reference file is a .coffee file converts it to a .js file and adds the new file path to the temporary file collection
+        /// If not a .coffee file does nothing
+        /// </summary>
+        /// <param name="referencedFile"></param>
+        /// <param name="temporaryFiles"></param>
+        void Convert(ReferencedFile referencedFile, IList<string> temporaryFiles);
     }
 
     public class CoffeeScriptFileConverter : ICoffeeScriptFileConverter
@@ -22,7 +28,7 @@ namespace Chutzpah.FileConverter
             this.coffeeScriptEngine = coffeeScriptEngine;
         }
 
-        public void Convert(ReferencedFile referencedFile)
+        public void Convert(ReferencedFile referencedFile, IList<string> temporaryFiles)
         {
             if (!IsCoffeeScriptFile(referencedFile)) return;
 
@@ -33,6 +39,7 @@ namespace Chutzpah.FileConverter
             var newFilePath = Path.Combine(folderPath, string.Format(Constants.ChutzpahTemporaryFileFormat, fileName));
             fileSystem.WriteAllText(newFilePath, jsText);
             referencedFile.Path = newFilePath;
+            temporaryFiles.Add(newFilePath);
         }
 
         private static bool IsCoffeeScriptFile(ReferencedFile referencedFile)

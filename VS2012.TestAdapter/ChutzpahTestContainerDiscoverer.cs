@@ -264,7 +264,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private static bool HasJsExtension(string path)
         {
-            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
+            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
+                   || ".coffee".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool HasHTMLFileExtension(string path)

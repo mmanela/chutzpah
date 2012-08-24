@@ -39,8 +39,6 @@ namespace Chutzpah
             this.coffeeScriptFileConverter = coffeeScriptFileConverter;
         }
 
-        #region ITestContextBuilder Members
-
         public TestContext BuildContext(string file)
         {
             if (string.IsNullOrWhiteSpace(file))
@@ -73,11 +71,11 @@ namespace Chutzpah
                 if (testFileKind == PathType.Html)
                 {
                     return new TestContext
-                               {
-                                   InputTestFile = testFilePath,
-                                   TestHarnessPath = testFilePath,
-                                   TestRunner = definition.TestRunner
-                               };
+                        {
+                            InputTestFile = testFilePath,
+                            TestHarnessPath = testFilePath,
+                            TestRunner = definition.TestRunner
+                        };
                 }
 
                 string stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
@@ -87,13 +85,14 @@ namespace Chutzpah
                 }
 
                 var referencedFiles = new List<ReferencedFile>();
+                var temporaryFiles = new List<string>();
 
                 var fileUnderTest = GetFileUnderTest(testFilePath);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
-                ProcessCoffeeScriptFiles(referencedFiles);
+                ProcessCoffeeScriptFiles(referencedFiles, temporaryFiles);
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -109,29 +108,16 @@ namespace Chutzpah
                                                             referencedFiles);
 
                 return new TestContext
-                           {
-                               InputTestFile = testFilePath,
-                               TestHarnessPath = testHtmlFilePath,
-                               ReferencedJavaScriptFiles = referencedFiles,
-                               TestRunner = definition.TestRunner
-                           };
+                    {
+                        InputTestFile = testFilePath,
+                        TestHarnessPath = testHtmlFilePath,
+                        ReferencedJavaScriptFiles = referencedFiles,
+                        TestRunner = definition.TestRunner,
+                        TemporaryFiles = temporaryFiles
+                    };
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Iterates over referenced files and process any which are coffeescript files
-        /// </summary>
-        /// <param name="referencedFiles"></param>
-        private void ProcessCoffeeScriptFiles(List<ReferencedFile> referencedFiles)
-        {
-            referencedFiles.ForEach(coffeeScriptFileConverter.Convert);
-        }
-
-        private ReferencedFile GetFileUnderTest(string testFilePath)
-        {
-            return new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
         }
 
         public bool TryBuildContext(string file, out TestContext context)
@@ -151,7 +137,7 @@ namespace Chutzpah
             PathType testFileKind = pathInfo.Type;
             string testFilePath = pathInfo.FullPath;
 
-            if (testFilePath == null || testFileKind != PathType.JavaScript && testFileKind != PathType.Html)
+            if (testFilePath == null || (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript && testFileKind != PathType.Html))
             {
                 return false;
             }
@@ -162,7 +148,37 @@ namespace Chutzpah
             return TryDetectFramework(testFileText, testFileKind, out definition);
         }
 
-        #endregion
+        public void CleanupContext(TestContext context)
+        {
+            if(context == null) throw new ArgumentNullException("context");
+            foreach(var file in context.TemporaryFiles)
+            {
+                try
+                {
+                    fileSystem.DeleteFile(file);
+                }
+                catch (IOException)
+                {
+                    // Supress exception
+                    // TODO: Log this
+                }
+            }
+        }
+
+        /// <summary>
+        /// Iterates over referenced files and process any which are coffeescript files
+        /// </summary>
+        /// <param name="referencedFiles"></param>
+        /// <param name="temporaryFiles"> </param>
+        private void ProcessCoffeeScriptFiles(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        {
+            referencedFiles.ForEach(referencedFile => coffeeScriptFileConverter.Convert(referencedFile, temporaryFiles));
+        }
+
+        private ReferencedFile GetFileUnderTest(string testFilePath)
+        {
+            return new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
+        }
 
         private bool TryDetectFramework(string content, PathType pathType, out IFrameworkDefinition definition)
         {

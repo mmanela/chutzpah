@@ -1,12 +1,13 @@
-﻿namespace Chutzpah.Models
-{
-    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace Chutzpah.Models
+{
     public class TestContext
     {
         public TestContext()
         {
-            this.ReferencedJavaScriptFiles = new List<ReferencedFile>();
+            ReferencedJavaScriptFiles = new List<ReferencedFile>();
+            TemporaryFiles = new List<string>();
         }
 
         /// <summary>
@@ -29,5 +30,10 @@
         /// The list of referenced JavaScript files
         /// </summary>
         public IEnumerable<ReferencedFile> ReferencedJavaScriptFiles { get; set; }
+
+        /// <summary>
+        /// A list of temporary files that should be cleaned up after the test run is finished
+        /// </summary>
+        public IEnumerable<string> TemporaryFiles { get; set; }
     }
 }

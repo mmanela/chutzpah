@@ -38,6 +38,12 @@ namespace Chutzpah
             testContextBuilder = htmlTestFileCreator;
         }
 
+
+        public void CleanTestContext(TestContext context)
+        {
+            testContextBuilder.CleanupContext(context);
+        }
+
         public TestContext GetTestContext(string testFile, TestOptions options)
         {
             if (string.IsNullOrEmpty(testFile)) return null;
@@ -141,6 +147,13 @@ namespace Chutzpah
                         {
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
+                        else
+                        {
+                            // Don't clean up context if you open in browser since we need the files around
+                            // for the browser to use
+                            testContextBuilder.CleanupContext(testContext);
+                        }
+
                     }
 
                     // Limit the number of files we can scan to attempt to build a context for
@@ -156,6 +169,7 @@ namespace Chutzpah
                     callback.ExceptionThrown(e, testFile);
                 }
             });
+
 
             return overallSummary;
         }

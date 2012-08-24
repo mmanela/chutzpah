@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chutzpah.FileConverter;
@@ -8,6 +9,7 @@ using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace Chutzpah.Facts
 {
@@ -111,6 +113,21 @@ namespace Chutzpah.Facts
                 Assert.False(result);
             }
 
+            [Theory]
+            [InlineData("test.coffee", PathType.CoffeeScript)]
+            [InlineData("test.js", PathType.JavaScript)]
+            [InlineData("test.html", PathType.Html)]
+            public void Will_return_true_for_valid_files(string path, PathType type)
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(path)).Returns(new PathInfo { Type = type, FullPath = path });
+                creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
+
+                var result = creator.ClassUnderTest.IsTestFile(path);
+
+                Assert.True(result);
+            }
+
             [Fact]
             public void Will_return_false_if_test_file_does_not_exist()
             {
@@ -134,16 +151,42 @@ namespace Chutzpah.Facts
                 Assert.False(result);
             }
 
+        }
+
+        public class CleanContext
+        {
             [Fact]
-            public void Will_return_false_if_test_framework_detected()
+            public void Will_throw_if_context_is_null()
             {
-                var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
-                creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
+                var builder = new TestableTestContextBuilder();
 
-                var result = creator.ClassUnderTest.IsTestFile("test.js");
+                Exception ex = Record.Exception(() => builder.ClassUnderTest.CleanupContext(null));
 
-                Assert.False(result);
+                Assert.IsType<ArgumentNullException>(ex);
+            }
+
+            [Fact]
+            public void Will_delete_temporary_files()
+            {
+                var builder = new TestableTestContextBuilder();
+                var context = new TestContext {TemporaryFiles = new string[] {"foo.js", "bar.js"}};
+
+                builder.ClassUnderTest.CleanupContext(context);
+
+                builder.Mock<IFileSystemWrapper>().Verify(x => x.DeleteFile("foo.js"));
+                builder.Mock<IFileSystemWrapper>().Verify(x => x.DeleteFile("bar.js"));
+            }
+
+            [Fact]
+            public void Will_suppress_temporary_file_deletion_errors()
+            {
+                var builder = new TestableTestContextBuilder();
+                var context = new TestContext { TemporaryFiles = new string[] { "foo.js", "bar.js" } };
+                builder.Mock<IFileSystemWrapper>().Setup(x => x.DeleteFile("foo.js")).Throws(new IOException());
+
+                builder.ClassUnderTest.CleanupContext(context);
+
+                builder.Mock<IFileSystemWrapper>().Verify(x => x.DeleteFile("bar.js"));
             }
 
         }
@@ -296,7 +339,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee");
 
-                creator.Mock<ICoffeeScriptFileConverter>().Verify(x => x.Convert(It.IsAny<ReferencedFile>()));
+                creator.Mock<ICoffeeScriptFileConverter>().Verify(x => x.Convert(It.IsAny<ReferencedFile>(), It.IsAny<List<string>>()));
             }
 
             [Fact(Timeout = 5000)]
