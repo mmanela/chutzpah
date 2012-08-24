@@ -40,6 +40,12 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="SassAndCoffee.Core">
+      <HintPath>..\3rdParty\SassAndCoffee\SassAndCoffee.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SassAndCoffee.JavaScript">
+      <HintPath>..\3rdParty\SassAndCoffee\SassAndCoffee.JavaScript.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -59,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="FileConverter\CoffeeScriptFileConvertor.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\ChutzpahException.cs" />
     <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
@@ -116,6 +123,7 @@
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
+    <Compile Include="Wrappers\CoffeeScriptEngineWrapper.cs" />
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
     <Compile Include="Wrappers\IHtmlUtility.cs" />

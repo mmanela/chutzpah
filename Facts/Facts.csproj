@@ -66,8 +66,9 @@
     <Compile Include="Library\QUnitDefinitionFacts.cs" />
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
-    <Compile Include="Library\TestContextBuilderFacts.cs" />
+    <Compile Include="Library\FileConverter\CoffeeScriptFileConverterFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
+    <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,6 +119,12 @@
   <ItemGroup>
     <None Include="Resources\JasmineHarness.html" />
     <None Include="Resources\QUnitHarness.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\QUnitSuite.coffee" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\JasmineSuite.coffee" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -49,13 +49,24 @@
         }
 
         /// <summary>
-        /// Gets a regular expression pattern to match a testable Jasmine file.
+        /// Gets a regular expression pattern to match a testable Jasmine file in a JavaScript file.
         /// </summary>
-        protected override Regex FrameworkSignature
+        protected override Regex FrameworkSignatureJavaScript
         {
             get
             {
-                return RegexPatterns.JasmineTestRegex;
+                return RegexPatterns.JasmineTestRegexJavaScript;
+            }
+        }
+
+        /// <summary>
+        /// Gets a regular expression pattern to match a testable Jasmine file in a CoffeeScript file.
+        /// </summary>
+        protected override Regex FrameworkSignatureCoffeeScript
+        {
+            get
+            {
+                return RegexPatterns.JasmineTestRegexCoffeeScript;
             }
         }
 

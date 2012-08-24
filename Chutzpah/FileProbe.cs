@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -60,11 +61,16 @@ namespace Chutzpah
                         yield return pathInfo.FullPath;
                         break;
                     case PathType.JavaScript:
+                    case PathType.CoffeeScript:
                         if (!testingMode.HasFlag(TestingMode.JavaScript)) break;
                         yield return pathInfo.FullPath;
                         break;
                     case PathType.Folder:
-                        foreach (var item in fileSystem.GetFiles(pathInfo.FullPath, "*.js", SearchOption.AllDirectories))
+
+                        var query = fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
+                            .Where(file => file.EndsWith(".js", StringComparison.OrdinalIgnoreCase) 
+                                        || file.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase));
+                        foreach (var item in query)
                         {
                             yield return item;
                         }
@@ -77,12 +83,13 @@ namespace Chutzpah
         public PathInfo GetPathInfo(string path)
         {
             var fullPath = FindFolderPath(path);
-            if (fullPath != null) return new PathInfo{ FullPath = fullPath, Type = PathType.Folder};
+            if (fullPath != null) return new PathInfo { FullPath = fullPath, Type = PathType.Folder };
 
             fullPath = FindFilePath(path);
             if (IsHtmlFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.Html };
             if (IsJavaScriptFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.JavaScript };
-            return new PathInfo{ FullPath = fullPath, Type = PathType.Other};
+            if (IsCoffeeScriptFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.CoffeeScript };
+            return new PathInfo { FullPath = fullPath, Type = PathType.Other };
         }
 
         private static bool IsHtmlFile(string fileName)
@@ -96,6 +103,12 @@ namespace Chutzpah
         {
             string ext = Path.GetExtension(fileName);
             return ext != null && ext.Equals(".js", StringComparison.OrdinalIgnoreCase);
+        }        
+        
+        private static bool IsCoffeeScriptFile(string fileName)
+        {
+            string ext = Path.GetExtension(fileName);
+            return ext != null && ext.Equals(".coffee", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

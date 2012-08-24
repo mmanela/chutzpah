@@ -73,6 +73,11 @@ namespace Chutzpah.Wrappers
                 File.Delete(path);
         }
 
+        public void WriteAllText(string path, string text)
+        {
+            File.WriteAllText(path, text);
+        }
+
         public void DeleteDirectory(string path, bool recursive)
         {
             if (FolderExists(path))

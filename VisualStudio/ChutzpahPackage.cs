@@ -129,7 +129,8 @@ namespace Chutzpah.VisualStudio
 
         private TestFileType GetFileType(string filename)
         {
-            if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+            if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
+                || filename.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase))
             {
                 return TestFileType.JS;
             }

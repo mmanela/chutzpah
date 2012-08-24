@@ -5,6 +5,7 @@
         Other,
         JavaScript,
         Html,
-        Folder
+        Folder,
+        CoffeeScript
     }
 }

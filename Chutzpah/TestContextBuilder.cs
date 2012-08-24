@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chutzpah.FileConverter;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -13,22 +14,29 @@ namespace Chutzpah
 {
     public class TestContextBuilder : ITestContextBuilder
     {
-        private readonly IFileSystemWrapper fileSystem;
-        private readonly IFileProbe fileProbe;
-        private readonly IHasher hasher;
-        private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
-
         private const string TestFileFolder = "TestFiles";
 
-        private readonly Regex JsReferencePathRegex = new Regex(@"^\s*///\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
-                                                              RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex JsReferencePathRegex =
+            new Regex(@"^\s*(///|##)\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
+                      RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public TestContextBuilder(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IHasher hasher, IEnumerable<IFrameworkDefinition> frameworkDefinitions)
+        private readonly IFileProbe fileProbe;
+        private readonly IFileSystemWrapper fileSystem;
+        private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
+        private readonly ICoffeeScriptFileConverter coffeeScriptFileConverter;
+        private readonly IHasher hasher;
+
+        public TestContextBuilder(IFileSystemWrapper fileSystem,
+                                  IFileProbe fileProbe,
+                                  IHasher hasher,
+                                  IEnumerable<IFrameworkDefinition> frameworkDefinitions,
+                                  ICoffeeScriptFileConverter coffeeScriptFileConverter)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
+            this.coffeeScriptFileConverter = coffeeScriptFileConverter;
         }
 
         public TestContext BuildContext(string file)
@@ -38,13 +46,14 @@ namespace Chutzpah
                 throw new ArgumentNullException("file");
             }
 
-            var pathInfo = fileProbe.GetPathInfo(file);
-            var testFileKind = pathInfo.Type;
-            var testFilePath = pathInfo.FullPath;
+            PathInfo pathInfo = fileProbe.GetPathInfo(file);
+            PathType testFileKind = pathInfo.Type;
+            string testFilePath = pathInfo.FullPath;
 
-            if (testFileKind != PathType.JavaScript && testFileKind != PathType.Html)
+            if (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript &&
+                testFileKind != PathType.Html)
             {
-                throw new ArgumentException("Expecting a .js or .html file");
+                throw new ArgumentException("Expecting a .js, .coffee or .html file");
             }
 
             if (testFilePath == null)
@@ -52,11 +61,11 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find file: " + file);
             }
 
-            var testFileText = fileSystem.GetText(testFilePath);
+            string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
 
-            if (TryDetectFramework(testFileText, out definition))
+            if (TryDetectFramework(testFileText, testFileKind, out definition))
             {
                 // For HTML test files we don't need to create a test harness to just return this file
                 if (testFileKind == PathType.Html)
@@ -69,35 +78,42 @@ namespace Chutzpah
                         };
                 }
 
-                var stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
+                string stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
                 if (!fileSystem.FolderExists(stagingFolder))
                 {
                     fileSystem.CreateDirectory(stagingFolder);
                 }
 
                 var referencedFiles = new List<ReferencedFile>();
+                var temporaryFiles = new List<string>();
 
-                var fileUnderTest = new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
+                var fileUnderTest = GetFileUnderTest(testFilePath);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
-                GetReferencedFiles(referencedFiles, definition, testFileKind, testFileText, testFilePath);
+                GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
+                ProcessCoffeeScriptFiles(referencedFiles, temporaryFiles);
 
-                foreach (var item in definition.FileDependencies)
+                foreach (string item in definition.FileDependencies)
                 {
-                    var sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
-                    var destinationPath = Path.Combine(stagingFolder, Path.GetFileName(item));
+                    string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
+                    string destinationPath = Path.Combine(stagingFolder, Path.GetFileName(item));
                     CreateIfDoesNotExist(sourcePath, destinationPath);
                 }
 
-                var testHtmlFilePath = CreateTestHarness(definition, stagingFolder, testFilePath, referencedFiles);
+                string testHtmlFilePath = CreateTestHarness(definition,
+                                                            stagingFolder,
+                                                            testFilePath,
+                                                            testFileKind,
+                                                            referencedFiles);
 
                 return new TestContext
                     {
                         InputTestFile = testFilePath,
                         TestHarnessPath = testHtmlFilePath,
                         ReferencedJavaScriptFiles = referencedFiles,
-                        TestRunner = definition.TestRunner
+                        TestRunner = definition.TestRunner,
+                        TemporaryFiles = temporaryFiles
                     };
             }
 
@@ -117,40 +133,76 @@ namespace Chutzpah
                 return false;
             }
 
-            var pathInfo = fileProbe.GetPathInfo(file);
-            var testFileKind = pathInfo.Type;
-            var testFilePath = pathInfo.FullPath;
+            PathInfo pathInfo = fileProbe.GetPathInfo(file);
+            PathType testFileKind = pathInfo.Type;
+            string testFilePath = pathInfo.FullPath;
 
-            if (testFilePath == null || testFileKind != PathType.JavaScript && testFileKind != PathType.Html)
+            if (testFilePath == null || (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript && testFileKind != PathType.Html))
             {
                 return false;
             }
 
-            var testFileText = fileSystem.GetText(testFilePath);
+            string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
-            return TryDetectFramework(testFileText, out definition);
+            return TryDetectFramework(testFileText, testFileKind, out definition);
         }
 
-        private bool TryDetectFramework(string content, out IFrameworkDefinition definition)
+        public void CleanupContext(TestContext context)
         {
-            definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false));
+            if(context == null) throw new ArgumentNullException("context");
+            foreach(var file in context.TemporaryFiles)
+            {
+                try
+                {
+                    fileSystem.DeleteFile(file);
+                }
+                catch (IOException)
+                {
+                    // Supress exception
+                    // TODO: Log this
+                }
+            }
+        }
+
+        /// <summary>
+        /// Iterates over referenced files and process any which are coffeescript files
+        /// </summary>
+        /// <param name="referencedFiles"></param>
+        /// <param name="temporaryFiles"> </param>
+        private void ProcessCoffeeScriptFiles(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        {
+            referencedFiles.ForEach(referencedFile => coffeeScriptFileConverter.Convert(referencedFile, temporaryFiles));
+        }
+
+        private ReferencedFile GetFileUnderTest(string testFilePath)
+        {
+            return new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
+        }
+
+        private bool TryDetectFramework(string content, PathType pathType, out IFrameworkDefinition definition)
+        {
+            definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false, pathType));
 
             if (definition == null)
             {
-                definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true));
+                definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true, pathType));
             }
 
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition, string stagingFolder, string inputTestFilePath, IEnumerable<ReferencedFile> referencedFiles)
+        private string CreateTestHarness(IFrameworkDefinition definition,
+                                         string stagingFolder,
+                                         string inputTestFilePath,
+                                         PathType testFileKind,
+                                         IEnumerable<ReferencedFile> referencedFiles)
         {
-            var testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
-            var templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
-            var testHtmlTemplate = fileSystem.GetText(templatePath);
-            var inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, referencedFiles);
+            string testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
+            string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
+            string testHtmlTemplate = fileSystem.GetText(templatePath);
+            string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, testFileKind, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
@@ -169,39 +221,39 @@ namespace Chutzpah
         /// </summary>
         /// <param name="referencedFiles">The list of referenced files</param>
         /// <param name="definition">Test framework defintition</param>
-        /// <param name="testFileType">The type of testing file (JS or HTML)</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
         /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
         private void GetReferencedFiles(List<ReferencedFile> referencedFiles,
                                         IFrameworkDefinition definition,
-                                        PathType testFileType,
                                         string textToParse,
                                         string currentFilePath)
         {
-            var result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)), definition, testFileType, textToParse, currentFilePath);
-            var flattenedReferenceTree = from root in result
-                                         from flattened in FlattenReferenceGraph(root)
-                                         select flattened;
+            IList<ReferencedFile> result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)),
+                                                              definition,
+                                                              textToParse,
+                                                              currentFilePath);
+            IEnumerable<ReferencedFile> flattenedReferenceTree = from root in result
+                                                                 from flattened in FlattenReferenceGraph(root)
+                                                                 select flattened;
             referencedFiles.AddRange(flattenedReferenceTree);
         }
 
         private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths,
                                                          IFrameworkDefinition definition,
-                                                         PathType testFileType,
                                                          string textToParse,
                                                          string currentFilePath)
         {
             var referencedFiles = new List<ReferencedFile>();
-            var regex = JsReferencePathRegex;
+            Regex regex = JsReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
             {
                 if (match.Success)
                 {
                     string referencePath = match.Groups["Path"].Value;
-                    Uri referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
-                    var referenceFileName = Path.GetFileName(referencePath);
+                    var referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
+                    string referenceFileName = Path.GetFileName(referencePath);
 
                     // Don't copy over test runner, since we use our own.
                     if (definition.ReferenceIsDependency(referenceFileName))
@@ -211,19 +263,23 @@ namespace Chutzpah
 
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
-                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
-                        var absolutePath = fileProbe.FindFilePath(relativeReferencePath);
-                        if (absolutePath != null && !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
+                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath),
+                                                                    referencePath);
+                        string absolutePath = fileProbe.FindFilePath(relativeReferencePath);
+                        if (absolutePath != null &&
+                            !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var referencedFile = new ReferencedFile { Path = absolutePath, IsLocal = true };
+                            var referencedFile = new ReferencedFile {Path = absolutePath, IsLocal = true};
                             referencedFiles.Add(referencedFile);
                             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
-                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absolutePath);
+                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths,
+                                                                                    definition,
+                                                                                    absolutePath);
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
                     }
                 }
             }
@@ -231,12 +287,14 @@ namespace Chutzpah
             return referencedFiles;
         }
 
-        private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths, IFrameworkDefinition definition, string currentFilePath)
+        private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths,
+                                                             IFrameworkDefinition definition,
+                                                             string currentFilePath)
         {
             try
             {
-                var textToParse = fileSystem.GetText(currentFilePath);
-                return GetReferencedFiles(discoveredPaths, definition, PathType.JavaScript, textToParse, currentFilePath);
+                string textToParse = fileSystem.GetText(currentFilePath);
+                return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath);
             }
             catch (IOException)
             {
@@ -249,7 +307,7 @@ namespace Chutzpah
         private static IEnumerable<ReferencedFile> FlattenReferenceGraph(ReferencedFile rootFile)
         {
             var flattenedFileList = new List<ReferencedFile>();
-            foreach (var childFile in rootFile.ReferencedFiles)
+            foreach (ReferencedFile childFile in rootFile.ReferencedFiles)
             {
                 flattenedFileList.AddRange(FlattenReferenceGraph(childFile));
             }
@@ -258,12 +316,16 @@ namespace Chutzpah
             return flattenedFileList;
         }
 
-        private static string FillTestHtmlTemplate(string testHtmlTemplate, string inputTestFileDir, IEnumerable<ReferencedFile> referencedFiles)
+        private static string FillTestHtmlTemplate(string testHtmlTemplate,
+                                                   string inputTestFileDir,
+                                                   PathType testFileKind,
+                                                   IEnumerable<ReferencedFile> referencedFiles)
         {
             var testJsReplacement = new StringBuilder();
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
-            var referencedFilePaths = referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x);
+            IEnumerable<ReferencedFile> referencedFilePaths =
+                referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x);
             BuildReferenceHtml(referencedFilePaths, referenceCssReplacement, testJsReplacement, referenceJsReplacement);
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
@@ -280,32 +342,42 @@ namespace Chutzpah
                                                StringBuilder referenceJsReplacement,
                                                StringBuilder referenceIconReplacement = null)
         {
-            foreach (var referencedFile in referencedFilePaths)
+            foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
-                var referencePath = referencedFile.Path;
+                string referencePath = referencedFile.Path;
 
-                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) && referenceCssReplacement != null)
+                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) &&
+                    referenceCssReplacement != null)
                 {
                     referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
                 }
-                else if (referencedFile.IsFileUnderTest && referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
+                else if (referencedFile.IsFileUnderTest &&
+                         referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
                 {
                     testJsReplacement.AppendLine(GetScriptStatement(referencePath));
                 }
-                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && referenceJsReplacement != null)
+                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) &&
+                         referenceJsReplacement != null)
                 {
                     referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
                 }
-                else if (referencePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) && referenceIconReplacement != null)
+                else if (referencePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) &&
+                         referenceIconReplacement != null)
                 {
                     referenceIconReplacement.AppendLine(GetIconStatement(referencePath));
                 }
             }
         }
 
-        public static string GetScriptStatement(string path)
+        public static string GetScriptStatement(string path, bool absolute = true)
         {
             const string format = @"<script type=""text/javascript"" src=""{0}""></script>";
+            return string.Format(format, absolute ? GetAbsoluteFileUrl(path) : path);
+        }
+
+        public static string GetCoffeeScriptStatement(string path)
+        {
+            const string format = @"<script type=""text/coffeescript"" src=""{0}""></script>";
             return string.Format(format, GetAbsoluteFileUrl(path));
         }
 

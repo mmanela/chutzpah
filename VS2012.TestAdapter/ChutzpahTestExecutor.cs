@@ -10,6 +10,13 @@ namespace Chutzpah.VS2012.TestAdapter
     [ExtensionUri(Constants.ExecutorUriString)]
     public class ChutzpahTestExecutor : ITestExecutor
     {
+        private readonly ITestRunner testRunner;
+
+        public ChutzpahTestExecutor()
+        {
+            testRunner = TestRunner.Create();
+        }
+
         public void Cancel()
         {
         }
@@ -32,9 +39,8 @@ namespace Chutzpah.VS2012.TestAdapter
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
                 };
 
-            var chutzpahRunner = TestRunner.Create();
-            var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle)); 
-            chutzpahRunner.RunTests(sources, testOptions, callback);
+            var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle));
+            testRunner.RunTests(sources, testOptions, callback);
         }
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)

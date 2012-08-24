@@ -3,7 +3,7 @@ using System;
 namespace Chutzpah.Models
 {
     /// <summary>
-    /// Determines if we are testing JavaScript files (and creating harnesses for them), testing html test harnesses directly or both
+    /// Determines if we are testing JavaScript/Coffee files (and creating harnesses for them), testing html test harnesses directly or both
     /// </summary>
     [Flags]
     public enum TestingMode
