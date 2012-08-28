@@ -6,7 +6,6 @@ properties {
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
   $mainVersion = "2.0.1"
-  $buildNumber = if ($env:build_number -ne $NULL) { $env:build_number } else { '0' }
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . ./vsvars2010.ps1 
@@ -18,19 +17,13 @@ task Default -depends Run-Build
 task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
 task Build -depends Run-Build
 task Clean -depends Clean-Solution
+task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
 
 # Build Tasks
 task Run-Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
-  if($buildNumber -gt 0){
-    $last = $buildNumber
-  }
-  else{
-    $last = (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
-  }
-  
-  $global:version = $mainVersion  + "." + $last
+  $global:version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count
 }
 
 task Update-AssemblyInfoFiles {
@@ -48,9 +41,22 @@ task Clean-PackageFiles {
     clean $packageDir
 }
 
+# CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
+# VS components
+task Clean-TeamCitySolution {
+    exec { msbuild TeamCity.CodeBetter.sln /t:Clean /v:quiet }
+
+}
+
 task Clean-Solution {
     exec { msbuild Chutzpah.VS2010.sln /t:Clean /v:quiet }
     exec { msbuild Chutzpah.VS2012.sln /t:Clean /v:quiet }
+}
+
+# CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
+# VS components
+task Build-TeamCitySolution {
+    exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Build-Solution {
