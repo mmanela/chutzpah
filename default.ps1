@@ -6,26 +6,36 @@ properties {
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
   $mainVersion = "2.0.1"
-  $version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
+  $buildNumber = if ($env:build_number -ne $NULL) { $env:build_number } else { '0' }
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
-    . vsvars2010.ps1 
+    . ./vsvars2010.ps1 
     }
-  
 }
 
 # Aliases
 task Default -depends Run-Build
-task Package -depends Clean-Solution,Clean-PackageFiles, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
+task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
 task Build -depends Run-Build
 task Clean -depends Clean-Solution
 
 # Build Tasks
 task Run-Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
 
+task Set-Version {
+  if($buildNumber -gt 0){
+    $last = $buildNumber
+  }
+  else{
+    $last = (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count 
+  }
+  
+  $global:version = $mainVersion  + "." + $last
+}
+
 task Update-AssemblyInfoFiles {
 	$commit = hg log --template '{rev}:{node}\n' -l 1
-	Update-AssemblyInfoFiles $version $commit
+	Update-AssemblyInfoFiles $global:version $commit
 }
 
 task Run-Chutzpah -depends  Build-Solution {
@@ -99,13 +109,13 @@ task Package-NuGet -depends Clean-PackageFiles {
     
     copy-item "$baseDir\License.txt", $nuspec -destination $nugetDir
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
-    $v = new-object -TypeName System.Version -ArgumentList $version
+    $v = new-object -TypeName System.Version -ArgumentList $global:version
     regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)
     exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
 }
 
-task Push-Nuget {
-  $v = new-object -TypeName System.Version -ArgumentList $version
+task Push-Nuget -depends Set-Version {
+  $v = new-object -TypeName System.Version -ArgumentList $global:version
 	exec { .\Tools\nuget.exe push $packageDir\Chutzpah.$($v.ToString(3)).nupkg }
 }
 
