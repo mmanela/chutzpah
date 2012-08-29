@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -63,7 +64,7 @@ namespace Chutzpah
 
         public IEnumerable<TestCase> DiscoverTests(string testPath)
         {
-            return DiscoverTests(new[] {testPath});
+            return DiscoverTests(new[] { testPath });
         }
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths)
@@ -87,7 +88,7 @@ namespace Chutzpah
                                         TestOptions options,
                                         ITestMethodRunnerCallback callback = null)
         {
-            return RunTests(new[] {testPath}, options, callback);
+            return RunTests(new[] { testPath }, options, callback);
         }
 
 
@@ -123,10 +124,13 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
             var overallSummary = new TestCaseSummary();
+            
+            // Concurrent collection used to gather the parallel results from
+            var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
             var resultCount = 0;
             var cancellationSource = new CancellationTokenSource();
-            var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token};
-            Parallel.ForEach(fileProbe.FindScriptFiles(testPaths, options.TestingMode),parallelOptions, testFile =>
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token };
+            Parallel.ForEach(fileProbe.FindScriptFiles(testPaths, options.TestingMode), parallelOptions, testFile =>
             {
                 try
                 {
@@ -141,7 +145,7 @@ namespace Chutzpah
                                                            testContext,
                                                            testRunnerMode,
                                                            callback);
-                        overallSummary.Append(testSummary);
+                        testFileSummaries.Enqueue(testSummary);
 
                         if (options.OpenInBrowser)
                         {
@@ -171,6 +175,12 @@ namespace Chutzpah
             });
 
 
+            // Gather TestFileSummaries into TaseCaseSummary
+            foreach(var fileSummary in testFileSummaries)
+            {
+                overallSummary.Append(fileSummary);
+            }
+
             return overallSummary;
         }
 
@@ -196,7 +206,7 @@ namespace Chutzpah
 
         private static void HandleTestProcessExitCode(int exitCode, string inputTestFile)
         {
-            switch ((TestProcessExitCode) exitCode)
+            switch ((TestProcessExitCode)exitCode)
             {
                 case TestProcessExitCode.AllPassed:
                 case TestProcessExitCode.SomeFailed:

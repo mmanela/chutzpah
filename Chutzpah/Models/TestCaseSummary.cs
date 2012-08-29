@@ -16,7 +16,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// A mapping from module name to test case list
         /// </summary>
-        public List<TestFileSummary> TestFileSummaries { get; private set; }
+        public IList<TestFileSummary> TestFileSummaries { get; private set; }
 
         /// <summary>
         /// Appends another test case summary into the current instnace.
