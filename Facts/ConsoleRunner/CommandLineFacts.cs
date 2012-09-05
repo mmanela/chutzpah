@@ -86,6 +86,38 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class FailOnScriptErrorOptionFacts
+        {
+            [Fact]
+            public void FailOnScriptError_Option_Not_Passed_Is_False()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.FailOnScriptError);
+            }
+
+            [Fact]
+            public void FailOnScriptError_Option_Passed_Is_True()
+            {
+                var arguments = new[] { "test.html", "/failOnScriptError" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.FailOnScriptError);
+            }
+
+            [Fact]
+            public void FailOnScriptError_Option_Ignore_Case_Is_True()
+            {
+                var arguments = new[] { "test.html", "/fAilONScriptERRor" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.FailOnScriptError);
+            }
+        }
 
         public class DebugOptionFacts
         {

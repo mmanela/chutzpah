@@ -74,6 +74,7 @@ namespace Chutzpah
             Console.WriteLine("  /silent                : Do not output running test count");
             Console.WriteLine("  /teamcity              : Forces TeamCity mode (normally auto-detected)");
             Console.WriteLine("  /wait                  : Wait for input after completion");
+            Console.WriteLine("  /failOnScriptError     : Return a non-zero exit code if any script errors occurs");
             Console.WriteLine("  /debug                 : Print debugging information");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})",Constants.DefaultTestFileTimeout);
@@ -129,7 +130,7 @@ namespace Chutzpah
                 Console.WriteLine(ex.Message);
             }
 
-            return testResultsSummary.FailedCount;
+            return commandLine.FailOnScriptError && testResultsSummary.FailedCount <= 0 ? 1 : testResultsSummary.FailedCount;
         }
 
         private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
