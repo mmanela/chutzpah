@@ -13,14 +13,15 @@ properties {
 }
 
 # Aliases
-task Default -depends Run-Build
+task Default -depends Build
 task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
-task Build -depends Run-Build
 task Clean -depends Clean-Solution
 task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
 
 # Build Tasks
-task Run-Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
+task Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
+task Build-2010 -depends  Clean-Solution-2010, Build-Solution-2010, Run-UnitTests, Run-IntegrationTests
+task Build-2012 -depends  Clean-Solution-2012, Build-Solution-2012, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
   $global:version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count
@@ -48,9 +49,14 @@ task Clean-TeamCitySolution {
 
 }
 
-task Clean-Solution {
-    exec { msbuild Chutzpah.VS2010.sln /t:Clean /v:quiet }
+task Clean-Solution -depends Clean-Solution-2010, Clean-Solution-2012
+
+task Clean-Solution-2012 {
     exec { msbuild Chutzpah.VS2012.sln /t:Clean /v:quiet }
+}
+
+task Clean-Solution-2010 {
+    exec { msbuild Chutzpah.VS2010.sln /t:Clean /v:quiet }
 }
 
 # CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
@@ -59,10 +65,16 @@ task Build-TeamCitySolution {
     exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
-task Build-Solution {
-    exec { msbuild Chutzpah.VS2010.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+task Build-Solution -depends Build-Solution-2010, Build-Solution-2012
+
+task Build-Solution-2012 {
     exec { msbuild Chutzpah.VS2012.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
+
+task Build-Solution-2010 {
+    exec { msbuild Chutzpah.VS2010.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+}
+
 
 task Run-PerfTester {
     $result = & "PerfTester\bin\$configuration\chutzpah.perftester.exe"

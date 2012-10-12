@@ -41,14 +41,25 @@ namespace Chutzpah
 
         public TestContext BuildContext(string file)
         {
-            if (string.IsNullOrWhiteSpace(file))
+            if (String.IsNullOrWhiteSpace(file))
             {
                 throw new ArgumentNullException("file");
             }
 
             PathInfo pathInfo = fileProbe.GetPathInfo(file);
-            PathType testFileKind = pathInfo.Type;
-            string testFilePath = pathInfo.FullPath;
+            
+            return BuildContext(pathInfo);
+        }
+
+        public TestContext BuildContext(PathInfo file)
+        {
+            if (file == null)
+            {
+                throw new ArgumentNullException("testFilePathInfo");
+            }
+
+            PathType testFileKind = file.Type;
+            string testFilePath = file.FullPath;
 
             if (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript &&
                 testFileKind != PathType.Html)
@@ -58,7 +69,7 @@ namespace Chutzpah
 
             if (testFilePath == null)
             {
-                throw new FileNotFoundException("Unable to find file: " + file);
+                throw new FileNotFoundException("Unable to find file: " + file.Path);
             }
 
             string testFileText = fileSystem.GetText(testFilePath);
@@ -121,6 +132,12 @@ namespace Chutzpah
         }
 
         public bool TryBuildContext(string file, out TestContext context)
+        {
+            context = BuildContext(file);
+            return context != null;
+        }
+
+        public bool TryBuildContext(PathInfo file, out TestContext context)
         {
             context = BuildContext(file);
             return context != null;

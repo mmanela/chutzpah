@@ -46,7 +46,7 @@ namespace Chutzpah
             return null;
         }
 
-        public IEnumerable<string> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
+        public IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
         {
             if (testPaths == null) yield break;
 
@@ -58,12 +58,12 @@ namespace Chutzpah
                 {
                     case PathType.Html:
                         if (!testingMode.HasFlag(TestingMode.HTML)) break;
-                        yield return pathInfo.FullPath;
+                        yield return pathInfo;
                         break;
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
                         if (!testingMode.HasFlag(TestingMode.JavaScript)) break;
-                        yield return pathInfo.FullPath;
+                        yield return pathInfo;
                         break;
                     case PathType.Folder:
 
@@ -72,7 +72,7 @@ namespace Chutzpah
                                         || file.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase));
                         foreach (var item in query)
                         {
-                            yield return item;
+                            yield return GetPathInfo(item);
                         }
 
                         break;
@@ -83,13 +83,13 @@ namespace Chutzpah
         public PathInfo GetPathInfo(string path)
         {
             var fullPath = FindFolderPath(path);
-            if (fullPath != null) return new PathInfo { FullPath = fullPath, Type = PathType.Folder };
+            if (fullPath != null) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Folder };
 
             fullPath = FindFilePath(path);
-            if (IsHtmlFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.Html };
-            if (IsJavaScriptFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.JavaScript };
-            if (IsCoffeeScriptFile(path)) return new PathInfo { FullPath = fullPath, Type = PathType.CoffeeScript };
-            return new PathInfo { FullPath = fullPath, Type = PathType.Other };
+            if (IsHtmlFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Html };
+            if (IsJavaScriptFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.JavaScript };
+            if (IsCoffeeScriptFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.CoffeeScript };
+            return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Other };
         }
 
         private static bool IsHtmlFile(string fileName)

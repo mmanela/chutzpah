@@ -198,7 +198,7 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestableTestContextBuilder();
 
-                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext(null));
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext((string)null));
 
                 Assert.IsType<ArgumentNullException>(ex);
             }

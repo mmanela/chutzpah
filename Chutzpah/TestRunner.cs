@@ -170,7 +170,7 @@ namespace Chutzpah
                 }
                 catch (Exception e)
                 {
-                    callback.ExceptionThrown(e, testFile);
+                    callback.ExceptionThrown(e, testFile.FullPath);
                 }
             });
 
