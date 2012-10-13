@@ -8,7 +8,7 @@ namespace Chutzpah.Facts.Integration
 {
     public class Discovery
     {
-        public static IEnumerable<object[]> TestScripts
+        public static IEnumerable<object[]> BasicTestScripts
         {
             get
             {
@@ -27,14 +27,27 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                 {
-                    new object[] { @"JS\Test\coffee-qunit.coffee" },
-                    new object[] { @"JS\Test\coffee-jasmine.coffee" }
+                    new object[] { @"JS\Test\basic-qunit.coffee" },
+                    new object[] { @"JS\Test\basic-jasmine.coffee" }
+                };
+            }
+        }
+
+
+        public static IEnumerable<object[]> TypeScriptTests
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { @"JS\Test\basic-qunit.ts" },
+                    new object[] { @"JS\Test\basic-jasmine.ts" }
                 };
             }
         }
 
         [Theory]
-        [PropertyData("TestScripts")]
+        [PropertyData("BasicTestScripts")]
         public void Will_discover_tests_from_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();

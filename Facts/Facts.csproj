@@ -61,12 +61,14 @@
   <ItemGroup>
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
+    <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />
+    <Compile Include="Library\FileGenerators\TypeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\JasmineDefinitionFacts.cs" />
     <Compile Include="Library\JasmineLineNumberProcessorFacts.cs" />
     <Compile Include="Library\QUnitDefinitionFacts.cs" />
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
-    <Compile Include="Library\FileConverter\CoffeeScriptFileConverterFacts.cs" />
+    <Compile Include="Library\FileGenerators\CoffeeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />

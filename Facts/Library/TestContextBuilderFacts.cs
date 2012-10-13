@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Chutzpah.FileConverter;
+using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -103,7 +103,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_false_test_file_is_not_a_js_or_coffee_or_html_file()
+            public void Will_return_false_test_file_is_not_a_valid_file_file()
             {
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { Type = PathType.Other });
@@ -114,6 +114,7 @@ namespace Chutzpah.Facts
             }
 
             [Theory]
+            [InlineData("test.ts", PathType.TypeScript)]
             [InlineData("test.coffee", PathType.CoffeeScript)]
             [InlineData("test.js", PathType.JavaScript)]
             [InlineData("test.html", PathType.Html)]
@@ -204,7 +205,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_throw_if_test_file_is_not_a_js_or_html_file()
+            public void Will_throw_if_test_file_is_not_a_valid_test_type_file()
             {
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { Type = PathType.Other });
@@ -332,14 +333,16 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_pass_referenced_files_to_coffeescriptconverter()
+            public void Will_pass_referenced_files_to_a_file_generator()
             {
                 var creator = new TestableTestContextBuilder();
+                var fileGenerator = new Mock<IFileGenerator>();
+                creator.InjectArray(new[] {fileGenerator.Object});
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee");
 
-                creator.Mock<ICoffeeScriptFileConverter>().Verify(x => x.Convert(It.IsAny<ReferencedFile>(), It.IsAny<List<string>>()));
+                fileGenerator.Verify(x => x.Generate(It.IsAny<ReferencedFile>(), It.IsAny<List<string>>()));
             }
 
             [Fact(Timeout = 5000)]

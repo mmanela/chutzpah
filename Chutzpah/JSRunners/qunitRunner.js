@@ -7,17 +7,25 @@
     phantom.injectJs('chutzpahRunner.js');
 
     function onInitialized() {
+        //console.log("onInitialized");
     }
 
     function isTestingDone() {
+        //console.log("isTestingDone");
         return window.chutzpah.isTestingFinished === true;
     }
     
     function isQunitLoaded() {
+        //console.log("isQunitLoaded");
         return window.QUnit;
     }
     
     function onQUnitLoaded() {
+        //console.log("onQUnitLoaded");
+
+        // Prevent QUnit from autostarting so have better control of the timing
+        window.QUnit.config.autostart = false;
+        
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -165,7 +173,8 @@
     }
     
     function onPageLoaded() {
-        
+        //console.log("onPageLoaded");
+        window.QUnit.start();
     }
 
     try {

@@ -12,6 +12,16 @@ namespace Chutzpah
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
 
+        private static readonly Dictionary<string, PathType> ExtensionToPathTypeMap =
+            new Dictionary<string, PathType>
+            {
+                {Constants.TypeScriptExtension,PathType.TypeScript},
+                {Constants.CoffeeScriptExtension,PathType.CoffeeScript},
+                {Constants.JavaScriptExtension,PathType.JavaScript},
+                {Constants.HtmlScriptExtension,PathType.Html},
+                {Constants.HtmScriptExtension,PathType.Html}
+            };
+
         public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem)
         {
             this.environment = environment;
@@ -62,14 +72,16 @@ namespace Chutzpah
                         break;
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
+                    case PathType.TypeScript:
                         if (!testingMode.HasFlag(TestingMode.JavaScript)) break;
                         yield return pathInfo;
                         break;
                     case PathType.Folder:
 
                         var query = fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
-                            .Where(file => file.EndsWith(".js", StringComparison.OrdinalIgnoreCase) 
-                                        || file.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase));
+                            .Where(file => file.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase)
+                                        || file.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase)
+                                        || file.EndsWith(Constants.TypeScriptExtension, StringComparison.OrdinalIgnoreCase));
                         foreach (var item in query)
                         {
                             yield return GetPathInfo(item);
@@ -86,29 +98,20 @@ namespace Chutzpah
             if (fullPath != null) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Folder };
 
             fullPath = FindFilePath(path);
-            if (IsHtmlFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Html };
-            if (IsJavaScriptFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.JavaScript };
-            if (IsCoffeeScriptFile(path)) return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.CoffeeScript };
-            return new PathInfo { Path = path, FullPath = fullPath, Type = PathType.Other };
+            var pathType = GetFilePathType(path);
+            return new PathInfo { Path = path, FullPath = fullPath, Type = pathType };
         }
 
-        private static bool IsHtmlFile(string fileName)
+        private static PathType GetFilePathType(string fileName)
         {
             string ext = Path.GetExtension(fileName);
-            return ext != null &&
-                   (ext.Equals(".html", StringComparison.OrdinalIgnoreCase) || ext.Equals(".htm", StringComparison.OrdinalIgnoreCase));
-        }
+            PathType pathType;
+            if(ext != null && ExtensionToPathTypeMap.TryGetValue(ext, out pathType))
+            {
+                return pathType;
+            }
 
-        private static bool IsJavaScriptFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null && ext.Equals(".js", StringComparison.OrdinalIgnoreCase);
-        }        
-        
-        private static bool IsCoffeeScriptFile(string fileName)
-        {
-            string ext = Path.GetExtension(fileName);
-            return ext != null && ext.Equals(".coffee", StringComparison.OrdinalIgnoreCase);
+            return PathType.Other;
         }
     }
 }

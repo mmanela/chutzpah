@@ -1,4 +1,5 @@
-﻿using Chutzpah.FileProcessors;
+﻿using Chutzpah.FileGenerator;
+using Chutzpah.FileProcessors;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Utility;
 using StructureMap;
@@ -24,6 +25,7 @@ namespace Chutzpah
                         {
                             scan.TheCallingAssembly();
                             scan.WithDefaultConventions();
+                            scan.AddAllTypesOf<IFileGenerator>();
                             scan.AddAllTypesOf<IQUnitReferencedFileProcessor>();
                             scan.AddAllTypesOf<IJasmineReferencedFileProcessor>();
                             scan.AddAllTypesOf<IFrameworkDefinition>();

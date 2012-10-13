@@ -5,12 +5,16 @@
 <script type="text/javascript" src="qunit.js"></script>
     
     <script>
-        window.onload = function() { console.log("window load"); };
+        window.QUnit.config.autostart = false;
+        window.onload = function () {
+            console.log("window load html");
             test("A basic test", function () {
+                console.log("TEST IS RUNNING");
                 ok(true, "this test is fine");
                 var value = "hello";
                 equal("hello", value, "We expect value to be hello");
             });
+        };
     </script>
 </head>
 

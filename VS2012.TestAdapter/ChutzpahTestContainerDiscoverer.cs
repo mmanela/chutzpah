@@ -239,9 +239,9 @@ namespace Chutzpah.VS2012.TestAdapter
             switch (settingsMapper.Settings.TestingMode)
             {
                 case TestingMode.JavaScript:
-                    return containers.Where(x => HasJsExtension(x.Source));
+                    return containers.Where(x => HasJsCompatibleExtension(x.Source));
                 case TestingMode.HTML:
-                    return containers.Where(x => HasHTMLFileExtension(x.Source));
+                    return containers.Where(x => HasHtmlFileExtension(x.Source));
                 default:
                     return containers;
             }
@@ -262,21 +262,25 @@ namespace Chutzpah.VS2012.TestAdapter
                    select item;
         }
 
-        private static bool HasJsExtension(string path)
+        /// <summary>
+        /// Returns true if the file has a .js extension or if it is of a type that will have a .js file generated for it
+        /// </summary>
+        private static bool HasJsCompatibleExtension(string path)
         {
-            return ".js".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
-                   || ".coffee".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
+            return Chutzpah.Constants.JavaScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
+                   || Chutzpah.Constants.CoffeeScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
+                   || Chutzpah.Constants.TypeScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool HasHTMLFileExtension(string path)
+        private static bool HasHtmlFileExtension(string path)
         {
-            return ".html".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
-                   || ".htm".Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
+            return Chutzpah.Constants.HtmlScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
+                   || Chutzpah.Constants.HtmScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool HasTestFileExtension(string path)
         {
-            return HasHTMLFileExtension(path) || HasJsExtension(path);
+            return HasHtmlFileExtension(path) || HasJsCompatibleExtension(path);
         }
 
         private bool IsTestFile(string path)

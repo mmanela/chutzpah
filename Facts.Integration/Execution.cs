@@ -26,8 +26,21 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                 {
-                    new object[] { @"JS\Test\coffee-qunit.coffee" },
-                    new object[] { @"JS\Test\coffee-jasmine.coffee" }
+                    new object[] { @"JS\Test\basic-qunit.coffee" },
+                    new object[] { @"JS\Test\basic-jasmine.coffee" }
+                };
+            }
+        }
+
+
+        public static IEnumerable<object[]> TypeScriptTests
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { @"JS\Test\basic-qunit.ts" },
+                    new object[] { @"JS\Test\basic-jasmine.ts" }
                 };
             }
         }
@@ -60,6 +73,19 @@ namespace Chutzpah.Facts.Integration
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_run_tests_from_a_coffee_script_file(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath);
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(3, result.PassedCount);
+            Assert.Equal(4, result.TotalCount);
+        }
+
+        [Theory]
+        [PropertyData("TypeScriptTests")]
+        public void Will_run_tests_from_a_type_script_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
 

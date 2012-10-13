@@ -14,5 +14,14 @@ namespace Chutzpah
         // Coffee script to JS
         public const string ChutzpahTemporaryFileFormat = "_Chutzpah.{0}";
 
+
+        public const string PngExtension = ".png";
+        public const string CssExtension = ".css";
+        public const string JavaScriptExtension = ".js";
+        public const string TypeScriptExtension = ".ts";
+        public const string CoffeeScriptExtension = ".coffee";
+        public const string HtmScriptExtension = ".htm";
+        public const string HtmlScriptExtension = ".html";
+
     }
 }
