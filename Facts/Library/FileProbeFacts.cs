@@ -170,6 +170,19 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"C:\someFolder\a.coffee", info.FullPath);
             }
 
+
+            [Fact]
+            public void Will_return_TypeScript_type_for_typescript_file()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.ts")).Returns(true);
+
+                var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.ts");
+
+                Assert.Equal(PathType.TypeScript, info.Type);
+                Assert.Equal(@"C:\someFolder\a.ts", info.FullPath);
+            }
+
             [Fact]
             public void Will_return_Other_type_for_anything_else()
             {
@@ -264,14 +277,14 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_js_or_coffee_files_that_are_found_in_given_folder()
+            public void Will_return_js_or_coffee_or_typescript_files_that_are_found_in_given_folder()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
                 probe.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
-                    .Returns(new string[] { "subFile1.js", "subFile2.coffee" });
+                    .Returns(new string[] { "subFile1.js", "subFile2.coffee", "subFile3.ts" });
                 var paths = new List<string>
                             {
                                 "folder"
@@ -279,9 +292,10 @@ namespace Chutzpah.Facts
 
                 var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.All);
 
-                Assert.Equal(2, res.Count());
+                Assert.Equal(3, res.Count());
                 Assert.Contains("subFile1.js", res);
                 Assert.Contains("subFile2.coffee", res);
+                Assert.Contains("subFile3.ts", res);
             }
 
         }

@@ -5,10 +5,11 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-    [FileExtension(".coffee")]
-    [FileExtension(".js")]
-    [FileExtension(".htm")]
-    [FileExtension(".html")]
+    [FileExtension(Chutzpah.Constants.CoffeeScriptExtension)]
+    [FileExtension(Chutzpah.Constants.TypeScriptExtension)]
+    [FileExtension(Chutzpah.Constants.JavaScriptExtension)]
+    [FileExtension(Chutzpah.Constants.HtmlScriptExtension)]
+    [FileExtension(Chutzpah.Constants.HtmScriptExtension)]
     [DefaultExecutorUri(Constants.ExecutorUriString)]
     public class ChutzpahTestDiscoverer : ITestDiscoverer
     {

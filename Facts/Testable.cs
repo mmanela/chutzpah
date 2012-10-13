@@ -37,6 +37,11 @@ namespace Chutzpah.Facts
             autoMocker.InjectArray(types);
         }
 
+        public void MockSelf()
+        {
+            autoMocker.PartialMockTheClassUnderTest();
+        }
+
         public TClassUnderTest ClassUnderTest
         {
             get { return autoMocker.ClassUnderTest; }

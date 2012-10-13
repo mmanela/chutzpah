@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chutzpah.FileConverter;
+using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -23,20 +23,20 @@ namespace Chutzpah
         private readonly IFileProbe fileProbe;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
-        private readonly ICoffeeScriptFileConverter coffeeScriptFileConverter;
+        private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IHasher hasher;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
-                                  ICoffeeScriptFileConverter coffeeScriptFileConverter)
+                                  IEnumerable<IFileGenerator> fileGenerators)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
-            this.coffeeScriptFileConverter = coffeeScriptFileConverter;
+            this.fileGenerators = fileGenerators;
         }
 
         public TestContext BuildContext(string file)
@@ -50,10 +50,9 @@ namespace Chutzpah
             PathType testFileKind = pathInfo.Type;
             string testFilePath = pathInfo.FullPath;
 
-            if (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript &&
-                testFileKind != PathType.Html)
+            if (IsValidTestPathType(testFileKind))
             {
-                throw new ArgumentException("Expecting a .js, .coffee or .html file");
+                throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file");
             }
 
             if (testFilePath == null)
@@ -92,7 +91,7 @@ namespace Chutzpah
                 definition.Process(fileUnderTest);
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
-                ProcessCoffeeScriptFiles(referencedFiles, temporaryFiles);
+                ProcessForFilesGeneration(referencedFiles, temporaryFiles);
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -137,7 +136,7 @@ namespace Chutzpah
             PathType testFileKind = pathInfo.Type;
             string testFilePath = pathInfo.FullPath;
 
-            if (testFilePath == null || (testFileKind != PathType.JavaScript && testFileKind != PathType.CoffeeScript && testFileKind != PathType.Html))
+            if (testFilePath == null || (IsValidTestPathType(testFileKind)))
             {
                 return false;
             }
@@ -165,14 +164,26 @@ namespace Chutzpah
             }
         }
 
-        /// <summary>
-        /// Iterates over referenced files and process any which are coffeescript files
-        /// </summary>
-        /// <param name="referencedFiles"></param>
-        /// <param name="temporaryFiles"> </param>
-        private void ProcessCoffeeScriptFiles(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private static bool IsValidTestPathType(PathType testFileKind)
         {
-            referencedFiles.ForEach(referencedFile => coffeeScriptFileConverter.Convert(referencedFile, temporaryFiles));
+            return testFileKind != PathType.JavaScript
+                   && testFileKind != PathType.TypeScript
+                   && testFileKind != PathType.CoffeeScript
+                   && testFileKind != PathType.Html;
+        }
+
+        /// <summary>
+        /// Iterates over referenced files and over filegenerators letting the generators decide if they handle any files
+        /// </summary>
+        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        {
+            foreach (var fileGenerator in fileGenerators)
+            {
+                foreach (var referencedFile in referencedFiles)
+                {
+                    fileGenerator.Generate(referencedFile, temporaryFiles);
+                }
+            }
         }
 
         private ReferencedFile GetFileUnderTest(string testFilePath)
@@ -344,24 +355,26 @@ namespace Chutzpah
         {
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
-                string referencePath = referencedFile.Path;
+                string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath) 
+                                        ? referencedFile.Path
+                                        : referencedFile.GeneratedFilePath;
 
-                if (referencePath.EndsWith(".css", StringComparison.OrdinalIgnoreCase) &&
+                if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase) &&
                     referenceCssReplacement != null)
                 {
                     referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
                 }
                 else if (referencedFile.IsFileUnderTest &&
-                         referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
+                         referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
                 {
                     testJsReplacement.AppendLine(GetScriptStatement(referencePath));
                 }
-                else if (referencePath.EndsWith(".js", StringComparison.OrdinalIgnoreCase) &&
+                else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase) &&
                          referenceJsReplacement != null)
                 {
                     referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
                 }
-                else if (referencePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) &&
+                else if (referencePath.EndsWith(Constants.PngExtension, StringComparison.OrdinalIgnoreCase) &&
                          referenceIconReplacement != null)
                 {
                     referenceIconReplacement.AppendLine(GetIconStatement(referencePath));
