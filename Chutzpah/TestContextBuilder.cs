@@ -176,7 +176,6 @@ namespace Chutzpah
                 catch (IOException)
                 {
                     // Supress exception
-                    // TODO: Log this
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Chutzpah.Wrappers
 {
@@ -75,7 +76,7 @@ namespace Chutzpah.Wrappers
 
         public void WriteAllText(string path, string text)
         {
-            File.WriteAllText(path, text);
+            File.WriteAllText(path, text, Encoding.Default);
         }
 
         public void DeleteDirectory(string path, bool recursive)

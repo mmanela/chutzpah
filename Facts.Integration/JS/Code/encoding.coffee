@@ -1,0 +1,2 @@
+﻿createString = ->
+    "æøå"
