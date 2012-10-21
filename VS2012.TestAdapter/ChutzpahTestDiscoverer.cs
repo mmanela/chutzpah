@@ -1,4 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Diagnostics;
+using Chutzpah.VS.Common;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -31,7 +36,8 @@ namespace Chutzpah.VS2012.TestAdapter
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
                 };
 
-            foreach (var testCase in testRunner.DiscoverTests(sources, testOptions))
+            var testCases = testRunner.DiscoverTests(sources, testOptions);
+            foreach (var testCase in testCases)
             {
                 var vsTestCase = testCase.ToVsTestCase();
                 discoverySink.SendTestCase(vsTestCase);

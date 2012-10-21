@@ -71,6 +71,7 @@
     <Compile Include="Library\FileGenerators\CoffeeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
+    <Compile Include="Library\TestingModeExtensionsFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

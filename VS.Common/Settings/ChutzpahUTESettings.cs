@@ -41,10 +41,10 @@ namespace Chutzpah.VS.Common.Settings
         [Browsable(true)]
         [Category("UTE")]
         [DisplayName("Testing Mode")]
-        [Description("Should the Unit Test Explorer scan JavaScript, HTML files or both?")]
+        [Description("Should the Unit Test Explorer scan JavaScript, TypeScript, CoffeeScript or HTML files or both?")]
         public TestingMode TestingMode
         {
-            get { return testingMode ?? Models.TestingMode.JavaScript; }
+            get { return testingMode ?? TestingMode.AllExceptHTML; }
             set
             {
                 testingMode = value;

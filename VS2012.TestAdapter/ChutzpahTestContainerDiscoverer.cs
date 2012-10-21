@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using Chutzpah.Extensions;
 using Chutzpah.Models;
 using Chutzpah.VS.Common;
 using Chutzpah.VS11.EventWatchers;
@@ -15,7 +16,7 @@ using VS11.Plugin;
 namespace Chutzpah.VS2012.TestAdapter
 {
 
-    [Export(typeof (ITestContainerDiscoverer))]
+    [Export(typeof(ITestContainerDiscoverer))]
     public class ChutzpahTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
@@ -43,7 +44,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         [ImportingConstructor]
         public ChutzpahTestContainerDiscoverer(
-            [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
             IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
@@ -51,7 +52,7 @@ namespace Chutzpah.VS2012.TestAdapter
             : this(
                 serviceProvider,
                 settingsMapper,
-                new Logger(serviceProvider), 
+                new Logger(serviceProvider),
                 solutionListener,
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
@@ -123,11 +124,11 @@ namespace Chutzpah.VS2012.TestAdapter
                 var files = FindPotentialTestFiles(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
-                    UpdateFileWatcher(files, true);
+                    UpdateTestContainersAndFileWatchers(files, true);
                 }
                 else if (e.ChangedReason == SolutionChangedReason.Unload)
                 {
-                    UpdateFileWatcher(files, false);
+                    UpdateTestContainersAndFileWatchers(files, false);
                 }
             }
 
@@ -141,7 +142,7 @@ namespace Chutzpah.VS2012.TestAdapter
         /// After a project is loaded or unloaded either add or remove from the file watcher
         /// all test potential items inside that project
         /// </summary>
-        private void UpdateFileWatcher(IEnumerable<string> files, bool isAdd)
+        private void UpdateTestContainersAndFileWatchers(IEnumerable<string> files, bool isAdd)
         {
             foreach (var file in files)
             {
@@ -168,7 +169,8 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 // Don't do anything for files we are sure can't be test files
                 if (!HasTestFileExtension(e.File)) return;
-
+                logger.Log(string.Format("Changed detected for {0} with change type of {1}", e.File, e.ChangedReason), "ChutzpahTestContainerDiscoverer",LogType.Information);
+                
                 switch (e.ChangedReason)
                 {
                     case TestFileChangedReason.Added:
@@ -200,10 +202,9 @@ namespace Chutzpah.VS2012.TestAdapter
             var isTestFile = IsTestFile(file);
             RemoveTestContainer(file); // Remove if there is an existing container
 
-            // If this is a test file
             if (isTestFile)
             {
-                var container = new JsTestContainer(this, file, Constants.ExecutorUri);
+                var container = new JsTestContainer(this, file.ToLowerInvariant(), Constants.ExecutorUri);
                 cachedContainers.Add(container);
             }
         }
@@ -223,33 +224,31 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private IEnumerable<ITestContainer> GetTestContainers()
         {
+            logger.Log("GetTestContainers() are called", "ChutzpahTestContainerDiscoverer", LogType.Information);
+                
             if (initialContainerSearch)
             {
+                logger.Log("Initial test container search", "ChutzpahTestContainerDiscoverer", LogType.Information);
+                
                 cachedContainers.Clear();
                 var jsFiles = FindPotentialTestFiles();
-                UpdateFileWatcher(jsFiles, true);
+                UpdateTestContainersAndFileWatchers(jsFiles, true);
                 initialContainerSearch = false;
             }
 
-            return FilterContainers(cachedContainers);
+            var containers =  FilterContainers(cachedContainers);
+            return containers;
         }
 
         private IEnumerable<ITestContainer> FilterContainers(IEnumerable<ITestContainer> containers)
         {
-            switch (settingsMapper.Settings.TestingMode)
-            {
-                case TestingMode.JavaScript:
-                    return containers.Where(x => HasJsCompatibleExtension(x.Source));
-                case TestingMode.HTML:
-                    return containers.Where(x => HasHtmlFileExtension(x.Source));
-                default:
-                    return containers;
-            }
+            var mode = settingsMapper.Settings.TestingMode;
+            return containers.Where(x => mode.FileBelongsToTestingMode(x.Source));
         }
 
         private IEnumerable<string> FindPotentialTestFiles()
         {
-            var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
+            var solution = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
             return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
@@ -262,25 +261,10 @@ namespace Chutzpah.VS2012.TestAdapter
                    select item;
         }
 
-        /// <summary>
-        /// Returns true if the file has a .js extension or if it is of a type that will have a .js file generated for it
-        /// </summary>
-        private static bool HasJsCompatibleExtension(string path)
-        {
-            return Chutzpah.Constants.JavaScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
-                   || Chutzpah.Constants.CoffeeScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
-                   || Chutzpah.Constants.TypeScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool HasHtmlFileExtension(string path)
-        {
-            return Chutzpah.Constants.HtmlScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase)
-                   || Chutzpah.Constants.HtmScriptExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase);
-        }
 
         private static bool HasTestFileExtension(string path)
         {
-            return HasHtmlFileExtension(path) || HasJsCompatibleExtension(path);
+            return TestingMode.All.FileBelongsToTestingMode(path);
         }
 
         private bool IsTestFile(string path)
@@ -291,7 +275,7 @@ namespace Chutzpah.VS2012.TestAdapter
             }
             catch (IOException e)
             {
-                logger.Log("IO error when detecting a test file","Test Container Discovery",e);
+                logger.Log("IO error when detecting a test file", "ChutzpahTestContainerDiscoverer", e);
             }
 
             return false;
@@ -312,7 +296,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 if (testFilesUpdateWatcher != null)
                 {
                     testFilesUpdateWatcher.FileChangedEvent -= OnProjectItemChanged;
-                    ((IDisposable) testFilesUpdateWatcher).Dispose();
+                    ((IDisposable)testFilesUpdateWatcher).Dispose();
                     testFilesUpdateWatcher = null;
                 }
 

@@ -26,7 +26,8 @@ namespace Chutzpah.VS.Common
             string format = "Message: {0} \n Exception Message: {1} \n Stack Trace: {2}";
             var log = serviceProvider.GetService(typeof (SVsActivityLog)) as IVsActivityLog;
             if (log == null) return;
-            int hr = log.LogEntry((UInt32) __ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, source, string.Format(CultureInfo.CurrentCulture, format, message, e.Message, e.StackTrace));
+            var fullOutput = string.Format(CultureInfo.CurrentCulture, format, message, e.Message, e.StackTrace);
+            int hr = log.LogEntry((UInt32)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, source, fullOutput);
         }
 
 

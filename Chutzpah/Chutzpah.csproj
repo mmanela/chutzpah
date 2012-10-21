@@ -97,6 +97,7 @@
     <Compile Include="Models\JS\JsFileDone.cs" />
     <Compile Include="Models\TestFileSummary.cs" />
     <Compile Include="Models\TestingMode.cs" />
+    <Compile Include="Extensions\TestingModeExtensions.cs" />
     <Compile Include="Models\TestLog.cs" />
     <Compile Include="Models\JS\JsRunnerOutput.cs" />
     <Compile Include="Models\JS\JsTestCase.cs" />

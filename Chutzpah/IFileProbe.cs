@@ -37,5 +37,7 @@ namespace Chutzpah
         /// <param name="path">The path.</param>
         /// <returns>The type and full path the path points to.</returns>
         PathInfo GetPathInfo(string path);
+
+        IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode);
     }
 }

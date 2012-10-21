@@ -1,0 +1,3 @@
+﻿function getName() {
+    return "Chutzpah";
+};

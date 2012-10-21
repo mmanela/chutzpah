@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chutzpah.Extensions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -56,6 +57,13 @@ namespace Chutzpah
             return null;
         }
 
+        public IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode)
+        {
+            if (string.IsNullOrEmpty(path)) return Enumerable.Empty<PathInfo>();
+
+            return FindScriptFiles(new[] {path}, testingMode);
+        }
+
         public IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
         {
             if (testPaths == null) yield break;
@@ -67,21 +75,16 @@ namespace Chutzpah
                 switch (pathInfo.Type)
                 {
                     case PathType.Html:
-                        if (!testingMode.HasFlag(TestingMode.HTML)) break;
-                        yield return pathInfo;
-                        break;
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
                     case PathType.TypeScript:
-                        if (!testingMode.HasFlag(TestingMode.JavaScript)) break;
+                        if (!testingMode.FileBelongsToTestingMode(path)) break;
                         yield return pathInfo;
                         break;
                     case PathType.Folder:
-
-                        var query = fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
-                            .Where(file => file.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase)
-                                        || file.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase)
-                                        || file.EndsWith(Constants.TypeScriptExtension, StringComparison.OrdinalIgnoreCase));
+                        var query = from file in fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
+                                    where testingMode.FileBelongsToTestingMode(file)
+                                    select file;
                         foreach (var item in query)
                         {
                             yield return GetPathInfo(item);

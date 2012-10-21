@@ -52,7 +52,7 @@ namespace Chutzpah.VS2012.TestAdapter
         private static string BuildFullyQualifiedName(Models.TestCase testCase)
         {
             var parts = new[] { testCase.InputTestFile, testCase.ModuleName, testCase.TestName };
-            return String.Join("::", parts);
+            return String.Join("::", parts).ToLowerInvariant();
         }
 
         private static string GetTestDisplayText(Models.TestCase testCase)

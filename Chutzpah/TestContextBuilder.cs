@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chutzpah.Extensions;
 using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
@@ -47,7 +48,7 @@ namespace Chutzpah
             }
 
             PathInfo pathInfo = fileProbe.GetPathInfo(file);
-            
+
             return BuildContext(pathInfo);
         }
 
@@ -166,8 +167,8 @@ namespace Chutzpah
 
         public void CleanupContext(TestContext context)
         {
-            if(context == null) throw new ArgumentNullException("context");
-            foreach(var file in context.TemporaryFiles)
+            if (context == null) throw new ArgumentNullException("context");
+            foreach (var file in context.TemporaryFiles)
             {
                 try
                 {
@@ -292,26 +293,47 @@ namespace Chutzpah
                     {
                         string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath),
                                                                     referencePath);
-                        string absolutePath = fileProbe.FindFilePath(relativeReferencePath);
-                        if (absolutePath != null &&
-                            !discoveredPaths.Any(x => x.Equals(absolutePath, StringComparison.OrdinalIgnoreCase)))
+
+                        // Find the full file path
+                        string absoluteFilePath = fileProbe.FindFilePath(relativeReferencePath);
+
+                        if (absoluteFilePath != null)
                         {
-                            var referencedFile = new ReferencedFile {Path = absolutePath, IsLocal = true};
-                            referencedFiles.Add(referencedFile);
-                            discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
-                            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths,
-                                                                                    definition,
-                                                                                    absolutePath);
+                            VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles);
                         }
+                        else // If path is not a file then check if it is a folder
+                        {
+                            string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
+                            if (absoluteFolderPath != null)
+                            {
+                                // Find all files in this folder including sub-folders. This can be ALOT of files.
+                                // Only a subset of these files Chutzpah might understand so many of these will be ignored.
+                                var childFiles = fileSystem.GetFiles(absoluteFolderPath, "*.*", SearchOption.AllDirectories);
+                                childFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
+
+                            }
+                        }
+
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
             }
 
             return referencedFiles;
+        }
+
+        private void VisitReferencedFile(string absoluteFilePath, IFrameworkDefinition definition, HashSet<string> discoveredPaths, ICollection<ReferencedFile> referencedFiles)
+        {
+            // If the file doesn't exit exist or we have seen it already then return
+            if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;
+
+            var referencedFile = new ReferencedFile { Path = absoluteFilePath, IsLocal = true };
+            referencedFiles.Add(referencedFile);
+            discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
+            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath);
         }
 
         private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths,
@@ -371,7 +393,7 @@ namespace Chutzpah
         {
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
-                string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath) 
+                string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
                                         ? referencedFile.Path
                                         : referencedFile.GeneratedFilePath;
 

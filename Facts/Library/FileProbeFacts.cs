@@ -215,13 +215,13 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var res = probe.ClassUnderTest.FindScriptFiles(null, TestingMode.All);
+                var res = probe.ClassUnderTest.FindScriptFiles((IEnumerable<string>)null, TestingMode.All);
 
                 Assert.Empty(res);
             }
 
             [Fact]
-            public void Will_return_files_that_are_html_or_js_when_testing_mode_is_all()
+            public void Will_return_valid_test_files_when_testing_mode_is_all()
             {
                 var probe = new TestableFileProbe();
 
@@ -245,7 +245,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_files_that_are_js_or_coffee_when_testing_mode_is_JavaScript()
+            public void Will_return_files_that_match_testing_mode()
             {
                 var probe = new TestableFileProbe();
 
@@ -262,10 +262,9 @@ namespace Chutzpah.Facts
 
                 var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.JavaScript);
 
-                Assert.Equal(2, res.Count());
+                Assert.Equal(1, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
                 Assert.Contains(@"somePath\a.js", fullPaths);
-                Assert.Contains(@"somePath\a.coffee", fullPaths);
             }
 
             [Fact]
@@ -301,13 +300,13 @@ namespace Chutzpah.Facts
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
                 probe.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
-                    .Returns(new string[] { "subFile1.js", "subFile2.coffee", "subFile3.ts" });
+                    .Returns(new string[] { "subFile1.js", "subFile2.coffee", "subFile3.ts", "subFile4.html" });
                 var paths = new List<string>
                             {
                                 "folder"
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.All);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.AllExceptHTML);
 
                 Assert.Equal(3, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);

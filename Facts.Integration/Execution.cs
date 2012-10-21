@@ -145,6 +145,19 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+
+        [Fact]
+        public void Will_copy_over_files_from_a_referenced_folders()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\folderReference.js" });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
         [Fact]
         public void Will_copy_over_css_references_from_js_file()
         {
