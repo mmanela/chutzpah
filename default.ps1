@@ -5,7 +5,7 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "2.1.0"
+  $mainVersion = "2.2.0"
   # Import environment variables for Visual Studio
   if (test-path ("vsvars2010.ps1")) { 
     . ./vsvars2010.ps1 

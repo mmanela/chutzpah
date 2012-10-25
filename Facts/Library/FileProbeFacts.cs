@@ -208,6 +208,39 @@ namespace Chutzpah.Facts
             }
         }
 
+        public class IsChutzpahTemporaryFile
+        {
+            [Fact]
+            public void Will_return_false_if_path_is_empty()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile(null);
+
+                Assert.False(res);
+            }
+
+            [Fact]
+            public void Will_return_false_if_path_does_not_start_with_chutzpah_temp_prefix()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + "a.js");
+
+                Assert.False(res);
+            }
+
+            [Fact]
+            public void Will_return_true_if_path_does_starts_with_chutzpah_temp_prefix()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + string.Format(Constants.ChutzpahTemporaryFileFormat,"a.js"));
+
+                Assert.True(res);
+            }
+        }
+
         public class FindScriptFiles
         {
             [Fact]
@@ -313,6 +346,28 @@ namespace Chutzpah.Facts
                 Assert.Contains("subFile1.js", fullPaths);
                 Assert.Contains("subFile2.coffee", fullPaths);
                 Assert.Contains("subFile3.ts", fullPaths);
+            }
+
+            [Fact]
+            public void Will_skip_chutzpah_temporary_files_found_in_folders()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
+                probe.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
+                    .Returns(new string[] { "subFile1.js", string.Format(Constants.ChutzpahTemporaryFileFormat, "subFile2.js"), });
+                var paths = new List<string>
+                            {
+                                "folder"
+                            };
+
+                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.AllExceptHTML);
+
+                Assert.Equal(1, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains("subFile1.js", fullPaths);
             }
 
         }

@@ -13,3 +13,12 @@
 
      equal(result, name);
  });
+
+ test("Ensure we skip chutzah temp files", function () {
+     var name = "Chutzpah";
+
+     ok(!window.getNum);
+ });
+
+
+ 

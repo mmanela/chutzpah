@@ -12,12 +12,13 @@
         <licenseUrl>http://chutzpah.codeplex.com/license</licenseUrl>
         <iconUrl>http://matthewmanela.com/wp-content/uploads/2011/09/chetTimes.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <tags>testing javascript tdd qunit jasmine coffeescript</tags>
+        <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Add support for writing tests in coffee script (item 58)
-* Add option to ouput test results to XML file (item 57)
-* Change chutzpah.console.exe output to support VS error list integration (item 48)
-* Tests complete doesn't match total when using parallelism (item 59)
+* Add support for writing tests in TypeScript (item 67)
+* Fixed encoding problem with .coffee files (item 63)
+* Allow reference paths for folders (item 68)
+* Some Unit Test Explorer bug fixes
+* Add clearer error messages when test file does not exist
         </releaseNotes>
     </metadata>
 </package>

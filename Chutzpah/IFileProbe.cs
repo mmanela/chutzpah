@@ -39,5 +39,6 @@ namespace Chutzpah
         PathInfo GetPathInfo(string path);
 
         IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode);
+        bool IsTemporaryChutzpahFile(string path);
     }
 }

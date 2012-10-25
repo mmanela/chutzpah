@@ -455,7 +455,38 @@ namespace Chutzpah.Facts
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
                 Assert.Contains(scriptStatement,text);
+            }
 
+
+            [Fact]
+            public void Will_skip_chutzpah_temporary_files_in_folder_references()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.Mock<IFileProbe>().Setup(x => x.IsTemporaryChutzpahFile(It.IsAny<string>())).Returns(true);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"C:\temp\test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/somefolder")))
+                    .Returns((string)null);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFolderPath(Path.Combine(@"path\", @"../../js/somefolder")))
+                    .Returns(@"path\someFolder");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles(@"path\someFolder", "*.*", SearchOption.AllDirectories))
+                    .Returns(new[] { @"path\subFile.js" });
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithFolderReference);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
+                Assert.DoesNotContain(scriptStatement, text);
             }
 
             [Fact]

@@ -309,7 +309,10 @@ namespace Chutzpah
                                 // Find all files in this folder including sub-folders. This can be ALOT of files.
                                 // Only a subset of these files Chutzpah might understand so many of these will be ignored.
                                 var childFiles = fileSystem.GetFiles(absoluteFolderPath, "*.*", SearchOption.AllDirectories);
-                                childFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
+                                var validFiles = from file in childFiles
+                                                 where !fileProbe.IsTemporaryChutzpahFile(file)
+                                                 select file;
+                                validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
 
                             }
                         }

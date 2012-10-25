@@ -57,6 +57,13 @@ namespace Chutzpah
             return null;
         }
 
+        public bool IsTemporaryChutzpahFile(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            var fileName = Path.GetFileName(path);
+            return !string.IsNullOrEmpty(fileName) && fileName.StartsWith(Constants.ChutzpahTemporaryFilePrefix);
+        }
+
         public IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode)
         {
             if (string.IsNullOrEmpty(path)) return Enumerable.Empty<PathInfo>();
@@ -83,7 +90,7 @@ namespace Chutzpah
                         break;
                     case PathType.Folder:
                         var query = from file in fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
-                                    where testingMode.FileBelongsToTestingMode(file)
+                                    where !IsTemporaryChutzpahFile(file) && testingMode.FileBelongsToTestingMode(file)
                                     select file;
                         foreach (var item in query)
                         {

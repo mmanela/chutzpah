@@ -12,7 +12,8 @@ namespace Chutzpah
         // Format for temporary files Chutzpah creates that should be ignored in source controler.
         // These get generated when Chutzpah needs to generate a file in place like when it needs to convert 
         // Coffee script to JS
-        public const string ChutzpahTemporaryFileFormat = "_Chutzpah.{0}";
+        public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
+        public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}";
 
 
         public const string PngExtension = ".png";

@@ -154,8 +154,8 @@ namespace Chutzpah.Facts.Integration
             TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\folderReference.js" });
 
             Assert.Equal(0, result.FailedCount);
-            Assert.Equal(1, result.PassedCount);
-            Assert.Equal(1, result.TotalCount);
+            Assert.Equal(2, result.PassedCount);
+            Assert.Equal(2, result.TotalCount);
         }
 
         [Fact]
