@@ -1,7 +1,15 @@
-﻿class StringPlus {
+﻿class StringBase {
     vowels: string;
     constructor (public content: string){
         this.vowels = "aeiou";
+    }
+    
+}
+
+class StringPlus extends StringBase{
+    vowels: string;
+    constructor (public content: string){
+        super(content);
     }
 
     countVowels() {
