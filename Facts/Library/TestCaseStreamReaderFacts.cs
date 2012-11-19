@@ -259,6 +259,23 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_put_coverage_object_in_summary()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":{""foo"":""bar""}}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.NotNull(summary.CoverageObject);
+                Assert.Contains("foo", summary.CoverageObject.ToString());
+            }
+
+            [Fact]
             public void Will_recover_after_malformed_json()
             {
                 var reader = new TestableTestCaseStreamReader();

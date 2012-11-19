@@ -14,6 +14,7 @@ namespace Chutzpah
         // Coffee script to JS
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
         public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}";
+        public const string ChutzpahInstrumentedTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "instr.{0}";
 
 
         public const string PngExtension = ".png";

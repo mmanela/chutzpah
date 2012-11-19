@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Chutzpah.Models;
 
@@ -17,5 +18,16 @@ namespace Chutzpah.RunnerCallbacks
             Console.Write(errorMessage);
         }
 
+        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
+        {
+            if (testResultsSummary.CoverageObject != null)
+            {
+                var folder = Path.GetDirectoryName(fileName);
+                var coverageFileName = Path.GetFileNameWithoutExtension(fileName) + ".coverage.js";
+                File.WriteAllText(Path.Combine(folder, coverageFileName), testResultsSummary.CoverageObject.ToString());
+            }
+
+            base.FileFinished(fileName, testResultsSummary);
+        }
     }
 }

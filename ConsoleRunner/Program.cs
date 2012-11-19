@@ -86,6 +86,9 @@ namespace Chutzpah
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
 			Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
+            Console.WriteLine("  /coverage              : Enable coverage collection via JSCover (requires Java)");
+            Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
+            Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
             
 			foreach (var transformer in SummaryTransformerFactory.GetTransformers())
             {
@@ -118,7 +121,13 @@ namespace Chutzpah
                     {
                         OpenInBrowser = commandLine.OpenInBrowser, 
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
-                        MaxDegreeOfParallelism = commandLine.Parallelism
+                        MaxDegreeOfParallelism = commandLine.Parallelism,
+                        CoverageOptions = new CoverageOptions
+                        {
+                            Enabled = commandLine.Coverage,
+                            IncludePattern = commandLine.CoverageIncludePattern,
+                            ExcludePattern = commandLine.CoverageExcludePattern
+                        }
                     };
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);

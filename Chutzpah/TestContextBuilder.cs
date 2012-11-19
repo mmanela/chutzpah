@@ -40,7 +40,7 @@ namespace Chutzpah
             this.fileGenerators = fileGenerators;
         }
 
-        public TestContext BuildContext(string file)
+        public TestContext BuildContext(string file, TestOptions options)
         {
             if (String.IsNullOrWhiteSpace(file))
             {
@@ -49,10 +49,10 @@ namespace Chutzpah
 
             PathInfo pathInfo = fileProbe.GetPathInfo(file);
 
-            return BuildContext(pathInfo);
+            return BuildContext(pathInfo, options);
         }
 
-        public TestContext BuildContext(PathInfo file)
+        public TestContext BuildContext(PathInfo file, TestOptions options)
         {
             if (file == null)
             {
@@ -104,6 +104,11 @@ namespace Chutzpah
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles);
+                if (options != null)
+                {
+                    ProcessForCoverageInstrumentation(options.CoverageOptions, referencedFiles,
+                                                      temporaryFiles);
+                }
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -131,15 +136,15 @@ namespace Chutzpah
             return null;
         }
 
-        public bool TryBuildContext(string file, out TestContext context)
+        public bool TryBuildContext(string file, TestOptions options, out TestContext context)
         {
-            context = BuildContext(file);
+            context = BuildContext(file, options);
             return context != null;
         }
 
-        public bool TryBuildContext(PathInfo file, out TestContext context)
+        public bool TryBuildContext(PathInfo file, TestOptions options, out TestContext context)
         {
-            context = BuildContext(file);
+            context = BuildContext(file, options);
             return context != null;
         }
 
@@ -201,6 +206,15 @@ namespace Chutzpah
                     fileGenerator.Generate(referencedFile, temporaryFiles);
                 }
             }
+        }
+
+        private void ProcessForCoverageInstrumentation(CoverageOptions coverageOptions, List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        {
+            if (!coverageOptions.Enabled) return;
+            var cov = ChutzpahContainer.Current.GetInstance<ICoverageEngineWrapper>();
+            cov.IncludePattern = coverageOptions.IncludePattern;
+            cov.ExcludePattern = coverageOptions.ExcludePattern;
+            cov.Instrument(referencedFiles, temporaryFiles);
         }
 
         private ReferencedFile GetFileUnderTest(string testFilePath)

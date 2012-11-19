@@ -52,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Coverage.cs" />
     <Compile Include="Discovery.cs" />
     <Compile Include="Execution.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

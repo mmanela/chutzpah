@@ -43,6 +43,10 @@ namespace Chutzpah
 
         public bool VsOutput { get; protected set; }
 
+        public bool Coverage { get; protected set; }
+        public string CoverageIncludePattern { get; protected set; }
+        public string CoverageExcludePattern { get; protected set; }
+
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
             if (option.Value != null)
@@ -117,6 +121,19 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     VsOutput = true;
                 }
+                else if (optionName == "/coverage")
+                {
+                    GuardNoOptionValue(option);
+                    Coverage = true;
+                }
+                else if (optionName == "/coverageinclude")
+                {
+                    AddCoverageIncludeOption(option.Value);
+                }
+                else if (optionName == "/coverageexclude")
+                {
+                    AddCoverageExcludeOption(option.Value);
+                }
                 else
                 {
                     if (!optionName.StartsWith("/"))
@@ -127,6 +144,26 @@ namespace Chutzpah
                     }
                 }
             }
+        }
+
+        private void AddCoverageIncludeOption(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /coverageInclude.  Expecting a file name pattern");
+            }
+            CoverageIncludePattern = value;
+        }
+
+        private void AddCoverageExcludeOption(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /coverageExclude.  Expecting a file name pattern");
+            }
+            CoverageExcludePattern = value;
         }
 
         private void AddParallelismOption(string value)

@@ -205,7 +205,7 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestableTestContextBuilder();
 
-                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext((string)null));
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext((string)null, new TestOptions()));
 
                 Assert.IsType<ArgumentNullException>(ex);
             }
@@ -216,7 +216,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { Type = PathType.Other });
 
-                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.blah"));
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.blah", new TestOptions()));
 
                 Assert.IsType<ArgumentException>(ex);
             }
@@ -227,7 +227,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
 
-                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.js"));
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.js", new TestOptions()));
 
                 Assert.IsType<FileNotFoundException>(ex);
             }
@@ -243,7 +243,7 @@ namespace Chutzpah.Facts
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(false);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.Null(context);
             }
@@ -258,7 +258,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetPathInfo("test.js"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\test.js" });
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.Save(@"C:\temp2\test.html", It.IsAny<string>()));
                 Assert.Equal(@"C:\temp2\test.html", context.TestHarnessPath);
@@ -273,7 +273,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetPathInfo("testThing.html"))
                     .Returns(new PathInfo { Type = PathType.Html, FullPath = @"C:\testThing.html" });
 
-                var context = creator.ClassUnderTest.BuildContext("testThing.html");
+                var context = creator.ClassUnderTest.BuildContext("testThing.html", new TestOptions());
 
                 Assert.Equal(@"qunitRunner.js", context.TestRunner);
                 Assert.Equal(@"C:\testThing.html", context.TestHarnessPath);
@@ -290,7 +290,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.js")).Returns(false);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"pa\test.js")).Returns(TestJSFileContents);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true));
             }
@@ -305,7 +305,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetLastWriteTime(@"path\qunit.js")).Returns(DateTime.Now);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetLastWriteTime(@"C:\temp\qunit.js")).Returns(DateTime.Now.AddDays(-1));
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true));
             }
@@ -320,7 +320,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetLastWriteTime(@"path\qunit.js")).Returns(DateTime.Now);
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetLastWriteTime(@"C:\temp\qunit.js")).Returns(DateTime.Now.AddDays(1));
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true), Times.Never());
             }
@@ -332,7 +332,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
                 creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns("contents");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.True(context.ReferencedJavaScriptFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
             }
@@ -345,7 +345,7 @@ namespace Chutzpah.Facts
                 creator.InjectArray(new[] {fileGenerator.Object});
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
 
-                var context = creator.ClassUnderTest.BuildContext("test.coffee");
+                var context = creator.ClassUnderTest.BuildContext("test.coffee", new TestOptions());
 
                 fileGenerator.Verify(x => x.Generate(It.IsAny<ReferencedFile>(), It.IsAny<List<string>>()));
             }
@@ -367,7 +367,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\references.js"))
                     .Returns(ReferencesFileInfiniteLoop);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.NotNull(context);
             }
@@ -386,7 +386,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"qunit.js")))
                     .Returns(@"path\qunit.js");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true), Times.Never());
             }
@@ -415,7 +415,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\references.js"))
                     .Returns(ReferencesFile);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
                 string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\references.js");
@@ -451,7 +451,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileWithFolderReference);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
                 Assert.Contains(scriptStatement,text);
@@ -483,7 +483,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestJSFileWithFolderReference);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
                 Assert.DoesNotContain(scriptStatement, text);
@@ -510,7 +510,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
                     .Returns(@"path\common.js");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
                 string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\common.js");
@@ -544,7 +544,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
                     .Returns(@"path\common.js");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.True(text.Contains("DIR:this/path"));
             }
@@ -568,7 +568,7 @@ namespace Chutzpah.Facts
                     .Returns(@"path\common.js");
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
                 string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\common.js");
@@ -593,7 +593,7 @@ namespace Chutzpah.Facts
                     .Returns(@"path\style.css");
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string styleStatemenet = TestContextBuilder.GetStyleStatement(@"path\style.css");
                 Assert.Contains(styleStatemenet, text);
@@ -610,7 +610,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestFileContents);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(It.Is<string>(p => p.Contains("lib.js")), It.IsAny<string>(), true), Times.Never());
             }
@@ -631,7 +631,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path\test.js"))
                     .Returns(TestFileContents);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"http://a.com/lib.js");
                 Assert.Contains(scriptStatement, text);

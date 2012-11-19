@@ -84,6 +84,11 @@ namespace Chutzpah
                             callback.FileStarted(testContext.InputTestFile);
                             break;
 
+                        case "CoverageObject":
+                            var jsCov = jsonSerializer.Deserialize<JsCoverageObject>(json);
+                            summary.CoverageObject = jsCov.Object;
+                            break;
+
                         case "FileDone":
                             var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
                             summary.TimeTaken = jsFileDone.TimeTaken;

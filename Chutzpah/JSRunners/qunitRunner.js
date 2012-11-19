@@ -109,8 +109,18 @@
             log({ type: "TestDone", testCase: activeTestCase });
         };
 
+        // JSCoverage puts a source attr on an array, which is a bad idea...
+        var prepareCoverageObjectForSerialization = function (co) {
+            for (var key in co)
+                if (co[key].source) co[key] = { source: co[key].source, lineCounts: co[key] };
+            return co;
+        };
+
         callback.done = function (info) {
             var timetaken = new Date().getTime() - fileStartTime;
+            if (window._$jscoverage) {
+                log({ type: "CoverageObject", object: prepareCoverageObjectForSerialization(window._$jscoverage) });
+            }
             log({ type: "FileDone", timetaken: timetaken, passed: info.passed, failed: info.failed });
             window.chutzpah.isTestingFinished = true;
         };

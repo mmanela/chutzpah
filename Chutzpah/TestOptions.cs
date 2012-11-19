@@ -16,7 +16,7 @@ namespace Chutzpah
             TestingMode = TestingMode.All;
             defaultParallelism = 1;
             MaxDegreeOfParallelism = defaultParallelism;
-
+            CoverageOptions = new CoverageOptions();
         }
 
         /// <summary>
@@ -62,5 +62,10 @@ namespace Chutzpah
         {
             return Math.Min(Math.Max(value, defaultParallelism), Environment.ProcessorCount);
         }
+
+        /// <summary>
+        /// Contains options for code coverage collection.
+        /// </summary>
+        public CoverageOptions CoverageOptions { get; set; }
     }
 }
