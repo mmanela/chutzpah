@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -130,9 +131,16 @@ namespace Chutzpah.Wrappers
         private string FindJavaExe()
         {
             const string exe = "java.exe";
-            // First check if it's on the path
-            var result = processHelper.RunExecutableAndProcessOutput(exe, "-version", OutputCollector());
-            if (result.ExitCode == 0) return exe;
+            try
+            {
+                // First check if it's on the path
+                processHelper.RunExecutableAndProcessOutput(exe, "-version", OutputCollector());
+                return exe; // no exception implies success
+            }
+            catch (Win32Exception)
+            {
+                // Likely: "The system cannot find the file specified"
+            }
 
             // Next, check JAVA_HOME\bin
             var pathToExe = Environment.ExpandEnvironmentVariables(Path.Combine("%JAVA_HOME%", "bin", exe));
