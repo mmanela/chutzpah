@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Chutzpah.FileGenerator;
@@ -33,6 +34,7 @@ namespace Chutzpah.FileGenerators
             var folderPath = Path.GetDirectoryName(referencedFile.Path);
             var fileName = Path.GetFileNameWithoutExtension(referencedFile.Path) + ".js";
             var newFilePath = Path.Combine(folderPath, string.Format(Constants.ChutzpahTemporaryFileFormat, fileName));
+            
             fileSystem.WriteAllText(newFilePath, jsText);
             referencedFile.GeneratedFilePath = newFilePath;
             temporaryFiles.Add(newFilePath);

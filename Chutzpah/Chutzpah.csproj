@@ -124,6 +124,7 @@
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
+    <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
