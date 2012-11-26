@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chutzpah.Coverage;
+using Chutzpah.Models;
 using Xunit;
 using Xunit.Extensions;
 
 namespace Chutzpah.Facts.Integration
 {
+    /// <summary>
+    /// Note: Requires JSCover-all.jar in Facts.Integration\bin\Debug!
+    /// </summary>
     public class Coverage
     {
         public static IEnumerable<object[]> BasicTestScripts
@@ -44,6 +49,17 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("BasicTestScripts")]
+        public void Will_not_create_a_coverage_object_if_coverage_is_disabled(string scriptPath)
+        {
+            var testRunner = TestRunner.Create(true);
+
+            var result = testRunner.RunTests(scriptPath);
+
+            Assert.Null(result.TestFileSummaries.Single().CoverageObject);
+        }
+
+        [Theory]
+        [PropertyData("BasicTestScripts")]
         public void Will_fix_coverage_object_serialization(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -70,7 +86,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(AndInclude("**\\code.js")));
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.IncludePattern = "**\\code.js"));
             var text = result.TestFileSummaries.Single().CoverageObject.ToString();
             Assert.Contains("code.js", text);
             Assert.DoesNotContain(scriptPath.Replace("\\", "\\\\"), text);
@@ -82,7 +98,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(AndExclude("**\\" + scriptPath)));
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePattern = "**\\" + scriptPath));
             var text = result.TestFileSummaries.Single().CoverageObject.ToString();
             Assert.Contains("code.js", text);
             Assert.DoesNotContain(scriptPath.Replace("\\", "\\\\"), text);
@@ -112,24 +128,14 @@ namespace Chutzpah.Facts.Integration
             Assert.Contains("code.coffee", text);
         }
 
-        private Action<TestOptions> AndInclude(string includePattern)
+        private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
         {
-            return opts =>
-                       {
-                           opts.CoverageOptions.IncludePattern = includePattern;
-                       };
-        }
-
-        private Action<TestOptions> AndExclude(string excludePattern)
-        {
-            return opts =>
+            var cov = CoverageEngineFactory.GetCoverageEngine();
+            var messages = new List<string>();
+            if (!cov.CanUse(messages))
             {
-                opts.CoverageOptions.ExcludePattern = excludePattern;
-            };
-        }
-
-        private TestOptions WithCoverage(params Action<TestOptions>[] modifiers)
-        {
+                throw new Exception(string.Join(" ", messages));
+            }
             var opts = new TestOptions
                            {
                                CoverageOptions = new CoverageOptions
@@ -137,7 +143,7 @@ namespace Chutzpah.Facts.Integration
                                                          Enabled = true
                                                      }
                            };
-            modifiers.ToList().ForEach(mod => mod(opts));
+            mods.ToList().ForEach(a => a(opts.CoverageOptions));
             return opts;
         }
     }

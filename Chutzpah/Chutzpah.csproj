@@ -68,6 +68,7 @@
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="CoverageOptions.cs" />
+    <Compile Include="Coverage\CoverageEngineFactory.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
@@ -136,11 +137,11 @@
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
     <Compile Include="Wrappers\IHtmlUtility.cs" />
-    <Compile Include="Wrappers\ICoverageEngineWrapper.cs" />
+    <Compile Include="Coverage\ICoverageEngine.cs" />
     <Compile Include="Wrappers\IJsonSerializer.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="Wrappers\IProcessWrapper.cs" />
-    <Compile Include="Wrappers\CoverageEngineWrapper.cs" />
+    <Compile Include="Coverage\CoverageEngine.cs" />
     <Compile Include="Wrappers\JsonSerializer.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
@@ -152,10 +153,6 @@
     <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\3rdParty\JSCover\JSCover-all.jar">
-      <Link>JSCover-all.jar</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

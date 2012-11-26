@@ -27,11 +27,11 @@
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
 
-        // JSCoverage puts a source attr on an array, which is a bad idea...
-        var prepareCoverageObjectForSerialization = function (co) {
-            for (var key in co)
-                if (co[key].source) co[key] = { source: co[key].source, lineCounts: co[key] };
-            return co;
+        var logCoverage = function() {
+            if (window._$jscoverage) {
+                var json = JSON.parse(jscoverage_serializeCoverageToJSON(_$jscoverage));
+                log({ type: "CoverageObject", object: json });
+            }
         };
 
         var ChutzpahJasmineReporter = function () {
@@ -48,9 +48,7 @@
             self.reportRunnerResults = function (runner) {
                 var res = jasmine.getEnv().currentRunner().results();
                 var timetaken = new Date().getTime() - fileStartTime;
-                if (window._$jscoverage) {
-                    log({ type: "CoverageObject", object: prepareCoverageObjectForSerialization(window._$jscoverage) });
-                }
+                logCoverage();
                 log({ type: "FileDone", timetaken: timetaken, passed: res.passedCount, failed: res.failedCount });
                 window.chutzpah.isTestingFinished = true;
             };

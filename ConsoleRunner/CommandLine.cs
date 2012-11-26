@@ -44,7 +44,9 @@ namespace Chutzpah
         public bool VsOutput { get; protected set; }
 
         public bool Coverage { get; protected set; }
+
         public string CoverageIncludePattern { get; protected set; }
+
         public string CoverageExcludePattern { get; protected set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)

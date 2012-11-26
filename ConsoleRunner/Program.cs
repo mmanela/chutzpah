@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Chutzpah.Callbacks;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
 using System.Linq;
 using Chutzpah.Transformers;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -29,7 +32,7 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
-
+                CheckCoverageOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -47,6 +50,18 @@ namespace Chutzpah
                 Console.WriteLine();
                 Console.WriteLine("error: {0}", ex.Message);
                 return -1;
+            }
+        }
+
+        private static void CheckCoverageOptions(CommandLine cmdLine)
+        {
+            if (!cmdLine.Coverage) return;
+
+            var cov = CoverageEngineFactory.GetCoverageEngine();
+            var messages = new List<string>();
+            if (!cov.CanUse(messages))
+            {
+                throw new ArgumentException(string.Join(Environment.NewLine, messages));
             }
         }
 
@@ -86,7 +101,7 @@ namespace Chutzpah
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
 			Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
-            Console.WriteLine("  /coverage              : Enable coverage collection via JSCover (requires Java)");
+            Console.WriteLine("  /coverage              : Enable coverage collection (requires JSCover and Java)");
             Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
             Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
             
@@ -123,11 +138,11 @@ namespace Chutzpah
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
                         CoverageOptions = new CoverageOptions
-                        {
-                            Enabled = commandLine.Coverage,
-                            IncludePattern = commandLine.CoverageIncludePattern,
-                            ExcludePattern = commandLine.CoverageExcludePattern
-                        }
+                                              {
+                                                  Enabled = commandLine.Coverage,
+                                                  IncludePattern = commandLine.CoverageIncludePattern,
+                                                  ExcludePattern = commandLine.CoverageExcludePattern
+                                              }
                     };
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);

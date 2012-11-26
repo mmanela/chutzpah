@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chutzpah.Coverage;
 using Chutzpah.Extensions;
 using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
@@ -104,11 +105,12 @@ namespace Chutzpah
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles);
-                if (options != null)
-                {
-                    ProcessForCoverageInstrumentation(options.CoverageOptions, referencedFiles,
-                                                      temporaryFiles);
-                }
+                string coverageHelperPath;
+                ProcessForCoverageInstrumentation(options, 
+                                                  stagingFolder, 
+                                                  referencedFiles, 
+                                                  temporaryFiles, 
+                                                  out coverageHelperPath);
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -120,6 +122,7 @@ namespace Chutzpah
                 string testHtmlFilePath = CreateTestHarness(definition,
                                                             stagingFolder,
                                                             testFilePath,
+                                                            coverageHelperPath,
                                                             testFileKind,
                                                             referencedFiles);
 
@@ -208,13 +211,15 @@ namespace Chutzpah
             }
         }
 
-        private void ProcessForCoverageInstrumentation(CoverageOptions coverageOptions, List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private void ProcessForCoverageInstrumentation(TestOptions options, string stagingFolder, IList<ReferencedFile> referencedFiles, IList<string> temporaryFiles, out string coverageHelperPath)
         {
-            if (!coverageOptions.Enabled) return;
-            var cov = ChutzpahContainer.Current.GetInstance<ICoverageEngineWrapper>();
-            cov.IncludePattern = coverageOptions.IncludePattern;
-            cov.ExcludePattern = coverageOptions.ExcludePattern;
-            cov.Instrument(referencedFiles, temporaryFiles);
+            coverageHelperPath = null;
+            if (options == null || !options.CoverageOptions.Enabled) return;
+            var cov = CoverageEngineFactory.GetCoverageEngine();
+            if (!cov.CanUse(null)) return;
+            cov.IncludePattern = options.CoverageOptions.IncludePattern;
+            cov.ExcludePattern = options.CoverageOptions.ExcludePattern;
+            cov.Instrument(stagingFolder, referencedFiles, temporaryFiles, out coverageHelperPath);
         }
 
         private ReferencedFile GetFileUnderTest(string testFilePath)
@@ -237,6 +242,7 @@ namespace Chutzpah
         private string CreateTestHarness(IFrameworkDefinition definition,
                                          string stagingFolder,
                                          string inputTestFilePath,
+                                         string coverageHelperPath,
                                          PathType testFileKind,
                                          IEnumerable<ReferencedFile> referencedFiles)
         {
@@ -244,6 +250,13 @@ namespace Chutzpah
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
             string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
+
+            if (coverageHelperPath != null)
+            {
+                var rf = new ReferencedFile {Path = coverageHelperPath};
+                referencedFiles = Enumerable.Repeat(rf, 1).Concat(referencedFiles);
+            }
+
             string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, testFileKind, referencedFiles);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;

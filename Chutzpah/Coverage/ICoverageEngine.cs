@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Chutzpah.Models;
 
-namespace Chutzpah.Wrappers
+namespace Chutzpah.Coverage
 {
-    public interface ICoverageEngineWrapper
+    public interface ICoverageEngine
     {
         /// <summary>
         /// File name pattern that, if set, a file must match to be instrumented. Pattern matching
@@ -17,6 +17,8 @@ namespace Chutzpah.Wrappers
         /// </summary>
         string ExcludePattern { get; set; }
 
-        void Instrument(IList<ReferencedFile> referencedFiles, IList<string> temporaryFiles);
+        bool CanUse(IList<string> messages);
+
+        void Instrument(string stagingFolder, IList<ReferencedFile> referencedFiles, IList<string> temporaryFiles, out string coverageHelperPath);
     }
 }
