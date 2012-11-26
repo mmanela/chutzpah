@@ -24,7 +24,7 @@ namespace Chutzpah.RunnerCallbacks
             {
                 var folder = Path.GetDirectoryName(fileName);
                 var coverageFileName = Path.GetFileNameWithoutExtension(fileName) + ".coverage.json";
-                File.WriteAllText(Path.Combine(folder, coverageFileName), testResultsSummary.CoverageObject.ToString());
+                File.WriteAllText(Path.Combine(folder, coverageFileName), testResultsSummary.CoverageObjectJson);
             }
 
             base.FileFinished(fileName, testResultsSummary);

@@ -85,8 +85,9 @@ namespace Chutzpah
                             break;
 
                         case "CoverageObject":
-                            var jsCov = jsonSerializer.Deserialize<JsCoverageObject>(json);
+                            var jsCov = jsonSerializer.Deserialize<JsCoverage>(json);
                             summary.CoverageObject = jsCov.Object;
+                            summary.CoverageObjectJson = json;
                             break;
 
                         case "FileDone":

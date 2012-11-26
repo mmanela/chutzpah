@@ -259,11 +259,11 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_put_coverage_object_in_summary()
+            public void Will_put_coverage_object_and_json_rep_in_summary()
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":{""foo"":""bar""}}";
+                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":{}}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -272,7 +272,7 @@ namespace Chutzpah.Facts
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(summary.CoverageObject);
-                Assert.Contains("foo", summary.CoverageObject.ToString());
+                Assert.NotNull(summary.CoverageObjectJson);
             }
 
             [Fact]

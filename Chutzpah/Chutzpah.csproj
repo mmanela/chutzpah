@@ -92,7 +92,7 @@
     <Compile Include="Models\BaseTestCaseSummary.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
-    <Compile Include="Models\JS\JsCoverageObject.cs" />
+    <Compile Include="Models\JS\JsCoverage.cs" />
     <Compile Include="Models\JS\JsErrors.cs" />
     <Compile Include="Models\JS\JsLogs.cs" />
     <Compile Include="Models\Stack.cs" />

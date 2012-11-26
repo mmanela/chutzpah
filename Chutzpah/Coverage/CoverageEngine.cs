@@ -8,6 +8,7 @@ using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
 using Chutzpah.Wrappers;
+using System.Text.RegularExpressions;
 
 namespace Chutzpah.Coverage
 {
@@ -125,8 +126,8 @@ namespace Chutzpah.Coverage
                 // of other problems. Backslash escaping is necessary since the string will be
                 // interpreted by JavaScript.
                 var escapedPath = originalPath.Replace("'", "\\'").Replace("\\", "\\\\");
-                ReadWrite(instrPath, newFilePath, "_$jscoverage['" + tempFileName + "']",
-                          "_$jscoverage['" + escapedPath + "']");
+                ReadWrite(instrPath, newFilePath, "(_\\$jscoverage(\\.branchData)?)\\['" + Regex.Escape(tempFileName) + "'\\]",
+                          "$1['" + escapedPath + "']");
 
                 referencedFiles[i].GeneratedFilePath = newFilePath;
                 tempFiles.Add(newFilePath);
@@ -170,12 +171,13 @@ namespace Chutzpah.Coverage
             return result;
         }
 
-        private void ReadWrite(string sourcePath, string destPath, string replaceThis = null, string withThis = null)
+        private void ReadWrite(string sourcePath, string destPath, string replaceThisRegexp = null, string withThis = null)
         {
             var text = fileSystem.GetText(sourcePath);
-            if (replaceThis != null)
+            if (replaceThisRegexp != null)
             {
-                text = text.Replace(replaceThis, withThis);
+                var re = new Regex(replaceThisRegexp);
+                text = re.Replace(text, withThis);
             }
             fileSystem.WriteAllText(destPath, text);
         }
