@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Chutzpah.FileGenerator;
 using Chutzpah.FileGenerators;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using Xunit;
 
@@ -13,8 +14,8 @@ namespace Chutzpah.Facts
         {
             public bool CanHandle { get; set; }
 
-            public TestableFileGenerator(IFileSystemWrapper fileSystem, ICompilerEngineWrapper compilerEngineWrapper)
-                : base(fileSystem, compilerEngineWrapper)
+            public TestableFileGenerator(IFileSystemWrapper fileSystem, ICompilerEngineWrapper compilerEngineWrapper, ICompilerCache compilerCache)
+                : base(fileSystem, compilerEngineWrapper,compilerCache)
             {
             }
 

@@ -1,5 +1,6 @@
 using System;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah.FileGenerators
@@ -7,8 +8,8 @@ namespace Chutzpah.FileGenerators
     public class CoffeeScriptFileGenerator : CompileToJavascriptFileGenerator
     {
 
-        public CoffeeScriptFileGenerator(IFileSystemWrapper fileSystem, ICoffeeScriptEngineWrapper coffeeScriptEngine)
-            :base(fileSystem,coffeeScriptEngine)
+        public CoffeeScriptFileGenerator(IFileSystemWrapper fileSystem, ICoffeeScriptEngineWrapper coffeeScriptEngine, ICompilerCache compilerCache)
+            :base(fileSystem,coffeeScriptEngine,compilerCache)
         {
         }
 

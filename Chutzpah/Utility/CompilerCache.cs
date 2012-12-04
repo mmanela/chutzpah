@@ -6,33 +6,29 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Chutzpah.Utility
 {
-    class CompilerCache
+    class CompilerCache : IDisposable, ICompilerCache
     {
-        private readonly Dictionary<string, Tuple<DateTime, string>> _compilerCache;
-        private readonly string _fileName;
-        private readonly int _maxSizeBytes;
+        private Dictionary<string, Tuple<DateTime, string>> _compilerCache;
         private readonly Hasher _hasher;
-        
+        private readonly GlobalOptions _globalOptions;
+        private bool _initialized;
 
-
-        public CompilerCache(string fileName, int maxSizeMb = 1)
+        public CompilerCache()
         {
-            _fileName = fileName;
-            _maxSizeBytes = maxSizeMb * 1024 * 1024;
+            _globalOptions = GlobalOptions.Instance;
             _hasher = new Hasher();
-            _compilerCache = File.Exists(_fileName) ? DeSerializeObject(_fileName) : new Dictionary<string, Tuple<DateTime, string>>();
+            _initialized = false;
         }
 
-        public void Save()
+        ~CompilerCache()
         {
-            limitSize();
-            SerializeObject(_fileName, _compilerCache);
+            Save();
         }
 
-        private void limitSize()
+        private void LimitSize()
         {
             var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length);
-            while (size > _maxSizeBytes)
+            while (size > _globalOptions.CompilerCacheMaxSize*1024*1024)
             {
                 var oldestKey = "";
                 var oldestTime = DateTime.Now;
@@ -62,26 +58,59 @@ namespace Chutzpah.Utility
         {
             Stream stream = File.Open(filename, FileMode.Open);
             var bFormatter = new BinaryFormatter();
-            var objectToSerialize = (Dictionary<string, Tuple<DateTime, string>>)bFormatter.Deserialize(stream);
+            var deserializedObject = (Dictionary<string, Tuple<DateTime, string>>)bFormatter.Deserialize(stream);
             stream.Close();
-            return objectToSerialize;
+            return deserializedObject;
         }
 
-        public string Get(string coffeScriptSource)
+        public string Get(string source)
         {
-            var hash = _hasher.Hash(coffeScriptSource);
-            return _compilerCache.ContainsKey(hash) ? _compilerCache[hash].Item2 : null;
+            if (_globalOptions.EnableCompilerCache)
+            {
+                if (!_initialized)
+                {
+                    Initialize();
+                }
+                var hash = _hasher.Hash(source);
+                return _compilerCache.ContainsKey(hash) ? _compilerCache[hash].Item2 : null;
+            }
+            return null;
+        }
+
+        private void Initialize()
+        {
+
+            _compilerCache = File.Exists(_globalOptions.CompilerCacheFile)
+                                    ? DeSerializeObject(_globalOptions.CompilerCacheFile)
+                                    : new Dictionary<string, Tuple<DateTime, string>>();
+            
+            _initialized = true;
         }
 
         public void Set(string source, string compiled)
         {
+            if (!_globalOptions.EnableCompilerCache) return;
+            if (!_initialized)
+            {
+                Initialize();
+            }
             var hash = _hasher.Hash(source);
             _compilerCache[hash] = new Tuple<DateTime, string>(DateTime.Now, compiled);
         }
 
-        public void SetInProgress(string coffeScriptSource)
+        public void Save()
         {
-            Set(coffeScriptSource,"INPROGRESS");
+            if (_initialized)
+            {
+                LimitSize();
+                SerializeObject(_globalOptions.CompilerCacheFile, _compilerCache);
+            }
+        }
+
+
+        public void Dispose()
+        {
+            Save();
         }
     }
 }

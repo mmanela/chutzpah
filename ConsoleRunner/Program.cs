@@ -86,6 +86,8 @@ namespace Chutzpah
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
 			Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
+            Console.WriteLine("  /compilercache         : File where compiled scripts can be cached");
+            Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb");
             
 			foreach (var transformer in SummaryTransformerFactory.GetTransformers())
             {
@@ -118,9 +120,14 @@ namespace Chutzpah
                     {
                         OpenInBrowser = commandLine.OpenInBrowser, 
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
-                        MaxDegreeOfParallelism = commandLine.Parallelism
+                        MaxDegreeOfParallelism = commandLine.Parallelism,
                     };
 
+                var globalOptions = GlobalOptions.Instance;
+                globalOptions.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
+                globalOptions.CompilerCacheFile = commandLine.CompilerCache;
+                globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
+                
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
 
                 ProcessTestSummaryTransformers(commandLine, testResultsSummary);

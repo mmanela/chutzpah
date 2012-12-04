@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Chutzpah.FileGenerator;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah.FileGenerators
@@ -11,11 +12,13 @@ namespace Chutzpah.FileGenerators
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly ICompilerEngineWrapper compilerEngineWrapper;
+        private readonly ICompilerCache compilerCache;
 
-        protected CompileToJavascriptFileGenerator(IFileSystemWrapper fileSystem, ICompilerEngineWrapper compilerEngineWrapper)
+        protected CompileToJavascriptFileGenerator(IFileSystemWrapper fileSystem, ICompilerEngineWrapper compilerEngineWrapper, ICompilerCache compilerCache)
         {
             this.fileSystem = fileSystem;
             this.compilerEngineWrapper = compilerEngineWrapper;
+            this.compilerCache = compilerCache;
         }
 
         /// <summary>
@@ -30,7 +33,19 @@ namespace Chutzpah.FileGenerators
             if (!CanHandleFile(referencedFile)) return;
 
             var sourceText = fileSystem.GetText(referencedFile.Path);
-            var jsText = compilerEngineWrapper.Compile(sourceText);
+            string jsText;
+            lock (compilerCache)
+            {
+                jsText = compilerCache.Get(sourceText);
+            }
+            if (string.IsNullOrEmpty(jsText))
+            {
+                jsText = compilerEngineWrapper.Compile(sourceText);
+                lock (compilerCache)
+                {
+                    compilerCache.Set(sourceText, jsText);
+                }
+            }
             var folderPath = Path.GetDirectoryName(referencedFile.Path);
             var fileName = Path.GetFileNameWithoutExtension(referencedFile.Path) + ".js";
             var newFilePath = Path.Combine(folderPath, string.Format(Constants.ChutzpahTemporaryFileFormat, fileName));

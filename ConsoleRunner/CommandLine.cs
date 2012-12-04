@@ -35,6 +35,10 @@ namespace Chutzpah
 
         public bool TeamCity { get; protected set; }
 
+        public string CompilerCache { get; protected set; }
+
+        public int? CompilerCacheSizeMb { get; protected set; }
+
         public bool Wait { get; protected set; }
 
         public IList<string> Files { get; set; }
@@ -117,6 +121,14 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     VsOutput = true;
                 }
+                else if (optionName == "/compilercache")
+                {
+                    SetCompilerCacheFile(option.Value);
+                }
+                else if (optionName == "/compilercachesize")
+                {
+                    SetCompilerCacheSize(option.Value);
+                }
                 else
                 {
                     if (!optionName.StartsWith("/"))
@@ -127,6 +139,28 @@ namespace Chutzpah
                     }
                 }
             }
+        }
+
+        private void SetCompilerCacheSize(string value)
+        {
+            int sizeMb;
+            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out sizeMb) || sizeMb < 0)
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /compilercachesize.  Expecting a positive integer");
+            }
+
+            CompilerCacheSizeMb = sizeMb;
+        }
+
+        private void SetCompilerCacheFile(string file)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                throw new ArgumentException(
+                    "missing argument for /compilercache.  Expecting a file path for the cache.");
+            }
+            CompilerCache = file;
         }
 
         private void AddParallelismOption(string value)

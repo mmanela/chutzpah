@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="GlobalOptions.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
     <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
+    <Compile Include="Utility\ICompilerCache.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />

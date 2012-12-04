@@ -1,5 +1,6 @@
 using System;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah.FileGenerators
@@ -7,8 +8,8 @@ namespace Chutzpah.FileGenerators
     public class TypeScriptFileGenerator : CompileToJavascriptFileGenerator
     {
 
-        public TypeScriptFileGenerator(IFileSystemWrapper fileSystem, ITypeScriptEngineWrapper typeScriptEngine)
-            : base(fileSystem, typeScriptEngine)
+        public TypeScriptFileGenerator(IFileSystemWrapper fileSystem, ITypeScriptEngineWrapper typeScriptEngine, ICompilerCache compilerCache)
+            : base(fileSystem, typeScriptEngine,compilerCache)
         {
         }
 
