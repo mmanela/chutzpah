@@ -126,8 +126,11 @@ namespace Chutzpah
                 var globalOptions = GlobalOptions.Instance;
                 globalOptions.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
                 globalOptions.CompilerCacheFile = commandLine.CompilerCache;
-                globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
-                
+                if (commandLine.CompilerCacheSizeMb != null)
+                {
+                    globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
+                }
+
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
 
                 ProcessTestSummaryTransformers(commandLine, testResultsSummary);
