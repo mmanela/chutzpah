@@ -6,18 +6,21 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Chutzpah.Utility
 {
-    class CompilerCache : IDisposable, ICompilerCache
+    class CompilerCache : ICompilerCache
     {
-        private Dictionary<string, Tuple<DateTime, string>> _compilerCache;
+        private readonly Dictionary<string, Tuple<DateTime, string>> _compilerCache;
         private readonly Hasher _hasher;
         private readonly GlobalOptions _globalOptions;
-        private bool _initialized;
 
         public CompilerCache()
         {
             _globalOptions = GlobalOptions.Instance;
             _hasher = new Hasher();
-            _initialized = false;
+            _compilerCache = File.Exists(_globalOptions.CompilerCacheFile)
+                                    ? DeSerializeObject(_globalOptions.CompilerCacheFile)
+                                    : new Dictionary<string, Tuple<DateTime, string>>();
+
+            
         }
 
         ~CompilerCache()
@@ -67,50 +70,25 @@ namespace Chutzpah.Utility
         {
             if (_globalOptions.EnableCompilerCache)
             {
-                if (!_initialized)
-                {
-                    Initialize();
-                }
                 var hash = _hasher.Hash(source);
                 return _compilerCache.ContainsKey(hash) ? _compilerCache[hash].Item2 : null;
             }
             return null;
         }
 
-        private void Initialize()
-        {
-
-            _compilerCache = File.Exists(_globalOptions.CompilerCacheFile)
-                                    ? DeSerializeObject(_globalOptions.CompilerCacheFile)
-                                    : new Dictionary<string, Tuple<DateTime, string>>();
-            
-            _initialized = true;
-        }
 
         public void Set(string source, string compiled)
         {
             if (!_globalOptions.EnableCompilerCache) return;
-            if (!_initialized)
-            {
-                Initialize();
-            }
             var hash = _hasher.Hash(source);
             _compilerCache[hash] = new Tuple<DateTime, string>(DateTime.Now, compiled);
         }
 
         public void Save()
         {
-            if (_initialized)
-            {
-                LimitSize();
-                SerializeObject(_globalOptions.CompilerCacheFile, _compilerCache);
-            }
+            LimitSize();
+            SerializeObject(_globalOptions.CompilerCacheFile, _compilerCache);
         }
 
-
-        public void Dispose()
-        {
-            Save();
-        }
     }
 }
