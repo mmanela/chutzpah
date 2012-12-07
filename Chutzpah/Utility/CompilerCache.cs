@@ -3,22 +3,33 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.Utility
 {
-    class CompilerCache : ICompilerCache
+    public class CompilerCache : ICompilerCache
     {
         private readonly Dictionary<string, Tuple<DateTime, string>> _compilerCache;
         private readonly Hasher _hasher;
-        private readonly GlobalOptions _globalOptions;
+        private IFileSystemWrapper _filesystem;
 
-        public CompilerCache()
+
+        public CompilerCache(IFileSystemWrapper fileSystem)
         {
-            _globalOptions = GlobalOptions.Instance;
+            
             _hasher = new Hasher();
-            _compilerCache = File.Exists(_globalOptions.CompilerCacheFile)
-                                    ? DeSerializeObject(_globalOptions.CompilerCacheFile)
-                                    : new Dictionary<string, Tuple<DateTime, string>>();
+            _compilerCache = new Dictionary<string, Tuple<DateTime, string>>();
+            _filesystem = fileSystem;
+            if (!string.IsNullOrEmpty( GlobalOptions.Instance.CompilerCacheFile) &&
+                fileSystem.FileExists( GlobalOptions.Instance.CompilerCacheFile))
+            {
+                using (var cacheStream = fileSystem.Open( GlobalOptions.Instance.CompilerCacheFile, FileMode.Open, FileAccess.Read))
+                {
+                    _compilerCache = DeSerializeObject(cacheStream);
+                }
+            }
+            
+            
 
             
         }
@@ -30,8 +41,8 @@ namespace Chutzpah.Utility
 
         private void LimitSize()
         {
-            var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length);
-            while (size > _globalOptions.CompilerCacheMaxSize*1024*1024)
+            var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length + tuple.Value.Item1.ToString().Length + tuple.Key.Length);
+            while (size >  GlobalOptions.Instance.CompilerCacheMaxSize*1024*1024)
             {
                 var oldestKey = "";
                 var oldestTime = DateTime.Now;
@@ -51,43 +62,50 @@ namespace Chutzpah.Utility
 
         private void SerializeObject(string filename, Dictionary<string, Tuple<DateTime, string>> objectToSerialize)
         {
-            Stream stream = File.Open(filename, FileMode.Create);
-            var bFormatter = new BinaryFormatter();
-            bFormatter.Serialize(stream, objectToSerialize);
-            stream.Close();
+            using (var stream = _filesystem.Open(filename, FileMode.Create, FileAccess.Write))
+            {
+                var bFormatter = new BinaryFormatter();
+                bFormatter.Serialize(stream, objectToSerialize);
+            }
         }
 
-        private Dictionary<string, Tuple<DateTime, string>> DeSerializeObject(string filename)
+        private Dictionary<string, Tuple<DateTime, string>> DeSerializeObject(Stream cacheStream)
         {
-            Stream stream = File.Open(filename, FileMode.Open);
-            var bFormatter = new BinaryFormatter();
-            var deserializedObject = (Dictionary<string, Tuple<DateTime, string>>)bFormatter.Deserialize(stream);
-            stream.Close();
-            return deserializedObject;
+            try
+            {
+                var bFormatter = new BinaryFormatter();
+                var deserializedObject = (Dictionary<string, Tuple<DateTime, string>>)bFormatter.Deserialize(cacheStream);
+                return deserializedObject;
+            }
+            catch (Exception)
+            {
+                // File was not a saved cache. Set filename to null to prevent it from being overwritten when saving.
+                GlobalOptions.Instance.CompilerCacheFile = null;
+                return new Dictionary<string, Tuple<DateTime, string>>();
+            }
+           
         }
 
         public string Get(string source)
         {
-            if (_globalOptions.EnableCompilerCache)
-            {
-                var hash = _hasher.Hash(source);
-                return _compilerCache.ContainsKey(hash) ? _compilerCache[hash].Item2 : null;
-            }
-            return null;
+            var hash = _hasher.Hash(source);
+            return _compilerCache.ContainsKey(hash) ? _compilerCache[hash].Item2 : null;
         }
 
 
         public void Set(string source, string compiled)
         {
-            if (!_globalOptions.EnableCompilerCache) return;
             var hash = _hasher.Hash(source);
             _compilerCache[hash] = new Tuple<DateTime, string>(DateTime.Now, compiled);
         }
 
         public void Save()
         {
-            LimitSize();
-            SerializeObject(_globalOptions.CompilerCacheFile, _compilerCache);
+            if (!string.IsNullOrEmpty( GlobalOptions.Instance.CompilerCacheFile))
+            {
+                LimitSize();
+                SerializeObject( GlobalOptions.Instance.CompilerCacheFile, _compilerCache);
+            }
         }
 
     }

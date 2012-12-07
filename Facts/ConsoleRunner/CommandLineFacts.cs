@@ -429,5 +429,68 @@ namespace Chutzpah.Facts.ConsoleRunner
                 Assert.True(commandLine.VsOutput);
             }
         }
+
+        public class CompilerCacheOptionsFacts
+        {
+            [Fact]
+            public void CompilerCache_Option_Not_Passed_CacheFile_Empty()
+            {
+                var arguments = new[] {"test.html"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(string.IsNullOrEmpty(commandLine.CompilerCache));
+            }
+
+            [Fact]
+            public void CompilerCache_Option_Passed_CacheFile_Set()
+            {
+                var arguments = new[] { "test.html", "/compilercache", "cache.dat"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("cache.dat",commandLine.CompilerCache);
+            }
+
+            [Fact]
+            public void CompilerCacheSize_Option_Not_Passed_CompilerCacheSize_Null()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Null(commandLine.CompilerCacheSizeMb);
+            }
+
+            [Fact]
+            public void CompilerCacheSize_Option_Passed_CompilerCacheSize_Set()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "16"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(16,commandLine.CompilerCacheSizeMb);
+            }
+
+            [Fact]
+            public void CompilerCacheSize_Option_Passed_Negative()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "-1" };
+                var exception = Record.Exception(() => TestableCommandLine.Create(arguments));
+
+                Assert.IsType<ArgumentException>(exception);
+                Assert.Equal("invalid or missing argument for /compilercachesize.  Expecting a positive integer", exception.Message);
+            }
+
+            [Fact]
+            public void CompilerCacheSize_Option_Passed_TooBig()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "1025" };
+                var exception = Record.Exception(() => TestableCommandLine.Create(arguments));
+
+                Assert.IsType<ArgumentException>(exception);
+                Assert.Equal("invalid argument for /compilercachesize.  Cachesize too large.", exception.Message);
+            }
+        }
     }
 }

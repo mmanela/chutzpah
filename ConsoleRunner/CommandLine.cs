@@ -149,6 +149,12 @@ namespace Chutzpah
                 throw new ArgumentException(
                     "invalid or missing argument for /compilercachesize.  Expecting a positive integer");
             }
+            if (sizeMb > 1024)
+            {
+                throw new ArgumentException(
+                    "invalid argument for /compilercachesize.  Cachesize too large.");
+            }
+
 
             CompilerCacheSizeMb = sizeMb;
         }

@@ -62,6 +62,7 @@
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
     <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />
+    <Compile Include="Library\FileGenerators\CompilerCacheFacts.cs" />
     <Compile Include="Library\FileGenerators\TypeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\JasmineDefinitionFacts.cs" />
     <Compile Include="Library\JasmineLineNumberProcessorFacts.cs" />

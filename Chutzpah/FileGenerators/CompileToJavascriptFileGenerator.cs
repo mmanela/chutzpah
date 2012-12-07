@@ -33,17 +33,24 @@ namespace Chutzpah.FileGenerators
             if (!CanHandleFile(referencedFile)) return;
 
             var sourceText = fileSystem.GetText(referencedFile.Path);
-            string jsText;
-            lock (compilerCache)
+            string jsText = null;
+
+            if (GlobalOptions.Instance.EnableCompilerCache)
             {
-                jsText = compilerCache.Get(sourceText);
+                lock (compilerCache)
+                {
+                    jsText = compilerCache.Get(sourceText);
+                }
             }
             if (string.IsNullOrEmpty(jsText))
             {
                 jsText = compilerEngineWrapper.Compile(sourceText);
-                lock (compilerCache)
+                if (GlobalOptions.Instance.EnableCompilerCache)
                 {
-                    compilerCache.Set(sourceText, jsText);
+                    lock (compilerCache)
+                    {
+                        compilerCache.Set(sourceText, jsText);
+                    }
                 }
             }
             var folderPath = Path.GetDirectoryName(referencedFile.Path);

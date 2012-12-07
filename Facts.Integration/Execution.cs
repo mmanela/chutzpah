@@ -84,6 +84,23 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
+        [PropertyData("CoffeeScriptTests")]
+        public void Will_run_tests_from_a_coffee_script_file_with_compilercache_enabled(string scriptPath)
+        {
+            var globalOptions = GlobalOptions.Instance;
+            globalOptions.EnableCompilerCache = true;
+            globalOptions.CompilerCacheFile = null;
+            globalOptions.CompilerCacheMaxSize = 0;
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath);
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(3, result.PassedCount);
+            Assert.Equal(4, result.TotalCount);
+        }
+
+        [Theory]
         [PropertyData("TypeScriptTests")]
         public void Will_run_tests_from_a_type_script_file(string scriptPath)
         {
