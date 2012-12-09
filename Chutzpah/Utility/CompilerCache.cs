@@ -12,6 +12,8 @@ namespace Chutzpah.Utility
         private readonly Dictionary<string, Tuple<DateTime, string>> _compilerCache;
         private readonly Hasher _hasher;
         private IFileSystemWrapper _filesystem;
+        private string _filename;
+        private const int maxSizeBytes = 8*1024*1024; 
 
 
         public CompilerCache(IFileSystemWrapper fileSystem)
@@ -20,10 +22,12 @@ namespace Chutzpah.Utility
             _hasher = new Hasher();
             _compilerCache = new Dictionary<string, Tuple<DateTime, string>>();
             _filesystem = fileSystem;
-            if (!string.IsNullOrEmpty( GlobalOptions.Instance.CompilerCacheFile) &&
-                fileSystem.FileExists( GlobalOptions.Instance.CompilerCacheFile))
+            _filename = Path.Combine(_filesystem.GetTemporaryFolder(Constants.ChutzpahCompilerCacheFolder),
+                                     Constants.ChutzpahCompilerCacheFileName);
+          
+            if (fileSystem.FileExists(_filename))
             {
-                using (var cacheStream = fileSystem.Open( GlobalOptions.Instance.CompilerCacheFile, FileMode.Open, FileAccess.Read))
+                using (var cacheStream = fileSystem.Open(_filename, FileMode.Open, FileAccess.Read))
                 {
                     _compilerCache = DeSerializeObject(cacheStream);
                 }
@@ -39,7 +43,7 @@ namespace Chutzpah.Utility
         private void LimitSize()
         {
             var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length + tuple.Value.Item1.ToString().Length + tuple.Key.Length);
-            while (size >  GlobalOptions.Instance.CompilerCacheMaxSize*1024*1024)
+            while (size > maxSizeBytes)
             {
                 var oldestKey = "";
                 var oldestTime = DateTime.Now;
@@ -76,8 +80,6 @@ namespace Chutzpah.Utility
             }
             catch (Exception)
             {
-                // File was not a saved cache. Set filename to null to prevent it from being overwritten when saving.
-                GlobalOptions.Instance.CompilerCacheFile = null;
                 return new Dictionary<string, Tuple<DateTime, string>>();
             }
            
@@ -98,11 +100,8 @@ namespace Chutzpah.Utility
 
         public void Save()
         {
-            if (!string.IsNullOrEmpty( GlobalOptions.Instance.CompilerCacheFile))
-            {
-                LimitSize();
-                SerializeObject( GlobalOptions.Instance.CompilerCacheFile, _compilerCache);
-            }
+            LimitSize();
+            SerializeObject( _filename, _compilerCache);
         }
 
     }

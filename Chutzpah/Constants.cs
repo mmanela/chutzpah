@@ -2,6 +2,7 @@ namespace Chutzpah
 {
     public static class Constants
     {
+        
         // Default time in milliseconds to wait for new test results. If we don't hear anything
         // from phantom after this amount of time abort
         public const int DefaultTestFileTimeout = 5000;
@@ -15,6 +16,8 @@ namespace Chutzpah
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
         public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}.{1}";
 
+        public const string ChutzpahCompilerCacheFolder = ChutzpahTemporaryFilePrefix + "cache";
+        public const string ChutzpahCompilerCacheFileName = ChutzpahTemporaryFilePrefix + "cache";
 
         public const string PngExtension = ".png";
         public const string CssExtension = ".css";

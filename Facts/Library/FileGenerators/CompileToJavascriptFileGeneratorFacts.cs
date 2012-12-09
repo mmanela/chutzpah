@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using Chutzpah.FileGenerator;
 using Chutzpah.FileGenerators;
 using Chutzpah.Models;
@@ -52,7 +53,7 @@ namespace Chutzpah.Facts
                 var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
                 generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId,"someFile.js");
                 var tempFiles = new List<string>();
 
                 generator.ClassUnderTest.Generate(file, tempFiles);
@@ -63,38 +64,17 @@ namespace Chutzpah.Facts
                 Assert.Contains(resultPath, tempFiles);
             }
 
+           
             [Fact]
-            public void Will_not_update_cache_when_caching_is_disabled()
+            public void Will_update_cache_when_compiling()
             {
-                GlobalOptions.Instance.EnableCompilerCache = false;
                 var generator = new TestableCompileToJavascriptFileGenerator();
                 generator.ClassUnderTest.CanHandle = true;
                 var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
                 generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
                 generator.Mock<ICompilerCache>().Setup(x => x.Get("jsContents")).Returns("");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
-                var tempFiles = new List<string>();
-
-                generator.ClassUnderTest.Generate(file, tempFiles);
-                generator.Mock<ICompilerCache>().Verify(x => x.Set("coffeeContents", "jsContents"),Times.Never());
-                generator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
-                Assert.Equal(@"path\to\someFile.coffee", file.Path);
-                Assert.Equal(resultPath, file.GeneratedFilePath);
-                Assert.Contains(resultPath, tempFiles);
-            }
-
-            [Fact]
-            public void Will_update_cache_when_caching_is_enabled()
-            {
-                GlobalOptions.Instance.EnableCompilerCache = true;
-                var generator = new TestableCompileToJavascriptFileGenerator();
-                generator.ClassUnderTest.CanHandle = true;
-                var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
-                generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
-                generator.Mock<ICompilerCache>().Setup(x => x.Get("jsContents")).Returns("");
-                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
                 generator.ClassUnderTest.Generate(file, tempFiles);
@@ -108,14 +88,13 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_use_cached_value_before_compiling_when_caching_is_enabled()
             {
-                GlobalOptions.Instance.EnableCompilerCache = true;
                 var generator = new TestableCompileToJavascriptFileGenerator();
                 generator.ClassUnderTest.CanHandle = true;
                 var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
                 generator.Mock<ICompilerCache>().Setup(x => x.Get("coffeeContents")).Returns("jsContents");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
                 generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("error");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
                 generator.ClassUnderTest.Generate(file, tempFiles);
@@ -125,30 +104,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(resultPath, file.GeneratedFilePath);
                 Assert.Contains(resultPath, tempFiles);
             }
-
-            [Fact]
-            public void Will_not_use_cached_value_before_compiling_when_caching_is_disabled()
-            {
-                GlobalOptions.Instance.EnableCompilerCache = false;
-                var generator = new TestableCompileToJavascriptFileGenerator();
-                generator.ClassUnderTest.CanHandle = true;
-                var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
-                generator.Mock<ICompilerCache>().Setup(x => x.Get("coffeeContents")).Returns("error");
-                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
-                generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
-                var tempFiles = new List<string>();
-
-                generator.ClassUnderTest.Generate(file, tempFiles);
-                generator.Mock<ICompilerCache>().Verify(x => x.Get("coffeeContents"),Times.Never());
-                generator.Mock<ICompilerEngineWrapper>().Verify(x => x.Compile("coffeeContents"), Times.Once());
-                generator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
-                Assert.Equal(@"path\to\someFile.coffee", file.Path);
-                Assert.Equal(resultPath, file.GeneratedFilePath);
-                Assert.Contains(resultPath, tempFiles);
-            }
-
-            
 
         }
     }

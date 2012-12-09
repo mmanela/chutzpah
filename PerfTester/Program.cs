@@ -17,13 +17,8 @@ namespace Chutzpah.PerfTester
 
             Console.WriteLine("Javascript:");
             PerfRunner.Run(() => testRunner.RunTests(@"JS\test.js"));
-            Console.WriteLine("\nCoffee without cache:");
-            PerfRunner.Run(() => testRunner.RunTests(@"Coffee\runner.coffee"));
             
-            var globalOptions = GlobalOptions.Instance;
-            globalOptions.EnableCompilerCache = true;
-            globalOptions.CompilerCacheFile = "js.cache";
-            Console.WriteLine("\nCoffee with cache:");
+            Console.WriteLine("\nCoffeescript:");
             PerfRunner.Run(() => testRunner.RunTests(@"Coffee\runner.coffee"));
         }
     }
