@@ -99,6 +99,13 @@ namespace Chutzpah
 
         static int RunTests(CommandLine commandLine)
         {
+            var globalOptions = GlobalOptions.Instance;
+            globalOptions.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
+            globalOptions.CompilerCacheFile = commandLine.CompilerCache;
+            if (commandLine.CompilerCacheSizeMb != null)
+            {
+                globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
+            }
 
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
@@ -122,14 +129,6 @@ namespace Chutzpah
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
                     };
-
-                var globalOptions = GlobalOptions.Instance;
-                globalOptions.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
-                globalOptions.CompilerCacheFile = commandLine.CompilerCache;
-                if (commandLine.CompilerCacheSizeMb != null)
-                {
-                    globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
-                }
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
 
