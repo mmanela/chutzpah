@@ -120,7 +120,7 @@ namespace Chutzpah
                     {
                         OpenInBrowser = commandLine.OpenInBrowser, 
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
-                        MaxDegreeOfParallelism = commandLine.Parallelism,
+                        MaxDegreeOfParallelism = commandLine.Parallelism
                     };
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
