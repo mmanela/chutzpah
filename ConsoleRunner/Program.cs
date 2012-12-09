@@ -29,7 +29,7 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
-
+                SetGlobalOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -47,6 +47,17 @@ namespace Chutzpah
                 Console.WriteLine();
                 Console.WriteLine("error: {0}", ex.Message);
                 return -1;
+            }
+        }
+
+        private static void SetGlobalOptions(CommandLine commandLine)
+        {
+            
+            GlobalOptions.Instance.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
+            GlobalOptions.Instance.CompilerCacheFile = commandLine.CompilerCache;
+            if (commandLine.CompilerCacheSizeMb != null)
+            {
+                GlobalOptions.Instance.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
             }
         }
 
@@ -99,14 +110,7 @@ namespace Chutzpah
 
         static int RunTests(CommandLine commandLine)
         {
-            var globalOptions = GlobalOptions.Instance;
-            globalOptions.EnableCompilerCache = !string.IsNullOrEmpty(commandLine.CompilerCache);
-            globalOptions.CompilerCacheFile = commandLine.CompilerCache;
-            if (commandLine.CompilerCacheSizeMb != null)
-            {
-                globalOptions.CompilerCacheMaxSize = commandLine.CompilerCacheSizeMb;
-            }
-
+            
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
             var chutzpahAssemblyName = testRunner.GetType().Assembly.GetName();
