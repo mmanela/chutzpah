@@ -85,6 +85,7 @@
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
+    <Compile Include="GlobalOptions.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />

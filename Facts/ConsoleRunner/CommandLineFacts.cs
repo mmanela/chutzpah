@@ -430,5 +430,30 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class CompilerCacheOptionsFacts
+        {
+            [Fact]
+            public void CompilerCache_Option_Not_Passed_CacheFile_Empty()
+            {
+                var arguments = new[] {"test.html"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(string.IsNullOrEmpty(commandLine.CompilerCacheFile));
+            }
+
+            [Fact]
+            public void CompilerCache_Option_Passed_CacheFile_Set()
+            {
+                var arguments = new[] { "test.html", "/compilercachefile", "cache.dat"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("cache.dat",commandLine.CompilerCacheFile);
+            }
+
+
+        }
+
     }
 }

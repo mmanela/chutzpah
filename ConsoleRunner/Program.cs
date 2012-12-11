@@ -29,6 +29,7 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
+                SetGlobalOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -47,6 +48,11 @@ namespace Chutzpah
                 Console.WriteLine("error: {0}", ex.Message);
                 return -1;
             }
+        }
+
+        private static void SetGlobalOptions(CommandLine commandLine)
+        {
+            GlobalOptions.Instance.CompilerCacheFile = commandLine.CompilerCacheFile;
         }
 
 

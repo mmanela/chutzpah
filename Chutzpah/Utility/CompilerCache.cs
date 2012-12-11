@@ -13,7 +13,7 @@ namespace Chutzpah.Utility
         private readonly Hasher _hasher;
         private IFileSystemWrapper _filesystem;
         private string _filename;
-        private const int maxSizeBytes = 8*1024*1024; 
+        
 
 
         public CompilerCache(IFileSystemWrapper fileSystem)
@@ -22,9 +22,16 @@ namespace Chutzpah.Utility
             _hasher = new Hasher();
             _compilerCache = new Dictionary<string, Tuple<DateTime, string>>();
             _filesystem = fileSystem;
-            _filename = Path.Combine(_filesystem.GetTemporaryFolder(Constants.ChutzpahCompilerCacheFolder),
-                                     Constants.ChutzpahCompilerCacheFileName);
-          
+            if (string.IsNullOrEmpty(GlobalOptions.Instance.CompilerCacheFile))
+            {
+                _filename = Path.Combine(_filesystem.GetTemporaryFolder(Constants.ChutzpahCompilerCacheFolder),
+                                         Constants.ChutzpahCompilerCacheFileName);
+            }
+            else
+            {
+                _filename = GlobalOptions.Instance.CompilerCacheFile;
+            }
+
             if (fileSystem.FileExists(_filename))
             {
                 using (var cacheStream = fileSystem.Open(_filename, FileMode.Open, FileAccess.Read))
@@ -42,8 +49,8 @@ namespace Chutzpah.Utility
 
         private void LimitSize()
         {
-            var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length + tuple.Value.Item1.ToString().Length + tuple.Key.Length);
-            while (size > maxSizeBytes)
+            var size = _compilerCache.Sum(tuple => tuple.Value.Item2.Length + tuple.Value.Item1.ToString().Length + tuple.Key.Length*2);
+            while (size > Constants.CompilerCacheFileMaxSize)
             {
                 var oldestKey = "";
                 var oldestTime = DateTime.Now;

@@ -10,6 +10,9 @@ namespace Chutzpah
         // Default of how many files to open during test file discovery
         public const int DefaultFileSeachLimit = 300;
 
+        // The max-size in bytes for the compilercache file
+        public const int CompilerCacheFileMaxSize = 32*1024*1024;
+
         // Format for temporary files Chutzpah creates that should be ignored in source controler.
         // These get generated when Chutzpah needs to generate a file in place like when it needs to convert 
         // Coffee script to JS

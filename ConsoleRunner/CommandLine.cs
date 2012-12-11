@@ -43,6 +43,8 @@ namespace Chutzpah
 
         public bool VsOutput { get; protected set; }
 
+        public string CompilerCacheFile { get; protected set; }
+
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
             if (option.Value != null)
@@ -117,6 +119,10 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     VsOutput = true;
                 }
+                else if (optionName == "/compilercachefile")
+                {
+                    SetCompilerCacheFile(option.Value);
+                }
                 else
                 {
                     if (!optionName.StartsWith("/"))
@@ -129,6 +135,15 @@ namespace Chutzpah
             }
         }
 
+        private void SetCompilerCacheFile(string file)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                throw new ArgumentException(
+                    "missing argument for /compilercachefile.  Expecting a file path for the cache.");
+            }
+            CompilerCacheFile = file;
+        }
 
         private void AddParallelismOption(string value)
         {
