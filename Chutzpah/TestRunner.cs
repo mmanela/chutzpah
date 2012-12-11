@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,11 +14,12 @@ namespace Chutzpah
     {
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
-
+        private readonly Stopwatch _stopWatch;
         private readonly IProcessHelper process;
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
+        
 
         public bool DebugEnabled { get; set; }
 
@@ -36,6 +38,7 @@ namespace Chutzpah
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
             this.fileProbe = fileProbe;
+            _stopWatch = new Stopwatch();
             testContextBuilder = htmlTestFileCreator;
         }
 
@@ -115,6 +118,7 @@ namespace Chutzpah
                                                  TestRunnerMode testRunnerMode,
                                                  ITestMethodRunnerCallback callback)
         {
+            _stopWatch.Start();
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
             if (testPaths == null)
                 throw new ArgumentNullException("testPaths");
@@ -180,7 +184,8 @@ namespace Chutzpah
             {
                 overallSummary.Append(fileSummary);
             }
-
+            _stopWatch.Stop();
+            overallSummary.SetTotalRunTime((int)_stopWatch.Elapsed.TotalMilliseconds);
             return overallSummary;
         }
 

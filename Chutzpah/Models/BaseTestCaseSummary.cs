@@ -46,6 +46,11 @@ namespace Chutzpah.Models
         public int TimeTaken { get; set; }
 
         /// <summary>
+        /// The total runtime in milliseconds to complete all tests
+        /// </summary>
+        public int TotalRuntime { get; set; }
+
+        /// <summary>
         /// Total count of all tests
         /// </summary>
         public int TotalCount
