@@ -132,11 +132,18 @@ namespace Chutzpah
         private void AddParallelismOption(string value)
         {
             int parallelism;
-            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out parallelism) || parallelism < 0)
+            if (string.IsNullOrEmpty(value))
+            {
+                // If no parallelism is specified, use CPU-count + 1
+                parallelism = Environment.ProcessorCount + 1;
+            }
+            else if (!int.TryParse(value, out parallelism) || parallelism < 0)
             {
                 throw new ArgumentException(
-                    "invalid or missing argument for /parallelism.  Expecting a postivie integer");
+                    "invalid argument for /parallelism.  Expecting a optional positive integer");
             }
+            
+            
 
             Parallelism = parallelism;
 
