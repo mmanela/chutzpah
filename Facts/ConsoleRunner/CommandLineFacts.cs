@@ -305,13 +305,13 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
 
             [Fact]
-            public void Will_throw_if_no_arg_given()
+            public void Will_set_to_cpu_count_plus_one_if_no_option_given()
             {
                 var arguments = new[] { "test.html", "/parallelism" };
 
-                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+                var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.NotNull(ex);
+                Assert.Equal(Environment.ProcessorCount + 1, commandLine.Parallelism);
             }
 
 
