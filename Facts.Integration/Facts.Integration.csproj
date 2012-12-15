@@ -156,6 +156,15 @@
     </Content>
     <Content Include="JS\Test\jasmine.css" />
     <Content Include="JS\Test\qunit.css" />
+    <Content Include="JS\Test\TypeScript\base.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TypeScript\child.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TypeScript\test.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\webReferenceSSL.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

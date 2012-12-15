@@ -196,10 +196,7 @@ namespace Chutzpah
         {
             foreach (var fileGenerator in fileGenerators)
             {
-                foreach (var referencedFile in referencedFiles)
-                {
-                    fileGenerator.Generate(referencedFile, temporaryFiles);
-                }
+                fileGenerator.Generate(referencedFiles, temporaryFiles);
             }
         }
 

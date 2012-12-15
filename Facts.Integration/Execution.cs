@@ -96,6 +96,21 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_process_type_script_files_together()
+        {
+            // This test verifies that we run TypeScript compiler on all ts files at once 
+            // this is important since TS using typechecking engine to help generate code
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+
         [Theory]
         [PropertyData("ReferencesTestScripts")]
         public void Will_expand_references_in_a_js_file(string scriptPath)

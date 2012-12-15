@@ -112,7 +112,7 @@ namespace Chutzpah
             return new PathInfo { Path = path, FullPath = fullPath, Type = pathType };
         }
 
-        private static PathType GetFilePathType(string fileName)
+        public static PathType GetFilePathType(string fileName)
         {
             string ext = Path.GetExtension(fileName);
             PathType pathType;

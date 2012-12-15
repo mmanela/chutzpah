@@ -151,7 +151,7 @@ namespace Chutzpah
                         {
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
-                        else
+                        else if(!DebugEnabled)
                         {
                             // Don't clean up context if you open in browser since we need the files around
                             // for the browser to use

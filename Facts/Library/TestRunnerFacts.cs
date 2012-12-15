@@ -363,6 +363,21 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_not_clean_up_test_context_if_debug_mode()
+            {
+                var runner = new TestableTestRunner();
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
+                runner.ClassUnderTest.DebugEnabled = true;
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
+
+                runner.Mock<ITestContextBuilder>().Verify(x => x.CleanupContext(context), Times.Never());
+            }
+
+            [Fact]
             public void Will_not_clean_up_test_context_if_open_in_browser_is_set()
             {
                 var runner = new TestableTestRunner();
