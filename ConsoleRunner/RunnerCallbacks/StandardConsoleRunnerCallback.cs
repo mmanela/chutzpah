@@ -33,7 +33,7 @@ namespace Chutzpah.RunnerCallbacks
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
             Console.WriteLine();
-            var seconds = testResultsSummary.TimeTaken / 1000.0;
+            var seconds = testResultsSummary.TotalRuntime / 1000.0;
             Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
 
             base.TestSuiteFinished(testResultsSummary);

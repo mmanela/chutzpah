@@ -49,5 +49,10 @@ namespace Chutzpah.Models
         {
             Errors = Errors.Concat(errors).ToList();
         }
+
+        public void SetTotalRunTime(int timeMs)
+        {
+            TotalRuntime = timeMs;
+        }
     }
 }
