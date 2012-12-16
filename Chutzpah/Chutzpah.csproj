@@ -85,6 +85,7 @@
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
+    <Compile Include="GlobalOptions.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
@@ -124,12 +125,15 @@
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
+    <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
+    <Compile Include="Utility\ICompilerCache.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
     <Compile Include="Wrappers\CoffeeScriptEngineWrapper.cs" />
+    <Compile Include="Wrappers\BinarySerializer.cs" />
     <Compile Include="Wrappers\ICompilerEngineWrapper.cs" />
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />

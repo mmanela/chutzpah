@@ -429,5 +429,94 @@ namespace Chutzpah.Facts.ConsoleRunner
                 Assert.True(commandLine.VsOutput);
             }
         }
+
+        public class CompilerCacheOptionsFacts
+        {
+            [Fact]
+            public void CompilerCache_Option_Not_Passed_CacheFile_Empty()
+            {
+                var arguments = new[] {"test.html"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(string.IsNullOrEmpty(commandLine.CompilerCacheFile));
+            }
+
+            [Fact]
+            public void CompilerCache_Option_Passed_CacheFile_Set()
+            {
+                var arguments = new[] { "test.html", "/compilercachefile", "cache.dat"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("cache.dat",commandLine.CompilerCacheFile);
+            }
+
+        }
+
+        public class CompilerCacheSizeOptionsFacs
+        {
+            [Fact]
+            public void Will_be_null_if_not_pass()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Null(commandLine.CompilerCacheFileMaxSizeMb);
+            }
+
+            [Fact]
+            public void Will_set_to_number_passed_in()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "10" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(10, commandLine.CompilerCacheFileMaxSizeMb);
+            }
+
+            [Fact]
+            public void Will_ignore_case()
+            {
+                var arguments = new[] { "test.html", "/compilerCacheSize", "10" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(10, commandLine.CompilerCacheFileMaxSizeMb);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_arg_given()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+
+            [Fact]
+            public void Will_throw_if_arg_is_negative()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "-10" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_arg_is_not_a_number()
+            {
+                var arguments = new[] { "test.html", "/compilercachesize", "sdf" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+        }
+
     }
 }

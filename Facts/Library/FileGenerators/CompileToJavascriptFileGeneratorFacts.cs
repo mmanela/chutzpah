@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Threading;
 using Chutzpah.FileGenerator;
 using Chutzpah.FileGenerators;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
+using Moq;
 using Xunit;
 
 namespace Chutzpah.Facts
@@ -25,7 +28,7 @@ namespace Chutzpah.Facts
             }
 
 
-            protected override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles)
+            public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles)
             {
                 return CompiledSources;
             }
@@ -60,7 +63,7 @@ namespace Chutzpah.Facts
                         {@"path\to\someFile.coffee", "jsContents"}
                     };
                 var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
                 generator.ClassUnderTest.Generate(new []{file}, tempFiles);
@@ -70,7 +73,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(resultPath, file.GeneratedFilePath);
                 Assert.Contains(resultPath, tempFiles);
             }
-
         }
     }
 }

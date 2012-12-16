@@ -21,6 +21,7 @@ namespace Chutzpah
             container.Configure(config =>
                 {
                     config.For<IHasher>().Singleton().Use<Hasher>();
+                    config.For<ICompilerCache>().Singleton().Use<CompilerCache>();
                     config.Scan(scan =>
                         {
                             scan.TheCallingAssembly();

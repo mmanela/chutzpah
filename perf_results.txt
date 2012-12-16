@@ -4,7 +4,14 @@
 
 Samples: 25
 
-Average Time:   0.498 seconds
-Fastest Time:   0.322 seconds
-Slowest Time:   0.766 seconds
-Std Deviation:  0.129 seconds
+Javascript:
+Average Time:   2.044 seconds
+Fastest Time:   1.706 seconds
+Slowest Time:   2.267 seconds
+Std Deviation:  0.163 seconds
+
+Coffeescript:
+Average Time:   1.888 seconds
+Fastest Time:   1.516 seconds
+Slowest Time:   2.327 seconds
+Std Deviation:  0.239 seconds

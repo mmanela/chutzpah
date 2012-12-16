@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -235,7 +236,7 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + string.Format(Constants.ChutzpahTemporaryFileFormat,"a.js"));
+                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + string.Format(Constants.ChutzpahTemporaryFileFormat,Thread.CurrentThread.ManagedThreadId,"a.js"));
 
                 Assert.True(res);
             }
@@ -357,7 +358,7 @@ namespace Chutzpah.Facts
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
                 probe.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
-                    .Returns(new string[] { "subFile1.js", string.Format(Constants.ChutzpahTemporaryFileFormat, "subFile2.js"), });
+                    .Returns(new string[] { "subFile1.js", string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "subFile2.js"), });
                 var paths = new List<string>
                             {
                                 "folder"

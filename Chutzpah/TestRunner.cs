@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Chutzpah.Exceptions;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -19,7 +20,8 @@ namespace Chutzpah
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
-        
+        private readonly ICompilerCache compilerCache;
+
 
         public bool DebugEnabled { get; set; }
 
@@ -33,13 +35,15 @@ namespace Chutzpah
         public TestRunner(IProcessHelper process,
                           ITestCaseStreamReaderFactory testCaseStreamReaderFactory,
                           IFileProbe fileProbe,
-                          ITestContextBuilder htmlTestFileCreator)
+                          ITestContextBuilder htmlTestFileCreator,
+                          ICompilerCache compilerCache)
         {
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
             this.fileProbe = fileProbe;
             stopWatch = new Stopwatch();
             testContextBuilder = htmlTestFileCreator;
+            this.compilerCache = compilerCache;
         }
 
 
@@ -186,6 +190,7 @@ namespace Chutzpah
             }
             stopWatch.Stop();
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
+            compilerCache.Save();
             return overallSummary;
         }
 

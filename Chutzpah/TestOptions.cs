@@ -16,6 +16,7 @@ namespace Chutzpah
             TestingMode = TestingMode.All;
             defaultParallelism = 1;
             MaxDegreeOfParallelism = defaultParallelism;
+            
 
         }
 
@@ -52,6 +53,8 @@ namespace Chutzpah
             get { return maxDegreeOfParallelism; }
             set { maxDegreeOfParallelism = GetDegreeOfParallelism(value); }
         }
+
+       
 
 
         /// <summary>
