@@ -1,4 +1,4 @@
-using SassAndCoffee.JavaScript.TypeScript;
+using Chutzpah.Compilers.TypeScript;
 
 namespace Chutzpah.Wrappers
 {

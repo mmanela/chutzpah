@@ -59,6 +59,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compilers\CoffeeScriptCompilerFacts.cs" />
+    <Compile Include="Compilers\TypeScriptCompilerFacts.cs" />
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
     <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />

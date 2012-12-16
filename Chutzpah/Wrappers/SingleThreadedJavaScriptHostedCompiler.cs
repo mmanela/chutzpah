@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using SassAndCoffee.Core;
-using SassAndCoffee.JavaScript;
+using Chutzpah.Compilers;
+using Chutzpah.Compilers.JavaScriptEngines;
 
 namespace Chutzpah.Wrappers
 {
@@ -90,7 +90,7 @@ namespace Chutzpah.Wrappers
 
         private static JavaScriptCompilerBase CreateEngine(Type compilerType)
         {
-            var provider = new InstanceProvider<IJavaScriptRuntime>(() => new IEJavaScriptRuntime());
+            var provider = new Lazy<IJavaScriptRuntime>(() => new IEJavaScriptRuntime());
             return (JavaScriptCompilerBase)Activator.CreateInstance(compilerType, provider);
         }
 

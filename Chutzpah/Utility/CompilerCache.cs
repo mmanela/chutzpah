@@ -13,7 +13,6 @@ namespace Chutzpah.Utility
         private readonly IFileSystemWrapper filesystem;
         private readonly IBinarySerializer binarySerializer;
         private readonly string filename;
-        private bool disposed;
 
         public CompilerCache(IFileSystemWrapper fileSystem, IBinarySerializer binarySerializer)
         {
