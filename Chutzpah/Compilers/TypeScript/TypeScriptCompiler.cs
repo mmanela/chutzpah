@@ -4,9 +4,9 @@ namespace Chutzpah.Compilers.TypeScript
 {
     public class TypeScriptCompiler : JavaScriptCompilerBase
     {
-        public override string CompilerLibraryResourceName
+        public override string[] CompilerLibraryResourceNames
         {
-            get { return "typescript.js"; }
+            get { return new [] {"typescript.js", "json2.js", "compile-ts.js"}; }
         }
 
         public override string CompilationFunctionName

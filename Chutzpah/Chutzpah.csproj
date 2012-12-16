@@ -59,6 +59,8 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <EmbeddedResource Include="Compilers\CoffeeScript\compile-cs.js" />
+    <Content Include="Compilers\README.txt" />
     <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptException.cs" />
     <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptParseWrapper.cs" />
     <Compile Include="Compilers\Interop\ActiveScript\BaseActiveScriptSite.cs" />
@@ -183,6 +185,8 @@
     <EmbeddedResource Include="Compilers\CoffeeScript\coffee-script.js" />
     <Content Include="Compilers\Interop\JavaScriptEngines\Notes.txt" />
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
+    <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
+    <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

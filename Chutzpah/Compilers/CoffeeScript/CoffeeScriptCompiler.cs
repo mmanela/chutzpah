@@ -4,9 +4,9 @@ namespace Chutzpah.Compilers.CoffeeScript
 {
     public class CoffeeScriptCompiler : JavaScriptCompilerBase
     {
-        public override string CompilerLibraryResourceName
+        public override string[] CompilerLibraryResourceNames
         {
-            get { return "coffee-script.js"; }
+            get { return new[] {"coffee-script.js", "compile-cs.js"}; }
         }
 
         public override string CompilationFunctionName

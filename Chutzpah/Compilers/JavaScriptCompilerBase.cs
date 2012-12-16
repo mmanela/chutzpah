@@ -5,7 +5,7 @@ namespace Chutzpah.Compilers
 {
     public abstract class JavaScriptCompilerBase : IJavaScriptCompiler
     {
-        public abstract string CompilerLibraryResourceName { get; }
+        public abstract string[] CompilerLibraryResourceNames { get; }
         public abstract string CompilationFunctionName { get; }
 
         private readonly Lazy<IJavaScriptRuntime> jsRuntimeProvider;
@@ -48,7 +48,10 @@ namespace Chutzpah.Compilers
             {
                 js = jsRuntimeProvider.Value;
                 js.Initialize();
-                js.LoadLibrary(ReadEmbeddedResource(CompilerLibraryResourceName, GetType()));
+                foreach (var resource in CompilerLibraryResourceNames)
+                {
+                    js.LoadLibrary(ReadEmbeddedResource(resource, GetType()));
+                }
                 initialized = true;
             }
         }
