@@ -50,8 +50,7 @@ namespace Chutzpah.FileGenerators
         {
             var folderPath = Path.GetDirectoryName(referencedFile.Path);
             var fileName = Path.GetFileNameWithoutExtension(referencedFile.Path) + ".js";
-            var newFilePath = Path.Combine(folderPath, string.Format(Constants.ChutzpahTemporaryFileFormat,
-                                                         Thread.CurrentThread.ManagedThreadId, fileName));
+            var newFilePath = Path.Combine(folderPath, string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, fileName));
 
             fileSystem.WriteAllText(newFilePath, generatedContent);
             referencedFile.GeneratedFilePath = newFilePath;

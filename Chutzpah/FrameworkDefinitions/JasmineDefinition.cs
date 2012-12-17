@@ -19,11 +19,13 @@
         public JasmineDefinition(IEnumerable<IJasmineReferencedFileProcessor> fileProcessors)
         {
             this.fileProcessors = fileProcessors;
-            this.fileDependencies = base.FileDependencies.Concat(new []
+            this.fileDependencies = new []
                 {
+                    "jasmine\\jasmine.css", 
+                    "jasmine\\jasmine.js", 
                     "jasmine\\jasmine-html.js", 
                     "jasmine\\jasmine_favicon.png"
-                });
+                };
         }
 
         /// <summary>
@@ -35,6 +37,11 @@
             {
                 return this.fileDependencies;
             }
+        }
+
+        public override string TestHarness
+        {
+            get { return @"Jasmine\jasmine.html"; }
         }
 
         /// <summary>
