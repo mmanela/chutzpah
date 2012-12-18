@@ -111,6 +111,17 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_run_QUnit_tests_even_when_QUnit_included_twice()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\qunitTwice.js");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
 
         [Theory]
         [PropertyData("ReferencesTestScripts")]

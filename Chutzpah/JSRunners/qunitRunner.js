@@ -23,6 +23,9 @@
     function onQUnitLoaded() {
         //console.log("onQUnitLoaded");
 
+        // If additional referenced to QUnit are loaded trick them to not pollute global namespace
+        window.exports = window.exports || {};
+        
         // Prevent QUnit from autostarting so have better control of the timing
         window.QUnit.config.autostart = false;
         
