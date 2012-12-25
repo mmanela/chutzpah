@@ -1,4 +1,5 @@
 ﻿using System;
+using Chutzpah.Models;
 using Xunit;
 
 namespace Chutzpah.Facts.ConsoleRunner
@@ -394,6 +395,29 @@ namespace Chutzpah.Facts.ConsoleRunner
                 {
                     Environment.SetEnvironmentVariable("TEAMCITY_PROJECT_NAME", originalValue);
                 }
+            }
+        }
+
+        public class TestModeArgumentFacts
+        {
+            [Fact]
+            public void TestMode_Option_Not_Passed_TestMode_DefaultAll()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(TestingMode.All, commandLine.TestMode);
+            }
+
+            [Fact]
+            public void TestMode_Option_Passed_TestMode_Set_Correctly()
+            {
+                var arguments = new[] { "/testMode", "TypeScript" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(TestingMode.TypeScript, commandLine.TestMode);
             }
         }
 
