@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -268,6 +269,9 @@ namespace Chutzpah.Facts
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
+
+                reader.Mock<ICoverageEngine>().Setup(ce => ce.DeserializeCoverageObject(It.IsAny<string>(), context)).
+                    Returns(new CoverageData());
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 

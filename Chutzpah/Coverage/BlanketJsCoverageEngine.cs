@@ -23,7 +23,8 @@ namespace Chutzpah.Coverage
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
         {
-            yield return string.Format("Coverage\\blanket_{0}.js", definition.FrameworkKey);
+            FrameworkSpecificInfo info = GetInfo(definition);
+            yield return "Coverage\\" + info.BlanketScriptName;
         }
 
         public string IncludePattern { get; set; }
@@ -45,42 +46,44 @@ namespace Chutzpah.Coverage
             }
             if (foundFilesToCover)
             {
+                FrameworkSpecificInfo info = GetInfo(definition);
+
                 // Name the coverage object so that the JS runner can pick it up.
                 harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket'", Constants.ChutzpahCoverageObjectReference)));
 
-                // Auto-run coverage for QUnit.
-                if (definition.FrameworkKey.Equals("qunit"))
-                {
-                    harness.ReferencedScripts.Add(new Script("QUnit.urlParams.coverage=true"));
-                }
+                info.AdditionalScripts.ToList().ForEach(script => harness.ReferencedScripts.Add(script));
                 
                 // Add a reference to the main Blanket script.
-                string coverageFile = string.Format("blanket_{0}.js", definition.FrameworkKey);
-                ReferencedFile coverageRefFile = new ReferencedFile {Path = coverageFile};
+                ReferencedFile coverageRefFile = new ReferencedFile { Path = info.BlanketScriptName };
                 harness.ReferencedScripts.Add(new Script(coverageRefFile));
             }
         }
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
-            CoverageData data = jsonSerializer.Deserialize<CoverageData>(json);
+            BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
                 testContext.ReferencedJavaScriptFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
+            
+            CoverageData coverageData = new CoverageData();
 
-            // Rewrite all keys in the coverage object dictionary to change URIs
+            // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths.
-            foreach (string scriptPath in data.Keys.ToList()) // copy to avoid concurrent modification
+            foreach (var entry in data)
             {
-                string filePath = new Uri(scriptPath).LocalPath;
+                string filePath = new Uri(entry.Key).LocalPath;
                 string newKey;
                 if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
                 {
                     newKey = filePath;
                 }
-                data[newKey] = data[scriptPath];
-                data.Remove(scriptPath);
+                coverageData.Add(newKey, new CoverageFileData
+                                             {
+                                                 LineExecutionCounts = entry.Value,
+                                                 FilePath = newKey
+                                             });
             }
-            return data;
+            return coverageData;
         }
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
@@ -91,6 +94,50 @@ namespace Chutzpah.Coverage
             if (IncludePattern != null && !PathMatchSpec(filePath, IncludePattern)) return false;
             if (ExcludePattern != null && PathMatchSpec(filePath, ExcludePattern)) return false;
             return true;
+        }
+
+        private class BlanketCoverageObject : Dictionary<string, int?[]>
+        {
+        }
+
+        private FrameworkSpecificInfo GetInfo(IFrameworkDefinition def)
+        {
+            FrameworkSpecificInfo info;
+            if (!FrameworkInfoMap.TryGetValue(def.GetType(), out info))
+            {
+                throw new ArgumentException("Unknown framework: " + def.GetType().Name);
+            }
+            return info;
+        }
+
+        private static IDictionary<Type, FrameworkSpecificInfo> FrameworkInfoMap =
+            new Dictionary<Type, FrameworkSpecificInfo>
+                {
+                    {
+                        typeof (JasmineDefinition), new FrameworkSpecificInfo
+                                                        {
+                                                            BlanketScriptName = "blanket_jasmine.js",
+                                                            AdditionalScripts = new Script[0]
+                                                        }
+                        },
+                    {
+                        typeof (QUnitDefinition), new FrameworkSpecificInfo
+                                                      {
+                                                          BlanketScriptName = "blanket_qunit.js",
+                                                          AdditionalScripts = new[]
+                                                                                  {
+                                                                                      // auto-run coverage
+                                                                                      new Script(
+                                                                                          "QUnit.urlParams.coverage=true")
+                                                                                  }
+                                                      }
+                        }
+                };
+
+        private class FrameworkSpecificInfo
+        {
+            internal string BlanketScriptName { get; set; }
+            internal IEnumerable<Script> AdditionalScripts { get; set; }
         }
     }
 }

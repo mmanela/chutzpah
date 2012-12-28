@@ -35,15 +35,27 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_have_1_based_coverage_lines()
+        public void Will_have_1_based_execution_count_lines()
         {
             var testRunner = TestRunner.Create();
 
             var result = testRunner.RunTests(ABasicTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            var coverageLines = dict.Single(kvp => kvp.Key.Contains("code.js")).Value;
+            var coverageLines = dict.Single(kvp => kvp.Key.Contains("code.js")).Value.LineExecutionCounts;
             Assert.Null(coverageLines[0]);
+        }
+
+        [Fact]
+        public void Will_put_file_path_in_the_coverage_file_data()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
+            var filePath = dict.Single(kvp => kvp.Key.Contains("code.js")).Value.FilePath;
+            Assert.Contains("\\code.js", filePath);
         }
 
         [Fact]
@@ -89,6 +101,8 @@ namespace Chutzpah.Facts.Integration
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
             Assert.True(HasKeyWithSubstring(dict, "code.coffee"));
+            var filePath = dict.Single(kvp => kvp.Key.Contains("code.coffee")).Value.FilePath;
+            Assert.Contains("\\code.coffee", filePath);
         }
 
         [Fact]

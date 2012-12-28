@@ -26,11 +26,6 @@ namespace Chutzpah.FrameworkDefinitions
         string TestRunner { get; }
 
         /// <summary>
-        /// Gets a short, file system friendly key for the framework library.
-        /// </summary>
-        string FrameworkKey { get; }
-
-        /// <summary>
         /// Tests whether the given file contents uses the framework.
         /// </summary>
         /// <param name="fileContents">Contents of the file as a string to test.</param>

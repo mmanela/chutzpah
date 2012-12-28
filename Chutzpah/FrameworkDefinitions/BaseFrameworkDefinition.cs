@@ -17,7 +17,10 @@ namespace Chutzpah.FrameworkDefinitions
             new Regex(@"\<(?:script|reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine)).*?\.js[""']",
                       RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public abstract string FrameworkKey { get; }
+        /// <summary>
+        /// Gets a short, file system friendly key for the framework library.
+        /// </summary>
+        protected abstract string FrameworkKey { get; }
 
         /// <summary>
         /// Gets a regular expression pattern to match a testable javascript file.
