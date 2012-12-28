@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Chutzpah.Callbacks;
-using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
 using System.Linq;
 using Chutzpah.Transformers;
-using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -32,7 +28,6 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
-                CheckCoverageOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -50,18 +45,6 @@ namespace Chutzpah
                 Console.WriteLine();
                 Console.WriteLine("error: {0}", ex.Message);
                 return -1;
-            }
-        }
-
-        private static void CheckCoverageOptions(CommandLine cmdLine)
-        {
-            if (!cmdLine.Coverage) return;
-
-            var cov = CoverageEngineFactory.GetCoverageEngine();
-            var messages = new List<string>();
-            if (!cov.CanUse(messages))
-            {
-                throw new ArgumentException(string.Join(Environment.NewLine, messages));
             }
         }
 

@@ -68,7 +68,6 @@
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="CoverageOptions.cs" />
-    <Compile Include="Coverage\CoverageEngineFactory.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
@@ -90,6 +89,7 @@
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
+    <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\JS\JsCoverage.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="ITestRunner.cs" />
     <Compile Include="Models\TestContext.cs" />
     <Compile Include="Models\TestResult.cs" />
+    <Compile Include="TestHarness.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
@@ -141,7 +142,7 @@
     <Compile Include="Wrappers\IJsonSerializer.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="Wrappers\IProcessWrapper.cs" />
-    <Compile Include="Coverage\CoverageEngine.cs" />
+    <Compile Include="Coverage\BlanketJsCoverageEngine.cs" />
     <Compile Include="Wrappers\JsonSerializer.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
@@ -153,6 +154,12 @@
     <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestFiles\Coverage\blanket_jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Coverage\blanket_qunit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using Chutzpah.Models.JS;
-
 namespace Chutzpah.Models
 {
     /// <summary>
@@ -22,11 +19,5 @@ namespace Chutzpah.Models
         /// If set, contains the coverage object created during coverage collection.
         /// </summary>
         public CoverageData CoverageObject { get; set; }
-
-        /// <summary>
-        /// If set, contains the raw JSON representation of the coverage object
-        /// created during coverage collection.
-        /// </summary>
-        public string CoverageObjectJson { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
@@ -417,9 +418,9 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
-                string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\references.js");
-                string scriptStatement3 = TestContextBuilder.GetScriptStatement(@"path\test.js");
+                string scriptStatement1 = new Script(new ReferencedFile { Path = @"path\lib.js" }).ToString();
+                string scriptStatement2 = new Script(new ReferencedFile { Path = @"path\references.js" }).ToString();
+                string scriptStatement3 = new Script(new ReferencedFile { Path = @"path\test.js" }).ToString();
                 var pos1 = text.IndexOf(scriptStatement1);
                 var pos2 = text.IndexOf(scriptStatement2);
                 var pos3 = text.IndexOf(scriptStatement3);
@@ -453,7 +454,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
+                string scriptStatement = new Script(new ReferencedFile { Path = @"path\subFile.js" }).ToString();
                 Assert.Contains(scriptStatement,text);
             }
 
@@ -485,7 +486,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
+                string scriptStatement = new Script(new ReferencedFile { Path = @"path\subFile.js" }).ToString();
                 Assert.DoesNotContain(scriptStatement, text);
             }
 
@@ -512,9 +513,9 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
-                string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\common.js");
-                string scriptStatement3 = TestContextBuilder.GetScriptStatement(@"path\test.js");
+                string scriptStatement1 = new Script(new ReferencedFile { Path = @"path\lib.js" }).ToString();
+                string scriptStatement2 = new Script(new ReferencedFile { Path = @"path\common.js" }).ToString();
+                string scriptStatement3 = new Script(new ReferencedFile { Path = @"path\test.js" }).ToString();
                 var pos1 = text.IndexOf(scriptStatement1);
                 var pos2 = text.IndexOf(scriptStatement2);
                 var pos3 = text.IndexOf(scriptStatement3);
@@ -570,8 +571,8 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement1 = TestContextBuilder.GetScriptStatement(@"path\lib.js");
-                string scriptStatement2 = TestContextBuilder.GetScriptStatement(@"path\common.js");
+                string scriptStatement1 = new Script(new ReferencedFile { Path = @"path\lib.js" }).ToString();
+                string scriptStatement2 = new Script(new ReferencedFile { Path = @"path\common.js" }).ToString();
                 Assert.Contains(scriptStatement1, text);
                 Assert.Contains(scriptStatement2, text);
                 Assert.DoesNotContain("@@ReferencedJSFiles@@", text);
@@ -595,8 +596,8 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string styleStatemenet = TestContextBuilder.GetStyleStatement(@"path\style.css");
-                Assert.Contains(styleStatemenet, text);
+                string styleStatement = new ExternalStylesheet(new ReferencedFile {Path = @"path\style.css"}).ToString();
+                Assert.Contains(styleStatement, text);
                 Assert.DoesNotContain("@@ReferencedCSSFiles@@", text);
             }
 
@@ -633,17 +634,25 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
-                string scriptStatement = TestContextBuilder.GetScriptStatement(@"http://a.com/lib.js");
+                string scriptStatement = new Script(new ReferencedFile { Path = @"http://a.com/lib.js" }).ToString();
                 Assert.Contains(scriptStatement, text);
             }
         }
 
         public class GetAbsoluteFileUrl
         {
+            // Shim to be able to preserve the old tests despite TestContextBuilder not
+            // having a static GetAbsoluteFileUrl method anymore.
+            private string TestContextBuilder_GetAbsoluteFileUrl(string path)
+            {
+                string html = new Script(new ReferencedFile {Path = path}).ToString();
+                return Regex.Match(html, "src=\"([^\"]+)\"").Groups[1].Value;
+            }
+
             [Fact]
             public void Will_prepend_scheme_and_convert_slashes_of_a_path_without_a_scheme()
             {
-                var actual = TestContextBuilder.GetAbsoluteFileUrl(@"D:\some\file\path.js");
+                var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\file\path.js");
 
                 Assert.Equal("file:///D:/some/file/path.js", actual);
             }
@@ -651,7 +660,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_prepend_scheme_and_convert_slashes_of_a_path_containing_a_scheme()
             {
-                var actual = TestContextBuilder.GetAbsoluteFileUrl(@"D:\some\http://.js");
+                var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\http://.js");
 
                 Assert.Equal("file:///D:/some/http://.js", actual);
             }
@@ -659,7 +668,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_not_prefix_a_path_using_http_scheme()
             {
-                var actual = TestContextBuilder.GetAbsoluteFileUrl("http://someurl/x.js");
+                var actual = TestContextBuilder_GetAbsoluteFileUrl("http://someurl/x.js");
 
                 Assert.Equal("http://someurl/x.js", actual);
             }
@@ -667,7 +676,7 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_not_prefix_a_path_using_https_scheme()
             {
-                var actual = TestContextBuilder.GetAbsoluteFileUrl("https://anyurl/y.js");
+                var actual = TestContextBuilder_GetAbsoluteFileUrl("https://anyurl/y.js");
 
                 Assert.Equal("https://anyurl/y.js", actual);
             }
@@ -675,9 +684,17 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_not_prefix_a_path_using_file_scheme()
             {
-                var actual = TestContextBuilder.GetAbsoluteFileUrl("file://Z:/path/z.js");
+                var actual = TestContextBuilder_GetAbsoluteFileUrl("file://Z:/path/z.js");
 
                 Assert.Equal("file://Z:/path/z.js", actual);
+            }
+
+            [Fact]
+            public void Will_not_prefix_a_non_rooted_path()
+            {
+                var actual = TestContextBuilder_GetAbsoluteFileUrl("z.js");
+
+                Assert.Equal("z.js", actual);
             }
         }
     }

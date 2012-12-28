@@ -8,5 +8,11 @@ namespace Chutzpah.Wrappers
         {
             return ServiceStack.Text.JsonSerializer.DeserializeFromString<T>(response);
         }
+
+        public string Serialize(object obj)
+        {
+            return ServiceStack.Text.JsonSerializer.SerializeToString(obj);
+        }
+
     }
 }

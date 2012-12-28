@@ -1,4 +1,5 @@
-﻿using Chutzpah.FileGenerator;
+﻿using Chutzpah.Coverage;
+using Chutzpah.FileGenerator;
 using Chutzpah.FileProcessors;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Utility;
@@ -21,6 +22,7 @@ namespace Chutzpah
             container.Configure(config =>
                 {
                     config.For<IHasher>().Singleton().Use<Hasher>();
+                    config.For<ICoverageEngine>().Use<BlanketJsCoverageEngine>();
                     config.Scan(scan =>
                         {
                             scan.TheCallingAssembly();

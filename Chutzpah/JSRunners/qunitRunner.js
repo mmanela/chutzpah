@@ -110,9 +110,8 @@
         };
 
         var logCoverage = function () {
-            if (window._$jscoverage) {
-                var json = JSON.parse(jscoverage_serializeCoverageToJSON(_$jscoverage));
-                log({ type: "CoverageObject", object: json });
+            if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
+                log({ type: "CoverageObject", object: window[window._Chutzpah_covobj_name] });
             }
         };
 

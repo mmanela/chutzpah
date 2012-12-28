@@ -259,7 +259,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_put_coverage_object_and_json_rep_in_summary()
+            public void Will_put_coverage_object_in_summary()
             {
                 var reader = new TestableTestCaseStreamReader();
 
@@ -272,7 +272,6 @@ namespace Chutzpah.Facts
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(summary.CoverageObject);
-                Assert.NotNull(summary.CoverageObjectJson);
             }
 
             [Fact]

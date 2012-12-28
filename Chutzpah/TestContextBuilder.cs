@@ -27,10 +27,12 @@ namespace Chutzpah
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IHasher hasher;
+        private readonly ICoverageEngine mainCoverageEngine;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
+                                  ICoverageEngine coverageEngine,
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
                                   IEnumerable<IFileGenerator> fileGenerators)
         {
@@ -39,6 +41,7 @@ namespace Chutzpah
             this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
+            mainCoverageEngine = coverageEngine;
         }
 
         public TestContext BuildContext(string file, TestOptions options)
@@ -105,14 +108,15 @@ namespace Chutzpah
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles);
-                string coverageHelperPath;
-                ProcessForCoverageInstrumentation(options, 
-                                                  stagingFolder, 
-                                                  referencedFiles, 
-                                                  temporaryFiles, 
-                                                  out coverageHelperPath);
 
-                foreach (string item in definition.FileDependencies)
+                ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options);
+                IEnumerable<string> deps = definition.FileDependencies;
+                if (coverageEngine != null)
+                {
+                    deps = deps.Concat(coverageEngine.GetFileDependencies(definition));
+                }
+
+                foreach (string item in deps)
                 {
                     string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
                     string destinationPath = Path.Combine(stagingFolder, Path.GetFileName(item));
@@ -122,9 +126,8 @@ namespace Chutzpah
                 string testHtmlFilePath = CreateTestHarness(definition,
                                                             stagingFolder,
                                                             testFilePath,
-                                                            coverageHelperPath,
-                                                            testFileKind,
-                                                            referencedFiles);
+                                                            referencedFiles,
+                                                            coverageEngine);
 
                 return new TestContext
                     {
@@ -211,15 +214,12 @@ namespace Chutzpah
             }
         }
 
-        private void ProcessForCoverageInstrumentation(TestOptions options, string stagingFolder, IList<ReferencedFile> referencedFiles, IList<string> temporaryFiles, out string coverageHelperPath)
+        private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options)
         {
-            coverageHelperPath = null;
-            if (options == null || !options.CoverageOptions.Enabled) return;
-            var cov = CoverageEngineFactory.GetCoverageEngine();
-            if (!cov.CanUse(null)) return;
-            cov.IncludePattern = options.CoverageOptions.IncludePattern;
-            cov.ExcludePattern = options.CoverageOptions.ExcludePattern;
-            cov.Instrument(stagingFolder, referencedFiles, temporaryFiles, out coverageHelperPath);
+            if (options == null || !options.CoverageOptions.Enabled) return null;
+            mainCoverageEngine.IncludePattern = options.CoverageOptions.IncludePattern;
+            mainCoverageEngine.ExcludePattern = options.CoverageOptions.ExcludePattern;
+            return mainCoverageEngine;
         }
 
         private ReferencedFile GetFileUnderTest(string testFilePath)
@@ -242,22 +242,21 @@ namespace Chutzpah
         private string CreateTestHarness(IFrameworkDefinition definition,
                                          string stagingFolder,
                                          string inputTestFilePath,
-                                         string coverageHelperPath,
-                                         PathType testFileKind,
-                                         IEnumerable<ReferencedFile> referencedFiles)
+                                         IEnumerable<ReferencedFile> referencedFiles,
+                                         ICoverageEngine coverageEngine)
         {
             string testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
-            string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
 
-            if (coverageHelperPath != null)
+            TestHarness harness = new TestHarness(inputTestFilePath, referencedFiles);
+
+            if (coverageEngine != null)
             {
-                var rf = new ReferencedFile {Path = coverageHelperPath};
-                referencedFiles = Enumerable.Repeat(rf, 1).Concat(referencedFiles);
+                coverageEngine.PrepareTestHarnessForCoverage(harness, definition);
             }
 
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir, testFileKind, referencedFiles);
+            string testHtmlText = harness.CreateHtmlText(testHtmlTemplate);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
@@ -393,95 +392,6 @@ namespace Chutzpah
             flattenedFileList.Add(rootFile);
 
             return flattenedFileList;
-        }
-
-        private static string FillTestHtmlTemplate(string testHtmlTemplate,
-                                                   string inputTestFileDir,
-                                                   PathType testFileKind,
-                                                   IEnumerable<ReferencedFile> referencedFiles)
-        {
-            var testJsReplacement = new StringBuilder();
-            var referenceJsReplacement = new StringBuilder();
-            var referenceCssReplacement = new StringBuilder();
-            IEnumerable<ReferencedFile> referencedFilePaths =
-                referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x);
-            BuildReferenceHtml(referencedFilePaths, referenceCssReplacement, testJsReplacement, referenceJsReplacement);
-
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFileDir@@", inputTestFileDir);
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
-
-            return testHtmlTemplate;
-        }
-
-        private static void BuildReferenceHtml(IEnumerable<ReferencedFile> referencedFilePaths,
-                                               StringBuilder referenceCssReplacement,
-                                               StringBuilder testJsReplacement,
-                                               StringBuilder referenceJsReplacement,
-                                               StringBuilder referenceIconReplacement = null)
-        {
-            foreach (ReferencedFile referencedFile in referencedFilePaths)
-            {
-                string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
-                                        ? referencedFile.Path
-                                        : referencedFile.GeneratedFilePath;
-
-                if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase) &&
-                    referenceCssReplacement != null)
-                {
-                    referenceCssReplacement.AppendLine(GetStyleStatement(referencePath));
-                }
-                else if (referencedFile.IsFileUnderTest &&
-                         referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase) && testJsReplacement != null)
-                {
-                    testJsReplacement.AppendLine(GetScriptStatement(referencePath));
-                }
-                else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase) &&
-                         referenceJsReplacement != null)
-                {
-                    referenceJsReplacement.AppendLine(GetScriptStatement(referencePath));
-                }
-                else if (referencePath.EndsWith(Constants.PngExtension, StringComparison.OrdinalIgnoreCase) &&
-                         referenceIconReplacement != null)
-                {
-                    referenceIconReplacement.AppendLine(GetIconStatement(referencePath));
-                }
-            }
-        }
-
-        public static string GetScriptStatement(string path, bool absolute = true)
-        {
-            const string format = @"<script type=""text/javascript"" src=""{0}""></script>";
-            return string.Format(format, absolute ? GetAbsoluteFileUrl(path) : path);
-        }
-
-        public static string GetCoffeeScriptStatement(string path)
-        {
-            const string format = @"<script type=""text/coffeescript"" src=""{0}""></script>";
-            return string.Format(format, GetAbsoluteFileUrl(path));
-        }
-
-        public static string GetStyleStatement(string path)
-        {
-            const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
-            return string.Format(format, GetAbsoluteFileUrl(path));
-        }
-
-        public static string GetIconStatement(string path)
-        {
-            const string format = @"<link rel=""shortcut icon"" type=""image/png"" href=""{0}"">";
-            return string.Format(format, GetAbsoluteFileUrl(path));
-        }
-
-        public static string GetAbsoluteFileUrl(string path)
-        {
-            if (!RegexPatterns.SchemePrefixRegex.IsMatch(path))
-            {
-                return "file:///" + path.Replace('\\', '/');
-            }
-
-            return path;
         }
     }
 }

@@ -14,8 +14,10 @@ namespace Chutzpah
         // Coffee script to JS
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
         public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}";
-        public const string ChutzpahInstrumentedTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "instr.{0}";
 
+        // Used to communicate between the coverage engine and the JS runner, for Chutzpah
+        // to be able to get hold of the coverage object.
+        public const string ChutzpahCoverageObjectReference = "_Chutzpah_covobj_name";
 
         public const string PngExtension = ".png";
         public const string CssExtension = ".css";
