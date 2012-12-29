@@ -83,6 +83,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
+
         [Theory]
         [PropertyData("TypeScriptTests")]
         public void Will_run_tests_from_a_type_script_file(string scriptPath)
@@ -94,6 +95,32 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_process_type_script_files_together()
+        {
+            // This test verifies that we run TypeScript compiler on all ts files at once 
+            // this is important since TS using typechecking engine to help generate code
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_run_QUnit_tests_even_when_QUnit_included_twice()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\qunitTwice.js");
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
         }
 
         [Theory]

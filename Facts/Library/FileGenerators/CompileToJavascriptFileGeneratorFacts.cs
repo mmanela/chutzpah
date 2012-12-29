@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Threading;
 using Chutzpah.FileGenerator;
 using Chutzpah.FileGenerators;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
+using Moq;
 using Xunit;
 
 namespace Chutzpah.Facts
@@ -12,9 +15,10 @@ namespace Chutzpah.Facts
         private class TestableFileGenerator : CompileToJavascriptFileGenerator
         {
             public bool CanHandle { get; set; }
+            public IDictionary<string, string> CompiledSources { get; set; }
 
-            public TestableFileGenerator(IFileSystemWrapper fileSystem, ICompilerEngineWrapper compilerEngineWrapper)
-                : base(fileSystem, compilerEngineWrapper)
+            public TestableFileGenerator(IFileSystemWrapper fileSystem)
+                : base(fileSystem)
             {
             }
 
@@ -22,6 +26,13 @@ namespace Chutzpah.Facts
             {
                 return CanHandle;
             }
+
+
+            public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles)
+            {
+                return CompiledSources;
+            }
+
         }
 
         private class TestableCompileToJavascriptFileGenerator : Testable<TestableFileGenerator> { }
@@ -36,7 +47,7 @@ namespace Chutzpah.Facts
                 var file = new ReferencedFile { Path = "somePath.js" };
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(file, tempFiles);
+                generator.ClassUnderTest.Generate(new []{file}, tempFiles);
 
                 Assert.Equal("somePath.js", file.Path);
                 Assert.Empty(tempFiles);
@@ -47,20 +58,21 @@ namespace Chutzpah.Facts
             {
                 var generator = new TestableCompileToJavascriptFileGenerator();
                 generator.ClassUnderTest.CanHandle = true;
+                generator.ClassUnderTest.CompiledSources = new Dictionary<string, string>
+                    {
+                        {@"path\to\someFile.coffee", "jsContents"}
+                    };
                 var file = new ReferencedFile { Path = @"path\to\someFile.coffee" };
-                generator.Mock<ICompilerEngineWrapper>().Setup(x => x.Compile("coffeeContents")).Returns("jsContents");
-                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\to\someFile.coffee")).Returns("coffeeContents");
-                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, "someFile.js");
+                var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(file, tempFiles);
+                generator.ClassUnderTest.Generate(new []{file}, tempFiles);
 
                 generator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
                 Assert.Equal(@"path\to\someFile.coffee", file.Path);
                 Assert.Equal(resultPath, file.GeneratedFilePath);
                 Assert.Contains(resultPath, tempFiles);
             }
-
         }
     }
 }

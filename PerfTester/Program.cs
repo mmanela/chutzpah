@@ -15,7 +15,11 @@ namespace Chutzpah.PerfTester
 
             var testRunner = TestRunner.Create();
 
+            Console.WriteLine("Javascript:");
             PerfRunner.Run(() => testRunner.RunTests(@"JS\test.js"));
+            
+            Console.WriteLine("\nCoffeescript:");
+            PerfRunner.Run(() => testRunner.RunTests(@"Coffee\runner.coffee"));
         }
     }
 }

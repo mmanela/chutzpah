@@ -9,9 +9,9 @@ namespace Chutzpah.Wrappers
             return ServiceStack.Text.JsonSerializer.DeserializeFromString<T>(response);
         }
 
-        public string Serialize(object obj)
+        public string Serialize<T>(T @object)
         {
-            return ServiceStack.Text.JsonSerializer.SerializeToString(obj);
+            return ServiceStack.Text.JsonSerializer.SerializeToString<T>(@object);
         }
 
     }

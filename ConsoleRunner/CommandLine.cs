@@ -44,8 +44,10 @@ namespace Chutzpah
         public bool VsOutput { get; protected set; }
 
         public bool Coverage { get; protected set; }
+        public string CompilerCacheFile { get; protected set; }
 
         public string CoverageIncludePattern { get; protected set; }
+        public int? CompilerCacheFileMaxSizeMb { get; protected set; }
 
         public string CoverageExcludePattern { get; protected set; }
 
@@ -136,6 +138,14 @@ namespace Chutzpah
                 {
                     AddCoverageExcludeOption(option.Value);
                 }
+                else if (optionName == "/compilercachefile")
+                {
+                    SetCompilerCacheFile(option.Value);
+                }
+                else if (optionName == "/compilercachesize")
+                {
+                    SetCompilerCacheMaxSize(option.Value);
+                }
                 else
                 {
                     if (!optionName.StartsWith("/"))
@@ -168,14 +178,43 @@ namespace Chutzpah
             CoverageExcludePattern = value;
         }
 
+        private void SetCompilerCacheMaxSize(string value)
+        {
+            int maxSize;
+            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out maxSize) || maxSize < 0)
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /compilercachemaxsize.  Expecting a postivie integer");
+            }
+
+            CompilerCacheFileMaxSizeMb = maxSize;
+        }
+
+        private void SetCompilerCacheFile(string file)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                throw new ArgumentException(
+                    "missing argument for /compilercachefile.  Expecting a file path for the cache.");
+            }
+            CompilerCacheFile = file;
+        }
+
         private void AddParallelismOption(string value)
         {
             int parallelism;
-            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out parallelism) || parallelism < 0)
+            if (string.IsNullOrEmpty(value))
+            {
+                // If no parallelism is specified, use CPU-count + 1
+                parallelism = Environment.ProcessorCount + 1;
+            }
+            else if (!int.TryParse(value, out parallelism) || parallelism < 0)
             {
                 throw new ArgumentException(
-                    "invalid or missing argument for /parallelism.  Expecting a postivie integer");
+                    "invalid argument for /parallelism.  Expecting a optional positive integer");
             }
+            
+            
 
             Parallelism = parallelism;
 

@@ -14,6 +14,6 @@ namespace Chutzpah.FileGenerator
         /// </summary>
         /// <param name="referencedFile"></param>
         /// <param name="temporaryFiles"></param>
-        void Generate(ReferencedFile referencedFile, IList<string> temporaryFiles);
+        void Generate(IEnumerable<ReferencedFile> referencedFiles, IList<string> temporaryFiles);
     }
 }

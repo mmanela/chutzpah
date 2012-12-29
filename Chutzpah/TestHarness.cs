@@ -10,6 +10,7 @@ namespace Chutzpah
     {
         private readonly string inputTestFilePath;
 
+        public IList<HtmlTag> TestFrameworkDependencies { get; private set; }
         public IList<HtmlTag> ReferencedScripts { get; private set; }
         public IList<HtmlTag> ReferencedStyles { get; private set; }
 
@@ -31,31 +32,63 @@ namespace Chutzpah
         {
             ReferencedScripts = new List<HtmlTag>();
             ReferencedStyles = new List<HtmlTag>();
+            TestFrameworkDependencies = new List<HtmlTag>();
+
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
                 string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
                                         ? referencedFile.Path
                                         : referencedFile.GeneratedFilePath;
+                IList<HtmlTag> refList = ChooseRefList(referencedFile, referencePath);
+                if (refList == null) continue;
 
                 if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    ReferencedStyles.Add(new ExternalStylesheet(referencedFile));
+                    refList.Add(new ExternalStylesheet(referencedFile));
+                }
+                else if (referencePath.EndsWith(Constants.PngExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    refList.Add(new ShortcutIcon(referencedFile));
                 }
                 else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    ReferencedScripts.Add(new Script(referencedFile));
+                    refList.Add(new Script(referencedFile));
                 }
             }
+        }
+
+        private IList<HtmlTag> ChooseRefList(ReferencedFile referencedFile, string referencePath)
+        {
+            IList<HtmlTag> list = null;
+            if (referencedFile.IsTestFrameworkDependency)
+            {
+                list = TestFrameworkDependencies;
+            }
+            else if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                list = ReferencedStyles;
+            }
+            else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                list = ReferencedScripts;
+            }
+            return list;
         }
 
         private string FillTestHtmlTemplate(string testHtmlTemplate,
                                             string inputTestFileDir)
         {
             var testJsReplacement = new StringBuilder();
+            var testFrameworkDependencies = new StringBuilder(); 
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
-            BuildReferenceHtml(referenceCssReplacement, testJsReplacement, referenceJsReplacement);
 
+            BuildReferenceHtml(testFrameworkDependencies,
+                               referenceCssReplacement,
+                               testJsReplacement,
+                               referenceJsReplacement);
+
+            testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFileDir@@", inputTestFileDir);
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
@@ -64,10 +97,15 @@ namespace Chutzpah
             return testHtmlTemplate;
         }
 
-        private void BuildReferenceHtml(StringBuilder referenceCssReplacement,
+        private void BuildReferenceHtml(StringBuilder testFrameworkDependencies,
+                                        StringBuilder referenceCssReplacement,
                                         StringBuilder testJsReplacement,
                                         StringBuilder referenceJsReplacement)
         {
+            foreach (HtmlTag tag in TestFrameworkDependencies)
+            {
+                testFrameworkDependencies.AppendLine(tag.ToString());
+            }
             foreach (HtmlTag tag in ReferencedScripts)
             {
                 if (tag.ReferencedFile != null && tag.ReferencedFile.IsFileUnderTest)
@@ -137,7 +175,7 @@ namespace Chutzpah
                         ? referencedFile.Path
                         : referencedFile.GeneratedFilePath;
 
-            if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath) && Path.IsPathRooted(referencePath))
+            if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath))
             {
                 return "file:///" + referencePath.Replace('\\', '/');
             }
@@ -153,6 +191,16 @@ namespace Chutzpah
         {
             Attributes.Add("rel", "stylesheet");
             Attributes.Add("type", "text/css");
+            Attributes.Add("href", GetAbsoluteFileUrl(referencedFile));
+        }
+    }
+
+    public class ShortcutIcon : HtmlTag
+    {
+        public ShortcutIcon(ReferencedFile referencedFile) : base(referencedFile, "link", false)
+        {
+            Attributes.Add("rel", "shortcut icon");
+            Attributes.Add("type", "image/png");
             Attributes.Add("href", GetAbsoluteFileUrl(referencedFile));
         }
     }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Chutzpah.Exceptions;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -13,11 +15,13 @@ namespace Chutzpah
     {
         public static string HeadlessBrowserName = "phantomjs.exe";
         public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
-
+        private readonly Stopwatch stopWatch;
         private readonly IProcessHelper process;
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
+        private readonly ICompilerCache compilerCache;
+
 
         public bool DebugEnabled { get; set; }
 
@@ -31,12 +35,15 @@ namespace Chutzpah
         public TestRunner(IProcessHelper process,
                           ITestCaseStreamReaderFactory testCaseStreamReaderFactory,
                           IFileProbe fileProbe,
-                          ITestContextBuilder htmlTestFileCreator)
+                          ITestContextBuilder htmlTestFileCreator,
+                          ICompilerCache compilerCache)
         {
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
             this.fileProbe = fileProbe;
+            stopWatch = new Stopwatch();
             testContextBuilder = htmlTestFileCreator;
+            this.compilerCache = compilerCache;
         }
 
 
@@ -115,6 +122,7 @@ namespace Chutzpah
                                                  TestRunnerMode testRunnerMode,
                                                  ITestMethodRunnerCallback callback)
         {
+            stopWatch.Start();
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
             if (testPaths == null)
                 throw new ArgumentNullException("testPaths");
@@ -151,7 +159,7 @@ namespace Chutzpah
                         {
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
-                        else
+                        else if(!DebugEnabled)
                         {
                             // Don't clean up context if you open in browser since we need the files around
                             // for the browser to use
@@ -180,7 +188,9 @@ namespace Chutzpah
             {
                 overallSummary.Append(fileSummary);
             }
-
+            stopWatch.Stop();
+            overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
+            compilerCache.Save();
             return overallSummary;
         }
 

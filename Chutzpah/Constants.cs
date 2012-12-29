@@ -2,6 +2,7 @@ namespace Chutzpah
 {
     public static class Constants
     {
+        
         // Default time in milliseconds to wait for new test results. If we don't hear anything
         // from phantom after this amount of time abort
         public const int DefaultTestFileTimeout = 5000;
@@ -9,11 +10,17 @@ namespace Chutzpah
         // Default of how many files to open during test file discovery
         public const int DefaultFileSeachLimit = 300;
 
+        // The max-size in bytes for the compilercache file
+        public const int DefaultCompilerCacheFileMaxSize = 32*1024*1024;
+
         // Format for temporary files Chutzpah creates that should be ignored in source controler.
         // These get generated when Chutzpah needs to generate a file in place like when it needs to convert 
         // Coffee script to JS
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
-        public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}";
+        public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}.{1}";
+
+        public const string ChutzpahCompilerCacheFolder = ChutzpahTemporaryFilePrefix + "cache";
+        public const string ChutzpahCompilerCacheFileName = ChutzpahTemporaryFilePrefix + "cache";
 
         // Used to communicate between the coverage engine and the JS runner, for Chutzpah
         // to be able to get hold of the coverage object.

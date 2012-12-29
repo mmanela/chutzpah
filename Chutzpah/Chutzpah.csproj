@@ -40,14 +40,6 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="SassAndCoffee.Core, Version=2.0.2.0, Culture=neutral, PublicKeyToken=e8efe0268e9b447d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\3rdParty\SassAndCoffee\SassAndCoffee.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SassAndCoffee.JavaScript, Version=2.0.2.0, Culture=neutral, PublicKeyToken=e8efe0268e9b447d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\3rdParty\SassAndCoffee\SassAndCoffee.JavaScript.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -68,6 +60,44 @@
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="CoverageOptions.cs" />
+    <EmbeddedResource Include="Compilers\CoffeeScript\compile-cs.js" />
+    <Content Include="Compilers\README.txt" />
+    <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptException.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptParseWrapper.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\BaseActiveScriptSite.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScript.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptError.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParse32.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParse64.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseProcedure32.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseProcedure64.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseWrapper.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptSite.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptSiteInterruptPoll.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptStats.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\IBindEventHandler.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptInfoFlags.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptInterruptFlags.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptItemFlags.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptProcedureFlags.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptState.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptStatistic.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptTextFlags.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptThreadId.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptThreadState.cs" />
+    <Compile Include="Compilers\Interop\ActiveScript\ScriptTypeLibFlags.cs" />
+    <Compile Include="Compilers\CoffeeScript\CoffeeScriptCompiler.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\IEJavaScriptRuntime.cs" />
+    <Compile Include="Compilers\IJavaScriptCompiler.cs" />
+    <Compile Include="Compilers\IJavaScriptRuntime.cs" />
+    <Compile Include="Compilers\JavaScriptCompilerBase.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\ChakraJavaScriptAuthor.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\ChakraJavaScriptEngine.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptAuthor.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptCompactEngine.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEncode.cs" />
+    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
+    <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
@@ -86,6 +116,7 @@
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
+    <Compile Include="GlobalOptions.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
@@ -128,12 +159,15 @@
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
+    <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
+    <Compile Include="Utility\ICompilerCache.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
     <Compile Include="Wrappers\CoffeeScriptEngineWrapper.cs" />
+    <Compile Include="Wrappers\BinarySerializer.cs" />
     <Compile Include="Wrappers\ICompilerEngineWrapper.cs" />
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
@@ -160,6 +194,11 @@
     <Content Include="TestFiles\Coverage\blanket_qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Compilers\CoffeeScript\coffee-script.js" />
+    <Content Include="Compilers\Interop\JavaScriptEngines\Notes.txt" />
+    <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
+    <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
+    <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

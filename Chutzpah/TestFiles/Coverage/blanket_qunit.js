@@ -3970,6 +3970,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         getOrdered: function(isOrdered){
             return ordered;
         },
+        setIgnoreScriptError: function(ignore){
+            ignoreScriptError = ignore;
+        },
+        getIgnoreScriptError: function(){
+            return ignoreScriptError;
+        },
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
@@ -4252,7 +4258,7 @@ blanket.defaultReporter = function(coverage){
 
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.text = blanket_toggleSource.toString();
+    script.text = blanket_toggleSource.toString().replace('function ' + blanket_toggleSource.name, 'function blanket_toggleSource');
     body.appendChild(script);
 
     var percentage = function(number, total) {
@@ -4325,7 +4331,7 @@ blanket.defaultReporter = function(coverage){
     //appendHtml(body, '</div>');
 };
 (function(){
-    var globalFilter,customReporter,adapter,order=true;
+    var globalFilter,customReporter,adapter,order=true,ignoreScriptError=false;
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -4343,11 +4349,15 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-unordered"){
                             order = false;
                         }
+                        if (es.nodeName === "data-cover-ignore-error"){
+                            ignoreScriptError = true;
+                        }
                     });
     blanket.setFilter(globalFilter);
     blanket.setReporter(customReporter);
     blanket.setAdapter(adapter);
     blanket.setOrdered(order);
+    blanket.setIgnoreScriptError(ignoreScriptError);
 })();
 (function(_blanket){
 _blanket.extend({utils: {
@@ -4426,11 +4436,19 @@ requirejs.load = function (context, moduleName, url) {
             },function(instrumented){
                 try{
                     _blanket.utils.blanketEval(instrumented);
+                    context.completeLoad(moduleName);
                 }
                 catch(err){
-                    console.log("Error parsing instrumented code: "+err);
-                } finally {
-                    context.completeLoad(moduleName);
+                    if (_blanket.getIgnoreScriptError()){
+                        //we can continue like normal if
+                        //we're ignoring script errors,
+                        //but otherwise we don't want
+                        //to completeLoad or the error might be
+                        //missed.
+                        context.completeLoad(moduleName);
+                    }else{
+                        throw new Error("Error parsing instrumented code: "+err);
+                    }
                 }
             });
         }else{
@@ -4524,8 +4542,8 @@ if (typeof QUnit !== 'undefined'){
             tooltip: "Enable code coverage."
         });
     
-        if ( QUnit.urlParams.coverage ) {
-            QUnit.begin(function(){
+        if (!document.getElementById('qunit-testrunner-toolbar') ||  QUnit.urlParams.coverage ) {
+            QUnit.begin(function () {
                 blanket.noConflict().setupCoverage();
             });
             

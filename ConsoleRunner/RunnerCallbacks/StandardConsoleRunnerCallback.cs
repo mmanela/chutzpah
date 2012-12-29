@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Chutzpah.Models;
 
@@ -10,17 +11,29 @@ namespace Chutzpah.RunnerCallbacks
         readonly bool silent;
         readonly bool vsoutput;
         int testCount;
+        private readonly bool haveConsole;
 
         public StandardConsoleRunnerCallback(bool silent, bool vsoutput)
         {
             this.silent = silent;
             this.vsoutput = vsoutput;
+            try
+            {
+                // BufferWidth throws an IOException if there is no console attached
+                var temp = Console.BufferWidth;
+                haveConsole = true;
+            }
+            catch (IOException)
+            {
+                haveConsole = false;
+            }
+            
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
             Console.WriteLine();
-            var seconds = testResultsSummary.TimeTaken / 1000.0;
+            var seconds = testResultsSummary.TotalRuntime / 1000.0;
             Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
 
             base.TestSuiteFinished(testResultsSummary);
@@ -113,7 +126,15 @@ namespace Chutzpah.RunnerCallbacks
             {
 
                 Console.Write("\r");
-                Console.Write(" ".PadLeft(Console.BufferWidth));
+                if (haveConsole)
+                {
+                    Console.Write(" ".PadLeft(Console.BufferWidth));
+                }
+                else
+                {
+                    // Lets use a fixed width of 80 chars
+                    Console.Write(" ".PadLeft(80));
+                }
                 Console.Write("\r");
             }
         }

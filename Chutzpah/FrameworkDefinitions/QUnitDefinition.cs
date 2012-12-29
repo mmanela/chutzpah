@@ -10,13 +10,29 @@
     public class QUnitDefinition : BaseFrameworkDefinition
     {
         private IEnumerable<IQUnitReferencedFileProcessor> fileProcessors;
+        private IEnumerable<string> fileDependencies;
 
         /// <summary>
         /// Initializes a new instance of the QUnitDefinition class.
         /// </summary>
         public QUnitDefinition(IEnumerable<IQUnitReferencedFileProcessor> fileProcessors)
         {
-            this.fileProcessors = fileProcessors;
+            this.fileProcessors = fileProcessors; 
+            this.fileDependencies = new[]
+                {
+                    "QUnit\\qunit.css", 
+                    "QUnit\\qunit.js"
+                };
+        }
+
+        public override IEnumerable<string> FileDependencies
+        {
+            get { return fileDependencies; }
+        }
+
+        public override string TestHarness
+        {
+            get { return @"QUnit\qunit.html"; }
         }
 
         /// <summary>

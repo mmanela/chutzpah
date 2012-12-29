@@ -37,30 +37,15 @@ namespace Chutzpah.FrameworkDefinitions
         /// </summary>
         protected abstract IEnumerable<IReferencedFileProcessor> FileProcessors { get; }
 
-        #region IFrameworkDefinition Members
-
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
-        public virtual IEnumerable<string> FileDependencies
-        {
-            get
-            {
-                return new[]
-                           {
-                               string.Format("{0}\\{0}.js", FrameworkKey),
-                               string.Format("{0}\\{0}.css", FrameworkKey)
-                           };
-            }
-        }
+        public abstract IEnumerable<string> FileDependencies { get; }
 
         /// <summary>
         /// Gets the file name of the test harness to use with the framework.
         /// </summary>
-        public virtual string TestHarness
-        {
-            get { return string.Format("{0}\\{0}.html", FrameworkKey); }
-        }
+        public abstract string TestHarness { get; }
 
         /// <summary>
         /// Gets the file name of the JavaScript test runner to use with the framework.
@@ -122,7 +107,5 @@ namespace Chutzpah.FrameworkDefinitions
                 }
             }
         }
-
-        #endregion
     }
 }

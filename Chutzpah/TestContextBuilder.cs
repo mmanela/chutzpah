@@ -93,12 +93,6 @@ namespace Chutzpah
                         };
                 }
 
-                string stagingFolder = fileSystem.GetTemporaryFolder(hasher.Hash(testFilePath));
-                if (!fileSystem.FolderExists(stagingFolder))
-                {
-                    fileSystem.CreateDirectory(stagingFolder);
-                }
-
                 var referencedFiles = new List<ReferencedFile>();
                 var temporaryFiles = new List<string>();
 
@@ -119,15 +113,14 @@ namespace Chutzpah
                 foreach (string item in deps)
                 {
                     string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
-                    string destinationPath = Path.Combine(stagingFolder, Path.GetFileName(item));
-                    CreateIfDoesNotExist(sourcePath, destinationPath);
+                    referencedFiles.Add(new ReferencedFile { IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath });
                 }
 
                 string testHtmlFilePath = CreateTestHarness(definition,
-                                                            stagingFolder,
                                                             testFilePath,
                                                             referencedFiles,
-                                                            coverageEngine);
+                                                            coverageEngine,
+                                                            temporaryFiles);
 
                 return new TestContext
                     {
@@ -201,16 +194,13 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Iterates over referenced files and over filegenerators letting the generators decide if they handle any files
+        /// Iterates over filegenerators letting the generators decide if they handle any files
         /// </summary>
         private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
         {
             foreach (var fileGenerator in fileGenerators)
             {
-                foreach (var referencedFile in referencedFiles)
-                {
-                    fileGenerator.Generate(referencedFile, temporaryFiles);
-                }
+                fileGenerator.Generate(referencedFiles, temporaryFiles);
             }
         }
 
@@ -240,17 +230,22 @@ namespace Chutzpah
         }
 
         private string CreateTestHarness(IFrameworkDefinition definition,
-                                         string stagingFolder,
                                          string inputTestFilePath,
                                          IEnumerable<ReferencedFile> referencedFiles,
-                                         ICoverageEngine coverageEngine)
+                                         ICoverageEngine coverageEngine,
+                                         List<string> temporaryFiles)
         {
-            string testHtmlFilePath = Path.Combine(stagingFolder, "test.html");
+            // Use the directory of the test file to create the temporary html file
+            string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath);
+            string testFilePathHash = hasher.Hash(inputTestFilePath);
+            string testHtmlFilePath = Path.Combine(inputTestFileDir, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
+            temporaryFiles.Add(testHtmlFilePath);
+
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
             TestHarness harness = new TestHarness(inputTestFilePath, referencedFiles);
-
+            CleanupTestHarness(harness);
             if (coverageEngine != null)
             {
                 coverageEngine.PrepareTestHarnessForCoverage(harness, definition);
@@ -261,23 +256,30 @@ namespace Chutzpah
             return testHtmlFilePath;
         }
 
-        private void CreateIfDoesNotExist(string sourcePath, string destinationPath)
+        private void CleanupTestHarness(TestHarness harness)
         {
-            if (!fileSystem.FileExists(destinationPath)
-                || fileSystem.GetLastWriteTime(sourcePath) > fileSystem.GetLastWriteTime(destinationPath))
+            // Remove additional references to QUnit.
+            // (Iterate over a copy to avoid concurrent modification of the list!)
+            foreach (HtmlTag reference in harness.ReferencedScripts.Where(r => r.ReferencedFile != null).ToList())
             {
-                fileSystem.CopyFile(sourcePath, destinationPath);
+                if (reference.ReferencedFile.IsFileUnderTest) continue;
+
+                var lastSlash = reference.ReferencedFile.Path.LastIndexOfAny(new[] {'/', '\\'});
+                string fileName = reference.ReferencedFile.Path.Substring(lastSlash + 1);
+                if (Regex.IsMatch(fileName, "^qunit(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.IgnoreCase))
+                {
+                    harness.ReferencedScripts.Remove(reference);
+                }
             }
         }
 
         /// <summary>
-        /// Scans the test file extracting all referenced files from it. These will later be copied to the staging directory
+        /// Scans the test file extracting all referenced files from it.
         /// </summary>
         /// <param name="referencedFiles">The list of referenced files</param>
         /// <param name="definition">Test framework defintition</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
         /// <param name="currentFilePath">Path to the file under test</param>
-        /// <param name="stagingFolder">Folder where files are staged for testing</param>
         /// <returns></returns>
         private void GetReferencedFiles(List<ReferencedFile> referencedFiles,
                                         IFrameworkDefinition definition,
@@ -339,10 +341,8 @@ namespace Chutzpah
                                                  where !fileProbe.IsTemporaryChutzpahFile(file)
                                                  select file;
                                 validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
-
                             }
                         }
-
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
@@ -354,7 +354,10 @@ namespace Chutzpah
             return referencedFiles;
         }
 
-        private void VisitReferencedFile(string absoluteFilePath, IFrameworkDefinition definition, HashSet<string> discoveredPaths, ICollection<ReferencedFile> referencedFiles)
+        private void VisitReferencedFile(string absoluteFilePath,
+                                         IFrameworkDefinition definition,
+                                         HashSet<string> discoveredPaths,
+                                         ICollection<ReferencedFile> referencedFiles)
         {
             // If the file doesn't exit exist or we have seen it already then return
             if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;

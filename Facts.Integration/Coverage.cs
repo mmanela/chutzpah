@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 using Xunit.Extensions;
 
@@ -28,6 +29,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_create_a_coverage_object(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.DebugEnabled = true;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -138,6 +140,9 @@ namespace Chutzpah.Facts.Integration
         {
             public override void ExceptionThrown(Exception exception, string fileName)
             {
+                var preserveStackTrace = typeof(Exception).GetMethod("InternalPreserveStackTrace",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                preserveStackTrace.Invoke(exception, null);
                 throw exception;
             }
         }

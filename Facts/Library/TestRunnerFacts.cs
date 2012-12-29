@@ -5,6 +5,7 @@ using System.Linq;
 using Chutzpah.Exceptions;
 using Chutzpah.Facts.Mocks;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
@@ -349,6 +350,21 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_save_compiler_cache_after_test_run()
+            {
+                var runner = new TestableTestRunner();
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), It.IsAny<TestOptions>(), out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
+
+                runner.Mock<ICompilerCache>().Verify(x => x.Save());
+            }
+
+
+            [Fact]
             public void Will_clean_up_test_context()
             {
                 var runner = new TestableTestRunner();
@@ -360,6 +376,21 @@ namespace Chutzpah.Facts
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
 
                runner.Mock<ITestContextBuilder>().Verify(x => x.CleanupContext(context));
+            }
+
+            [Fact]
+            public void Will_not_clean_up_test_context_if_debug_mode()
+            {
+                var runner = new TestableTestRunner();
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), It.IsAny<TestOptions>(), out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
+                runner.ClassUnderTest.DebugEnabled = true;
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
+
+                runner.Mock<ITestContextBuilder>().Verify(x => x.CleanupContext(context), Times.Never());
             }
 
             [Fact]

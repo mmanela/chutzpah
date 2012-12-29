@@ -28,6 +28,7 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
+                SetGlobalOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -47,6 +48,17 @@ namespace Chutzpah
                 return -1;
             }
         }
+
+        private static void SetGlobalOptions(CommandLine commandLine)
+        {
+            GlobalOptions.Instance.CompilerCacheFile = commandLine.CompilerCacheFile;
+
+            if (commandLine.CompilerCacheFileMaxSizeMb.HasValue)
+            {
+                GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = commandLine.CompilerCacheFileMaxSizeMb.Value * 1024 * 1024;
+            }
+        }
+
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
@@ -75,22 +87,25 @@ namespace Chutzpah
             Console.WriteLine("  /failOnScriptError     : Return a non-zero exit code if any script errors occurs");
             Console.WriteLine("  /debug                 : Print debugging information");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
-            Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})",Constants.DefaultTestFileTimeout);
-            Console.WriteLine("  /parallelism n         : Max degree of parallelism for Chutzpah. (Defaults to 1)");
+            Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
+            Console.WriteLine("  /parallelism [n]       : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
             Console.WriteLine("                         : If you specify more than 1 the test output may be a bit jumbled");
             Console.WriteLine("  /path path             : Adds a path to a folder or file to the list of test paths to run.");
             Console.WriteLine("                         : Specify more than one to add multiple paths.");
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
-			Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
+            Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
             Console.WriteLine("  /coverage              : Enable coverage collection (requires JSCover and Java)");
             Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
             Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
-            
-			foreach (var transformer in SummaryTransformerFactory.GetTransformers())
+            Console.WriteLine("  /compilercache         : File where compiled scripts can be cached");
+            Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb");
+
+
+            foreach (var transformer in SummaryTransformerFactory.GetTransformers())
             {
-                Console.WriteLine("  /{0} filename        : {1}", transformer.Name,transformer.Description);
+                Console.WriteLine("  /{0} filename        : {1}", transformer.Name, transformer.Description);
             }
 
             Console.WriteLine();
@@ -102,7 +117,7 @@ namespace Chutzpah
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
             var chutzpahAssemblyName = testRunner.GetType().Assembly.GetName();
-            
+
 
             Console.WriteLine();
             Console.WriteLine("chutzpah.dll:     Version {0}", chutzpahAssemblyName.Version);
@@ -117,7 +132,7 @@ namespace Chutzpah
 
                 var testOptions = new TestOptions
                     {
-                        OpenInBrowser = commandLine.OpenInBrowser, 
+                        OpenInBrowser = commandLine.OpenInBrowser,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
                         CoverageOptions = new CoverageOptions

@@ -23,6 +23,7 @@ namespace Chutzpah
                 {
                     config.For<IHasher>().Singleton().Use<Hasher>();
                     config.For<ICoverageEngine>().Use<BlanketJsCoverageEngine>();
+                    config.For<ICompilerCache>().Singleton().Use<CompilerCache>();
                     config.Scan(scan =>
                         {
                             scan.TheCallingAssembly();

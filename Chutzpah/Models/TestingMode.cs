@@ -14,6 +14,6 @@ namespace Chutzpah.Models
         TypeScript = 4,
         AllExceptHTML = 8,
         HTML = 16,
-        All = HTML | JavaScript | TypeScript | CoffeeScript
+        All = 32
     }
 }

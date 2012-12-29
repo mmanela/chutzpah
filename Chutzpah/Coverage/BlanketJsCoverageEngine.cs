@@ -33,6 +33,7 @@ namespace Chutzpah.Coverage
 
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
+            FrameworkSpecificInfo info = GetInfo(definition);
             bool foundFilesToCover = false;
             foreach (HtmlTag tag in harness.ReferencedScripts)
             {
@@ -46,16 +47,14 @@ namespace Chutzpah.Coverage
             }
             if (foundFilesToCover)
             {
-                FrameworkSpecificInfo info = GetInfo(definition);
-
                 // Name the coverage object so that the JS runner can pick it up.
-                harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket'", Constants.ChutzpahCoverageObjectReference)));
+                harness.TestFrameworkDependencies.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
 
-                info.AdditionalScripts.ToList().ForEach(script => harness.ReferencedScripts.Add(script));
-                
-                // Add a reference to the main Blanket script.
-                ReferencedFile coverageRefFile = new ReferencedFile { Path = info.BlanketScriptName };
-                harness.ReferencedScripts.Add(new Script(coverageRefFile));
+                // Tell Blanket to ignore parse errors.
+                HtmlTag blanketMain =
+                    harness.TestFrameworkDependencies.Single(
+                        d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
+                blanketMain.Attributes.Add("data-cover-ignore-error", "");
             }
         }
 
@@ -116,20 +115,13 @@ namespace Chutzpah.Coverage
                     {
                         typeof (JasmineDefinition), new FrameworkSpecificInfo
                                                         {
-                                                            BlanketScriptName = "blanket_jasmine.js",
-                                                            AdditionalScripts = new Script[0]
+                                                            BlanketScriptName = "blanket_jasmine.js"
                                                         }
                         },
                     {
                         typeof (QUnitDefinition), new FrameworkSpecificInfo
                                                       {
-                                                          BlanketScriptName = "blanket_qunit.js",
-                                                          AdditionalScripts = new[]
-                                                                                  {
-                                                                                      // auto-run coverage
-                                                                                      new Script(
-                                                                                          "QUnit.urlParams.coverage=true")
-                                                                                  }
+                                                          BlanketScriptName = "blanket_qunit.js"
                                                       }
                         }
                 };
@@ -137,7 +129,6 @@ namespace Chutzpah.Coverage
         private class FrameworkSpecificInfo
         {
             internal string BlanketScriptName { get; set; }
-            internal IEnumerable<Script> AdditionalScripts { get; set; }
         }
     }
 }

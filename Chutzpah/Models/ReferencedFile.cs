@@ -26,5 +26,10 @@ namespace Chutzpah.Models
         /// This will be used when a file is in a different language like CoffeeScript
         /// </summary>
         public string GeneratedFilePath { get; set; }
+
+        /// <summary>
+        /// Gets if this is a dependency of the test framework
+        /// </summary>
+        public bool IsTestFrameworkDependency { get; set; }
     }
 }

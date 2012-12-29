@@ -17,6 +17,7 @@ namespace Chutzpah
             defaultParallelism = 1;
             MaxDegreeOfParallelism = defaultParallelism;
             CoverageOptions = new CoverageOptions();
+
         }
 
         /// <summary>
@@ -52,6 +53,8 @@ namespace Chutzpah
             get { return maxDegreeOfParallelism; }
             set { maxDegreeOfParallelism = GetDegreeOfParallelism(value); }
         }
+
+       
 
 
         /// <summary>
