@@ -10,9 +10,9 @@ namespace Chutzpah
     {
         private readonly string inputTestFilePath;
 
-        public IList<HtmlTag> TestFrameworkDependencies { get; private set; }
-        public IList<HtmlTag> ReferencedScripts { get; private set; }
-        public IList<HtmlTag> ReferencedStyles { get; private set; }
+        public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
+        public IList<TestHarnessItem> ReferencedScripts { get; private set; }
+        public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
         public TestHarness(string inputTestFilePath,
                              IEnumerable<ReferencedFile> referencedFiles)
@@ -30,16 +30,16 @@ namespace Chutzpah
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)
         {
-            ReferencedScripts = new List<HtmlTag>();
-            ReferencedStyles = new List<HtmlTag>();
-            TestFrameworkDependencies = new List<HtmlTag>();
+            ReferencedScripts = new List<TestHarnessItem>();
+            ReferencedStyles = new List<TestHarnessItem>();
+            TestFrameworkDependencies = new List<TestHarnessItem>();
 
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
                 string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
                                         ? referencedFile.Path
                                         : referencedFile.GeneratedFilePath;
-                IList<HtmlTag> refList = ChooseRefList(referencedFile, referencePath);
+                IList<TestHarnessItem> refList = ChooseRefList(referencedFile, referencePath);
                 if (refList == null) continue;
 
                 if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
@@ -57,9 +57,9 @@ namespace Chutzpah
             }
         }
 
-        private IList<HtmlTag> ChooseRefList(ReferencedFile referencedFile, string referencePath)
+        private IList<TestHarnessItem> ChooseRefList(ReferencedFile referencedFile, string referencePath)
         {
-            IList<HtmlTag> list = null;
+            IList<TestHarnessItem> list = null;
             if (referencedFile.IsTestFrameworkDependency)
             {
                 list = TestFrameworkDependencies;
@@ -102,50 +102,53 @@ namespace Chutzpah
                                         StringBuilder testJsReplacement,
                                         StringBuilder referenceJsReplacement)
         {
-            foreach (HtmlTag tag in TestFrameworkDependencies)
+            foreach (TestHarnessItem item in TestFrameworkDependencies)
             {
-                testFrameworkDependencies.AppendLine(tag.ToString());
+                testFrameworkDependencies.AppendLine(item.ToString());
             }
-            foreach (HtmlTag tag in ReferencedScripts)
+            foreach (TestHarnessItem item in ReferencedScripts)
             {
-                if (tag.ReferencedFile != null && tag.ReferencedFile.IsFileUnderTest)
+                if (item.ReferencedFile != null && item.ReferencedFile.IsFileUnderTest)
                 {
-                    testJsReplacement.AppendLine(tag.ToString());
+                    testJsReplacement.AppendLine(item.ToString());
                 }
                 else
                 {
-                    referenceJsReplacement.AppendLine(tag.ToString());
+                    referenceJsReplacement.AppendLine(item.ToString());
                 }
             }
-            foreach (HtmlTag tag in ReferencedStyles)
+            foreach (TestHarnessItem item in ReferencedStyles)
             {
-                referenceCssReplacement.AppendLine(tag.ToString());
+                referenceCssReplacement.AppendLine(item.ToString());
             }
         }
     }
 
-    public class HtmlTag
+    public class TestHarnessItem
     {
         private readonly bool explicitEndTag;
-        private string contents;
-        public string TagName { get; private set; }
+        private readonly string contents;
+        private readonly string tagName;
+
         public IDictionary<string, string> Attributes { get; private set; }
         public ReferencedFile ReferencedFile { get; private set; }
+        public bool HasFile { get { return ReferencedFile != null; } }
 
-        public HtmlTag(ReferencedFile referencedFile, string tagName, bool explicitEndTag)
+        internal TestHarnessItem(ReferencedFile referencedFile, string tagName, bool explicitEndTag)
             : this(tagName, explicitEndTag)
         {
             ReferencedFile = referencedFile;
         }
 
-        public HtmlTag(string contents, string tagName, bool explicitEndTag) : this(tagName, explicitEndTag)
+        internal TestHarnessItem(string contents, string tagName, bool explicitEndTag)
+            : this(tagName, explicitEndTag)
         {
             this.contents = contents;
         }
 
-        private HtmlTag(string tagName, bool explicitEndTag)
+        private TestHarnessItem(string tagName, bool explicitEndTag)
         {
-            TagName = tagName;
+            this.tagName = tagName;
             this.explicitEndTag = explicitEndTag;
             Attributes = new Dictionary<string, string>();
         }
@@ -153,14 +156,14 @@ namespace Chutzpah
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder("<");
-            builder.Append(TagName);
+            builder.Append(tagName);
             foreach (var entry in Attributes)
             {
                 builder.AppendFormat(@" {0}=""{1}""", entry.Key, entry.Value);
             }
             if (explicitEndTag || contents != null)
             {
-                builder.AppendFormat(">{1}</{0}>", TagName, contents ?? "");
+                builder.AppendFormat(">{1}</{0}>", tagName, contents ?? "");
             }
             else
             {
@@ -185,7 +188,7 @@ namespace Chutzpah
 
     }
 
-    public class ExternalStylesheet : HtmlTag
+    public class ExternalStylesheet : TestHarnessItem
     {
         public ExternalStylesheet(ReferencedFile referencedFile) : base(referencedFile, "link", false)
         {
@@ -195,7 +198,7 @@ namespace Chutzpah
         }
     }
 
-    public class ShortcutIcon : HtmlTag
+    public class ShortcutIcon : TestHarnessItem
     {
         public ShortcutIcon(ReferencedFile referencedFile) : base(referencedFile, "link", false)
         {
@@ -205,7 +208,7 @@ namespace Chutzpah
         }
     }
 
-    public class Script : HtmlTag
+    public class Script : TestHarnessItem
     {
         public Script(ReferencedFile referencedFile)
             : base(referencedFile, "script", true)

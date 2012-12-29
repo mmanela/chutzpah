@@ -35,23 +35,23 @@ namespace Chutzpah.Coverage
         {
             FrameworkSpecificInfo info = GetInfo(definition);
             bool foundFilesToCover = false;
-            foreach (HtmlTag tag in harness.ReferencedScripts)
+            foreach (TestHarnessItem reference in harness.ReferencedScripts.Where(s => s.HasFile))
             {
-                string originalFilePath = tag.ReferencedFile.Path;
+                string originalFilePath = reference.ReferencedFile.Path;
                 if (IsFileEligibleForInstrumentation(originalFilePath))
                 {
-                    tag.Attributes.Add("data-cover", "");
-                    tag.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
+                    reference.Attributes.Add("data-cover", "");
+                    reference.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
                     foundFilesToCover = true;
                 }
             }
             if (foundFilesToCover)
             {
                 // Name the coverage object so that the JS runner can pick it up.
-                harness.TestFrameworkDependencies.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
+                harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
 
                 // Tell Blanket to ignore parse errors.
-                HtmlTag blanketMain =
+                TestHarnessItem blanketMain =
                     harness.TestFrameworkDependencies.Single(
                         d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
                 blanketMain.Attributes.Add("data-cover-ignore-error", "");

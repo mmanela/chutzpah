@@ -260,7 +260,7 @@ namespace Chutzpah
         {
             // Remove additional references to QUnit.
             // (Iterate over a copy to avoid concurrent modification of the list!)
-            foreach (HtmlTag reference in harness.ReferencedScripts.Where(r => r.ReferencedFile != null).ToList())
+            foreach (TestHarnessItem reference in harness.ReferencedScripts.Where(r => r.HasFile).ToList())
             {
                 if (reference.ReferencedFile.IsFileUnderTest) continue;
 
