@@ -20,7 +20,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Gets a short, file system friendly key for the framework library.
         /// </summary>
-        protected abstract string FrameworkKey { get; }
+        public abstract string FrameworkKey { get; }
 
         /// <summary>
         /// Gets a regular expression pattern to match a testable javascript file.

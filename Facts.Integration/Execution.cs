@@ -525,5 +525,58 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.PassedCount);
             Assert.Equal(1, result.TotalCount);
         }
+
+
+        public class ChutzpahSettingsFile
+        {
+
+            [Fact]
+            public void Will_use_settings_file_to_determine_framework()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\frameworkTest.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Can_place_test_harness_next_to_settings_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub1\settingsAdjacentHarnessTest.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Can_place_test_harness_next_to_test_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub2\SubSub2\testAdjacentHarnessTest.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Can_place_test_harness_in_custom_path()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub3\customPathHarnessTest.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+        }
     }
 }

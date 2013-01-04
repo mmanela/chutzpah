@@ -1,0 +1,4 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "TestFileAdjacent"
+}

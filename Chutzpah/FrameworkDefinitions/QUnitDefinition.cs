@@ -38,7 +38,7 @@
         /// <summary>
         /// Gets a short, file system friendly key for the QUnit library.
         /// </summary>
-        protected override string FrameworkKey
+        public override string FrameworkKey
         {
             get
             {

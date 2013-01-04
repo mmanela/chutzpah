@@ -40,5 +40,13 @@ namespace Chutzpah
 
         IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode);
         bool IsTemporaryChutzpahFile(string path);
+
+        /// <summary>
+        /// Finds a Chutzpah test settings file given a directory. Will recursively scan current direcotry 
+        /// and all directories above until it finds the file 
+        /// </summary>
+        /// <param name="currentDirectory">the directory to start searching from</param>
+        /// <returns>Eithe the found setting file path or null</returns>
+        string FindTestSettingsFile(string currentDirectory);
     }
 }

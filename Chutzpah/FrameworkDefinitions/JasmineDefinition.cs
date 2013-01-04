@@ -47,7 +47,7 @@
         /// <summary>
         /// Gets a short, file system friendly key for the Jasmine library.
         /// </summary>
-        protected override string FrameworkKey
+        public override string FrameworkKey
         {
             get
             {
