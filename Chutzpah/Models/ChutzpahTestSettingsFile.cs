@@ -58,14 +58,16 @@ namespace Chutzpah.Models
         {
             if (string.IsNullOrEmpty(directory)) return new ChutzpahTestSettingsFile();
 
-            var settings = new ChutzpahTestSettingsFile();
-            if(!ChutzpahSettingsFileCache.ContainsKey(directory))
+            directory = directory.TrimEnd('/', '\\');
+
+            ChutzpahTestSettingsFile settings;
+            if (!ChutzpahSettingsFileCache.TryGetValue(directory, out settings))
             {
                 var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
                 if(string.IsNullOrEmpty(testSettingsFilePath))
                 {
                     // TODO: Log inability to find test file
-                    return settings;
+                    return new ChutzpahTestSettingsFile();
                 }
 
                 if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
@@ -76,10 +78,10 @@ namespace Chutzpah.Models
                     ValidateTestHarnessLocationMode(settings, fileProbe);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
-                    ChutzpahSettingsFileCache.TryAdd(testSettingsFilePath, settings);
+                    ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
                 }
 
-                // Add mapping in the cahce for the original directory tried to skip needing to traverse the tree again
+                // Add mapping in the cache for the original directory tried to skip needing to traverse the tree again
                 ChutzpahSettingsFileCache.TryAdd(directory, settings);
             }
 

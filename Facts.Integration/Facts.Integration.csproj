@@ -78,6 +78,9 @@
     <Content Include="JS\Test\TestSettings\Sub3\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\requirejs\WithSettings\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
@@ -213,13 +216,13 @@
     <Content Include="JS\Test\oldCallbackQunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\requirejs\rjs-qunit-solo.js">
+    <Content Include="JS\Test\requirejs\WithSettings\rjs-qunit-solo.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\requirejs\testfiledependency.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\requirejs\rjs-jasmine-solo.js">
+    <Content Include="JS\Test\requirejs\WithSettings\rjs-jasmine-solo.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\requirejs\rjs-jasmine-html.js">

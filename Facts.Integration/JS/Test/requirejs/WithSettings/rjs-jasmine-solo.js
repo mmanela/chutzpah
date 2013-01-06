@@ -1,6 +1,6 @@
-﻿/// <reference path="../../Code/RequireJS/require.js" />
+﻿/// <reference path="../../../Code/RequireJS/require.js" />
 
-requirejs(['../../Code/RequireJS/base/core', '../../Code/RequireJS/ui/screen'],
+requirejs(['base/core', 'ui/screen'],
     function (core, screen) {
 
         describe("base/core", function () {

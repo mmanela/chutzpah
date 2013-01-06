@@ -442,55 +442,6 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html");
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(2, result.PassedCount);
-            Assert.Equal(2, result.TotalCount);
-        }
-
-        [Fact]
-        public void Will_run_jasmine_require_html_test_where_test_file_uses_requirejs_command()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html");
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(2, result.PassedCount);
-            Assert.Equal(2, result.TotalCount);
-        }
-
-
-        [Fact]
-        public void Will_run_qunit_require_js_test_where_test_file_uses_requirejs_command()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.qunit.js");
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(2, result.PassedCount);
-            Assert.Equal(2, result.TotalCount);
-        }
-
-        [Fact]
-        public void Will_run_jasmine_require_js_test_where_test_file_uses_requirejs_command()
-        {
-            var testRunner = TestRunner.Create();
-           
-            TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js");
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(2, result.PassedCount);
-            Assert.Equal(2, result.TotalCount);
-        }
-
-        [Fact]
         public void Will_execute_ajax_call_test()
         {
             var testRunner = TestRunner.Create();
@@ -526,6 +477,81 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        public class AMD
+        {
+
+            [Fact]
+            public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_require_html_test_where_test_file_uses_requirejs_command()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_qunit_require_js_test_where_test_file_uses_requirejs_command()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.qunit.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_require_js_test_where_test_file_uses_requirejs_command()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_qunit_require_js_test_using_settings_to_place_harness()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-qunit-solo.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_require_js_test_using_settings_to_place_harness()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-jasmine-solo.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+        }
 
         public class ChutzpahSettingsFile
         {

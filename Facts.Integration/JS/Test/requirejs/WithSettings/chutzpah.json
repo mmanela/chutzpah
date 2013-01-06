@@ -1,0 +1,4 @@
+﻿{
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "../../../Code/RequireJS"
+}
