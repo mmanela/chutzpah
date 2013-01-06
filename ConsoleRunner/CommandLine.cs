@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Chutzpah.Models;
 
 namespace Chutzpah
 {
@@ -9,6 +10,7 @@ namespace Chutzpah
         private const string TeamcityProjectName = "TEAMCITY_PROJECT_NAME";
 
         private readonly Stack<string> arguments = new Stack<string>();
+        private TestingMode testMode = TestingMode.All;
 
         protected CommandLine(string[] args)
         {
@@ -42,6 +44,12 @@ namespace Chutzpah
         public IDictionary<string,string> UnmatchedArguments { get; set; }
 
         public bool VsOutput { get; protected set; }
+
+        public TestingMode TestMode
+        {
+            get { return testMode; }
+            protected set { testMode = value; }
+        }
 
         public string CompilerCacheFile { get; protected set; }
 
@@ -128,6 +136,15 @@ namespace Chutzpah
                 else if (optionName == "/compilercachesize")
                 {
                     SetCompilerCacheMaxSize(option.Value);
+                }
+                else if (optionName == "/testmode")
+                {
+                    TestingMode resultMode;
+                    if(Enum.TryParse(option.Value, true, out resultMode))
+                    {
+                        TestMode = resultMode; 
+                    }
+
                 }
                 else
                 {
