@@ -96,7 +96,7 @@ namespace Chutzpah
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
             Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
-            Console.WriteLine("  /coverage              : Enable coverage collection (requires JSCover and Java)");
+            Console.WriteLine("  /coverage              : Enable coverage collection");
             Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
             Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
             Console.WriteLine("  /compilercache         : File where compiled scripts can be cached");
