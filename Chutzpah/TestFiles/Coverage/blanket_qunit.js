@@ -1,4 +1,4 @@
-/*! blanket - v1.0.0 */ 
+/*! blanket - v1.0.1 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
@@ -3911,9 +3911,19 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,ordered,
+    __blanket,
     copynumber = Math.floor(Math.random()*1000),
-    coverageInfo = {},existingRequireJS=false;
+    coverageInfo = {},options = {
+        reporter: null,
+        adapter:null,
+        filter: null,
+        orderedLoading: true,
+        loader: null,
+        ignoreScriptError: false,
+        existingRequireJS:false,
+        autoStart: false
+    };
+    
     if (inBrowser && typeof window.blanket !== 'undefined'){
         __blanket = window.blanket.noConflict();
     }
@@ -3930,7 +3940,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             //for differentiating between instances
             return copynumber;
         },
-        _reporter: null,
         extend: function(obj) {
             //borrowed from underscore
             _blanket._extend(_blanket,obj);
@@ -3938,7 +3947,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         _extend: function(dest,source){
           if (source) {
             for (var prop in source) {
-              if (dest[prop]){
+              if ( dest[prop] instanceof Object && typeof dest[prop] !== "function"){
                 _blanket._extend(dest[prop],source[prop]);
               }else{
                   dest[prop] = source[prop];
@@ -3946,35 +3955,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
           }
         },
-        setExistingRequirejs: function(exists){
-            existingRequireJS = exists || false;
-        },
-        getExistingRequirejs: function(){
-            return existingRequireJS;
-        },
-        setFilter: function(filter){
-            instrumentFilter = filter;
-        },
-        getFilter: function(){
-            return instrumentFilter;
-        },
-        setReporter: function(reporterFcn){
-            reporter = reporterFcn;
-        },
-        getReporter: function(){
-            return reporter;
-        },
-        setOrdered: function(isOrdered){
-            ordered = isOrdered;
-        },
-        getOrdered: function(isOrdered){
-            return ordered;
-        },
-        setIgnoreScriptError: function(ignore){
-            ignoreScriptError = ignore;
-        },
-        getIgnoreScriptError: function(){
-            return ignoreScriptError;
+        options: function(key,value){
+            if (typeof key !== "string"){
+                _blanket._extend(options,key);
+            }else if (typeof value === 'undefined'){
+                return options[key];
+            }else{
+                options[key]=value;
+            }
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -4076,7 +4064,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
-                this.getReporter().call(this,coverageInfo);
+                this.options("reporter").call(this,coverageInfo);
             }
         }
     };
@@ -4084,13 +4072,48 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 })();
 
 (function(_blanket){
+    var oldOptions = _blanket.options;
 _blanket.extend({
-    setAdapter: function(adapterPath){
-        _blanket._adapter = adapterPath;
+    outstandingRequireFiles:[],
+    options: function(key,value){
+        var newVal={};
+
+        if (typeof key !== "string"){
+            //key is key/value map
+            oldOptions(key);
+            newVal = key;
+        }else if (typeof value === 'undefined'){
+            //accessor
+            return oldOptions(key);
+        }else{
+            //setter
+            oldOptions(key,value);
+            newVal[key] = value;
+        }
         
-        if (typeof adapterPath !== "undefined"){
+        if (newVal.adapter){
+            _blanket._loadFile(newVal.adapter);
+        }
+        if (newVal.loader){
+            _blanket._loadFile(newVal.loader);
+        }
+    },
+    requiringFile: function(filename,done){
+        if (typeof filename === "undefined"){
+            _blanket.outstandingRequireFiles=[];
+        }else if (typeof done === "undefined"){
+            _blanket.outstandingRequireFiles.push(filename);
+        }else{
+            _blanket.outstandingRequireFiles.splice(_blanket.outstandingRequireFiles.indexOf(filename),1);
+        }
+    },
+    requireFilesLoaded: function(){
+        return _blanket.outstandingRequireFiles.length === 0;
+    },
+    _loadFile: function(path){
+        if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
-            request.open('GET', adapterPath, false);
+            request.open('GET', path, false);
             request.send();
             //load the adapter
             var script = document.createElement("script");
@@ -4100,12 +4123,12 @@ _blanket.extend({
         }
     },
     hasAdapter: function(callback){
-        return typeof _blanket._adapter !== "undefined";
+        return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
-        if (_blanket.getReporter()){
-            require([_blanket.getReporter().replace(".js","")],function(r){
+        if (_blanket.options("reporter")){
+            require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
             });
         }else if (typeof _blanket.defaultReporter === 'function'){
@@ -4136,51 +4159,64 @@ _blanket.extend({
         }
 
         var scripts = _blanket.utils.collectPageScripts();
-        
-        _blanket.setFilter(scripts);
-        
-        var requireConfig = {
-            paths: {},
-            shim: {}
-        };
-        var lastDep = {
-            deps: []
-        };
-        var isOrdered = _blanket.getOrdered();
-        scripts.forEach(function(file,indx){
-            //for whatever reason requirejs
-            //prefers when we don't use the full path
-            //so we just use a custom name
-            var requireKey = "blanket_"+indx;
-            requireConfig.paths[requireKey] = file;
-            if (isOrdered){
-                if (indx > 0){
-                   requireConfig.shim[requireKey] = copy(lastDep);
-                }
-                lastDep.deps = [requireKey];
-            }
-        });
-        require.config(requireConfig);
-        require(_blanket.getFilter().map(function(val,indx){
-            return "blanket_"+indx;
-        }), function(){
+        //_blanket.options("filter",scripts);
+        if (scripts.length === 0){
             callback();
-        });
+        }else{
+            var requireConfig = {
+                paths: {},
+                shim: {}
+            };
+            var lastDep = {
+                deps: []
+            };
+            var isOrdered = _blanket.options("orderedLoading");
+            var initialGet=[];
+            scripts.forEach(function(file,indx){
+                //for whatever reason requirejs
+                //prefers when we don't use the full path
+                //so we just use a custom name
+                var requireKey = "blanket_"+indx;
+                initialGet.push(requireKey);
+                requireConfig.paths[requireKey] = file;
+                if (isOrdered){
+                    if (indx > 0){
+                       requireConfig.shim[requireKey] = copy(lastDep);
+                    }
+                    lastDep.deps = [requireKey];
+                }
+            });
+            require.config(requireConfig);
+            var filt = initialGet;
+            require(filt, function(){
+                callback();
+            });
+        }
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
         opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
         opts.callback = opts.callback || function() {  };
         opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        if(!(opts.checkRequirejs && _blanket.getExistingRequirejs())){
-            if (opts.coverage){
-                _blanket._bindStartTestRunner(opts.bindEvent,
-                function(){
-                    _blanket._loadSourceFiles(opts.callback);
+        if (opts.coverage) {
+            _blanket._bindStartTestRunner(opts.bindEvent,
+            function(){
+                _blanket._loadSourceFiles(function() {
+                    var allLoaded = function(){
+                        return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
+                    };
+                    var check = function() {
+                        if (allLoaded()) {
+                            opts.callback();
+                        } else {
+                            setTimeout(check, 13);
+                        }
+                    };
+                    check();
                 });
-            }else{
-                opts.callback();
-            }
+            });
+        }else{
+            opts.callback();
         }
     },
     utils: {
@@ -4196,7 +4232,7 @@ _blanket.extend({
 if (typeof requirejs !== "undefined" &&
     typeof require !== "undefined" &&
     typeof define !== "undefined"){
-    blanket.setExistingRequirejs(true);
+    blanket.options("existingRequireJS",true);
 }else{
 
 /*
@@ -4237,7 +4273,7 @@ null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").r
     
 }
 blanket.defaultReporter = function(coverage){
-    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 20px;} .bl-source .miss{background-color:#e6c3c7}",
+    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space:nowrap;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center; } .bl-source .miss{background-color:#e6c3c7}",
         successRate = 60,
         head = document.head,
         fileNumber = 0,
@@ -4304,6 +4340,8 @@ blanket.defaultReporter = function(coverage){
                 if(statsForFile[i] === 0){
                     totalSmts++;
                     code[i] = code[i].replace("{{executed}}",'miss');
+                }else{
+                    code[i] = code[i].replace("{{executed}}","");
                 }
             }
         }
@@ -4327,56 +4365,69 @@ blanket.defaultReporter = function(coverage){
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
-    appendTag('div', body, bodyContent);
+    if (document.getElementById("blanket-main")){
+        document.getElementById("blanket-main").innerHTML=
+            bodyContent.slice(23,-6);
+    }else{
+        appendTag('div', body, bodyContent);
+    }
     //appendHtml(body, '</div>');
 };
 (function(){
-    var globalFilter,customReporter,adapter,order=true,ignoreScriptError=false;
+    var newOptions={};
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
     toArray.call(scripts[scripts.length - 1].attributes)
                     .forEach(function(es){
                         if(es.nodeName === "data-cover-only"){
-                            globalFilter = es.nodeValue;
+                            newOptions.filter = es.nodeValue;
+                        }
+                        if(es.nodeName === "data-cover-never"){
+                            newOptions.antifilter = es.nodeValue;
                         }
                         if(es.nodeName === "data-cover-reporter"){
-                            customReporter = es.nodeValue;
+                            newOptions.reporter = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-adapter"){
-                            adapter = es.nodeValue;
+                            newOptions.adapter = es.nodeValue;
                         }
-                        if (es.nodeName === "data-cover-unordered"){
-                            order = false;
+                        if (es.nodeName === "data-cover-loader"){
+                            newOptions.loader = es.nodeValue;
                         }
-                        if (es.nodeName === "data-cover-ignore-error"){
-                            ignoreScriptError = true;
+                        if (es.nodeName === "data-cover-flags"){
+                            var flags = " "+es.nodeValue+" ";
+                            if (flags.indexOf(" unordered ") > -1){
+                                newOptions.order = false;
+                            }
+                            if (flags.indexOf(" ignoreError ") > -1){
+                                newOptions.ignoreScriptError = true;
+                            }
+                            if (flags.indexOf(" autoStart ") > -1){
+                                newOptions.autoStart = true;
+                            }
                         }
                     });
-    blanket.setFilter(globalFilter);
-    blanket.setReporter(customReporter);
-    blanket.setAdapter(adapter);
-    blanket.setOrdered(order);
-    blanket.setIgnoreScriptError(ignoreScriptError);
+    blanket.options(newOptions);
 })();
 (function(_blanket){
-_blanket.extend({utils: {
+_blanket.extend({
+    utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
     matchPatternAttribute: function(filename,pattern){
         if (typeof pattern === 'string'){
-            if (pattern.indexOf("[") === 1){
+            if (pattern.indexOf("[") === 0){
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                 });
-            }else if ( pattern.indexOf("//") === 1){
-                //treat as regex
-                var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-                // sanity check here
-                var regex = new RegExp(patternRegex[0], patternRegex[1]);
+            }else if ( pattern.indexOf("//") === 0){
+                var ex = pattern.slice(2,pattern.lastIndexOf('/'));
+                var mods = pattern.slice(pattern.lastIndexOf('/')+1);
+                var regex = new RegExp(ex,mods);
                 return regex.test(filename);
             }else{
                 return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
@@ -4399,13 +4450,15 @@ _blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = _blanket.getFilter();
+        var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
+            var antimatch = _blanket.options("antifilter");
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                        (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
                                 }).length === 1;
                             });
         }else{
@@ -4418,6 +4471,9 @@ _blanket.extend({utils: {
                                             return sn.nodeName === "src";
                                         })[0].nodeValue).replace(".js","");
                                 });
+        if (!filter){
+            _blanket.options("filter","['"+scriptNames.join("','")+"']");
+        }
         return scriptNames;
     }
 }
@@ -4426,10 +4482,17 @@ _blanket.extend({utils: {
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-
+    _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
-        var match = _blanket.getFilter();
-        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+        _blanket.requiringFile(url,true);
+        var match = _blanket.options("filter");
+        //we check the never matches first
+        var antimatch = _blanket.options("antifilter");
+        if (typeof antimatch !== "undefined" &&
+                _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
+            ){
+            _blanket.utils.oldloader(context, moduleName, url);
+        }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
@@ -4439,7 +4502,7 @@ requirejs.load = function (context, moduleName, url) {
                     context.completeLoad(moduleName);
                 }
                 catch(err){
-                    if (_blanket.getIgnoreScriptError()){
+                    if (_blanket.options("ignoreScriptError")){
                         //we can continue like normal if
                         //we're ignoring script errors,
                         //but otherwise we don't want
@@ -4456,6 +4519,7 @@ requirejs.load = function (context, moduleName, url) {
         }
 
     }, function (err) {
+        _blanket.requiringFile();
         throw err;
     });
 };
@@ -4512,7 +4576,13 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 })(blanket);
+(function(){
 if (typeof QUnit !== 'undefined'){
+    //check to make sure requirejs is completed before we start the test runner
+    var allLoaded = function() {
+        return window.QUnit.config.queue.length > 0 && blanket.noConflict().requireFilesLoaded();
+    };
+
     if (!QUnit.config.urlConfig[0].tooltip){
         //older versions we run coverage automatically
         //and we change how events are binded
@@ -4533,6 +4603,7 @@ if (typeof QUnit !== 'undefined'){
             blanket.noConflict().onTestDone(details.total,details.passed);
         };
         blanket.beforeStartTestRunner({
+            condition: allLoaded,
             callback: QUnit.start
         });
     }else{
@@ -4542,8 +4613,8 @@ if (typeof QUnit !== 'undefined'){
             tooltip: "Enable code coverage."
         });
     
-        if (!document.getElementById('qunit-testrunner-toolbar') ||  QUnit.urlParams.coverage ) {
-            QUnit.begin(function () {
+        if ( QUnit.urlParams.coverage || blanket.options("autoStart") ) {
+            QUnit.begin(function(){
                 blanket.noConflict().setupCoverage();
             });
             
@@ -4560,13 +4631,24 @@ if (typeof QUnit !== 'undefined'){
                 blanket.noConflict().onTestDone(details.total,details.passed);
             });
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start
+                condition: allLoaded,
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                }
             });
         }else{
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start,
+                condition: allLoaded,
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                },
                 coverage:false
             });
         }
     }
 }
+})();

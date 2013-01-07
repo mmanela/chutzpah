@@ -24,16 +24,49 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> RequireJsTestScripts
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"}
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_create_a_coverage_object(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.DebugEnabled = true;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
             Assert.NotNull(result.TestFileSummaries.Single().CoverageObject);
+        }
+
+        [Theory]
+        [PropertyData("BasicTestScripts")]
+        public void Will_cover_the_correct_scripts(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] {scriptPath, "JS\\Code\\code.js"});
+        }
+
+        [Theory]
+        [PropertyData("BasicTestScripts")]
+        public void Will_get_test_results_with_coverage_enabled(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(4, result.TotalCount);
         }
 
         [Fact]
@@ -78,8 +111,7 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.IncludePattern = "**\\code.js"),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
-            Assert.True(HasKeyWithSubstring(dict, "code.js"));
-            Assert.False(HasKeyWithSubstring(dict, ABasicTestScript));
+            ExpectKeysMatching(dict, new[] {"\\code.js"});
         }
 
         [Fact]
@@ -90,8 +122,7 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePattern = "**\\" + ABasicTestScript),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
-            Assert.True(HasKeyWithSubstring(dict, "code.js"));
-            Assert.False(HasKeyWithSubstring(dict, ABasicTestScript));
+            ExpectKeysMatching(dict, new[] { "\\code.js" });
         }
 
         [Fact]
@@ -103,6 +134,16 @@ namespace Chutzpah.Facts.Integration
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
             Assert.True(HasKeyWithSubstring(dict, "code.coffee"));
+        }
+
+        [Fact]
+        public void Will_put_original_script_name_in_file_path_in_coverage_object()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
             var filePath = dict.Single(kvp => kvp.Key.Contains("code.coffee")).Value.FilePath;
             Assert.Contains("\\code.coffee", filePath);
         }
@@ -116,6 +157,44 @@ namespace Chutzpah.Facts.Integration
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
             Assert.False(HasKeyWithSubstring(dict, "file://"));
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
+        public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.NotNull(result.TestFileSummaries.Single().CoverageObject);
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
+        public void Will_cover_the_correct_files_for_test_where_test_file_uses_requirejs_command(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
+                               new[]
+                                   {
+                                       scriptPath, "tests\\base\\base.", "tests\\ui\\ui.", "\\base\\core.js",
+                                       "ui\\screen.js"
+                                   });
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
+        public void Will_get_results_for_test_where_test_file_uses_requirejs_command_with_coverage_enabled(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePattern = "**\\require.js"), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(2, result.TotalCount);
         }
 
         private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
@@ -134,6 +213,31 @@ namespace Chutzpah.Facts.Integration
         private bool HasKeyWithSubstring<T>(IDictionary<string, T> dict, string subString)
         {
             return dict.Keys.Any(k => k.Contains(subString));
+        }
+
+        private void ExpectKeysMatching<T>(IDictionary<string, T> dict, IEnumerable<string> keySubstrings)
+        {
+            var ok = true;
+            var keySubstringsList = keySubstrings.ToList();
+            if (dict.Count != keySubstringsList.Count)
+            {
+                ok = false;
+            }
+            if (ok)
+            {
+                foreach (var substr in keySubstringsList)
+                {
+                    var found = dict.Keys.Any(key => key.IndexOf(substr, StringComparison.CurrentCultureIgnoreCase) >= 0);
+                    if (!found)
+                    {
+                        ok = false;
+                    }
+                }
+            }
+            if (!ok)
+            {
+                throw new Xunit.Sdk.EqualException(string.Join(", ", keySubstringsList), string.Join(", ", dict.Keys), true);
+            }
         }
 
         private class ExceptionThrowingRunnerCallback : RunnerCallback

@@ -34,28 +34,51 @@ namespace Chutzpah.Coverage
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
             FrameworkSpecificInfo info = GetInfo(definition);
-            bool foundFilesToCover = false;
             foreach (TestHarnessItem reference in harness.ReferencedScripts.Where(s => s.HasFile))
             {
-                string originalFilePath = reference.ReferencedFile.Path;
-                if (IsFileEligibleForInstrumentation(originalFilePath))
+                reference.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
+            }
+
+            // Construct array of scripts to exclude from instrumentation/coverage collection.
+            IEnumerable<string> dontCover =
+                harness.TestFrameworkDependencies.Where(
+                    dep =>
+                    dep.HasFile && IsScriptFile(dep.ReferencedFile)).Select(dep => dep.Attributes["src"]);
+            string dataCoverNever = "[" + string.Join(",", dontCover.Select(file => "'" + file + "'")) + "]";
+            
+            // Remove require.js if found amoung the referenced scripts. It's included in Blanket, and
+            // it cannot come after the main Blanket include. Simplest approach is to remove it!
+            foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile).ToList())
+            {
+                var lastSlash = refScript.ReferencedFile.Path.LastIndexOfAny(new[] { '/', '\\' });
+                string fileName = refScript.ReferencedFile.Path.Substring(lastSlash + 1);
+                if (fileName.Equals("require.js", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    reference.Attributes.Add("data-cover", "");
-                    reference.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
-                    foundFilesToCover = true;
+                    harness.ReferencedScripts.Remove(refScript);
+                    break;
                 }
             }
-            if (foundFilesToCover)
-            {
-                // Name the coverage object so that the JS runner can pick it up.
-                harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
 
-                // Tell Blanket to ignore parse errors.
-                TestHarnessItem blanketMain =
-                    harness.TestFrameworkDependencies.Single(
-                        d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
-                blanketMain.Attributes.Add("data-cover-ignore-error", "");
-            }
+            // Name the coverage object so that the JS runner can pick it up.
+            harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
+
+            // Configure Blanket. We let Blanket instrument everything, and then remove stuff from the coverage
+            // object afterwards. The reasons are:
+            // *) The user should be able to use simple wildcards instead of regular expressions for include/exclude.
+            // *) The include/exclude patterns apply to original file paths rather than generated ones.
+            // *) RequireJS includes are done at "runtime", so we cannot process them in advance.
+            TestHarnessItem blanketMain =
+                harness.TestFrameworkDependencies.Single(
+                    d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
+            blanketMain.Attributes.Add("data-cover-flags", "ignoreError autoStart");
+            blanketMain.Attributes.Add("data-cover-only", "//.*/");
+            blanketMain.Attributes.Add("data-cover-never", dataCoverNever);
+        }
+
+        private bool IsScriptFile(ReferencedFile file)
+        {
+            string name = file.GeneratedFilePath ?? file.Path;
+            return name.EndsWith(Constants.JavaScriptExtension, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
@@ -67,7 +90,8 @@ namespace Chutzpah.Coverage
             CoverageData coverageData = new CoverageData();
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
-            // to paths and generated paths to original paths.
+            // to paths and generated paths to original paths, then only keep the ones
+            // that match the include/exclude patterns.
             foreach (var entry in data)
             {
                 string filePath = new Uri(entry.Key).LocalPath;
@@ -76,11 +100,14 @@ namespace Chutzpah.Coverage
                 {
                     newKey = filePath;
                 }
-                coverageData.Add(newKey, new CoverageFileData
-                                             {
-                                                 LineExecutionCounts = entry.Value,
-                                                 FilePath = newKey
-                                             });
+                if (IsFileEligibleForInstrumentation(newKey))
+                {
+                    coverageData.Add(newKey, new CoverageFileData
+                                                 {
+                                                     LineExecutionCounts = entry.Value,
+                                                     FilePath = newKey
+                                                 });
+                }
             }
             return coverageData;
         }

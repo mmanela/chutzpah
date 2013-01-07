@@ -178,7 +178,9 @@
 
     function onPageLoaded() {
         //console.log("onPageLoaded");
-        window.QUnit.start();
+        if (!window._Chutzpah_covobj_name) {
+            window.QUnit.start();
+        }
     }
 
     try {

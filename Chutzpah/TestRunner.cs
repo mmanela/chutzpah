@@ -204,7 +204,6 @@ namespace Chutzpah
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
-
             Func<ProcessStream, TestFileSummary> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
