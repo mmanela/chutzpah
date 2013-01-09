@@ -66,11 +66,9 @@ namespace Chutzpah.Models
                 var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
                 if(string.IsNullOrEmpty(testSettingsFilePath))
                 {
-                    // TODO: Log inability to find test file
-                    return new ChutzpahTestSettingsFile();
+                    settings = new ChutzpahTestSettingsFile();
                 }
-
-                if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
+                else if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
                 {
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);

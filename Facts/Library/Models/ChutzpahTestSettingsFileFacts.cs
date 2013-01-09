@@ -69,5 +69,18 @@ namespace Chutzpah.Facts.Library.Models
 
             Assert.Equal(@"C:\settingsDir4", cached.SettingsFileDirectory);
         }
+
+        [Fact]
+        public void Will_cache_missing_default_settings_for_missing_settings_files()
+        {
+            var mockFileProbe = new Mock<IFileProbe>();
+            var mockSerializer = new Mock<IJsonSerializer>();
+            mockFileProbe.Setup(x => x.FindTestSettingsFile("dir5")).Returns((string)null);
+            ChutzpahTestSettingsFile.Read(@"dir5", mockFileProbe.Object, mockSerializer.Object);
+            
+            var cached = ChutzpahTestSettingsFile.Read(@"dir5", mockFileProbe.Object, mockSerializer.Object);
+
+            mockFileProbe.Verify(x => x.FindTestSettingsFile("dir5"), Times.Once());
+        }
     }
 }
