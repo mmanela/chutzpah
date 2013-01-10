@@ -34,10 +34,6 @@ namespace Chutzpah.Coverage
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
             FrameworkSpecificInfo info = GetInfo(definition);
-            foreach (TestHarnessItem reference in harness.ReferencedScripts.Where(s => s.HasFile))
-            {
-                reference.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
-            }
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
             IEnumerable<string> dontCover =
@@ -57,6 +53,13 @@ namespace Chutzpah.Coverage
                     harness.ReferencedScripts.Remove(refScript);
                     break;
                 }
+            }
+
+            // Let BlanketJS handle *ALL* scripts, even if we in theory could exclude some of them
+            // already at this point. But that causes order problems.
+            foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
+            {
+                refScript.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
             }
 
             // Name the coverage object so that the JS runner can pick it up.
