@@ -103,13 +103,13 @@ namespace Chutzpah
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
-                GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
+                GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles);
 
                 foreach (string item in definition.FileDependencies)
                 {
                     string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
-                    referencedFiles.Add(new ReferencedFile {IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath});
+                    referencedFiles.Add(new ReferencedFile { IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath });
                 }
 
                 string testHtmlFilePath = CreateTestHarness(definition,
@@ -205,7 +205,7 @@ namespace Chutzpah
 
         private ReferencedFile GetFileUnderTest(string testFilePath)
         {
-            return new ReferencedFile {Path = testFilePath, IsLocal = true, IsFileUnderTest = true};
+            return new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
         }
 
         private bool TryDetectFramework(string content, PathType pathType, ChutzpahTestSettingsFile chutzpahTestSettings, out IFrameworkDefinition definition)
@@ -271,12 +271,15 @@ namespace Chutzpah
         private void GetReferencedFiles(List<ReferencedFile> referencedFiles,
                                         IFrameworkDefinition definition,
                                         string textToParse,
-                                        string currentFilePath)
+                                        string currentFilePath,
+                                        ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             IList<ReferencedFile> result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)),
                                                               definition,
                                                               textToParse,
-                                                              currentFilePath);
+                                                              currentFilePath,
+                                                              chutzpahTestSettings);
+
             IEnumerable<ReferencedFile> flattenedReferenceTree = from root in result
                                                                  from flattened in FlattenReferenceGraph(root)
                                                                  select flattened;
@@ -286,7 +289,8 @@ namespace Chutzpah
         private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths,
                                                          IFrameworkDefinition definition,
                                                          string textToParse,
-                                                         string currentFilePath)
+                                                         string currentFilePath,
+                                                         ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             var referencedFiles = new List<ReferencedFile>();
             Regex regex = JsReferencePathRegex;
@@ -295,6 +299,10 @@ namespace Chutzpah
                 if (match.Success)
                 {
                     string referencePath = match.Groups["Path"].Value;
+                    
+                    // Check test settings and adjust the path if it is rooted (e.g. /some/path)
+                    referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
+
                     var referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
                     string referenceFileName = Path.GetFileName(referencePath);
 
@@ -314,7 +322,7 @@ namespace Chutzpah
 
                         if (absoluteFilePath != null)
                         {
-                            VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles);
+                            VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles, chutzpahTestSettings);
                         }
                         else // If path is not a file then check if it is a folder
                         {
@@ -327,7 +335,7 @@ namespace Chutzpah
                                 var validFiles = from file in childFiles
                                                  where !fileProbe.IsTemporaryChutzpahFile(file)
                                                  select file;
-                                validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
+                                validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings));
                             }
                         }
                     }
@@ -341,32 +349,50 @@ namespace Chutzpah
             return referencedFiles;
         }
 
+        /// <summary>
+        /// If the reference path is rooted (e.g. /some/path) and the user chose to adjust it then change it
+        /// </summary>
+        /// <returns></returns>
+        private static string AdjustPathIfRooted(ChutzpahTestSettingsFile chutzpahTestSettings, string referencePath)
+        {        
+            if(chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory && 
+                (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
+            {
+                referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
+            }
+
+            return referencePath;
+        }
+
         private void VisitReferencedFile(string absoluteFilePath,
                                          IFrameworkDefinition definition,
                                          HashSet<string> discoveredPaths,
-                                         ICollection<ReferencedFile> referencedFiles)
+                                         ICollection<ReferencedFile> referencedFiles,
+                                         ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             // If the file doesn't exit exist or we have seen it already then return
             if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;
 
-            var referencedFile = new ReferencedFile {Path = absoluteFilePath, IsLocal = true};
+            var referencedFile = new ReferencedFile { Path = absoluteFilePath, IsLocal = true };
             referencedFiles.Add(referencedFile);
             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
-            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath);
+            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath, chutzpahTestSettings);
         }
 
         private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths,
                                                              IFrameworkDefinition definition,
-                                                             string currentFilePath)
+                                                             string currentFilePath,
+                                                             ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             try
             {
                 string textToParse = fileSystem.GetText(currentFilePath);
-                return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath);
+                return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath, chutzpahTestSettings);
             }
             catch (IOException)
             {
                 // Unable to get file text
+                // TODO: log this!
             }
 
             return new List<ReferencedFile>();

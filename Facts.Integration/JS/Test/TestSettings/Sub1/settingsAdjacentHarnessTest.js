@@ -2,7 +2,7 @@
 
 // This test validates test harness being placed settings adjacent
 
-test("A basic test", function () {
+test("Settings Adjacent Harness Test", function () {
     assertFileLoad('settingsAdjacentFile.js');
 });
 

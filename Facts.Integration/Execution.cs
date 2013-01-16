@@ -603,6 +603,18 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
             }
+
+            [Fact]
+            public void Will_set_root_reference_path_to_settings_dir()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\RootReferencePathModeTests\settingsFileDirectoryTest.js");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
         }
     }
 }

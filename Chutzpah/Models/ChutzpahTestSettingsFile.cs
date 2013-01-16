@@ -12,6 +12,12 @@ namespace Chutzpah.Models
         Custom
     }
 
+    public enum RootReferencePathMode
+    {
+        DriveRoot,
+        SettingsFileDirectory
+    }
+
     /// <summary>
     /// Represents the Chutzpah Test Settings file (chutzpah.json)
     /// Applies to all test files in its directory and below.
@@ -35,6 +41,13 @@ namespace Chutzpah.Models
         /// If TestHarnessLocationMode is set to Custom then this will be the path to the folder to place the generated test harness file
         /// </summary>
         public string TestHarnessDirectory { get; set; }
+
+        /// <summary>
+        /// Determines what a reference path that starts with / or \  (.e.g <reference path="/" />) is relative to
+        /// DriveRoot - Make it relative to the root of the drive (e.g. C:\). This is default.
+        /// SettingsFileDirectory - Makes root path relative to the directory of the settings file
+        /// </summary>
+        public RootReferencePathMode RootReferencePathMode { get; set; }
 
         /// <summary>
         /// The path to the settings file

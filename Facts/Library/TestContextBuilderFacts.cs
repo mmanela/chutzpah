@@ -79,6 +79,12 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+
+        const string TestJSFileWithRootedReference =
+            @"/// <reference path=""/rooted/file.js"" />
+                        some javascript code
+                        ";
+
         const string ReferencesFile =
             @"/// <reference path=""lib.js"" />";
 
@@ -382,6 +388,44 @@ namespace Chutzpah.Facts
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
                 Assert.NotNull(context);
+            }
+
+            [Fact]
+            public void Will_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path1\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path1\test.js"))
+                    .Returns(TestJSFileWithRootedReference);
+
+                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js");
+
+                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path1/settingsPath/rooted/file.js");
+                Assert.Contains(scriptStatement, text);
+            }
+
+            [Fact]
+            public void Will_not_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.DriveRoot;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path2\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path2\test.js"))
+                    .Returns(TestJSFileWithRootedReference);
+
+                var context = creator.ClassUnderTest.BuildContext(@"path2\test.js");
+
+                string scriptStatement = TestContextBuilder.GetScriptStatement(@"/rooted/file.js");
+                Assert.Contains(scriptStatement, text);
             }
 
             [Fact]
