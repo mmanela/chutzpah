@@ -46,33 +46,17 @@ namespace Chutzpah.Facts
         public class GenerateCompiledSources
         {
             [Fact]
-            public void Will_return_compiled_files_and_set_to_cache()
+            public void Will_return_compiled_files()
             {
                 var generator = new TestableTypeScriptFileGenerator();
                 var file = new ReferencedFile { Path = "path1.ts" };
-                generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>())).Returns("{\"path1.ts\" :\"compiled\"");
+                generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>(), It.IsAny<object[]>())).Returns("{\"path1.ts\" :\"compiled\"");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
-                generator.Mock<ICompilerCache>().Setup(x => x.Get(It.IsAny<string>())).Returns((string) null);
+                generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>())).Returns((string)null);
 
-                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] {file});
+                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] {file}, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("compiled", result[file.Path]);
-                generator.Mock<ICompilerCache>().Verify(x => x.Set("content", "compiled"));
-            }
-
-            [Fact]
-            public void Will_return_compiled_files_that_are_cache()
-            {
-                var generator = new TestableTypeScriptFileGenerator();
-                var file = new ReferencedFile { Path = "path1.ts" };
-                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
-                generator.Mock<ICompilerCache>().Setup(x => x.Get(It.IsAny<string>())).Returns("compiled");
-
-                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file });
-
-                Assert.Equal("compiled", result[file.Path]);
-                generator.Mock<ITypeScriptEngineWrapper>().Verify(x => x.Compile(It.IsAny<string>()), Times.Never());
-                generator.Mock<ICompilerCache>().Verify(x => x.Set(It.IsAny<string>(),It.IsAny<string>()), Times.Never());
             }
         }
     }

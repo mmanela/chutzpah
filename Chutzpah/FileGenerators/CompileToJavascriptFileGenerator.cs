@@ -22,12 +22,12 @@ namespace Chutzpah.FileGenerators
         /// If the referenced file can be handled it generate a .js file and sets to the reference files generatedfilepath and adds the new file path to the temporary file collection
         /// If it can't handle the file it does nothing
         /// </summary>
-        public virtual void Generate(IEnumerable<ReferencedFile> referencedFiles, IList<string> temporaryFiles)
+        public virtual void Generate(IEnumerable<ReferencedFile> referencedFiles, IList<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             // Filter down to just the referenced files this generator supports
             referencedFiles = referencedFiles.Where(CanHandleFile).ToList();
 
-            var compiledMap = GenerateCompiledSources(referencedFiles);
+            var compiledMap = GenerateCompiledSources(referencedFiles, chutzpahTestSettings);
 
             foreach (var referencedFile in referencedFiles)
             {
@@ -57,6 +57,6 @@ namespace Chutzpah.FileGenerators
             temporaryFiles.Add(newFilePath);
         }
 
-        public abstract IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles);
+        public abstract IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles, ChutzpahTestSettingsFile chutzpahTestSettings);
     }
 }

@@ -365,7 +365,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee");
 
-                fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>()));
+                fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
 
             [Fact(Timeout = 5000)]

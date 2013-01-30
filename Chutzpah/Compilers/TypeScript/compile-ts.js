@@ -22,7 +22,19 @@ Buffer.prototype = {
     }
 };
 
-function compilify_ts(fileMapStr) {
+function compilify_ts(fileMapStr, codeGenTarget) {
+
+    var settings = TypeScript.defaultSettings;
+    
+    if (codeGenTarget === "ES3") {
+        settings.codeGenTarget = TypeScript.CodeGenTarget.ES3;
+        TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES3;
+    }
+    else if (codeGenTarget === "ES5") {
+        settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
+        TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES5;
+    }
+
     var fileMap = JSON.parse(fileMapStr);
     var convertedFileMap = {};
 
@@ -42,7 +54,7 @@ function compilify_ts(fileMapStr) {
 
     var errors = new Buffer();
     var logger = new Buffer();
-    var compiler = new TypeScript.TypeScriptCompiler(errors, logger);
+    var compiler = new TypeScript.TypeScriptCompiler(errors, logger, settings);
     for (var fileName in fileMap) {
         if (fileMap.hasOwnProperty(fileName)) {
             compiler.addUnit(fileMap[fileName], fileName);

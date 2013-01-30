@@ -24,7 +24,7 @@ namespace Chutzpah.FileGenerators
             return referencedFile.Path.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles)
+        public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             var compiledMap = (from referencedFile in referencedFiles
                                let content = fileSystem.GetText(referencedFile.Path)

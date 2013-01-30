@@ -13,10 +13,10 @@ namespace Chutzpah.Facts.Integration
             get
             {
                 return new[]
-                {
-                    new object[] { @"JS\Test\references-qunit.js" },
-                    new object[] { @"JS\Test\references-jasmine.js" }
-                };
+                    {
+                        new object[] {@"JS\Test\references-qunit.js"},
+                        new object[] {@"JS\Test\references-jasmine.js"}
+                    };
             }
         }
 
@@ -25,35 +25,23 @@ namespace Chutzpah.Facts.Integration
             get
             {
                 return new[]
-                {
-                    new object[] { @"JS\Test\basic-qunit.coffee" },
-                    new object[] { @"JS\Test\basic-jasmine.coffee" }
-                };
+                    {
+                        new object[] {@"JS\Test\basic-qunit.coffee"},
+                        new object[] {@"JS\Test\basic-jasmine.coffee"}
+                    };
             }
         }
 
-
-        public static IEnumerable<object[]> TypeScriptTests
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { @"JS\Test\basic-qunit.ts" },
-                    new object[] { @"JS\Test\basic-jasmine.ts" }
-                };
-            }
-        }
 
         public static IEnumerable<object[]> BasicTestScripts
         {
             get
             {
                 return new[]
-                {
-                   new object[] { @"JS\Test\basic-qunit.js" },
-                   new object[] { @"JS\Test\basic-jasmine.js" }
-                };
+                    {
+                        new object[] {@"JS\Test\basic-qunit.js"},
+                        new object[] {@"JS\Test\basic-jasmine.js"}
+                    };
             }
         }
 
@@ -73,20 +61,6 @@ namespace Chutzpah.Facts.Integration
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_run_tests_from_a_coffee_script_file(string scriptPath)
-        {
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(scriptPath);
-
-            Assert.Equal(1, result.FailedCount);
-            Assert.Equal(3, result.PassedCount);
-            Assert.Equal(4, result.TotalCount);
-        }
-
-
-        [Theory]
-        [PropertyData("TypeScriptTests")]
-        public void Will_run_tests_from_a_type_script_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
 
@@ -153,7 +127,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\basic-qunit.js", @"JS\Test\SubFolder" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\basic-qunit.js", @"JS\Test\SubFolder"});
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(5, result.PassedCount);
@@ -165,7 +139,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\sameName.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\sameName.js"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -178,7 +152,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\folderReference.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\folderReference.js"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
@@ -190,7 +164,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\styleReference.js"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -202,7 +176,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.html" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\styleReference.html"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -214,7 +188,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\asyncTest.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\asyncTest.js"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
@@ -226,7 +200,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\timeoutTest.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
@@ -238,7 +212,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\spinWait.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\spinWait.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
@@ -250,7 +224,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 1500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\timeoutTest.js"}, new TestOptions {TestFileTimeoutMilliseconds = 1500});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -333,7 +307,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_coffee_script_test_that_asserts_unicode_characters()
         {
             var testRunner = TestRunner.Create();
-            
+
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\coffeeEncoding.js");
 
             Assert.Equal(0, result.FailedCount);
@@ -370,10 +344,10 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
             var tests = new List<string>
-                            {
-                                @"JS\Test\basic-qunit.js",
-                                @"JS\Test\basic-qunit.html"
-                            };
+                {
+                    @"JS\Test\basic-qunit.js",
+                    @"JS\Test\basic-qunit.html"
+                };
             TestCaseSummary result = testRunner.RunTests(tests);
 
             Assert.Equal(2, result.FailedCount);
@@ -446,7 +420,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(new List<string> { @"JS\Test\ajaxCall.js" });
+            var result = testRunner.RunTests(new List<string> {@"JS\Test\ajaxCall.js"});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -464,7 +438,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
         }
-        
+
         [Fact]
         public void Will_run_qunit_html_file_with_inline_tests()
         {
@@ -477,9 +451,48 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        public class TypeScript
+        {
+            public static IEnumerable<object[]> TypeScriptTests
+            {
+                get
+                {
+                    return new[]
+                        {
+                            new object[] {@"JS\Test\basic-qunit.ts"},
+                            new object[] {@"JS\Test\basic-jasmine.ts"}
+                        };
+                }
+            }
+
+            [Theory]
+            [PropertyData("TypeScriptTests")]
+            public void Will_run_tests_from_a_type_script_file(string scriptPath)
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(scriptPath);
+
+                Assert.Equal(1, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(4, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_convert_ES5_code_given_setting()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TypeScript\ES5\ES5Test.ts");
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+        }
+
         public class AMD
         {
-
             [Fact]
             public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
             {
@@ -555,7 +568,6 @@ namespace Chutzpah.Facts.Integration
 
         public class ChutzpahSettingsFile
         {
-
             [Fact]
             public void Will_use_settings_file_to_determine_framework()
             {

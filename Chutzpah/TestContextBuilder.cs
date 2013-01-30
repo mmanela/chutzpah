@@ -104,7 +104,7 @@ namespace Chutzpah
                 definition.Process(fileUnderTest);
 
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
-                ProcessForFilesGeneration(referencedFiles, temporaryFiles);
+                ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
                 foreach (string item in definition.FileDependencies)
                 {
@@ -195,11 +195,11 @@ namespace Chutzpah
         /// <summary>
         /// Iterates over filegenerators letting the generators decide if they handle any files
         /// </summary>
-        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             foreach (var fileGenerator in fileGenerators)
             {
-                fileGenerator.Generate(referencedFiles, temporaryFiles);
+                fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
             }
         }
 

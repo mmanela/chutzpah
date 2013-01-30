@@ -28,7 +28,7 @@ namespace Chutzpah.Facts
             }
 
 
-            public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles)
+            public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
             {
                 return CompiledSources;
             }
@@ -47,7 +47,7 @@ namespace Chutzpah.Facts
                 var file = new ReferencedFile { Path = "somePath.js" };
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(new []{file}, tempFiles);
+                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("somePath.js", file.Path);
                 Assert.Empty(tempFiles);
@@ -66,7 +66,7 @@ namespace Chutzpah.Facts
                 var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(new []{file}, tempFiles);
+                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile());
 
                 generator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
                 Assert.Equal(@"path\to\someFile.coffee", file.Path);

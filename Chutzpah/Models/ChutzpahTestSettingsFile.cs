@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using Chutzpah.Compilers.TypeScript;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah.Models
@@ -48,6 +49,13 @@ namespace Chutzpah.Models
         /// SettingsFileDirectory - Makes root path relative to the directory of the settings file
         /// </summary>
         public RootReferencePathMode RootReferencePathMode { get; set; }
+
+        /// <summary>
+        /// The type of code for the TypeScript compiler to generate
+        /// ES3 - Generate ECMAScript 3 Compatible code
+        /// ES5 - Generate ECMAScript 5 Compatible code
+        /// </summary>
+        public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
 
         /// <summary>
         /// The path to the settings file

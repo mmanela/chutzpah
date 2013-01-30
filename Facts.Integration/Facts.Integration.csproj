@@ -84,6 +84,10 @@
     <Content Include="JS\Test\requirejs\WithSettings\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\TypeScript\ES5\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="JS\Code\RequireJS\TypeScript\chutzpah.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
@@ -202,6 +206,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\TypeScript\child.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TypeScript\ES5\ES5Test.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\TypeScript\test.ts">

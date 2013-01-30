@@ -15,9 +15,9 @@ namespace Chutzpah.Wrappers
             engine = new SingleThreadedJavaScriptHostedCompiler();
         }
 
-        public string Compile(string coffeScriptSource)
+        public string Compile(string coffeScriptSource, params object[] args)
         {
-            return engine.Compile(coffeScriptSource, typeof(CoffeeScriptCompiler));
+            return engine.Compile(coffeScriptSource, typeof(CoffeeScriptCompiler), args);
         }
     }
 }
