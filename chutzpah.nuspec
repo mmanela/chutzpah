@@ -14,11 +14,16 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Add support for writing tests in TypeScript (item 67)
-* Fixed encoding problem with .coffee files (item 63)
-* Allow reference paths for folders (item 68)
-* Some Unit Test Explorer bug fixes
-* Add clearer error messages when test file does not exist
+* Added Chutzpah.json settings file support
+* Consistent conversion error (item 70)
+* System.IO.IOException: The handle is invalid when running from inside WebStorm (item 77)
+* Exception has been thrown by the target of an invocation. inside Visual Studio 2012 (item 65)
+* Tests are hanging (ChutzpahTimeoutException) (item 72)
+* Reference root path should be project (item 83)
+* Smarter coffeescript compilation (item 75)
+* Running with parallelism gives faulty timing (item 81)
+* Running with parallelism gives System.IO.IOException (item 74)
+* Compile all TypeScript files at the same time (item 82)
         </releaseNotes>
     </metadata>
 </package>
