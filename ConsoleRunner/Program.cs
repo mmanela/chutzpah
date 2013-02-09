@@ -15,7 +15,7 @@ namespace Chutzpah
         public static int Main(string[] args)
         {
             Console.WriteLine("Chutzpah console test runner ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
-            Console.WriteLine("Copyright (C) 2012 Matthew Manela (http://matthewmanela.com).");
+            Console.WriteLine("Copyright (C) 2013 Matthew Manela (http://matthewmanela.com).");
 
             if (args.Length == 0 || args[0] == "/?")
             {
@@ -101,6 +101,7 @@ namespace Chutzpah
             Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
             Console.WriteLine("  /compilercache         : File where compiled scripts can be cached");
             Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb");
+            Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
 
 
             foreach (var transformer in SummaryTransformerFactory.GetTransformers())
@@ -135,6 +136,7 @@ namespace Chutzpah
                         OpenInBrowser = commandLine.OpenInBrowser,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
+                        TestingMode = commandLine.TestMode
                         CoverageOptions = new CoverageOptions
                                               {
                                                   Enabled = commandLine.Coverage,

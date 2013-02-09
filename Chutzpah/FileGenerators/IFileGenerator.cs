@@ -12,8 +12,6 @@ namespace Chutzpah.FileGenerator
         /// <summary>
         /// This will get called for the test file and all referenced files. 
         /// </summary>
-        /// <param name="referencedFile"></param>
-        /// <param name="temporaryFiles"></param>
-        void Generate(IEnumerable<ReferencedFile> referencedFiles, IList<string> temporaryFiles);
+        void Generate(IEnumerable<ReferencedFile> referencedFiles, IList<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettingsFile);
     }
 }

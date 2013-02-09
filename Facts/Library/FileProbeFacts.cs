@@ -20,6 +20,45 @@ namespace Chutzpah.Facts
             }
         }
 
+        public class FindTestSettingsFile
+        {
+            [Fact]
+            public void Will_find_settings_file_in_current_directory()
+            {
+                var probe = new TestableFileProbe();
+                var dir = @"C:\a\b\c";
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\a\b\c\" + Constants.SettingsFileName)).Returns(true);
+
+                var file = probe.ClassUnderTest.FindTestSettingsFile(dir);
+
+                Assert.NotNull(file);
+            }
+
+            [Fact]
+            public void Will_find_settings_file_in_by_traversing_up_tree()
+            {
+                var probe = new TestableFileProbe();
+                var dir = @"C:\a\b\c";
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\" + Constants.SettingsFileName)).Returns(true);
+
+                var file = probe.ClassUnderTest.FindTestSettingsFile(dir);
+
+                Assert.NotNull(file);
+            }
+
+            [Fact]
+            public void Will_return_null_when_file_not_found()
+            {
+                var probe = new TestableFileProbe();
+                var dir = @"C:\a\b\c";
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+
+                var file = probe.ClassUnderTest.FindTestSettingsFile(dir);
+
+                Assert.Null(file);
+            }
+        }
+
         public class FindFilePath
         {
             [Fact]

@@ -51,11 +51,11 @@ namespace Chutzpah.Facts
             {
                 var generator = new TestableCoffeeScriptFileGenerator();
                 var file = new ReferencedFile { Path = "path1.ts" };
-                generator.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>())).Returns("compiled");
+                generator.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>(), It.IsAny<object[]>())).Returns("compiled");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
                 generator.Mock<ICompilerCache>().Setup(x => x.Get(It.IsAny<string>())).Returns((string)null);
 
-                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file });
+                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file }, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("compiled", result[file.Path]);
                 generator.Mock<ICompilerCache>().Verify(x => x.Set("content", "compiled"));
@@ -69,7 +69,7 @@ namespace Chutzpah.Facts
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
                 generator.Mock<ICompilerCache>().Setup(x => x.Get(It.IsAny<string>())).Returns("compiled");
 
-                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file });
+                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file }, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("compiled", result[file.Path]);
                 generator.Mock<ICoffeeScriptEngineWrapper>().Verify(x => x.Compile(It.IsAny<string>()), Times.Never());

@@ -32,10 +32,13 @@ namespace Chutzpah.Facts
 
         private class TestableTestContextBuilder : Testable<TestContextBuilder>
         {
+            static int counter = 0;
+            public ChutzpahTestSettingsFile ChutzpahTestSettingsFile { get; set; }
             public TestableTestContextBuilder()
             {
                 var frameworkMock = Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
+                frameworkMock.Setup(x => x.FrameworkKey).Returns("qunit");
                 frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
                 frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
                 frameworkMock.Setup(x => x.FileDependencies).Returns(new[] { "qunit.js", "qunit.css" });
@@ -52,6 +55,12 @@ namespace Chutzpah.Facts
                 Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\qunit.js"))
                     .Returns(TestTempateContents);
+
+                ChutzpahTestSettingsFile = new ChutzpahTestSettingsFile();
+                Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(() => "settingsPath\\chutzpah.json" + counter++);
+                Mock<IJsonSerializer>()
+                    .Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>()))
+                    .Returns(ChutzpahTestSettingsFile);
             }
         }
 
@@ -61,7 +70,6 @@ namespace Chutzpah.Facts
     @@ReferencedCSSFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
-    DIR:@@TestJSFileDir@@
 
 </head>
 <body><div id=""qunit-fixture""></div></body></html>
@@ -83,6 +91,12 @@ namespace Chutzpah.Facts
 
         const string TestJSFileWithFolderReference =
             @"/// <reference path=""../../js/somefolder"" />
+                        some javascript code
+                        ";
+
+
+        const string TestJSFileWithRootedReference =
+            @"/// <reference path=""/rooted/file.js"" />
                         some javascript code
                         ";
 
@@ -255,7 +269,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_save_generated_test_html_and_return_path_for_js_file()
+            public void Will_save_generated_test_html_when_test_file_adjacent_and_return_path_for_js_file()
             {
                 var creator = new TestableTestContextBuilder();
                 creator.Mock<IHasher>().Setup(x => x.Hash(@"C:\test.js")).Returns("test.JS_hash");
@@ -269,6 +283,40 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()));
                 Assert.Equal(@"C:\folder\_Chutzpah.hash.test.html", context.TestHarnessPath);
                 Assert.Equal(@"C:\folder\test.js", context.InputTestFile);
+            }
+
+            [Fact]
+            public void Will_save_generated_test_html_when_settings_file_adjacent()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.ChutzpahTestSettingsFile.TestHarnessLocationMode = TestHarnessLocationMode.SettingsFileAdjacent;
+                creator.Mock<IHasher>().Setup(x => x.Hash(@"C:\test.js")).Returns("test.JS_hash");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder("test.JS_hash")).Returns(@"C:\temp2\");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\folder1\test.js" });
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                Assert.Equal(@"settingsPath\_Chutzpah.hash.test.html", context.TestHarnessPath);
+            }
+
+            [Fact]
+            public void Will_save_generated_test_html_when_custom_placement()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.ChutzpahTestSettingsFile.TestHarnessLocationMode = TestHarnessLocationMode.Custom;
+                creator.ChutzpahTestSettingsFile.TestHarnessDirectory = "customFolder";
+                creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(It.Is<string>(p => p.Contains("customFolder")))).Returns("customFolder");
+                creator.Mock<IHasher>().Setup(x => x.Hash(@"C:\test.js")).Returns("test.JS_hash");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder("test.JS_hash")).Returns(@"C:\temp2\");
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\folder3\test.js" });
+
+                var context = creator.ClassUnderTest.BuildContext("test.js");
+
+                Assert.Equal(@"customFolder\_Chutzpah.hash.test.html", context.TestHarnessPath);
             }
 
             [Fact]
@@ -286,7 +334,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"C:\testThing.html", context.InputTestFile);
                 Assert.Empty(context.ReferencedJavaScriptFiles);
             }
-
 
             [Fact]
             public void Will_replace_test_dependency_placeholder_in_test_harness_html()
@@ -333,7 +380,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee", new TestOptions());
 
-                fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>()));
+                fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
 
             [Fact(Timeout = 5000)]
@@ -356,6 +403,44 @@ namespace Chutzpah.Facts
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.NotNull(context);
+            }
+
+            [Fact]
+            public void Will_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path1\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path1\test.js"))
+                    .Returns(TestJSFileWithRootedReference);
+
+                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js");
+
+                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path1/settingsPath/rooted/file.js");
+                Assert.Contains(scriptStatement, text);
+            }
+
+            [Fact]
+            public void Will_not_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.DriveRoot;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path2\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path2\test.js"))
+                    .Returns(TestJSFileWithRootedReference);
+
+                var context = creator.ClassUnderTest.BuildContext(@"path2\test.js");
+
+                string scriptStatement = TestContextBuilder.GetScriptStatement(@"/rooted/file.js");
+                Assert.Contains(scriptStatement, text);
             }
 
             [Fact]
@@ -443,7 +528,6 @@ namespace Chutzpah.Facts
                 Assert.Contains(scriptStatement,text);
             }
 
-
             [Fact]
             public void Will_skip_chutzpah_temporary_files_in_folder_references()
             {
@@ -507,32 +591,6 @@ namespace Chutzpah.Facts
                 Assert.True(pos1 < pos2);
                 Assert.True(pos2 < pos3);
                 Assert.Equal(1, context.ReferencedJavaScriptFiles.Count(x => x.IsFileUnderTest));
-            }
-
-            [Fact]
-            public void Will_put_normalzed_test_js_dir_in_html_template()
-            {
-                var creator = new TestableTestContextBuilder();
-                string text = null;
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.Save(@"this\path\_Chutzpah.hash.test.html", It.IsAny<string>()))
-                    .Callback<string, string>((x, y) => text = y);
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.GetPathInfo("test.js"))
-                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"this\path\test.js" });
-                creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"this\path\test.js"))
-                    .Returns(TestJSFileContents);
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"lib.js")))
-                    .Returns(@"path\lib.js");
-                creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/common.js")))
-                    .Returns(@"path\common.js");
-
-                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
-
-                Assert.True(text.Contains("DIR:this/path"));
             }
 
             [Fact]

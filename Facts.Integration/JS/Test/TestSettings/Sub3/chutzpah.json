@@ -1,0 +1,5 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "SubSub3"
+}

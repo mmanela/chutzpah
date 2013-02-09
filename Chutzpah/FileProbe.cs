@@ -29,6 +29,34 @@ namespace Chutzpah
             this.fileSystem = fileSystem;
         }
 
+        /// <summary>
+        /// Finds a Chutzpah test settings file given a directory. Will recursively scan current direcotry 
+        /// and all directories above until it finds the file 
+        /// </summary>
+        /// <param name="currentDirectory">the directory to start searching from</param>
+        /// <returns>Eithe the found setting file path or null</returns>
+        public string FindTestSettingsFile(string currentDirectory)
+        {
+            string settingsFilePath = null;
+
+            while (!string.IsNullOrEmpty(currentDirectory))
+            {
+                settingsFilePath = Path.Combine(currentDirectory, Constants.SettingsFileName);
+                if (fileSystem.FileExists(settingsFilePath))
+                {
+                    break;
+                }
+                else
+                {
+                    settingsFilePath = null;
+                    currentDirectory = Path.GetDirectoryName(currentDirectory);
+                }
+
+            }
+
+            return settingsFilePath;
+        }
+
         public string FindFilePath(string fileName)
         {
             return FindPath(fileName, fileSystem.FileExists);
@@ -37,24 +65,6 @@ namespace Chutzpah
         public string FindFolderPath(string fileName)
         {
             return FindPath(fileName, fileSystem.FolderExists);
-        }
-
-        private string FindPath(string path, Predicate<string> pathExists)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return null;
-
-            var currentDirFilePath = fileSystem.GetFullPath(path);
-            if (pathExists(currentDirFilePath))
-                return currentDirFilePath;
-
-            var executingPath = environment.GetExeuctingAssemblyPath();
-            var executingDir = fileSystem.GetDirectoryName(executingPath);
-            var filePath = fileSystem.GetFullPath(Path.Combine(executingDir, path));
-            if (pathExists(filePath))
-                return filePath;
-
-            return null;
         }
 
         public bool IsTemporaryChutzpahFile(string path)
@@ -68,7 +78,7 @@ namespace Chutzpah
         {
             if (string.IsNullOrEmpty(path)) return Enumerable.Empty<PathInfo>();
 
-            return FindScriptFiles(new[] {path}, testingMode);
+            return FindScriptFiles(new[] { path }, testingMode);
         }
 
         public IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
@@ -116,12 +126,30 @@ namespace Chutzpah
         {
             string ext = Path.GetExtension(fileName);
             PathType pathType;
-            if(ext != null && ExtensionToPathTypeMap.TryGetValue(ext, out pathType))
+            if (ext != null && ExtensionToPathTypeMap.TryGetValue(ext, out pathType))
             {
                 return pathType;
             }
 
             return PathType.Other;
+        }
+
+        private string FindPath(string path, Predicate<string> pathExists)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+
+            var currentDirFilePath = fileSystem.GetFullPath(path);
+            if (pathExists(currentDirFilePath))
+                return currentDirFilePath;
+
+            var executingPath = environment.GetExeuctingAssemblyPath();
+            var executingDir = fileSystem.GetDirectoryName(executingPath);
+            var filePath = fileSystem.GetFullPath(Path.Combine(executingDir, path));
+            if (pathExists(filePath))
+                return filePath;
+
+            return null;
         }
     }
 }

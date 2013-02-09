@@ -121,6 +121,7 @@
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
     <Compile Include="Models\CoverageData.cs" />
+    <Compile Include="Models\ChutzpahTestSettingsFile.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
     <Compile Include="Models\JS\JsCoverage.cs" />

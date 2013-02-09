@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,17 +29,20 @@ namespace Chutzpah
         private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IHasher hasher;
         private readonly ICoverageEngine mainCoverageEngine;
+        private readonly IJsonSerializer serializer;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
                                   ICoverageEngine coverageEngine,
+                                  IJsonSerializer serializer,
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
                                   IEnumerable<IFileGenerator> fileGenerators)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
+            this.serializer = serializer;
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
             mainCoverageEngine = coverageEngine;
@@ -76,11 +80,14 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find file: " + file.Path);
             }
 
+            var testFileDirectory = Path.GetDirectoryName(testFilePath);
+            var chutzpahTestSettings = ChutzpahTestSettingsFile.Read(testFileDirectory, fileProbe, serializer);
+
             string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
 
-            if (TryDetectFramework(testFileText, testFileKind, out definition))
+            if (TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition))
             {
                 // For HTML test files we don't need to create a test harness to just return this file
                 if (testFileKind == PathType.Html)
@@ -100,8 +107,8 @@ namespace Chutzpah
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
-                GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath);
-                ProcessForFilesGeneration(referencedFiles, temporaryFiles);
+                GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
+                ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
                 ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options);
                 IEnumerable<string> deps = definition.FileDependencies;
@@ -117,6 +124,7 @@ namespace Chutzpah
                 }
 
                 string testHtmlFilePath = CreateTestHarness(definition,
+                                                            chutzpahTestSettings,
                                                             testFilePath,
                                                             referencedFiles,
                                                             coverageEngine,
@@ -163,10 +171,12 @@ namespace Chutzpah
                 return false;
             }
 
+            var testFileDirectory = Path.GetDirectoryName(testFilePath);
+            var chutzpahTestSettings = ChutzpahTestSettingsFile.Read(testFileDirectory, fileProbe, serializer);
             string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
-            return TryDetectFramework(testFileText, testFileKind, out definition);
+            return TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition);
         }
 
         public void CleanupContext(TestContext context)
@@ -185,6 +195,7 @@ namespace Chutzpah
             }
         }
 
+
         private static bool IsValidTestPathType(PathType testFileKind)
         {
             return testFileKind != PathType.JavaScript
@@ -196,11 +207,11 @@ namespace Chutzpah
         /// <summary>
         /// Iterates over filegenerators letting the generators decide if they handle any files
         /// </summary>
-        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             foreach (var fileGenerator in fileGenerators)
             {
-                fileGenerator.Generate(referencedFiles, temporaryFiles);
+                fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
             }
         }
 
@@ -217,28 +228,48 @@ namespace Chutzpah
             return new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
         }
 
-        private bool TryDetectFramework(string content, PathType pathType, out IFrameworkDefinition definition)
+        private bool TryDetectFramework(string content, PathType pathType, ChutzpahTestSettingsFile chutzpahTestSettings, out IFrameworkDefinition definition)
         {
-            definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false, pathType));
 
-            if (definition == null)
-            {
-                definition = frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true, pathType));
-            }
+            var strategies = new Func<IFrameworkDefinition>[]
+                {
+                    // Check chutzpah settings
+                    () => frameworkDefinitions.FirstOrDefault(x => x.FrameworkKey.Equals(chutzpahTestSettings.Framework, StringComparison.OrdinalIgnoreCase)),
 
+                    // Check if we see an explicit reference to a framework file (e.g. <reference path="qunit.js" />)
+                    () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false, pathType)),
+
+                    // Check using basic heuristic like looking for test( or module( for QUnit
+                    () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true, pathType))
+                };
+
+            definition = strategies.Select(x => x()).FirstOrDefault(x => x != null);
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition,
-                                         string inputTestFilePath,
-                                         IEnumerable<ReferencedFile> referencedFiles,
+        private string CreateTestHarness(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFilePath, IEnumerable<ReferencedFile> referencedFiles, List<string> temporaryFiles)
                                          ICoverageEngine coverageEngine,
-                                         List<string> temporaryFiles)
         {
-            // Use the directory of the test file to create the temporary html file
             string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath);
             string testFilePathHash = hasher.Hash(inputTestFilePath);
-            string testHtmlFilePath = Path.Combine(inputTestFileDir, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
+
+            string testHarnessDirectory;
+            switch (chutzpahTestSettings.TestHarnessLocationMode)
+            {
+                case TestHarnessLocationMode.TestFileAdjacent:
+                    testHarnessDirectory = inputTestFileDir;
+                    break;
+                case TestHarnessLocationMode.SettingsFileAdjacent:
+                    testHarnessDirectory = chutzpahTestSettings.SettingsFileDirectory;
+                    break;
+                case TestHarnessLocationMode.Custom:
+                    testHarnessDirectory = chutzpahTestSettings.TestHarnessDirectory;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("chutzpahTestSettings");
+            }
+
+            string testHtmlFilePath = Path.Combine(testHarnessDirectory, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
             temporaryFiles.Add(testHtmlFilePath);
 
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
@@ -284,12 +315,15 @@ namespace Chutzpah
         private void GetReferencedFiles(List<ReferencedFile> referencedFiles,
                                         IFrameworkDefinition definition,
                                         string textToParse,
-                                        string currentFilePath)
+                                        string currentFilePath,
+                                        ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             IList<ReferencedFile> result = GetReferencedFiles(new HashSet<string>(referencedFiles.Select(x => x.Path)),
                                                               definition,
                                                               textToParse,
-                                                              currentFilePath);
+                                                              currentFilePath,
+                                                              chutzpahTestSettings);
+
             IEnumerable<ReferencedFile> flattenedReferenceTree = from root in result
                                                                  from flattened in FlattenReferenceGraph(root)
                                                                  select flattened;
@@ -299,7 +333,8 @@ namespace Chutzpah
         private IList<ReferencedFile> GetReferencedFiles(HashSet<string> discoveredPaths,
                                                          IFrameworkDefinition definition,
                                                          string textToParse,
-                                                         string currentFilePath)
+                                                         string currentFilePath,
+                                                         ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             var referencedFiles = new List<ReferencedFile>();
             Regex regex = JsReferencePathRegex;
@@ -308,6 +343,10 @@ namespace Chutzpah
                 if (match.Success)
                 {
                     string referencePath = match.Groups["Path"].Value;
+                    
+                    // Check test settings and adjust the path if it is rooted (e.g. /some/path)
+                    referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
+
                     var referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
                     string referenceFileName = Path.GetFileName(referencePath);
 
@@ -317,17 +356,17 @@ namespace Chutzpah
                         continue;
                     }
 
+                    // If this either a relative uri or a file uri 
                     if (!referenceUri.IsAbsoluteUri || referenceUri.IsFile)
                     {
-                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath),
-                                                                    referencePath);
+                        string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
 
                         // Find the full file path
                         string absoluteFilePath = fileProbe.FindFilePath(relativeReferencePath);
 
                         if (absoluteFilePath != null)
                         {
-                            VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles);
+                            VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles, chutzpahTestSettings);
                         }
                         else // If path is not a file then check if it is a folder
                         {
@@ -340,13 +379,13 @@ namespace Chutzpah
                                 var validFiles = from file in childFiles
                                                  where !fileProbe.IsTemporaryChutzpahFile(file)
                                                  select file;
-                                validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles));
+                                validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings));
                             }
                         }
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
                     }
                 }
             }
@@ -354,10 +393,26 @@ namespace Chutzpah
             return referencedFiles;
         }
 
+        /// <summary>
+        /// If the reference path is rooted (e.g. /some/path) and the user chose to adjust it then change it
+        /// </summary>
+        /// <returns></returns>
+        private static string AdjustPathIfRooted(ChutzpahTestSettingsFile chutzpahTestSettings, string referencePath)
+        {        
+            if(chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory && 
+                (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
+            {
+                referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
+            }
+
+            return referencePath;
+        }
+
         private void VisitReferencedFile(string absoluteFilePath,
                                          IFrameworkDefinition definition,
                                          HashSet<string> discoveredPaths,
-                                         ICollection<ReferencedFile> referencedFiles)
+                                         ICollection<ReferencedFile> referencedFiles,
+                                         ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             // If the file doesn't exit exist or we have seen it already then return
             if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;
@@ -365,21 +420,23 @@ namespace Chutzpah
             var referencedFile = new ReferencedFile { Path = absoluteFilePath, IsLocal = true };
             referencedFiles.Add(referencedFile);
             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops
-            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath);
+            referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath, chutzpahTestSettings);
         }
 
         private IList<ReferencedFile> ExpandNestedReferences(HashSet<string> discoveredPaths,
                                                              IFrameworkDefinition definition,
-                                                             string currentFilePath)
+                                                             string currentFilePath,
+                                                             ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             try
             {
                 string textToParse = fileSystem.GetText(currentFilePath);
-                return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath);
+                return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath, chutzpahTestSettings);
             }
             catch (IOException)
             {
                 // Unable to get file text
+                // TODO: log this!
             }
 
             return new List<ReferencedFile>();
@@ -396,5 +453,11 @@ namespace Chutzpah
 
             return flattenedFileList;
         }
+                                                                referenceCssReplacement,
+                                                                testJsReplacement,
+                                                                referenceJsReplacement,
+                                                                referenceIconReplacement,
+                                                                referencedFile,
+                                                                referencePath);
     }
 }

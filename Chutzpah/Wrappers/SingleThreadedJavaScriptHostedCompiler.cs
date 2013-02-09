@@ -20,11 +20,13 @@ namespace Chutzpah.Wrappers
             public string Source { get; set; }
             public string Result { get; set; }
             public Type CompilerType { get; set; }
+            public object[] Args { get; set; }
 
-            public JSWorkItem(string source, Type compilerType)
+            public JSWorkItem(string source, Type compilerType, object[] args)
             {
                 Source = source;
                 CompilerType = compilerType;
+                Args = args;
             }
 
             public string GetValueSync()
@@ -67,7 +69,7 @@ namespace Chutzpah.Wrappers
                                                               compilers[item.CompilerType] = compiler;
                                                           }
 
-                                                          item.Result = compiler.Compile(item.Source);
+                                                          item.Result = compiler.Compile(item.Source, item.Args);
                                                       }
                                                       catch (Exception ex)
                                                       {
@@ -94,9 +96,9 @@ namespace Chutzpah.Wrappers
             return (JavaScriptCompilerBase)Activator.CreateInstance(compilerType, provider);
         }
 
-        public string Compile(string sourceCode, Type compilerType)
+        public string Compile(string sourceCode, Type compilerType, object[] args)
         {
-            var ret = new JSWorkItem(sourceCode, compilerType);
+            var ret = new JSWorkItem(sourceCode, compilerType, args);
             workQueue.Enqueue(ret);
             return ret.GetValueSync();
         }

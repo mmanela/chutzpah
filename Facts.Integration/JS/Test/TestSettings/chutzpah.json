@@ -1,0 +1,5 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "RootReferencePathMode":"SettingsFileDirectory"
+}

@@ -2,6 +2,12 @@
 
 namespace Chutzpah.Compilers.TypeScript
 {
+    public enum TypeScriptCodeGenTarget
+    {
+        ES3,
+        ES5
+    }
+
     public class TypeScriptCompiler : JavaScriptCompilerBase
     {
         public override string[] CompilerLibraryResourceNames
