@@ -247,8 +247,12 @@ namespace Chutzpah
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFilePath, IEnumerable<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private string CreateTestHarness(IFrameworkDefinition definition,
+                                         ChutzpahTestSettingsFile chutzpahTestSettings,
+                                         string inputTestFilePath,
+                                         IEnumerable<ReferencedFile> referencedFiles,
                                          ICoverageEngine coverageEngine,
+                                         IList<string> temporaryFiles)
         {
             string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath);
             string testFilePathHash = hasher.Hash(inputTestFilePath);
@@ -453,11 +457,5 @@ namespace Chutzpah
 
             return flattenedFileList;
         }
-                                                                referenceCssReplacement,
-                                                                testJsReplacement,
-                                                                referenceJsReplacement,
-                                                                referenceIconReplacement,
-                                                                referencedFile,
-                                                                referencePath);
     }
 }

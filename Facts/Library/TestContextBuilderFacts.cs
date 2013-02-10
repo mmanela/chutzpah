@@ -296,7 +296,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetPathInfo("test.js"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\folder1\test.js" });
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.Equal(@"settingsPath\_Chutzpah.hash.test.html", context.TestHarnessPath);
             }
@@ -314,7 +314,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetPathInfo("test.js"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\folder3\test.js" });
 
-                var context = creator.ClassUnderTest.BuildContext("test.js");
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 Assert.Equal(@"customFolder\_Chutzpah.hash.test.html", context.TestHarnessPath);
             }
@@ -418,9 +418,9 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path1\test.js"))
                     .Returns(TestJSFileWithRootedReference);
 
-                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js");
+                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js", new TestOptions());
 
-                string scriptStatement = TestContextBuilder.GetScriptStatement(@"path1/settingsPath/rooted/file.js");
+                string scriptStatement = TestContextBuilder_GetScriptStatement(@"path1/settingsPath/rooted/file.js");
                 Assert.Contains(scriptStatement, text);
             }
 
@@ -437,9 +437,9 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetText(@"path2\test.js"))
                     .Returns(TestJSFileWithRootedReference);
 
-                var context = creator.ClassUnderTest.BuildContext(@"path2\test.js");
+                var context = creator.ClassUnderTest.BuildContext(@"path2\test.js", new TestOptions());
 
-                string scriptStatement = TestContextBuilder.GetScriptStatement(@"/rooted/file.js");
+                string scriptStatement = TestContextBuilder_GetScriptStatement(@"/rooted/file.js");
                 Assert.Contains(scriptStatement, text);
             }
 

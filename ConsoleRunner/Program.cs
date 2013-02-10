@@ -136,7 +136,7 @@ namespace Chutzpah
                         OpenInBrowser = commandLine.OpenInBrowser,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
-                        TestingMode = commandLine.TestMode
+                        TestingMode = commandLine.TestMode,
                         CoverageOptions = new CoverageOptions
                                               {
                                                   Enabled = commandLine.Coverage,

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Xunit;
 using Xunit.Extensions;
 
@@ -237,17 +236,6 @@ namespace Chutzpah.Facts.Integration
             if (!ok)
             {
                 throw new Xunit.Sdk.EqualException(string.Join(", ", keySubstringsList), string.Join(", ", dict.Keys), true);
-            }
-        }
-
-        private class ExceptionThrowingRunnerCallback : RunnerCallback
-        {
-            public override void ExceptionThrown(Exception exception, string fileName)
-            {
-                var preserveStackTrace = typeof(Exception).GetMethod("InternalPreserveStackTrace",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-                preserveStackTrace.Invoke(exception, null);
-                throw exception;
             }
         }
     }

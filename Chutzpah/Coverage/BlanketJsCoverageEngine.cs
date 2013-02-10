@@ -97,7 +97,7 @@ namespace Chutzpah.Coverage
             // that match the include/exclude patterns.
             foreach (var entry in data)
             {
-                string filePath = new Uri(entry.Key).LocalPath;
+                string filePath = entry.Key.StartsWith("file://") ? new Uri(entry.Key).LocalPath : entry.Key;
                 string newKey;
                 if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
                 {
