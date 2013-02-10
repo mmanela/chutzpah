@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Chutzpah.FrameworkDefinitions;
@@ -97,7 +98,12 @@ namespace Chutzpah.Coverage
             // that match the include/exclude patterns.
             foreach (var entry in data)
             {
-                string filePath = entry.Key.StartsWith("file://") ? new Uri(entry.Key).LocalPath : entry.Key;
+                Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
+                if (!uri.IsAbsoluteUri)
+                {
+                    uri = new Uri(new Uri(Directory.GetCurrentDirectory()), uri);
+                }
+                string filePath = uri.LocalPath;
                 string newKey;
                 if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
                 {
