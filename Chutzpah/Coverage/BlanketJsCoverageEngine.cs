@@ -101,7 +101,9 @@ namespace Chutzpah.Coverage
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
                 if (!uri.IsAbsoluteUri)
                 {
-                    uri = new Uri(new Uri(Directory.GetCurrentDirectory()), uri);
+                    // Resolve against the test file path.
+                    string basePath = new FileInfo(testContext.InputTestFile).DirectoryName;
+                    uri = new Uri(new Uri(basePath), uri);
                 }
                 string filePath = uri.LocalPath;
                 string newKey;

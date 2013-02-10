@@ -279,7 +279,7 @@ namespace Chutzpah
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
-            TestHarness harness = new TestHarness(inputTestFilePath, referencedFiles);
+            TestHarness harness = new TestHarness(referencedFiles);
             CleanupTestHarness(harness);
             if (coverageEngine != null)
             {

@@ -8,23 +8,18 @@ namespace Chutzpah
 {
     public class TestHarness
     {
-        private readonly string inputTestFilePath;
-
         public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
         public IList<TestHarnessItem> ReferencedScripts { get; private set; }
         public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
-        public TestHarness(string inputTestFilePath,
-                             IEnumerable<ReferencedFile> referencedFiles)
+        public TestHarness(IEnumerable<ReferencedFile> referencedFiles)
         {
-            this.inputTestFilePath = inputTestFilePath;
             BuildTags(referencedFiles);
         }
 
         public string CreateHtmlText(string testHtmlTemplate)
         {
-            string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath).Replace("\\", "/");
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, inputTestFileDir);
+            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate);
             return testHtmlText;
         }
 
@@ -75,8 +70,7 @@ namespace Chutzpah
             return list;
         }
 
-        private string FillTestHtmlTemplate(string testHtmlTemplate,
-                                            string inputTestFileDir)
+        private string FillTestHtmlTemplate(string testHtmlTemplate)
         {
             var testJsReplacement = new StringBuilder();
             var testFrameworkDependencies = new StringBuilder(); 
@@ -90,7 +84,6 @@ namespace Chutzpah
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFileDir@@", inputTestFileDir);
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
 
