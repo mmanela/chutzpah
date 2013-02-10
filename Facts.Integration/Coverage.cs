@@ -136,6 +136,30 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_put_converted_source_code_in_coverage_object_for_coffee_script()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
+            var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code.coffee"));
+            Assert.True(codeCoffeeEntry.Value.SourceLines.Any(l => l.Contains("function")));
+        }
+
+        [Fact]
+        public void Will_not_put_source_code_in_coverage_object_for_js_script_as_it_is_redundant()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
+            var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code.js"));
+            Assert.Null(codeCoffeeEntry.Value.SourceLines);
+        }
+
+        [Fact]
         public void Will_put_original_script_name_in_file_path_in_coverage_object()
         {
             var testRunner = TestRunner.Create();
@@ -183,6 +207,18 @@ namespace Chutzpah.Facts.Integration
                                        scriptPath, "tests\\base\\base.", "tests\\ui\\ui.", "\\base\\core.js",
                                        "ui\\screen.js"
                                    });
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
+        public void Will_resolve_requirejs_required_files_correctly(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+            Assert.True(dict.Any(e => e.Key.Contains("\\RequireJS\\")));
         }
 
         [Theory]

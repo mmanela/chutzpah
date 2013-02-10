@@ -15,11 +15,13 @@ namespace Chutzpah.Coverage
     /// </summary>
     public class BlanketJsCoverageEngine : ICoverageEngine
     {
+        private readonly IFileSystemWrapper fileSystem;
         private readonly IJsonSerializer jsonSerializer;
 
-        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer)
+        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem)
         {
             this.jsonSerializer = jsonSerializer;
+            this.fileSystem = fileSystem;
         }
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
@@ -103,7 +105,7 @@ namespace Chutzpah.Coverage
                 {
                     // Resolve against the test file path.
                     string basePath = new FileInfo(testContext.InputTestFile).DirectoryName;
-                    uri = new Uri(new Uri(basePath), uri);
+                    uri = new Uri(Path.Combine(basePath, entry.Key));
                 }
                 string filePath = uri.LocalPath;
                 string newKey;
@@ -113,10 +115,13 @@ namespace Chutzpah.Coverage
                 }
                 if (IsFileEligibleForInstrumentation(newKey))
                 {
+                    // Only add source code for converted files!
+                    string[] sourceLines = newKey.Equals(filePath) ? null : fileSystem.GetLines(filePath);
                     coverageData.Add(newKey, new CoverageFileData
                                                  {
                                                      LineExecutionCounts = entry.Value,
-                                                     FilePath = newKey
+                                                     FilePath = newKey,
+                                                     SourceLines = sourceLines
                                                  });
                 }
             }
