@@ -69,6 +69,13 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+        const string TestJSFileWithExcludedReferenceContents =
+            @"/// <reference path=""lib.js"" />
+                        /// <reference path=""../../js/excluded.js"" chutzpah-exclude=""true"" />
+                        /// <reference path=""../../js/doublenegative.js"" chutzpah-exclude=""false"" />
+                        some javascript code
+                        ";
+
         const string TestJSFileWithReferencesContents =
             @"/// <reference path=""../../js/references.js"" />
                         some javascript code
@@ -181,7 +188,7 @@ namespace Chutzpah.Facts
             public void Will_delete_temporary_files()
             {
                 var builder = new TestableTestContextBuilder();
-                var context = new TestContext {TemporaryFiles = new string[] {"foo.js", "bar.js"}};
+                var context = new TestContext { TemporaryFiles = new string[] { "foo.js", "bar.js" } };
 
                 builder.ClassUnderTest.CleanupContext(context);
 
@@ -360,7 +367,7 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestableTestContextBuilder();
                 var fileGenerator = new Mock<IFileGenerator>();
-                creator.InjectArray(new[] {fileGenerator.Object});
+                creator.InjectArray(new[] { fileGenerator.Object });
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
 
                 var context = creator.ClassUnderTest.BuildContext("test.coffee");
@@ -426,6 +433,22 @@ namespace Chutzpah.Facts
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"/rooted/file.js");
                 Assert.Contains(scriptStatement, text);
+            }
+
+            [Fact]
+            public void Will_not_add_referenced_file_if_it_is_excluded()
+            {
+                var creator = new TestableTestContextBuilder();
+                var path = @"fakepath\fakesuite.js";
+
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(path))
+                    .Returns(TestJSFileWithExcludedReferenceContents);
+
+                var context = creator.ClassUnderTest.BuildContext(path);
+
+                Assert.False(context.ReferencedJavaScriptFiles.Any(x => x.Path.EndsWith("excluded.js")), "Test context contains excluded reference.");
+                Assert.True(context.ReferencedJavaScriptFiles.Any(x => x.Path.EndsWith("doublenegative.js")), "Test context does not contain negatively excluded reference.");
             }
 
             [Fact]
@@ -498,8 +521,8 @@ namespace Chutzpah.Facts
                     .Setup(x => x.FindFolderPath(Path.Combine(@"path\", @"../../js/somefolder")))
                     .Returns(@"path\someFolder");
                 creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetFiles(@"path\someFolder","*.*",SearchOption.AllDirectories))
-                    .Returns(new []{@"path\subFile.js"});
+                    .Setup(x => x.GetFiles(@"path\someFolder", "*.*", SearchOption.AllDirectories))
+                    .Returns(new[] { @"path\subFile.js" });
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("test.js"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
@@ -510,7 +533,7 @@ namespace Chutzpah.Facts
                 var context = creator.ClassUnderTest.BuildContext("test.js");
 
                 string scriptStatement = TestContextBuilder.GetScriptStatement(@"path\subFile.js");
-                Assert.Contains(scriptStatement,text);
+                Assert.Contains(scriptStatement, text);
             }
 
             [Fact]

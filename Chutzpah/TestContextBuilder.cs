@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +18,7 @@ namespace Chutzpah
         private const string TestFileFolder = "TestFiles";
 
         private readonly Regex JsReferencePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""']\s*/>",
+            new Regex(@"^\s*(///|##)\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'](\s+chutzpah-exclude\s*=\s*[""""'](?<Exclude>[^""""<>|]+)[""""'])?\s*/>",
                       RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;
@@ -296,10 +295,10 @@ namespace Chutzpah
             Regex regex = JsReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
             {
-                if (match.Success)
+                if (ShouldIncludeReference(match))
                 {
                     string referencePath = match.Groups["Path"].Value;
-                    
+
                     // Check test settings and adjust the path if it is rooted (e.g. /some/path)
                     referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
 
@@ -341,7 +340,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
             }
@@ -354,8 +353,8 @@ namespace Chutzpah
         /// </summary>
         /// <returns></returns>
         private static string AdjustPathIfRooted(ChutzpahTestSettingsFile chutzpahTestSettings, string referencePath)
-        {        
-            if(chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory && 
+        {
+            if (chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory &&
                 (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
             {
                 referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
@@ -509,6 +508,28 @@ namespace Chutzpah
             }
 
             return replacementBuffer;
+        }
+
+        private static bool ShouldIncludeReference(Match match)
+        {
+            if (match.Success)
+            {
+                var exclude = match.Groups["Exclude"].Value;
+
+                if (!string.IsNullOrWhiteSpace(exclude))
+                {
+                    exclude = exclude.ToLower();
+
+                    if (exclude != "false" && exclude != "no")
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         public static string GetScriptStatement(string path, bool absolute = true)
