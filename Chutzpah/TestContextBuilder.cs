@@ -510,23 +510,24 @@ namespace Chutzpah
             return replacementBuffer;
         }
 
+        /// <summary>
+        /// Decides whether a reference match should be included.
+        /// </summary>
+        /// <param name="match">The reference match.</param>
+        /// <returns>
+        /// <c>true</c> if the reference should be included, otherwise <c>false</c>.
+        /// </returns>
         private static bool ShouldIncludeReference(Match match)
         {
             if (match.Success)
             {
                 var exclude = match.Groups["Exclude"].Value;
 
-                if (!string.IsNullOrWhiteSpace(exclude))
+                if (string.IsNullOrWhiteSpace(exclude) || exclude.ToLower() == "false" || exclude.ToLower() == "no")
                 {
-                    exclude = exclude.ToLower();
-
-                    if (exclude != "false" && exclude != "no")
-                    {
-                        return false;
-                    }
+                    // The exclude flag is empty or negative
+                    return true;
                 }
-
-                return true;
             }
 
             return false;
