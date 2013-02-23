@@ -96,9 +96,13 @@ namespace Chutzpah
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /file path             : Alias for /path");
             Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
-            Console.WriteLine("  /compilercache         : File where compiled scripts can be cached");
-            Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb");
+            Console.WriteLine("  /coverage              : Enable coverage collection");
+            Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
+            Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
+            Console.WriteLine("  /compilercache         : File where compiled scripts can be cached. Defaults to a file in the temp directory.");
+            Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb. Defaults to 32Mb.");
             Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
+
 
             foreach (var transformer in SummaryTransformerFactory.GetTransformers())
             {
@@ -132,7 +136,13 @@ namespace Chutzpah
                         OpenInBrowser = commandLine.OpenInBrowser,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
-                        TestingMode = commandLine.TestMode
+                        TestingMode = commandLine.TestMode,
+                        CoverageOptions = new CoverageOptions
+                                              {
+                                                  Enabled = commandLine.Coverage,
+                                                  IncludePattern = commandLine.CoverageIncludePattern,
+                                                  ExcludePattern = commandLine.CoverageExcludePattern
+                                              }
                     };
 
                 testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);

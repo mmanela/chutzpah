@@ -51,7 +51,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(scriptPath);
+            TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -64,7 +64,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath);
+            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -78,7 +78,7 @@ namespace Chutzpah.Facts.Integration
             // this is important since TS using typechecking engine to help generate code
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts");
+            var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -90,7 +90,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\qunitTwice.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\qunitTwice.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -103,7 +103,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(scriptPath);
+            TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -115,7 +115,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\SubFolder");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\SubFolder", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
@@ -127,7 +127,9 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\basic-qunit.js", @"JS\Test\SubFolder" });
+            TestCaseSummary result =
+                testRunner.RunTests(new List<string> {@"JS\Test\basic-qunit.js", @"JS\Test\SubFolder"},
+                                    new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(5, result.PassedCount);
@@ -139,7 +141,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\sameName.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\sameName.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -152,7 +154,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\folderReference.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\folderReference.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
@@ -164,7 +166,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -176,19 +178,19 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.html" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\styleReference.html" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
             Assert.Equal(1, result.TotalCount);
         }
-
-        [Fact]
+		
+		[Fact]
         public void Will_not_copy_over_excluded_reference_from_js_file()
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\excludeReference.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\excludeReference.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -200,7 +202,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\asyncTest.js" });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\asyncTest.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(2, result.PassedCount);
@@ -212,7 +214,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\timeoutTest.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
@@ -224,7 +226,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\spinWait.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\spinWait.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
@@ -236,7 +238,9 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 1500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\timeoutTest.js"},
+                                                         new TestOptions {TestFileTimeoutMilliseconds = 1500},
+                                                         new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -248,7 +252,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js", new ExceptionThrowingRunnerCallback());
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("A basic test"));
             Assert.Equal(3, test.Line);
@@ -260,7 +264,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.js", new ExceptionThrowingRunnerCallback());
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
             Assert.Equal(11, test.Line);
@@ -272,7 +276,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-jasmine.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-jasmine.js", new ExceptionThrowingRunnerCallback());
 
             var test = result.Tests.SingleOrDefault(x => x.TestName.Equals("will get vowel count"));
             Assert.Equal(13, test.Line);
@@ -284,7 +288,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.html");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\basic-qunit.html", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -296,7 +300,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\fixture.html");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\fixture.html", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -308,7 +312,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\encoding.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\encoding.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -320,7 +324,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\coffeeEncoding.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\coffeeEncoding.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -332,7 +336,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\webReference.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\webReference.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -344,7 +348,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\webReferenceSSL.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\webReferenceSSL.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -360,7 +364,7 @@ namespace Chutzpah.Facts.Integration
                     @"JS\Test\basic-qunit.js",
                     @"JS\Test\basic-qunit.html"
                 };
-            TestCaseSummary result = testRunner.RunTests(tests);
+            TestCaseSummary result = testRunner.RunTests(tests, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(2, result.FailedCount);
             Assert.Equal(6, result.PassedCount);
@@ -373,7 +377,7 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
 
             testRunner.DebugEnabled = true;
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -384,7 +388,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_test_which_logs_object_to_console_error()
         {
             var testRunner = TestRunner.Create();
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleError.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleError.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -396,7 +400,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleWarn.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleWarn.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -407,7 +411,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_test_which_has_script_error_which_gets_logged_to_output()
         {
             var testRunner = TestRunner.Create();
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\scriptError.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\scriptError.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(3, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -419,7 +423,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\nestedJasmine.js");
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\nestedJasmine.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal("nested.jasmine hello", result.Tests.First().ModuleName);
             Assert.Equal(1, result.FailedCount);
@@ -432,7 +436,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(new List<string> { @"JS\Test\ajaxCall.js" });
+            var result = testRunner.RunTests(new List<string> { @"JS\Test\ajaxCall.js" }, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -444,7 +448,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(@"JS\Test\oldCallbackQUnit.html");
+            var result = testRunner.RunTests(@"JS\Test\oldCallbackQUnit.html", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
@@ -456,7 +460,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(@"JS\Test\inlineTests.html");
+            var result = testRunner.RunTests(@"JS\Test\inlineTests.html", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -483,7 +487,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(scriptPath);
+                var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(1, result.FailedCount);
                 Assert.Equal(3, result.PassedCount);
@@ -495,7 +499,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TypeScript\ES5\ES5Test.ts");
+                var result = testRunner.RunTests(@"JS\Test\TypeScript\ES5\ES5Test.ts", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
@@ -510,7 +514,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -522,7 +526,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -534,7 +538,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.qunit.js");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.qunit.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -546,7 +550,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -558,7 +562,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-qunit-solo.js");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-qunit-solo.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -570,7 +574,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-jasmine-solo.js");
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\WithSettings\rjs-jasmine-solo.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -585,7 +589,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\frameworkTest.js");
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\frameworkTest.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
@@ -597,7 +601,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub1\settingsAdjacentHarnessTest.js");
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub1\settingsAdjacentHarnessTest.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
@@ -609,7 +613,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub2\SubSub2\testAdjacentHarnessTest.js");
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub2\SubSub2\testAdjacentHarnessTest.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
@@ -621,7 +625,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub3\customPathHarnessTest.js");
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Sub3\customPathHarnessTest.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
@@ -633,7 +637,7 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\RootReferencePathModeTests\settingsFileDirectoryTest.js");
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\RootReferencePathModeTests\settingsFileDirectoryTest.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);

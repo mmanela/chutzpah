@@ -24,6 +24,10 @@ namespace Chutzpah
         public const string ChutzpahCompilerCacheFolder = ChutzpahTemporaryFilePrefix + "cache";
         public const string ChutzpahCompilerCacheFileName = ChutzpahTemporaryFilePrefix + "cache";
 
+        // Used to communicate between the coverage engine and the JS runner, for Chutzpah
+        // to be able to get hold of the coverage object.
+        public const string ChutzpahCoverageObjectReference = "_Chutzpah_covobj_name";
+
         public const string PngExtension = ".png";
         public const string CssExtension = ".css";
         public const string JavaScriptExtension = ".js";

@@ -56,7 +56,7 @@ namespace Chutzpah
         {
             if (string.IsNullOrEmpty(testFile)) return null;
 
-            return testContextBuilder.BuildContext(testFile);
+            return testContextBuilder.BuildContext(testFile, options);
         }
 
         public TestContext GetTestContext(string testFile)
@@ -146,7 +146,7 @@ namespace Chutzpah
                     TestContext testContext;
 
                     resultCount++;
-                    if (testContextBuilder.TryBuildContext(testFile, out testContext))
+                    if (testContextBuilder.TryBuildContext(testFile, options, out testContext))
                     {
                         var testSummary = InvokeTestRunner(headlessBrowserPath,
                                                            options,
@@ -204,7 +204,6 @@ namespace Chutzpah
             string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
-
             Func<ProcessStream, TestFileSummary> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);

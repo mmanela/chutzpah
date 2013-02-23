@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
 using Chutzpah.Wrappers;
@@ -26,10 +27,12 @@ namespace Chutzpah
 
         // Tracks the last time we got an event/update from phantom. 
         private DateTime lastTestEvent;
+        private readonly ICoverageEngine coverageEngine;
 
-        public TestCaseStreamReader()
+        public TestCaseStreamReader(ICoverageEngine coverageEngine)
         {
             jsonSerializer = new JsonSerializer();
+            this.coverageEngine = coverageEngine;
         }
 
         public TestFileSummary Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
@@ -82,6 +85,11 @@ namespace Chutzpah
                     {
                         case "FileStart":
                             callback.FileStarted(testContext.InputTestFile);
+                            break;
+
+                        case "CoverageObject":
+                            var jsCov = jsonSerializer.Deserialize<JsCoverage>(json);
+                            summary.CoverageObject = coverageEngine.DeserializeCoverageObject(jsCov.Object, testContext);
                             break;
 
                         case "FileDone":

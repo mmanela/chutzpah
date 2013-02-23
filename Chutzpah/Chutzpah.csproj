@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="CoverageOptions.cs" />
     <EmbeddedResource Include="Compilers\CoffeeScript\compile-cs.js" />
     <Content Include="Compilers\README.txt" />
     <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptException.cs" />
@@ -119,9 +120,11 @@
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
+    <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\ChutzpahTestSettingsFile.cs" />
     <Compile Include="Models\FilePosition.cs" />
     <Compile Include="Models\FilePositions.cs" />
+    <Compile Include="Models\JS\JsCoverage.cs" />
     <Compile Include="Models\JS\JsErrors.cs" />
     <Compile Include="Models\JS\JsLogs.cs" />
     <Compile Include="Models\Stack.cs" />
@@ -150,6 +153,7 @@
     <Compile Include="ITestRunner.cs" />
     <Compile Include="Models\TestContext.cs" />
     <Compile Include="Models\TestResult.cs" />
+    <Compile Include="TestHarness.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
@@ -169,9 +173,11 @@
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
     <Compile Include="Wrappers\IHtmlUtility.cs" />
+    <Compile Include="Coverage\ICoverageEngine.cs" />
     <Compile Include="Wrappers\IJsonSerializer.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="Wrappers\IProcessWrapper.cs" />
+    <Compile Include="Coverage\BlanketJsCoverageEngine.cs" />
     <Compile Include="Wrappers\JsonSerializer.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="TestRunner.cs" />
@@ -183,6 +189,12 @@
     <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestFiles\Coverage\blanket_jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Coverage\blanket_qunit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="Compilers\CoffeeScript\coffee-script.js" />
     <Content Include="Compilers\Interop\JavaScriptEngines\Notes.txt" />
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />

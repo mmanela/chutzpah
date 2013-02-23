@@ -27,13 +27,19 @@
         window.chutzpah.isTestingFinished = false;
         window.chutzpah.testCases = [];
 
+        function logCoverage() {
+            if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
+                log({ type: "CoverageObject", object: window[window._Chutzpah_covobj_name] });
+            }
+        }
+
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
             self.reportRunnerStarting = function (runner) {
 
                 fileStartTime = new Date().getTime();
-                
+
                 // Testing began
                 log({ type: "FileStart" });
             };
@@ -41,6 +47,7 @@
             self.reportRunnerResults = function (runner) {
                 var res = jasmine.getEnv().currentRunner().results();
                 var timetaken = new Date().getTime() - fileStartTime;
+                logCoverage();
                 log({ type: "FileDone", timetaken: timetaken, passed: res.passedCount, failed: res.failedCount });
                 window.chutzpah.isTestingFinished = true;
             };

@@ -6,10 +6,6 @@ properties {
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
   $mainVersion = "2.3.0"
-  # Import environment variables for Visual Studio
-  if (test-path ("vsvars2010.ps1")) { 
-    . ./vsvars2010.ps1 
-    }
 }
 
 # Aliases
@@ -72,6 +68,11 @@ task Build-Solution-2012 {
 }
 
 task Build-Solution-2010 {
+    # Import environment variables for Visual Studio 2010
+    if (test-path ("vsvars2010.ps1")) { 
+      . ./vsvars2010.ps1 
+    }
+    
     exec { msbuild Chutzpah.VS2010.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 

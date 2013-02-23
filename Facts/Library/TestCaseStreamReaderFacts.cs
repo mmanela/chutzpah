@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
@@ -256,6 +257,25 @@ namespace Chutzpah.Facts
                 Assert.Equal("errorFile", summary.Errors[0].Stack[0].File);
                 Assert.Equal("errorFunc", summary.Errors[0].Stack[0].Function);
                 Assert.Equal("22", summary.Errors[0].Stack[0].Line);
+            }
+
+            [Fact]
+            public void Will_put_coverage_object_in_summary()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":{}}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                reader.Mock<ICoverageEngine>().Setup(ce => ce.DeserializeCoverageObject(It.IsAny<string>(), context)).
+                    Returns(new CoverageData());
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.NotNull(summary.CoverageObject);
             }
 
             [Fact]

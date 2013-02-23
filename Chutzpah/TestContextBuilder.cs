@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chutzpah.Coverage;
 using Chutzpah.Extensions;
 using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
@@ -15,22 +17,24 @@ namespace Chutzpah
 {
     public class TestContextBuilder : ITestContextBuilder
     {
-        private const string TestFileFolder = "TestFiles";
+            private const string TestFileFolder = "TestFiles";
 
-        private readonly Regex JsReferencePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'](\s+chutzpah-exclude\s*=\s*[""""'](?<Exclude>[^""""<>|]+)[""""'])?\s*/>",
-                      RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            private readonly Regex JsReferencePathRegex =
+                new Regex(@"^\s*(///|##)\s*<\s*reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'](\s+chutzpah-exclude\s*=\s*[""""'](?<Exclude>[^""""<>|]+)[""""'])?\s*/>",
+                          RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IHasher hasher;
+        private readonly ICoverageEngine mainCoverageEngine;
         private readonly IJsonSerializer serializer;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
+                                  ICoverageEngine coverageEngine,
                                   IJsonSerializer serializer,
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
                                   IEnumerable<IFileGenerator> fileGenerators)
@@ -41,9 +45,10 @@ namespace Chutzpah
             this.serializer = serializer;
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
+            mainCoverageEngine = coverageEngine;
         }
 
-        public TestContext BuildContext(string file)
+        public TestContext BuildContext(string file, TestOptions options)
         {
             if (String.IsNullOrWhiteSpace(file))
             {
@@ -52,10 +57,10 @@ namespace Chutzpah
 
             PathInfo pathInfo = fileProbe.GetPathInfo(file);
 
-            return BuildContext(pathInfo);
+            return BuildContext(pathInfo, options);
         }
 
-        public TestContext BuildContext(PathInfo file)
+        public TestContext BuildContext(PathInfo file, TestOptions options)
         {
             if (file == null)
             {
@@ -105,7 +110,14 @@ namespace Chutzpah
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
-                foreach (string item in definition.FileDependencies)
+                ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options);
+                IEnumerable<string> deps = definition.FileDependencies;
+                if (coverageEngine != null)
+                {
+                    deps = deps.Concat(coverageEngine.GetFileDependencies(definition));
+                }
+
+                foreach (string item in deps)
                 {
                     string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
                     referencedFiles.Add(new ReferencedFile { IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath });
@@ -115,6 +127,7 @@ namespace Chutzpah
                                                             chutzpahTestSettings,
                                                             testFilePath,
                                                             referencedFiles,
+                                                            coverageEngine,
                                                             temporaryFiles);
 
                 return new TestContext
@@ -130,15 +143,15 @@ namespace Chutzpah
             return null;
         }
 
-        public bool TryBuildContext(string file, out TestContext context)
+        public bool TryBuildContext(string file, TestOptions options, out TestContext context)
         {
-            context = BuildContext(file);
+            context = BuildContext(file, options);
             return context != null;
         }
 
-        public bool TryBuildContext(PathInfo file, out TestContext context)
+        public bool TryBuildContext(PathInfo file, TestOptions options, out TestContext context)
         {
-            context = BuildContext(file);
+            context = BuildContext(file, options);
             return context != null;
         }
 
@@ -202,6 +215,14 @@ namespace Chutzpah
             }
         }
 
+        private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options)
+        {
+            if (options == null || !options.CoverageOptions.Enabled) return null;
+            mainCoverageEngine.IncludePattern = options.CoverageOptions.IncludePattern;
+            mainCoverageEngine.ExcludePattern = options.CoverageOptions.ExcludePattern;
+            return mainCoverageEngine;
+        }
+
         private ReferencedFile GetFileUnderTest(string testFilePath)
         {
             return new ReferencedFile { Path = testFilePath, IsLocal = true, IsFileUnderTest = true };
@@ -226,7 +247,12 @@ namespace Chutzpah
             return definition != null;
         }
 
-        private string CreateTestHarness(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFilePath, IEnumerable<ReferencedFile> referencedFiles, List<string> temporaryFiles)
+        private string CreateTestHarness(IFrameworkDefinition definition,
+                                         ChutzpahTestSettingsFile chutzpahTestSettings,
+                                         string inputTestFilePath,
+                                         IEnumerable<ReferencedFile> referencedFiles,
+                                         ICoverageEngine coverageEngine,
+                                         IList<string> temporaryFiles)
         {
             string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath);
             string testFilePathHash = hasher.Hash(inputTestFilePath);
@@ -252,12 +278,18 @@ namespace Chutzpah
 
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
-            string normalizedInputTestFileDir = inputTestFileDir.Replace("\\", "/");
-            string testHtmlText = FillTestHtmlTemplate(testHtmlTemplate, normalizedInputTestFileDir, referencedFiles);
+
+            var harness = new TestHarness(referencedFiles);
+
+            if (coverageEngine != null)
+            {
+                coverageEngine.PrepareTestHarnessForCoverage(harness, definition);
+            }
+
+            string testHtmlText = harness.CreateHtmlText(testHtmlTemplate);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }
-
 
         /// <summary>
         /// Scans the test file extracting all referenced files from it.
@@ -298,7 +330,7 @@ namespace Chutzpah
                 if (ShouldIncludeReference(match))
                 {
                     string referencePath = match.Groups["Path"].Value;
-
+                    
                     // Check test settings and adjust the path if it is rooted (e.g. /some/path)
                     referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
 
@@ -340,7 +372,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
+                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
                     }
                 }
             }
@@ -353,8 +385,8 @@ namespace Chutzpah
         /// </summary>
         /// <returns></returns>
         private static string AdjustPathIfRooted(ChutzpahTestSettingsFile chutzpahTestSettings, string referencePath)
-        {
-            if (chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory &&
+        {        
+            if(chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory && 
                 (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
             {
                 referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
@@ -409,107 +441,6 @@ namespace Chutzpah
             return flattenedFileList;
         }
 
-
-        private static string FillTestHtmlTemplate(string testHtmlTemplate,
-                                                   string inputTestFileDir,
-                                                   IEnumerable<ReferencedFile> referencedFiles)
-        {
-            var testJsReplacement = new StringBuilder();
-            var testFrameworkDependencies = new StringBuilder();
-            var referenceJsReplacement = new StringBuilder();
-            var referenceCssReplacement = new StringBuilder();
-            var referenceIconReplacement = new StringBuilder();
-
-            var referencedFilePaths = referencedFiles.OrderBy(x => x.IsFileUnderTest).Select(x => x);
-            BuildReferenceHtml(referencedFilePaths,
-                               testFrameworkDependencies,
-                               referenceCssReplacement,
-                               testJsReplacement,
-                               referenceJsReplacement,
-                               referenceIconReplacement);
-
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
-
-            return testHtmlTemplate;
-        }
-
-        private static void BuildReferenceHtml(IEnumerable<ReferencedFile> referencedFilePaths,
-                                               StringBuilder testFrameworkDependencies,
-                                               StringBuilder referenceCssReplacement,
-                                               StringBuilder testJsReplacement,
-                                               StringBuilder referenceJsReplacement,
-                                               StringBuilder referenceIconReplacement)
-        {
-            foreach (ReferencedFile referencedFile in referencedFilePaths)
-            {
-                string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
-                                           ? referencedFile.Path
-                                           : referencedFile.GeneratedFilePath;
-
-                var replacementBuffer = ChooseReplacementBuffer(testFrameworkDependencies,
-                                                                referenceCssReplacement,
-                                                                testJsReplacement,
-                                                                referenceJsReplacement,
-                                                                referenceIconReplacement,
-                                                                referencedFile,
-                                                                referencePath);
-                if (replacementBuffer == null) continue;
-
-                if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    replacementBuffer.AppendLine(GetStyleStatement(referencePath));
-                }
-                else if (referencedFile.IsFileUnderTest && referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    replacementBuffer.AppendLine(GetScriptStatement(referencePath));
-                }
-                else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    replacementBuffer.AppendLine(GetScriptStatement(referencePath));
-                }
-                else if (referencePath.EndsWith(Constants.PngExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    replacementBuffer.AppendLine(GetIconStatement(referencePath));
-                }
-            }
-        }
-
-        private static StringBuilder ChooseReplacementBuffer(StringBuilder testFrameworkDependencies,
-                                                             StringBuilder referenceCssReplacement,
-                                                             StringBuilder testJsReplacement,
-                                                             StringBuilder referenceJsReplacement,
-                                                             StringBuilder referenceIconReplacement,
-                                                             ReferencedFile referencedFile,
-                                                             string referencePath)
-        {
-            StringBuilder replacementBuffer = null;
-            if (referencedFile.IsTestFrameworkDependency)
-            {
-                replacementBuffer = testFrameworkDependencies;
-            }
-            else if (referencedFile.IsFileUnderTest && referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                replacementBuffer = testJsReplacement;
-            }
-            else if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                replacementBuffer = referenceCssReplacement;
-            }
-            else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                replacementBuffer = referenceJsReplacement;
-            }
-            else if (referencePath.EndsWith(Constants.PngExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                replacementBuffer = referenceIconReplacement;
-            }
-
-            return replacementBuffer;
-        }
-
         /// <summary>
         /// Decides whether a reference match should be included.
         /// </summary>
@@ -523,7 +454,9 @@ namespace Chutzpah
             {
                 var exclude = match.Groups["Exclude"].Value;
 
-                if (string.IsNullOrWhiteSpace(exclude) || exclude.ToLower() == "false" || exclude.ToLower() == "no")
+                if (string.IsNullOrWhiteSpace(exclude) 
+                    || exclude.Equals("false",StringComparison.OrdinalIgnoreCase)
+                    || exclude.Equals("no", StringComparison.OrdinalIgnoreCase))
                 {
                     // The exclude flag is empty or negative
                     return true;
@@ -531,34 +464,6 @@ namespace Chutzpah
             }
 
             return false;
-        }
-
-        public static string GetScriptStatement(string path, bool absolute = true)
-        {
-            const string format = @"<script type=""text/javascript"" src=""{0}""></script>";
-            return string.Format(format, absolute ? GetAbsoluteFileUrl(path) : path);
-        }
-
-        public static string GetStyleStatement(string path)
-        {
-            const string format = @"<link rel=""stylesheet"" href=""{0}"" type=""text/css""/>";
-            return string.Format(format, GetAbsoluteFileUrl(path));
-        }
-
-        public static string GetIconStatement(string path)
-        {
-            const string format = @"<link rel=""shortcut icon"" type=""image/png"" href=""{0}"">";
-            return string.Format(format, GetAbsoluteFileUrl(path));
-        }
-
-        public static string GetAbsoluteFileUrl(string path)
-        {
-            if (!RegexPatterns.SchemePrefixRegex.IsMatch(path))
-            {
-                return "file:///" + path.Replace('\\', '/');
-            }
-
-            return path;
         }
     }
 }

@@ -464,30 +464,89 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
-        public class CompilerCacheOptionsFacts
+        public class CoverageOptionsFacts
         {
             [Fact]
-            public void CompilerCache_Option_Not_Passed_CacheFile_Empty()
+            public void Coverage_Option_Not_Passed_Coverage_False()
             {
-                var arguments = new[] {"test.html"};
+                var arguments = new[] { "test.html" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.True(string.IsNullOrEmpty(commandLine.CompilerCacheFile));
+                Assert.False(commandLine.Coverage);
             }
 
             [Fact]
-            public void CompilerCache_Option_Passed_CacheFile_Set()
+            public void Coverage_Option_Coverage_Is_True()
             {
-                var arguments = new[] { "test.html", "/compilercachefile", "cache.dat"};
+                var arguments = new[] { "test.html", "/coverage" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.Equal("cache.dat",commandLine.CompilerCacheFile);
+                Assert.True(commandLine.Coverage);
             }
 
-        }
+            [Fact]
+            public void CoverageInclude_Option_Not_Passed_CoverageIncludePattern_Null()
+            {
+                var arguments = new[] { "test.html" };
 
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Null(commandLine.CoverageIncludePattern);
+            }
+
+            [Fact]
+            public void CoverageExclude_Option_Not_Passed_CoverageExcludePattern_Null()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Null(commandLine.CoverageExcludePattern);
+            }
+
+            [Fact]
+            public void CoverageInclude_Option_With_Value_CoverageIncludePattern_Set()
+            {
+                var arguments = new[] { "test.html", "/coverageInclude", "*.js" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("*.js", commandLine.CoverageIncludePattern);
+            }
+
+            [Fact]
+            public void CoverageExclude_Option_With_Value_CoverageExcludePattern_Set()
+            {
+                var arguments = new[] { "test.html", "/coverageExclude", "*.coffee" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("*.coffee", commandLine.CoverageExcludePattern);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_arg_given_to_CoverageInclude()
+            {
+                var arguments = new[] { "test.html", "/coverageInclude" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_arg_given_to_CoverageExclude()
+            {
+                var arguments = new[] { "test.html", "/coverageExclude" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+        }
+        
         public class CompilerCacheSizeOptionsFacs
         {
             [Fact]

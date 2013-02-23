@@ -20,5 +20,6 @@ namespace Chutzpah.Wrappers
         {
             return ServiceStack.Text.JsonSerializer.SerializeToString<T>(@object);
         }
+
     }
 }
