@@ -154,7 +154,13 @@ namespace Chutzpah
                 Console.WriteLine(ex.Message);
             }
 
-            return commandLine.FailOnScriptError && testResultsSummary.FailedCount <= 0 ? 1 : testResultsSummary.FailedCount;
+            var failedCount = testResultsSummary.FailedCount;
+            if (commandLine.FailOnScriptError && testResultsSummary.Errors.Any())
+            {
+                return failedCount > 0 ? failedCount : 1;
+            }
+
+            return failedCount;
         }
 
         private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
