@@ -108,7 +108,7 @@ namespace Chutzpah
                                         TestOptions options,
                                         ITestMethodRunnerCallback callback = null)
         {
-            callback = callback ?? RunnerCallback.Empty;
+            callback = options.OpenInBrowser || callback == null ? RunnerCallback.Empty : callback;
             callback.TestSuiteStarted();
 
             var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback);
@@ -148,18 +148,22 @@ namespace Chutzpah
                     resultCount++;
                     if (testContextBuilder.TryBuildContext(testFile, options, out testContext))
                     {
-                        var testSummary = InvokeTestRunner(headlessBrowserPath,
-                                                           options,
-                                                           testContext,
-                                                           testRunnerMode,
-                                                           callback);
-                        testFileSummaries.Enqueue(testSummary);
-
                         if (options.OpenInBrowser)
                         {
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
-                        else if(!DebugEnabled)
+                        else
+                        {
+                            var testSummary = InvokeTestRunner(headlessBrowserPath,
+                                                               options,
+                                                               testContext,
+                                                               testRunnerMode,
+                                                               callback);
+                            testFileSummaries.Enqueue(testSummary);
+                        }
+
+                        
+                        if(!DebugEnabled && !options.OpenInBrowser)
                         {
                             // Don't clean up context if you open in browser since we need the files around
                             // for the browser to use

@@ -10,7 +10,7 @@ namespace Chutzpah
         public const int DefaultTestFileTimeout = 5000;
 
         // Default of how many files to open during test file discovery
-        public const int DefaultFileSeachLimit = 300;
+        public const int DefaultFileSeachLimit = 10000;
 
         // The max-size in bytes for the compilercache file
         public const int DefaultCompilerCacheFileMaxSize = 32*1024*1024;
