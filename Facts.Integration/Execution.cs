@@ -70,6 +70,18 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
         }
+        
+        [Fact]
+        public void Will_follow_references_using_chutzpah_reference_syntax()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\chutzpahReferenceComment.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
 
         [Fact]
         public void Will_process_type_script_files_together()

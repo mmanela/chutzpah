@@ -78,7 +78,7 @@ namespace Chutzpah.Facts
 ";
 
         const string TestJSFileContents =
-            @"/// <reference path=""lib.js"" />
+            @"/// <chutzpah_reference path=""lib.js"" />
                         /// <reference path=""../../js/common.js"" />
                         /// <reference path=""../../js/style.css"" />
                         some javascript code
@@ -122,7 +122,7 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
-
+        
         public class IsTestFile
         {
             [Fact]
