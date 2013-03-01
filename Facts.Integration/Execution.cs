@@ -72,6 +72,18 @@ namespace Chutzpah.Facts.Integration
         }
         
         [Fact]
+        public void Will_autodetect_qunit_when_using_fully_qualified_function_names()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\fullyQualifiedQunit.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+        
+        [Fact]
         public void Will_follow_references_using_chutzpah_reference_syntax()
         {
             var testRunner = TestRunner.Create();
