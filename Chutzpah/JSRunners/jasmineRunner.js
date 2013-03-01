@@ -72,7 +72,9 @@
                 for (var i = 0; i < resultItems.length; i++) {
                     var result = resultItems[i];
                     var testResult = {};
-                    testResult.passed = result.passed();
+                    
+                    // result.passed() may return (true/false) or (1,0) but we want to only return boolean
+                    testResult.passed = result.passed() ? true : false;
                     testResult.message = result.message;
                     activeTestCase.testResults.push(testResult);
                 }
