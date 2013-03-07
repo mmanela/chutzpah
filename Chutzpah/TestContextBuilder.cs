@@ -20,7 +20,7 @@ namespace Chutzpah
             private const string TestFileFolder = "TestFiles";
 
             private readonly Regex JsReferencePathRegex =
-                new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""""'](?<Path>[^""""<>|]+)[""""'](\s+chutzpah-exclude\s*=\s*[""""'](?<Exclude>[^""""<>|]+)[""""'])?\s*/>",
+                new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
                           RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;

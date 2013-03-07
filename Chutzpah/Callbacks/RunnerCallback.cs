@@ -6,17 +6,25 @@ namespace Chutzpah
 {
     public abstract class RunnerCallback : ITestMethodRunnerCallback
     {
-        public static ITestMethodRunnerCallback Empty = new EmptyRunnerCallback(); 
-        private sealed class EmptyRunnerCallback : RunnerCallback{}
+        public static ITestMethodRunnerCallback Empty = new EmptyRunnerCallback();
+        private sealed class EmptyRunnerCallback : RunnerCallback { }
 
-        public virtual void TestSuiteStarted(){}
-        public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary){}
-        public virtual void FileStarted(string fileName){}
-        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary){}
-        public virtual void TestStarted(TestCase testCase){}
-        public virtual void ExceptionThrown(Exception exception, string fileName){}
-        public virtual void FileError(TestError error){}
-        public virtual void FileLog(TestLog log){}
+        public virtual void TestSuiteStarted() { }
+        public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary) { }
+        public virtual void FileStarted(string fileName) { }
+
+        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary)
+        {
+            if (testResultsSummary.CoverageObject != null)
+            {
+                CodeCoverageResults(fileName, testResultsSummary.CoverageObject);
+            }
+        }
+
+        public virtual void TestStarted(TestCase testCase) { }
+        public virtual void ExceptionThrown(Exception exception, string fileName) { }
+        public virtual void FileError(TestError error) { }
+        public virtual void FileLog(TestLog log) { }
         public virtual void TestFinished(TestCase testCase)
         {
             if (testCase.Passed)
@@ -27,9 +35,22 @@ namespace Chutzpah
             TestComplete(testCase);
         }
 
-        protected virtual void TestComplete(TestCase testCase){}
-        protected virtual void TestFailed(TestCase testCase){}
-        protected virtual void TestPassed(TestCase testCase){}
+        protected virtual void TestComplete(TestCase testCase) { }
+        protected virtual void TestFailed(TestCase testCase) { }
+        protected virtual void TestPassed(TestCase testCase) { }
+        protected virtual void CodeCoverageResults(string fileName, CoverageData coverageData) { }
+
+        protected virtual string GetCodeCoverageMessage(string fileName, CoverageData coverageData)
+        {
+            var message = string.Format("Code Coverage Results for {0}\n", fileName);
+            message += string.Format("     Average Coverage: {0:0%}\n", coverageData.CoveragePercentage);
+            foreach (var fileData in coverageData)
+            {
+                message += string.Format("     {0:0%} for {1}\n", fileData.Value.CoveragePercentage, fileData.Key);
+            }
+
+            return message;
+        }
 
         protected virtual string GetFileLogMessage(TestLog log)
         {
@@ -65,8 +86,6 @@ namespace Chutzpah
             return string.Format("JS Error: {0}\n {1}While Running:{2}\n\n", error.Message, stack, error.InputTestFile);
         }
 
-
-
         protected virtual string GetTestFailureMessage(TestCase testCase)
         {
 
@@ -85,8 +104,8 @@ namespace Chutzpah
         }
 
         protected virtual string GetTestFailureLocationString(TestCase testCase)
-       {
-           return string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);            
-       }
+        {
+            return string.Format("in {0} (line {1})\n\n", testCase.InputTestFile, testCase.Line);
+        }
     }
 }

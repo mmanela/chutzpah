@@ -18,18 +18,5 @@ namespace Chutzpah.RunnerCallbacks
             var errorMessage = GetFileErrorMessage(error);
             Console.Write(errorMessage);
         }
-
-        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
-        {
-            if (testResultsSummary.CoverageObject != null)
-            {
-                var folder = Path.GetDirectoryName(fileName);
-                var coverageFileName = Path.GetFileNameWithoutExtension(fileName) + ".coverage.json";
-                JsonSerializer serializer = new JsonSerializer();
-                File.WriteAllText(Path.Combine(folder, coverageFileName), serializer.Serialize(testResultsSummary.CoverageObject));
-            }
-
-            base.FileFinished(fileName, testResultsSummary);
-        }
     }
 }

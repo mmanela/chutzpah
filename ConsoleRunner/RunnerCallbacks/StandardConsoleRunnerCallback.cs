@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.RunnerCallbacks
 {
@@ -112,6 +113,17 @@ namespace Chutzpah.RunnerCallbacks
             var errorMessage = GetFileErrorMessage(error);
             Console.WriteLine(errorMessage);
             Console.ResetColor();
+        }
+
+        protected override void CodeCoverageResults(string fileName, CoverageData coverageData)
+        {
+            ClearCounter();
+            var folder = Path.GetDirectoryName(fileName);
+            var coverageFileName = Path.GetFileNameWithoutExtension(fileName) + ".coverage.json";
+            JsonSerializer serializer = new JsonSerializer();
+            File.WriteAllText(Path.Combine(folder, coverageFileName), serializer.Serialize(coverageData));
+
+            Console.WriteLine(GetCodeCoverageMessage(fileName,coverageData));
         }
 
         protected override void TestComplete(TestCase testCase)

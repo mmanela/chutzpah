@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Chutzpah.Models
 {
@@ -8,6 +9,23 @@ namespace Chutzpah.Models
     /// </summary>
     public class CoverageData : Dictionary<string, CoverageFileData>
     {
+        private double? coveragePercentage;
+
+        /// <summary>
+        /// The average percentage of line that were covered
+        /// </summary>
+        public double CoveragePercentage
+        {
+            get
+            {
+                if (!coveragePercentage.HasValue)
+                {
+                    coveragePercentage = this.Average(x => x.Value.CoveragePercentage);
+                }
+
+                return coveragePercentage.Value;
+            }
+        }
     }
 
     /// <summary>
@@ -15,6 +33,9 @@ namespace Chutzpah.Models
     /// </summary>
     public class CoverageFileData
     {
+
+        private double? coveragePercentage;
+
         /// <summary>
         /// The path to the file. Mostly for convenience.
         /// </summary>
@@ -35,5 +56,47 @@ namespace Chutzpah.Models
         /// is 0-based, which means that the first item is the first line of the file.
         /// </summary>
         public string[] SourceLines { get; set; }
+
+        /// <summary>
+        /// The percentage of line that were covered
+        /// </summary>
+        public double CoveragePercentage
+        {
+            get
+            {
+                if (!coveragePercentage.HasValue)
+                {
+                    coveragePercentage = CalculateCoveragePercentage();
+                }
+
+                return coveragePercentage.Value;
+            }
+        }
+
+        private double CalculateCoveragePercentage()
+        {
+            if (LineExecutionCounts == null || LineExecutionCounts.Length == 0)
+            {
+                return 0;
+            }
+
+            var sum = 0;
+            double count = 0;
+
+            for (var i = 1; i < LineExecutionCounts.Length; i++)
+            {
+                if (LineExecutionCounts[i].HasValue)
+                {
+                    count++;
+
+                    if (LineExecutionCounts[i] > 0)
+                    {
+                        sum++;
+                    }
+                }
+            }
+
+            return sum / count;
+        }
     }
 }
