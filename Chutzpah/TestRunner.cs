@@ -205,7 +205,7 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
-            string fileUrl = BuildFileUrl(testContext.TestHarnessPath);
+            string fileUrl = BuildHarnessUrl(testContext.TestHarnessPath, testContext.IsRemoteHarness);
 
             string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
             Func<ProcessStream, TestFileSummary> streamProcessor =
@@ -251,10 +251,17 @@ namespace Chutzpah
             return runnerArgs;
         }
 
-        private static string BuildFileUrl(string absolutePath)
+        private static string BuildHarnessUrl(string absolutePath, bool isRemoteHarness)
         {
-            const string fileUrlFormat = "\"file:///{0}\"";
-            return string.Format(fileUrlFormat, absolutePath.Replace("\\", "/"));
+            if (isRemoteHarness)
+            {
+                return absolutePath;
+            }
+            else
+            {
+                const string fileUrlFormat = "\"file:///{0}\"";
+                return string.Format(fileUrlFormat, absolutePath.Replace("\\", "/"));
+            }
         }
     }
 }

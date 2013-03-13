@@ -7,6 +7,7 @@
         Html,
         Folder,
         CoffeeScript,
-        TypeScript
+        TypeScript,
+        Url
     }
 }

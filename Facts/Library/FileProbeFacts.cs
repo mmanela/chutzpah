@@ -72,6 +72,16 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_return_path_if_web_url()
+            {
+                var prob = new TestableFileProbe();
+
+                var path = prob.ClassUnderTest.FindFilePath("http://someurl.com");
+
+                Assert.Equal("http://someurl.com", path);
+            }
+
+            [Fact]
             public void Will_return_full_path_of_fileName_in_executing_if_file_exists()
             {
                 var prob = new TestableFileProbe();
@@ -185,6 +195,17 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"shortPath", info.Path);
             }
 
+
+            [Fact]
+            public void Will_return_url_type_for_url_file()
+            {
+                var probe = new TestableFileProbe();
+
+                var info = probe.ClassUnderTest.GetPathInfo(@"http://url.com/site");
+
+                Assert.Equal(PathType.Url, info.Type);
+                Assert.Equal(@"http://url.com/site", info.FullPath);
+            }
 
             [Fact]
             public void Will_return_html_type_for_html_file()
@@ -362,6 +383,19 @@ namespace Chutzpah.Facts
                 var fullPaths = res.Select(x => x.FullPath);
                 Assert.Contains(@"somePath\b.html", fullPaths);
                 Assert.Contains(@"somePath\d.htm", fullPaths);
+            }
+
+            [Fact]
+            public void Will_return_urls_when_testing_mode_is_HTML()
+            {
+                var probe = new TestableFileProbe();
+                var paths = new List<string> {"http://someurl.com/path"};
+
+                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.HTML);
+
+                Assert.Equal(1, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains("http://someurl.com/path", fullPaths);
             }
 
             [Fact]

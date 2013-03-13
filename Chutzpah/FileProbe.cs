@@ -57,14 +57,20 @@ namespace Chutzpah
             return settingsFilePath;
         }
 
-        public string FindFilePath(string fileName)
+        public string FindFilePath(string path)
         {
-            return FindPath(fileName, fileSystem.FileExists);
+            if (path != null && RegexPatterns.SchemePrefixRegex.IsMatch(path))
+            {
+                // Assume a web url exists
+                return path;
+            }
+
+            return FindPath(path, fileSystem.FileExists);
         }
 
-        public string FindFolderPath(string fileName)
+        public string FindFolderPath(string path)
         {
-            return FindPath(fileName, fileSystem.FolderExists);
+            return FindPath(path, fileSystem.FolderExists);
         }
 
         public bool IsTemporaryChutzpahFile(string path)
@@ -91,6 +97,12 @@ namespace Chutzpah
 
                 switch (pathInfo.Type)
                 {
+                    case PathType.Url:
+                        if (testingMode == TestingMode.HTML || testingMode == TestingMode.All)
+                        {
+                            yield return pathInfo;
+                        }
+                        break;
                     case PathType.Html:
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
@@ -124,6 +136,12 @@ namespace Chutzpah
 
         public static PathType GetFilePathType(string fileName)
         {
+            // Detect web urls
+            if (RegexPatterns.SchemePrefixRegex.IsMatch(fileName))
+            {
+                return PathType.Url;
+            }
+
             string ext = Path.GetExtension(fileName);
             PathType pathType;
             if (ext != null && ExtensionToPathTypeMap.TryGetValue(ext, out pathType))
@@ -136,8 +154,16 @@ namespace Chutzpah
 
         private string FindPath(string path, Predicate<string> pathExists)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrEmpty(path))
+            {
                 return null;
+            }
+
+            if (RegexPatterns.SchemePrefixRegex.IsMatch(path))
+            {
+                // Web url can't be a folder
+                return null;
+            }
 
             var currentDirFilePath = fileSystem.GetFullPath(path);
             if (pathExists(currentDirFilePath))

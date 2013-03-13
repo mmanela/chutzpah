@@ -17,13 +17,14 @@ namespace Chutzpah
 {
     public class TestContextBuilder : ITestContextBuilder
     {
-            private const string TestFileFolder = "TestFiles";
+        private const string TestFileFolder = "TestFiles";
 
-            private readonly Regex JsReferencePathRegex =
-                new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
-                          RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex JsReferencePathRegex =
+            new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
+                      RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;
+        private readonly IHttpWrapper httpClient;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IEnumerable<IFileGenerator> fileGenerators;
@@ -32,6 +33,7 @@ namespace Chutzpah
         private readonly IJsonSerializer serializer;
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
+                                  IHttpWrapper httpWrapper,
                                   IFileProbe fileProbe,
                                   IHasher hasher,
                                   ICoverageEngine coverageEngine,
@@ -39,6 +41,7 @@ namespace Chutzpah
                                   IEnumerable<IFrameworkDefinition> frameworkDefinitions,
                                   IEnumerable<IFileGenerator> fileGenerators)
         {
+            this.httpClient = httpWrapper;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
@@ -72,7 +75,7 @@ namespace Chutzpah
 
             if (IsValidTestPathType(testFileKind))
             {
-                throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file");
+                throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file or a url");
             }
 
             if (testFilePath == null)
@@ -83,19 +86,28 @@ namespace Chutzpah
             var testFileDirectory = Path.GetDirectoryName(testFilePath);
             var chutzpahTestSettings = ChutzpahTestSettingsFile.Read(testFileDirectory, fileProbe, serializer);
 
-            string testFileText = fileSystem.GetText(testFilePath);
+            string testFileText;
+            if (testFileKind == PathType.Url)
+            {
+                testFileText = httpClient.GetContent(testFilePath);
+            }
+            else
+            {
+                testFileText = fileSystem.GetText(testFilePath);
+            }
 
             IFrameworkDefinition definition;
 
             if (TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition))
             {
                 // For HTML test files we don't need to create a test harness to just return this file
-                if (testFileKind == PathType.Html)
+                if (testFileKind == PathType.Html || testFileKind == PathType.Url)
                 {
                     return new TestContext
                         {
                             InputTestFile = testFilePath,
                             TestHarnessPath = testFilePath,
+                            IsRemoteHarness = testFileKind == PathType.Url,
                             TestRunner = definition.TestRunner
                         };
                 }
@@ -201,6 +213,7 @@ namespace Chutzpah
             return testFileKind != PathType.JavaScript
                    && testFileKind != PathType.TypeScript
                    && testFileKind != PathType.CoffeeScript
+                   && testFileKind != PathType.Url
                    && testFileKind != PathType.Html;
         }
 
@@ -330,7 +343,7 @@ namespace Chutzpah
                 if (ShouldIncludeReference(match))
                 {
                     string referencePath = match.Groups["Path"].Value;
-                    
+
                     // Check test settings and adjust the path if it is rooted (e.g. /some/path)
                     referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
 
@@ -372,7 +385,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
-                        referencedFiles.Add(new ReferencedFile {Path = referencePath, IsLocal = false});
+                        referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
             }
@@ -385,8 +398,8 @@ namespace Chutzpah
         /// </summary>
         /// <returns></returns>
         private static string AdjustPathIfRooted(ChutzpahTestSettingsFile chutzpahTestSettings, string referencePath)
-        {        
-            if(chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory && 
+        {
+            if (chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory &&
                 (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
             {
                 referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
@@ -454,8 +467,8 @@ namespace Chutzpah
             {
                 var exclude = match.Groups["Exclude"].Value;
 
-                if (string.IsNullOrWhiteSpace(exclude) 
-                    || exclude.Equals("false",StringComparison.OrdinalIgnoreCase)
+                if (string.IsNullOrWhiteSpace(exclude)
+                    || exclude.Equals("false", StringComparison.OrdinalIgnoreCase)
                     || exclude.Equals("no", StringComparison.OrdinalIgnoreCase))
                 {
                     // The exclude flag is empty or negative

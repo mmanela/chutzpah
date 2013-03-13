@@ -12,6 +12,6 @@
         public static Regex JasmineTestRegexJavaScript = new Regex(@"(?<!\.)\bit\s*\(\s*[""'](?<Test>.*)[""']", RegexOptions.Compiled);
         public static Regex JasmineTestRegexCoffeeScript = new Regex(@"^[\t ]*it[\t ]+[""'](?<Test>.*)[""']", RegexOptions.Compiled | RegexOptions.Multiline);
 
-        public static Regex SchemePrefixRegex = new Regex(@"^(http|https|file)://", RegexOptions.Compiled);
+        public static Regex SchemePrefixRegex = new Regex(@"^(http|https|file)://", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     }
 }

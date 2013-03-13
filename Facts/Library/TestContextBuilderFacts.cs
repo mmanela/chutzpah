@@ -339,6 +339,24 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"qunitRunner.js", context.TestRunner);
                 Assert.Equal(@"C:\testThing.html", context.TestHarnessPath);
                 Assert.Equal(@"C:\testThing.html", context.InputTestFile);
+                Assert.False(context.IsRemoteHarness);
+                Assert.Empty(context.ReferencedJavaScriptFiles);
+            }
+
+            [Fact]
+            public void Will_return_path_and_framework_for_web_url()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("http://someUrl.com"))
+                    .Returns(new PathInfo { Type = PathType.Url, FullPath = @"http://someUrl.com" });
+
+                var context = creator.ClassUnderTest.BuildContext("http://someUrl.com", new TestOptions());
+
+                Assert.Equal(@"qunitRunner.js", context.TestRunner);
+                Assert.Equal(@"http://someUrl.com", context.TestHarnessPath);
+                Assert.Equal(@"http://someUrl.com", context.InputTestFile);
+                Assert.True(context.IsRemoteHarness);
                 Assert.Empty(context.ReferencedJavaScriptFiles);
             }
 

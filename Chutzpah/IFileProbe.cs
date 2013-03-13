@@ -8,17 +8,17 @@ namespace Chutzpah
         /// Finds the full path of a file. This method will probe from both the executing assembly
         /// path. As well as the current working directory.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
+        /// <param name="path">File path.</param>
         /// <returns>The full path to the file</returns>
-        string FindFilePath(string fileName);
+        string FindFilePath(string path);
 
         /// <summary>
         /// Finds the full path of a folder. This method will probe from both the executing assembly
         /// path. As well as the current working directory.
         /// </summary>
-        /// <param name="fileName">Name of the file.</param>
+        /// <param name="path">Folder path.</param>
         /// <returns>The full path to the folder</returns>
-        string FindFolderPath(string folderName);
+        string FindFolderPath(string path);
 
 
         /// <summary>

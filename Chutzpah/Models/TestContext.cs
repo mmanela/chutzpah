@@ -27,6 +27,11 @@ namespace Chutzpah.Models
         public string TestHarnessPath { get; set; }
 
         /// <summary>
+        /// Is the harness on a remote server
+        /// </summary>
+        public bool IsRemoteHarness { get; set; }
+
+        /// <summary>
         /// The list of referenced JavaScript files
         /// </summary>
         public IEnumerable<ReferencedFile> ReferencedJavaScriptFiles { get; set; }

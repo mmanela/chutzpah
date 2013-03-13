@@ -169,6 +169,7 @@
     <Compile Include="Wrappers\HtmlUtility.cs" />
     <Compile Include="Wrappers\CoffeeScriptEngineWrapper.cs" />
     <Compile Include="Wrappers\BinarySerializer.cs" />
+    <Compile Include="Wrappers\HttpWrapper.cs" />
     <Compile Include="Wrappers\ICompilerEngineWrapper.cs" />
     <Compile Include="Wrappers\IEnvironmentWrapper.cs" />
     <Compile Include="Wrappers\IFileSystemWrapper.cs" />
