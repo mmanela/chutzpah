@@ -97,8 +97,8 @@ namespace Chutzpah
             Console.WriteLine("  /file path             : Alias for /path");
             Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
             Console.WriteLine("  /coverage              : Enable coverage collection");
-            Console.WriteLine("  /coverageInclude pat   : Only instrument files that match the given shell pattern");
-            Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern");
+            Console.WriteLine("  /coverageIncludes pat  : Only instrument files that match the given shell patterns (in glob format), comma separated.");
+            Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern (in glob format), comma separated.");
             Console.WriteLine("  /compilercache         : File where compiled scripts can be cached. Defaults to a file in the temp directory.");
             Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb. Defaults to 32Mb.");
             Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
@@ -140,8 +140,8 @@ namespace Chutzpah
                         CoverageOptions = new CoverageOptions
                                               {
                                                   Enabled = commandLine.Coverage,
-                                                  IncludePattern = commandLine.CoverageIncludePattern,
-                                                  ExcludePattern = commandLine.CoverageExcludePattern
+                                                  IncludePatterns = (commandLine.CoverageIncludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries),
+                                                  ExcludePatterns = (commandLine.CoverageExcludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries)
                                               }
                     };
 

@@ -13,13 +13,7 @@ namespace Chutzpah
         public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary) { }
         public virtual void FileStarted(string fileName) { }
 
-        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary)
-        {
-            if (testResultsSummary.CoverageObject != null)
-            {
-                CodeCoverageResults(fileName, testResultsSummary.CoverageObject);
-            }
-        }
+        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary){}
 
         public virtual void TestStarted(TestCase testCase) { }
         public virtual void ExceptionThrown(Exception exception, string fileName) { }
@@ -38,11 +32,10 @@ namespace Chutzpah
         protected virtual void TestComplete(TestCase testCase) { }
         protected virtual void TestFailed(TestCase testCase) { }
         protected virtual void TestPassed(TestCase testCase) { }
-        protected virtual void CodeCoverageResults(string fileName, CoverageData coverageData) { }
 
-        protected virtual string GetCodeCoverageMessage(string fileName, CoverageData coverageData)
+        protected virtual string GetCodeCoverageMessage(CoverageData coverageData)
         {
-            var message = string.Format("Code Coverage Results for {0}\n", fileName);
+            var message = string.Format("Code Coverage Results");
             message += string.Format("     Average Coverage: {0:0%}\n", coverageData.CoveragePercentage);
             foreach (var fileData in coverageData)
             {

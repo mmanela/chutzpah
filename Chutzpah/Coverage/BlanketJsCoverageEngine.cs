@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
@@ -10,7 +12,7 @@ using Chutzpah.Wrappers;
 namespace Chutzpah.Coverage
 {
     /// <summary>
-    /// Coverage engine that uses Blanket.JS (http://migrii.github.com/blanket/) to do instrumentation
+    /// Coverage engine that uses Blanket.JS (http://blanketjs.org/) to do instrumentation
     /// and coverage collection.
     /// </summary>
     public class BlanketJsCoverageEngine : ICoverageEngine
@@ -22,6 +24,9 @@ namespace Chutzpah.Coverage
         {
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
+
+            IncludePatterns = new List<string>();
+            ExcludePatterns = new List<string>();
         }
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
@@ -30,9 +35,9 @@ namespace Chutzpah.Coverage
             yield return "Coverage\\" + info.BlanketScriptName;
         }
 
-        public string IncludePattern { get; set; }
-        
-        public string ExcludePattern { get; set; }
+        public ICollection<string> IncludePatterns { get; set; }
+
+        public ICollection<string> ExcludePatterns { get; set; }
 
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
@@ -90,7 +95,7 @@ namespace Chutzpah.Coverage
             BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
                 testContext.ReferencedJavaScriptFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
-            
+
             CoverageData coverageData = new CoverageData();
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
@@ -115,8 +120,7 @@ namespace Chutzpah.Coverage
 
                 if (IsFileEligibleForInstrumentation(newKey))
                 {
-                    // Only add source code for converted files!
-                    string[] sourceLines = newKey.Equals(filePath, StringComparison.OrdinalIgnoreCase) ? null : fileSystem.GetLines(filePath);
+                    string[] sourceLines = fileSystem.GetLines(filePath);
                     coverageData.Add(newKey, new CoverageFileData
                                                  {
                                                      LineExecutionCounts = entry.Value,
@@ -133,8 +137,18 @@ namespace Chutzpah.Coverage
 
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
-            if (IncludePattern != null && !PathMatchSpec(filePath, IncludePattern)) return false;
-            if (ExcludePattern != null && PathMatchSpec(filePath, ExcludePattern)) return false;
+            // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
+            if (IncludePatterns.Any() && !IncludePatterns.Any(includePattern => PathMatchSpec(filePath, includePattern)))
+            {
+                return false;
+            }
+
+            // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
+            if (ExcludePatterns.Any() && ExcludePatterns.Any(excludePattern => PathMatchSpec(filePath, excludePattern)))
+            {
+                return false;
+            }
+
             return true;
         }
 

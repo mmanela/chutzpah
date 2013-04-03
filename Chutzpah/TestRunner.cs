@@ -165,8 +165,7 @@ namespace Chutzpah
                         
                         if(!DebugEnabled && !options.OpenInBrowser)
                         {
-                            // Don't clean up context if you open in browser since we need the files around
-                            // for the browser to use
+                            // Don't clean up context if in debug mode
                             testContextBuilder.CleanupContext(testContext);
                         }
 

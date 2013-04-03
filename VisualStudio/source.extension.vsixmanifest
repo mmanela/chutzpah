@@ -1,39 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-    <Identifier Id="0a3da9d8-a5b6-4fb9-b423-ef87ff203628">
-        <Name>Chutzpah - A JavaScript Test Runner</Name>
-        <Author>Matthew Manela</Author>
-        <Version>2.3.0</Version>
-        <Description xml:space="preserve">Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
-        <Locale>1033</Locale>
-        <MoreInfoUrl>http://chutzpah.codeplex.com/</MoreInfoUrl>
-        <License>EULA.rtf</License>
-        <GettingStartedGuide>http://chutzpah.codeplex.com/</GettingStartedGuide>
-        <Icon>chetTimes.png</Icon>
-        <PreviewImage>chetTimes.png</PreviewImage>
-        <InstalledByMsi>false</InstalledByMsi>
-        <SupportedProducts>
-            <VisualStudio Version="10.0">
-                <Edition>Ultimate</Edition>
-                <Edition>Premium</Edition>
-                <Edition>Pro</Edition>
-                <Edition>IntegratedShell</Edition>
-            </VisualStudio>
-            <VisualStudio Version="11.0">
-                <Edition>Ultimate</Edition>
-                <Edition>Premium</Edition>
-                <Edition>Pro</Edition>
-                <Edition>IntegratedShell</Edition>
-            </VisualStudio>
-        </SupportedProducts>
-        <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
-    </Identifier>
-    <References>
-        <Reference Id="Microsoft.VisualStudio.MPF" MinVersion="10.0">
-            <Name>Visual Studio MPF</Name>
-        </Reference>
-    </References>
-    <Content>
-        <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
-    </Content>
+  <Identifier Id="0a3da9d8-a5b6-4fb9-b423-ef87ff203628">
+    <Name>Chutzpah - A JavaScript Test Runner</Name>
+    <Author>Matthew Manela</Author>
+    <Version>2.4.0</Version>
+    <Description xml:space="preserve">Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
+    <Locale>1033</Locale>
+    <MoreInfoUrl>http://chutzpah.codeplex.com/</MoreInfoUrl>
+    <License>EULA.rtf</License>
+    <GettingStartedGuide>http://chutzpah.codeplex.com/</GettingStartedGuide>
+    <Icon>chetTimes.png</Icon>
+    <PreviewImage>chetTimes.png</PreviewImage>
+    <InstalledByMsi>false</InstalledByMsi>
+    <SupportedProducts>
+      <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+      <VisualStudio Version="11.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+    </SupportedProducts>
+    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="5.0" />
+  </Identifier>
+  <References>
+    <Reference Id="Microsoft.VisualStudio.MPF" MinVersion="10.0">
+      <Name>Visual Studio MPF</Name>
+    </Reference>
+  </References>
+  <Content>
+    <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
+  </Content>
 </Vsix>

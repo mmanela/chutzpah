@@ -1,0 +1,4 @@
+{
+  "CodeCoverageExcludes": ["*\\JS\\Code\\*"],
+  "CodeCoverageIncludes": ["*\\JS\\Code\\*"]
+}';

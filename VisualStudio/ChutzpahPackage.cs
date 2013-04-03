@@ -16,6 +16,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using DTEConstants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
+using Chutzpah.Coverage;
 
 namespace Chutzpah.VisualStudio
 {
@@ -35,7 +36,7 @@ namespace Chutzpah.VisualStudio
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "2.3.0", IconResourceID = 400)]
-    [ProvideOptionPage(typeof (ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
+    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
@@ -75,7 +76,7 @@ namespace Chutzpah.VisualStudio
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             base.Initialize();
 
-            dte = (DTE2) GetService(typeof (DTE));
+            dte = (DTE2)GetService(typeof(DTE));
             if (dte == null)
             {
                 //if dte is null then we throw a excpetion
@@ -87,26 +88,34 @@ namespace Chutzpah.VisualStudio
 
             processHelper = new ProcessHelper();
             Logger = new Logger(this);
-            Settings = GetDialogPage(typeof (ChutzpahSettings)) as ChutzpahSettings;
+            Settings = GetDialogPage(typeof(ChutzpahSettings)) as ChutzpahSettings;
 
-            statusBar = GetService(typeof (SVsStatusbar)) as IVsStatusbar;
+            statusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
             runnerCallback = new ParallelRunnerCallbackAdapter(new VisualStudioRunnerCallback(dte, statusBar));
 
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
-            var mcs = GetService(typeof (IMenuCommandService)) as OleMenuCommandService;
+            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
             {
                 // Command - Run JS Tests
-                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int) PkgCmdIDList.cmdidRunJSTests);
+                var runJsTestsCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunJSTests);
                 var runJsTestMenuCmd = new OleMenuCommand(RunJSTestCmdCallback, runJsTestsCmd);
                 runJsTestMenuCmd.BeforeQueryStatus += RunJSTestsCmdQueryStatus;
                 mcs.AddCommand(runJsTestMenuCmd);
+
                 // Command - Run JS tests in browser
-                var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int) PkgCmdIDList.cmdidRunInBrowser);
+                var runJsTestsInBrowserCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunInBrowser);
                 var runJsTestInBrowserMenuCmd = new OleMenuCommand(RunJSTestInBrowserCmdCallback, runJsTestsInBrowserCmd);
                 runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsInBrowserCmdQueryStatus;
                 mcs.AddCommand(runJsTestInBrowserMenuCmd);
+
+                // Command - Run JS tests in browser
+                var runJsTestCodeCoverageCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunCodeCoverage);
+                var runJsTestCodeCoverageMenuCmd = new OleMenuCommand(RunCodeCoverageCmdCallback, runJsTestCodeCoverageCmd);
+                runJsTestCodeCoverageMenuCmd.BeforeQueryStatus += RunCodeCoverageCmdQueryStatus;
+                mcs.AddCommand(runJsTestCodeCoverageMenuCmd);
+
             }
         }
 
@@ -152,12 +161,12 @@ namespace Chutzpah.VisualStudio
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
-                // We only support one file for opening in browser throuhg VS for now
+                // We only support one file for opening in browser through VS for now
                 selectedFiles = SearchForTestableFiles().Take(1);
             }
             else if (activeWindow.Kind == "Document")
             {
-                selectedFiles = new List<string> {CurrentDocumentPath};
+                selectedFiles = new List<string> { CurrentDocumentPath };
             }
 
             foreach (var selectedFile in selectedFiles)
@@ -180,13 +189,27 @@ namespace Chutzpah.VisualStudio
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
-                RunTestsInSolutionFolderNodeCallback(sender, e);
+                RunTestsInSolutionFolderNodeCallback(sender, e, false);
             }
             else if (activeWindow.Kind == "Document")
             {
-                RunTestsFromEditorCallback(sender, e);
+                RunTestsFromEditorCallback(sender, e, false);
             }
         }
+
+        private void RunCodeCoverageCmdCallback(object sender, EventArgs e)
+        {
+            var activeWindow = dte.ActiveWindow;
+            if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
+            {
+                RunTestsInSolutionFolderNodeCallback(sender, e, true);
+            }
+            else if (activeWindow.Kind == "Document")
+            {
+                RunTestsFromEditorCallback(sender, e, true);
+            }
+        }
+
 
         private void RunJSTestsCmdQueryStatus(object sender, EventArgs e)
         {
@@ -202,6 +225,14 @@ namespace Chutzpah.VisualStudio
             if (menuCommand == null) return;
 
             SetCommandVisibility(menuCommand, TestFileType.HTML, TestFileType.JS);
+        }
+
+        private void RunCodeCoverageCmdQueryStatus(object sender, EventArgs e)
+        {
+            var menuCommand = sender as OleMenuCommand;
+            if (menuCommand == null) return;
+
+            SetCommandVisibility(menuCommand, TestFileType.Folder, TestFileType.JS);
         }
 
         private void SetCommandVisibility(OleMenuCommand menuCommand, params TestFileType[] allowedTypes)
@@ -245,27 +276,27 @@ namespace Chutzpah.VisualStudio
             menuCommand.Visible = true;
         }
 
-        private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e)
+        private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e, bool withCodeCoverage)
         {
             var filePaths = GetSelectedFilesAndFolders(TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
-            RunTests(filePaths);
+            RunTests(filePaths, withCodeCoverage);
         }
 
-        private void RunTestsFromEditorCallback(object sender, EventArgs e)
+        private void RunTestsFromEditorCallback(object sender, EventArgs e, bool withCodeCoverage)
         {
             string filePath = CurrentDocumentPath;
-            RunTests(filePath);
+            RunTests(filePath, withCodeCoverage);
         }
 
-        private void RunTests(string filePath)
+        private void RunTests(string filePath, bool withCodeCoverage)
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                RunTests(new[] {filePath});
+                RunTests(new[] { filePath }, withCodeCoverage);
             }
         }
 
-        private void RunTests(IEnumerable<string> filePaths)
+        private void RunTests(IEnumerable<string> filePaths, bool withCodeCoverage)
         {
             if (!testingInProgress)
             {
@@ -274,28 +305,38 @@ namespace Chutzpah.VisualStudio
                     if (!testingInProgress)
                     {
                         dte.Documents.SaveAll();
+                        var solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
                         testingInProgress = true;
                         Task.Factory.StartNew(
                             () =>
+                            {
+                                try
                                 {
-                                    try
-                                    {
-                                        var options = new TestOptions
+                                    var options = new TestOptions
+                                                      {
+                                                          TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds,
+                                                          MaxDegreeOfParallelism = Settings.MaxDegreeOfParallelism,
+                                                          CoverageOptions = new CoverageOptions
                                                           {
-                                                              TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds,
-                                                              MaxDegreeOfParallelism = Settings.MaxDegreeOfParallelism
-                                                          };
-                                        testRunner.RunTests(filePaths, options, runnerCallback);
-                                    }
-                                    catch (Exception e)
+                                                              Enabled = withCodeCoverage
+                                                          }
+                                                      };
+                                    var result = testRunner.RunTests(filePaths, options, runnerCallback);
+                                    if (withCodeCoverage)
                                     {
-                                        Logger.Log("Error while running tests", "ChutzpahPackage", e);
+                                        var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result);
+                                        processHelper.LaunchFileInBrowser(path);
                                     }
-                                    finally
-                                    {
-                                        testingInProgress = false;
-                                    }
-                                });
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Log("Error while running tests", "ChutzpahPackage", e);
+                                }
+                                finally
+                                {
+                                    testingInProgress = false;
+                                }
+                            });
                     }
                 }
             }
@@ -312,8 +353,8 @@ namespace Chutzpah.VisualStudio
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem) item).Object as ProjectItem;
-                var projectNode = ((UIHierarchyItem) item).Object as Project;
+                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                var projectNode = ((UIHierarchyItem)item).Object as Project;
 
                 if (projectItem != null)
                 {
@@ -338,7 +379,7 @@ namespace Chutzpah.VisualStudio
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem) item).Object as ProjectItem;
+                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
                 if (projectItem != null)
                 {
                     string filePath = projectItem.FileNames[0];
@@ -355,8 +396,8 @@ namespace Chutzpah.VisualStudio
         {
             get
             {
-                var hierarchy = (UIHierarchy) dte.ToolWindows.GetToolWindow(DTEConstants.vsWindowKindSolutionExplorer);
-                return (Array) hierarchy.SelectedItems;
+                var hierarchy = (UIHierarchy)dte.ToolWindows.GetToolWindow(DTEConstants.vsWindowKindSolutionExplorer);
+                return (Array)hierarchy.SelectedItems;
             }
         }
 

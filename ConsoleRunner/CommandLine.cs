@@ -54,10 +54,10 @@ namespace Chutzpah
 
         public string CompilerCacheFile { get; protected set; }
 
-        public string CoverageIncludePattern { get; protected set; }
+        public string CoverageIncludePatterns { get; protected set; }
         public int? CompilerCacheFileMaxSizeMb { get; protected set; }
 
-        public string CoverageExcludePattern { get; protected set; }
+        public string CoverageExcludePatterns { get; protected set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
@@ -138,11 +138,11 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     Coverage = true;
                 }
-                else if (optionName == "/coverageinclude")
+                else if (optionName == "/coverageincludes")
                 {
                     AddCoverageIncludeOption(option.Value);
                 }
-                else if (optionName == "/coverageexclude")
+                else if (optionName == "/coverageexcludes")
                 {
                     AddCoverageExcludeOption(option.Value);
                 }
@@ -180,9 +180,9 @@ namespace Chutzpah
             if (string.IsNullOrEmpty(value))
             {
                 throw new ArgumentException(
-                    "invalid or missing argument for /coverageInclude.  Expecting a file name pattern");
+                    "invalid or missing argument for /coverageIncludes.  Expecting a list of comma separated file name patterns");
             }
-            CoverageIncludePattern = value;
+            CoverageIncludePatterns = value;
         }
 
         private void AddCoverageExcludeOption(string value)
@@ -190,9 +190,9 @@ namespace Chutzpah
             if (string.IsNullOrEmpty(value))
             {
                 throw new ArgumentException(
-                    "invalid or missing argument for /coverageExclude.  Expecting a file name pattern");
+                    "invalid or missing argument for /coverageExcludes.  Expecting a list of comma separated file name patterns");
             }
-            CoverageExcludePattern = value;
+            CoverageExcludePatterns = value;
         }
 
         private void SetCompilerCacheMaxSize(string value)

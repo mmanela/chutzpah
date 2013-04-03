@@ -69,6 +69,46 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_include_files_from_settings_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\Coverage\IncludePath\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] {  "JS\\Code\\code.js" });
+        }
+
+        [Fact]
+        public void Will_exclude_files_from_settings_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\Coverage\ExcludePath\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\Coverage\ExcludePath\test.js" });
+        }
+
+        [Fact]
+        public void Will_honor_both_include_and_exclude_paths()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\Coverage\IncludeExcludePath\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\Coverage\IncludeExcludePath\test.js" });
+        }
+
+        [Fact]
+        public void Will_exclude_files_after_include_for_settings_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\Coverage\CompetingIncludeExclude\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.TestFileSummaries.Single().CoverageObject.Count);
+        }
+
+        [Fact]
         public void Will_have_1_based_execution_count_lines()
         {
             var testRunner = TestRunner.Create();
@@ -107,7 +147,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.IncludePattern = "**\\code.js"),
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.IncludePatterns = new []{"**\\code.js"}),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
             ExpectKeysMatching(dict, new[] {"\\code.js"});
@@ -118,7 +158,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePattern = "**\\" + ABasicTestScript),
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePatterns = new[]{"**\\" + ABasicTestScript}),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
             ExpectKeysMatching(dict, new[] { "\\code.js" });
@@ -148,7 +188,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_not_put_source_code_in_coverage_object_for_js_script_as_it_is_redundant()
+        public void Will_put_source_code_in_coverage_object_for_js_script()
         {
             var testRunner = TestRunner.Create();
 
@@ -156,7 +196,7 @@ namespace Chutzpah.Facts.Integration
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
             var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code.js"));
-            Assert.Null(codeCoffeeEntry.Value.SourceLines);
+            Assert.NotNull(codeCoffeeEntry.Value.SourceLines);
         }
 
         [Fact]
@@ -227,7 +267,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePattern = "**\\require.js"), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[]{"**\\require.js"}), new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(2, result.TotalCount);
         }

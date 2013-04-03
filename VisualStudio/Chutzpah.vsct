@@ -64,17 +64,28 @@
                     <ButtonText>Run JS Tests</ButtonText>
                 </Strings>
             </Button>
-
-           <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0001" type="Button">
+          
+          <Button guid="guidChutzpahCmdSetString" id="cmdidRunInBrowser" priority="0x0000" type="Button">
                 <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
+            <Icon guid="guidImages" id="chet1" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
                 <Strings>
                     <CommandName>RunInBrowser</CommandName>
-                    <ButtonText>Run JS Tests in browser</ButtonText>
+                    <ButtonText>Open in browser</ButtonText>
                 </Strings>
             </Button>
-
+          
+          <Button guid="guidChutzpahCmdSetString" id="cmdidRunCodeCoverage" priority="0x0000" type="Button">
+            <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
+            <Icon guid="guidImages" id="chet1" />
+            <CommandFlag>DynamicVisibility</CommandFlag>
+            <CommandFlag>DefaultInvisible</CommandFlag>
+            <Strings>
+              <CommandName>RunInBrowser</CommandName>
+              <ButtonText>Calculate Code Coverage</ButtonText>
+            </Strings>
+          </Button>
         </Buttons>
 
         <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -131,7 +142,7 @@
             <IDSymbol name="ChutzpahMenuGroup" value="0x1020" />
             <IDSymbol name="cmdidRunJSTests" value="0x0100" />
             <IDSymbol name="cmdidRunInBrowser" value="0x0101" />
-            <IDSymbol name="cmdidDebugInBrowser" value="0x0102" />
+            <IDSymbol name="cmdidRunCodeCoverage" value="0x0102" />
         </GuidSymbol>
 
         <GuidSymbol name="guidCssEdGrp" value="{A764E896-518D-11d2-9A89-00C04F79EFC3}">

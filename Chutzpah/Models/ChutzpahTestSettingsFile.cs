@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using Chutzpah.Compilers.TypeScript;
 using Chutzpah.Wrappers;
@@ -25,6 +26,12 @@ namespace Chutzpah.Models
     /// </summary>
     public class ChutzpahTestSettingsFile
     {
+        public ChutzpahTestSettingsFile()
+        {
+            CodeCoverageIncludes = new List<string>();
+            CodeCoverageExcludes = new List<string>();    
+        }
+
         /// <summary>
         /// If not null tells Chutzpah which framework to use instead of detecting automatically
         /// </summary>
@@ -56,6 +63,17 @@ namespace Chutzpah.Models
         /// ES5 - Generate ECMAScript 5 Compatible code
         /// </summary>
         public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
+
+
+        /// <summary>
+        /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.
+        /// </summary>
+        public ICollection<string> CodeCoverageIncludes { get; set; }
+
+        /// <summary>
+        /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
+        /// </summary>
+        public ICollection<string> CodeCoverageExcludes { get; set; }
 
         /// <summary>
         /// The path to the settings file

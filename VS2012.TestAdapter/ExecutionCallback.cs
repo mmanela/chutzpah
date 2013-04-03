@@ -1,17 +1,27 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
+using Chutzpah.Utility;
+using Chutzpah.Wrappers;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TestCase = Chutzpah.Models.TestCase;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
     public class ExecutionCallback : RunnerCallback
     {
         private readonly IFrameworkHandle frameworkHandle;
+        private readonly IRunContext runContext;
 
-        public ExecutionCallback(IFrameworkHandle frameworkHandle)
+        public ExecutionCallback(IFrameworkHandle frameworkHandle, IRunContext runContext)
         {
             this.frameworkHandle = frameworkHandle;
+            this.runContext = runContext;
         }
 
         public override void FileError(TestError error)
@@ -49,6 +59,22 @@ namespace Chutzpah.VS2012.TestAdapter
 
             // The test case is done
             frameworkHandle.RecordEnd(testCase, outcome);
+        }
+
+        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        {
+            base.TestSuiteFinished(testResultsSummary);
+
+            if (!runContext.IsDataCollectionEnabled)
+            {
+                return;
+            }
+
+            var directory = runContext.SolutionDirectory;
+            var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary);
+            var processHelper = new ProcessHelper();
+
+            processHelper.LaunchFileInBrowser(coverageHtmlFile);
         }
 
     }

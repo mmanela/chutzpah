@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Chutzpah.Callbacks;
+using Chutzpah.Coverage;
+using Chutzpah.Wrappers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -24,11 +27,6 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            if (runContext.IsDataCollectionEnabled)
-            {
-                // DataCollectors like Code Coverage are currently unavailable for JavaScript
-                frameworkHandle.SendMessage(TestMessageLevel.Warning, "DataCollectors like Code Coverage are unavailable for JavaScript");
-            }
 
             var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
@@ -36,10 +34,12 @@ namespace Chutzpah.VS2012.TestAdapter
                 {
                     TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
                     TestingMode = settings.TestingMode,
-                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
+                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
                 };
 
-            var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle));
+            testOptions.CoverageOptions.Enabled = runContext.IsDataCollectionEnabled;
+
+            var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle, runContext));
             testRunner.RunTests(sources, testOptions, callback);
         }
 

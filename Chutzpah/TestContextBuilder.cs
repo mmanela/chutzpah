@@ -122,7 +122,7 @@ namespace Chutzpah
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
-                ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options);
+                ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options, chutzpahTestSettings);
                 IEnumerable<string> deps = definition.FileDependencies;
                 if (coverageEngine != null)
                 {
@@ -228,11 +228,11 @@ namespace Chutzpah
             }
         }
 
-        private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options)
+        private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             if (options == null || !options.CoverageOptions.Enabled) return null;
-            mainCoverageEngine.IncludePattern = options.CoverageOptions.IncludePattern;
-            mainCoverageEngine.ExcludePattern = options.CoverageOptions.ExcludePattern;
+            mainCoverageEngine.IncludePatterns = chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns).ToList();
+            mainCoverageEngine.ExcludePatterns = chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns).ToList();
             return mainCoverageEngine;
         }
 

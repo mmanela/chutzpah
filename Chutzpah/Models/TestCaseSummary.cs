@@ -14,13 +14,18 @@ namespace Chutzpah.Models
         }
 
         /// <summary>
+        /// If set, contains the aggregate coverage object by combining all test files. 
+        /// </summary>
+        public CoverageData CoverageObject { get; set; }
+
+        /// <summary>
         /// A mapping from module name to test case list
         /// </summary>
         public IList<TestFileSummary> TestFileSummaries { get; private set; }
 
         /// <summary>
         /// Appends another test case summary into the current instnace.
-        /// This will combines the tests, logs and errors collections
+        /// This will combines the tests, logs and errors collections. This is not thread safe.
         /// </summary>
         /// <param name="summary"></param>
         public void Append(TestFileSummary summary)
@@ -29,7 +34,23 @@ namespace Chutzpah.Models
             AppendTests(summary.Tests);
             AppendLogs(summary.Logs);
             AppendErrors(summary.Errors);
+            AppendCoverageData(summary.CoverageObject);
             TimeTaken += summary.TimeTaken;
+        }
+
+        internal void AppendCoverageData(CoverageData fileCoverageObject)
+        {
+            if (fileCoverageObject != null)
+            {
+                
+                if (CoverageObject == null)
+                {
+                    CoverageObject = new CoverageData();
+                }
+
+                CoverageObject.Merge(fileCoverageObject);
+
+            }
         }
 
         internal void AppendTests(IEnumerable<TestCase> tests)

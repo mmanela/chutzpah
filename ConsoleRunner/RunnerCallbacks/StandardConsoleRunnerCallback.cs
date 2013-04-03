@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -33,6 +34,10 @@ namespace Chutzpah.RunnerCallbacks
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
+            Console.WriteLine();
+
+            CodeCoverageResults(testResultsSummary);
+
             Console.WriteLine();
             var seconds = testResultsSummary.TotalRuntime / 1000.0;
             Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
@@ -115,15 +120,15 @@ namespace Chutzpah.RunnerCallbacks
             Console.ResetColor();
         }
 
-        protected override void CodeCoverageResults(string fileName, CoverageData coverageData)
+        private void CodeCoverageResults(TestCaseSummary testCaseSummary)
         {
-            ClearCounter();
-            var folder = Path.GetDirectoryName(fileName);
-            var coverageFileName = Path.GetFileNameWithoutExtension(fileName) + ".coverage.json";
-            JsonSerializer serializer = new JsonSerializer();
-            File.WriteAllText(Path.Combine(folder, coverageFileName), serializer.Serialize(coverageData));
+            var currentDirectory = Environment.CurrentDirectory;
+            CoverageOutputGenerator.WriteHtmlFile(currentDirectory, testCaseSummary);
+            CoverageOutputGenerator.WriteJsonFile(currentDirectory, testCaseSummary);
 
-            Console.WriteLine(GetCodeCoverageMessage(fileName,coverageData));
+
+            Console.WriteLine(GetCodeCoverageMessage(testCaseSummary.CoverageObject));
+            
         }
 
         protected override void TestComplete(TestCase testCase)

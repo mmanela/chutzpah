@@ -26,6 +26,25 @@ namespace Chutzpah.Models
                 return coveragePercentage.Value;
             }
         }
+
+        /// <summary>
+        /// Merges two coverage objects together, mutating the current one
+        /// </summary>
+        /// <param name="coverageData"></param>
+        public void Merge(CoverageData coverageData)
+        {
+            foreach (var pair in coverageData)
+            {
+                if (this.ContainsKey(pair.Key))
+                {
+                    this[pair.Key].Merge(pair.Value);
+                }
+                else
+                {
+                    this[pair.Key] = new CoverageFileData(pair.Value);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -35,6 +54,23 @@ namespace Chutzpah.Models
     {
 
         private double? coveragePercentage;
+
+        public CoverageFileData()
+        {
+            this.LineExecutionCounts = new int?[0];
+            this.SourceLines = new string[0];
+        }
+
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="coverageFileData"></param>
+        public CoverageFileData(CoverageFileData coverageFileData)
+        {
+            this.FilePath = coverageFileData.FilePath;
+            this.LineExecutionCounts = coverageFileData.LineExecutionCounts.ToArray();
+            this.SourceLines = coverageFileData.SourceLines.ToArray();
+        }
 
         /// <summary>
         /// The path to the file. Mostly for convenience.
@@ -97,6 +133,37 @@ namespace Chutzpah.Models
             }
 
             return sum / count;
+        }
+
+        public void Merge(CoverageFileData coverageFileData)
+        {
+            // If LineExecutionCounts is null then this class has not be merged with any coverage object yet so just take its values
+            if (LineExecutionCounts == null)
+            {
+                LineExecutionCounts = coverageFileData.LineExecutionCounts;
+                SourceLines = coverageFileData.SourceLines;
+            }
+            else
+            {
+                for (var i = 0; i < LineExecutionCounts.Length; i++)
+                {
+                    if (!coverageFileData.LineExecutionCounts[i].HasValue)
+                    {
+                        // No data to merge
+                        continue;
+                    }
+                    else if (!this.LineExecutionCounts[i].HasValue)
+                    {
+                        // Just take the given data
+                        this.LineExecutionCounts[i] = coverageFileData.LineExecutionCounts[i];
+                    }
+                    else
+                    {
+                        // If we both have values sum them up
+                        this.LineExecutionCounts[i] += coverageFileData.LineExecutionCounts[i];
+                    }
+                }
+            }
         }
     }
 }

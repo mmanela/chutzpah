@@ -493,7 +493,7 @@ namespace Chutzpah.Facts.ConsoleRunner
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.Null(commandLine.CoverageIncludePattern);
+                Assert.Null(commandLine.CoverageIncludePatterns);
             }
 
             [Fact]
@@ -503,33 +503,33 @@ namespace Chutzpah.Facts.ConsoleRunner
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.Null(commandLine.CoverageExcludePattern);
+                Assert.Null(commandLine.CoverageExcludePatterns);
             }
 
             [Fact]
             public void CoverageInclude_Option_With_Value_CoverageIncludePattern_Set()
             {
-                var arguments = new[] { "test.html", "/coverageInclude", "*.js" };
+                var arguments = new[] { "test.html", "/coverageIncludes", "*.js" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.Equal("*.js", commandLine.CoverageIncludePattern);
+                Assert.Equal("*.js", commandLine.CoverageIncludePatterns);
             }
 
             [Fact]
             public void CoverageExclude_Option_With_Value_CoverageExcludePattern_Set()
             {
-                var arguments = new[] { "test.html", "/coverageExclude", "*.coffee" };
+                var arguments = new[] { "test.html", "/coverageExcludes", "*.coffee" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.Equal("*.coffee", commandLine.CoverageExcludePattern);
+                Assert.Equal("*.coffee", commandLine.CoverageExcludePatterns);
             }
 
             [Fact]
             public void Will_throw_if_no_arg_given_to_CoverageInclude()
             {
-                var arguments = new[] { "test.html", "/coverageInclude" };
+                var arguments = new[] { "test.html", "/coverageIncludes" };
 
                 var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
 
@@ -539,7 +539,7 @@ namespace Chutzpah.Facts.ConsoleRunner
             [Fact]
             public void Will_throw_if_no_arg_given_to_CoverageExclude()
             {
-                var arguments = new[] { "test.html", "/coverageExclude" };
+                var arguments = new[] { "test.html", "/coverageExcludes" };
 
                 var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
 
