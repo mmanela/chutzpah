@@ -322,9 +322,9 @@ namespace Chutzpah.VisualStudio
                                                           }
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);
-                                    if (withCodeCoverage)
+                                    if (withCodeCoverage && result.CoverageObject != null)
                                     {
-                                        var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result);
+                                        var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result.CoverageObject);
                                         processHelper.LaunchFileInBrowser(path);
                                     }
                                 }

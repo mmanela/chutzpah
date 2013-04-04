@@ -36,7 +36,10 @@ namespace Chutzpah.RunnerCallbacks
         {
             Console.WriteLine();
 
-            CodeCoverageResults(testResultsSummary);
+            if (testResultsSummary.CoverageObject != null)
+            {
+                CodeCoverageResults(testResultsSummary.CoverageObject);
+            }
 
             Console.WriteLine();
             var seconds = testResultsSummary.TotalRuntime / 1000.0;
@@ -120,14 +123,14 @@ namespace Chutzpah.RunnerCallbacks
             Console.ResetColor();
         }
 
-        private void CodeCoverageResults(TestCaseSummary testCaseSummary)
+        private void CodeCoverageResults(CoverageData coverage)
         {
             var currentDirectory = Environment.CurrentDirectory;
-            CoverageOutputGenerator.WriteHtmlFile(currentDirectory, testCaseSummary);
-            CoverageOutputGenerator.WriteJsonFile(currentDirectory, testCaseSummary);
+            CoverageOutputGenerator.WriteHtmlFile(currentDirectory, coverage);
+            CoverageOutputGenerator.WriteJsonFile(currentDirectory, coverage);
 
 
-            Console.WriteLine(GetCodeCoverageMessage(testCaseSummary.CoverageObject));
+            Console.WriteLine(GetCodeCoverageMessage(coverage));
             
         }
 

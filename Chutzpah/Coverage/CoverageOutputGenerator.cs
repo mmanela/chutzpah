@@ -13,35 +13,29 @@ namespace Chutzpah.Coverage
     {
         private const double SuccessPercentage = 60;
 
-        public static string WriteHtmlFile(string directory, TestCaseSummary testCaseSummary)
+        public static string WriteHtmlFile(string directory, CoverageData coverage)
         {
-            var name = Path.GetRandomFileName();
-            var path = Path.Combine(directory, string.Format(Constants.CoverageHtmlFileFormat, name));
+            var path = Path.Combine(directory, Constants.CoverageHtmlFileName);
 
-            WriteHtmlFile(path, testCaseSummary.CoverageObject);
-
-            return path;
-        }
-
-
-        public static string WriteJsonFile(string directory, TestCaseSummary testCaseSummary)
-        {
-            var name = Path.GetTempFileName();
-            var path = Path.Combine(directory, string.Format(Constants.CoverageJsonFileFormat, name));
-
-            JsonSerializer serializer = new JsonSerializer();
-            File.WriteAllText(path, serializer.Serialize(testCaseSummary.CoverageObject));
-             
-            return path;
-        }
-
-        public static void WriteHtmlFile(string path, CoverageData coverage)
-        {
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
                 GenerateHtml(coverage, fileStream);
             }
+
+            return path;
         }
+
+
+        public static string WriteJsonFile(string directory, CoverageData coverage)
+        {
+            var path = Path.Combine(directory, Constants.CoverageJsonFileName);
+
+            var serializer = new JsonSerializer();
+            File.WriteAllText(path, serializer.Serialize(coverage));
+             
+            return path;
+        }
+
 
         public static void GenerateHtml(CoverageData coverage, Stream stream)
         {
@@ -181,7 +175,7 @@ namespace Chutzpah.Coverage
 
 #chutzpah-main a.chutzpah-logo
 {
-  color:#EB1764;
+  color:#3245FF;
   cursor:pointer;
   font-weight:700;
   text-decoration:none;

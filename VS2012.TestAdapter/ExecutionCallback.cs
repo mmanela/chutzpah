@@ -65,13 +65,13 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             base.TestSuiteFinished(testResultsSummary);
 
-            if (!runContext.IsDataCollectionEnabled)
+            if (!runContext.IsDataCollectionEnabled || testResultsSummary.CoverageObject == null)
             {
                 return;
             }
 
             var directory = runContext.SolutionDirectory;
-            var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary);
+            var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
             var processHelper = new ProcessHelper();
 
             processHelper.LaunchFileInBrowser(coverageHtmlFile);

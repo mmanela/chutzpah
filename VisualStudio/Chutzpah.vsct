@@ -83,7 +83,7 @@
             <CommandFlag>DefaultInvisible</CommandFlag>
             <Strings>
               <CommandName>RunInBrowser</CommandName>
-              <ButtonText>Calculate Code Coverage</ButtonText>
+              <ButtonText>Show Code Coverage</ButtonText>
             </Strings>
           </Button>
         </Buttons>
