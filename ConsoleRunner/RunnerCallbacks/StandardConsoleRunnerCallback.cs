@@ -32,6 +32,14 @@ namespace Chutzpah.RunnerCallbacks
             
         }
 
+        public override void FileLog(TestLog log)
+        {
+            if (!silent)
+            {
+                Console.WriteLine(GetFileLogMessage(log));
+            }
+        }
+
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
             Console.WriteLine();

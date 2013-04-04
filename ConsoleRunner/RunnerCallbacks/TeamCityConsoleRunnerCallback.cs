@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using Chutzpah.Models;
 
 namespace Chutzpah.RunnerCallbacks
@@ -6,6 +8,12 @@ namespace Chutzpah.RunnerCallbacks
     public class TeamCityConsoleRunnerCallback : ConsoleRunnerCallback
     {
         private const string ChutzpahJavascriptTestSuiteName = "JavaScript Tests";
+        private readonly IList<string> _testCaseMessages = new List<string>();
+
+        public override void FileLog(TestLog log)
+        {
+            _testCaseMessages.Add(GetFileLogMessage(log));
+        }
 
         public override void TestSuiteFinished(TestCaseSummary summary)
         {
@@ -19,6 +27,11 @@ namespace Chutzpah.RunnerCallbacks
             Console.WriteLine("##teamcity[testSuiteStarted name='{0}']",Escape(ChutzpahJavascriptTestSuiteName));
         }
 
+        private string CombineWithTestCaseMessages(string output)
+        {
+            return string.Join("\n", _testCaseMessages.Concat(Enumerable.Repeat(output, 1)));
+        }
+
         protected override void TestFailed(TestCase testCase)
         {
             Console.WriteLine(
@@ -27,7 +40,7 @@ namespace Chutzpah.RunnerCallbacks
                 Escape(GetTestFailureMessage(testCase))
                 );
 
-            WriteOutput(testCase.GetDisplayName(), GetTestFailureMessage(testCase));
+            WriteOutput(testCase.GetDisplayName(), CombineWithTestCaseMessages(GetTestFailureMessage(testCase)));
         }
 
         protected override void TestComplete(TestCase testCase)
@@ -37,11 +50,12 @@ namespace Chutzpah.RunnerCallbacks
 
         protected override void TestPassed(TestCase testCase)
         {
-            WriteOutput(testCase.GetDisplayName(), "Passed");
+            WriteOutput(testCase.GetDisplayName(), CombineWithTestCaseMessages("Passed"));
         }
 
         public override void TestStarted(TestCase testCase)
         {
+            _testCaseMessages.Clear();
             Console.WriteLine(
                 "##teamcity[testStarted name='{0}']", Escape(testCase.GetDisplayName()));
         }
