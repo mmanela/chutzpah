@@ -75,11 +75,16 @@
                 for (var i = 0; i < resultItems.length; i++) {
                     var result = resultItems[i];
                     var testResult = {};
-                    
-                    // result.passed() may return (true/false) or (1,0) but we want to only return boolean
-                    testResult.passed = result.passed() ? true : false;
-                    testResult.message = result.message;
-                    activeTestCase.testResults.push(testResult);
+
+                    if (result.passed) {
+                        // result.passed() may return (true/false) or (1,0) but we want to only return boolean
+                        testResult.passed = result.passed() ? true : false;
+                        testResult.message = result.message;
+                        activeTestCase.testResults.push(testResult);
+                    } else {
+                        // Not an ExpectationResult, probably a MessageResult. Treat as any other log message.
+                        log({ type: 'Log', log: { message: result.toString() } });
+                    }
                 }
 
                 // Log test case when done. This will get picked up by phantom and streamed to chutzpah.

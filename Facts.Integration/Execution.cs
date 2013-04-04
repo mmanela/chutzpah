@@ -409,12 +409,34 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_run_test_which_logs_object_to_jasmine_log()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
         public void Will_capture_message_logged_via_console_log()
         {
             var testRunner = TestRunner.Create();
 
             testRunner.DebugEnabled = true;
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal("hello", result.Logs.Single().Message);
+        }
+
+        [Fact]
+        public void Will_capture_message_logged_via_jasmine_log()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal("hello", result.Logs.Single().Message);
         }
