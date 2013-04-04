@@ -63,6 +63,7 @@
     <Compile Include="Compilers\TypeScriptCompilerFacts.cs" />
     <Compile Include="ConsoleRunner\CallbackFacts.cs" />
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
+    <Compile Include="Exceptions\ExceptionFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
     <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />
     <Compile Include="Library\FileGenerators\CompilerCacheFacts.cs" />

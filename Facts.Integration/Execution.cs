@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Chutzpah.Exceptions;
 using Chutzpah.Models;
+using Moq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -43,6 +46,12 @@ namespace Chutzpah.Facts.Integration
                         new object[] {@"JS\Test\basic-jasmine.js"}
                     };
             }
+        }
+
+        public Execution()
+        {
+            // Disable caching
+            GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = 0;
         }
 
         [Theory]
@@ -534,6 +543,52 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
             Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_report_a_failed_CoffeeScript_compilation_to_the_callback()
+        {
+            var testRunner = TestRunner.Create();
+            var callback = new Mock<ITestMethodRunnerCallback>();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.coffee", callback.Object);
+
+            callback.Verify(x => x.ExceptionThrown(
+                It.Is((ChutzpahException ex) => ex.Message.Contains("Unexpected '->'")),
+                It.Is((string s) => s.Contains("syntaxError.coffee"))
+                ));
+        }
+
+        [Fact]
+        public void Will_report_a_failed_CoffeeScript_compilation_to_the_callback_and_pinpoint_the_correct_file_in_the_exception()
+        {
+            var testRunner = TestRunner.Create();
+            var callback = new Mock<ITestMethodRunnerCallback>();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\includeFileWithSyntaxError.coffee", callback.Object);
+
+            callback.Verify(x => x.ExceptionThrown(
+                It.Is((ChutzpahException ex) => ex.ToString().Contains("\\syntaxError.coffee")),
+                It.Is((string s) => s.Contains("includeFileWithSyntaxError.coffee"))
+                ));
+        }
+
+        [Fact]
+        public void Will_strip_unnecessary_info_when_reporting_a_failed_CoffeeScript_compilation_to_the_callback()
+        {
+            var testRunner = TestRunner.Create();
+            var callback = new Mock<ITestMethodRunnerCallback>();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.coffee", callback.Object);
+
+            callback.Verify(x => x.ExceptionThrown(
+                It.Is((ChutzpahException ex) => !ex.Message.Contains("Microsoft JScript runtime error") &&
+                                                !ex.Message.Contains("Error Code") &&
+                                                !ex.Message.Contains("Error WCode") &&
+                                                !Regex.IsMatch(ex.Message, "^at line", RegexOptions.Multiline)
+                    ),
+                It.IsAny<string>()
+                                     ));
         }
 
         public class TypeScript

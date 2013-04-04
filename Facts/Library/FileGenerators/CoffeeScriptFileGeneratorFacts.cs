@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Chutzpah.Exceptions;
 using Chutzpah.FileGenerator;
 using Chutzpah.FileGenerators;
 using Chutzpah.Models;
@@ -46,6 +47,28 @@ namespace Chutzpah.Facts
 
         public class GenerateCompiledSources
         {
+            [Fact]
+            public void Will_set_the_correct_filename_on_a_compilation_failed_exception()
+            {
+                var generator = new TestableCoffeeScriptFileGenerator();
+                var file1 = new ReferencedFile { Path = "path1.coffee" };
+                var file2 = new ReferencedFile { Path = "path2.coffee" };
+
+                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText("path1.coffee")).Returns("content1");
+                generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText("path2.coffee")).Returns("content2");
+                
+                generator.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile("content1", It.IsAny<object[]>())).Returns("compiled");
+                generator.Mock<ICoffeeScriptEngineWrapper>().Setup(x => x.Compile("content2", It.IsAny<object[]>())).
+                    Throws(new ChutzpahCompilationFailedException("Parse error"));
+
+                generator.Mock<ICompilerCache>().Setup(x => x.Get(It.IsAny<string>())).Returns((string)null);
+
+                var ex = Record.Exception(() => generator.ClassUnderTest.GenerateCompiledSources(new[] { file1, file2 },
+                    new ChutzpahTestSettingsFile())) as ChutzpahCompilationFailedException;
+
+                Assert.Equal("path2.coffee", ex.SourceFile);
+            }
+
             [Fact]
             public void Will_return_compiled_files_and_set_to_cache()
             {

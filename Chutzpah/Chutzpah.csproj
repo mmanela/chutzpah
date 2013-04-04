@@ -99,6 +99,7 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
