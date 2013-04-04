@@ -16,8 +16,9 @@
 
             jasmineEnv.addReporter(htmlReporter);
 
+            var oldFilter = jasmineEnv.specFilter;
             jasmineEnv.specFilter = function (spec) {
-                return htmlReporter.specFilter(spec);
+                return oldFilter.call(jasmineEnv, spec) && htmlReporter.specFilter(spec);
             };
 
             var currentWindowOnload = window.onload;

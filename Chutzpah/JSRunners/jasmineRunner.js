@@ -65,9 +65,12 @@
             };
 
             self.reportSpecResults = function (spec) {
+                var results = spec.results();
+                if (results.skipped) {
+                    return;
+                }
                 var timetaken = new Date().getTime() - testStartTime;
                 activeTestCase.timetaken = timetaken;
-                var results = spec.results();
                 var resultItems = results.getItems();
                 for (var i = 0; i < resultItems.length; i++) {
                     var result = resultItems[i];

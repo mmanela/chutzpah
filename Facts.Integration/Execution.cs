@@ -491,6 +491,18 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_run_jasmine_test_which_uses_iit()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\jasmine-iit.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
         public class TypeScript
         {
             public static IEnumerable<object[]> TypeScriptTests
