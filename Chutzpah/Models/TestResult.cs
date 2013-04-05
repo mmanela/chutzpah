@@ -30,9 +30,9 @@
                 errorString = "Assert failed";
             }
 
-            if (LineNumber != 0)
+            if (LineNumber != 0 && !errorString.Contains(string.Format("(line {0})", LineNumber)))
             {
-                errorString += string.Format(" (at line {0})", LineNumber);
+                errorString += string.Format(" (on line {0})", LineNumber);
             }
 
             return errorString;

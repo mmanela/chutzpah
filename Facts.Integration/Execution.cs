@@ -68,13 +68,23 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_track_line_number_of_failed_expectations()
+        public void Will_track_line_number_of_failed_jasmine_expectations()
         {
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(3, result.Tests.Single().TestResults.Single().LineNumber);
+        }
+
+        [Fact]
+        public void Will_track_line_number_of_exception_thrown_in_jasmine_spec()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(4, result.Tests.Single().TestResults.Single().LineNumber);
         }
 
         [Theory]

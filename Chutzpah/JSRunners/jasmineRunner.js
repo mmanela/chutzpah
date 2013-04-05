@@ -34,7 +34,8 @@
         }
 
         function findExpectationLineNumber(trace) {
-            var lines = trace.split('\n');
+            var stack = trace && trace.stack || '';
+            var lines = stack.split('\n');
             lines.splice(0, 1); // strip error message
             while (lines.length > 0 && lines[0].indexOf('/jasmine.js') >= 0) {
                 lines.shift();

@@ -117,7 +117,7 @@ jasmine.ExpectationResult = function(params) {
           try {
               throw new Error(self.message);
           } catch (e) {
-              trace = e.stack || '';
+              trace = e;
           }
       }
       return trace;
