@@ -67,6 +67,16 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_track_line_number_of_failed_expectations()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(3, result.Tests.Single().TestResults.Single().LineNumber);
+        }
+
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_run_tests_from_a_coffee_script_file(string scriptPath)

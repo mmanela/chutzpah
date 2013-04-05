@@ -80,6 +80,9 @@
     <Content Include="JS\Test\chutzpahReferenceComment.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\failing-expectation-jasmine.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\includeFileWithSyntaxError.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

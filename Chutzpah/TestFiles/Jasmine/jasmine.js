@@ -110,9 +110,18 @@ jasmine.ExpectationResult = function(params) {
   this.expected = params.expected;
   this.actual = params.actual;
   this.message = this.passed_ ? 'Passed.' : params.message;
-
-  var trace = (params.trace || new Error(this.message));
-  this.trace = this.passed_ ? '' : trace;
+  // Patched based on: https://github.com/pivotal/jasmine/pull/291
+  this.trace = this.passed_ ? '' : (function (self) {
+      var trace = params.trace;
+      if (!trace) {
+          try {
+              throw new Error(self.message);
+          } catch (e) {
+              trace = e.stack || '';
+          }
+      }
+      return trace;
+  })(this);
 };
 
 jasmine.ExpectationResult.prototype.toString = function () {

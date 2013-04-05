@@ -7,6 +7,12 @@
         public string Actual { get; set; }
         public string Message { get; set; }
 
+        /// <summary>
+        /// For a failed test result, may contain the line number of the expectation, if known.
+        /// Otherwise, contains the value <c>0</c>.
+        /// </summary>
+        public int LineNumber { get; set; }
+
         public string GetFailureMessage()
         {
             if (Passed) return "";
@@ -22,6 +28,11 @@
             else
             {
                 errorString = "Assert failed";
+            }
+
+            if (LineNumber != 0)
+            {
+                errorString += string.Format(" (at line {0})", LineNumber);
             }
 
             return errorString;

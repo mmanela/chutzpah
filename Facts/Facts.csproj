@@ -82,6 +82,7 @@
     <Compile Include="Library\TestingModeExtensionsFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
+    <Compile Include="Models\TestResultFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\TestRunnerFacts.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
