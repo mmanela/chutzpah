@@ -46,7 +46,15 @@
             }
             return 0;
         }
-
+        
+        function recordStackTrace(trace) {
+            var stack = trace && trace.stack || null;
+            if (stack) {
+                stack = stack.split('\n').slice(1).join('\n');
+            }
+            return stack;
+        }
+        
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
@@ -95,7 +103,13 @@
                         // result.passed() may return (true/false) or (1,0) but we want to only return boolean
                         testResult.passed = result.passed() ? true : false;
                         testResult.message = result.message;
-                        testResult.lineNumber = testResult.passed ? 0 : findExpectationLineNumber(result.trace);
+                        // __fake__ is a marker used for an error thrown to get the line number
+                        // of a failed expectation.
+                        var hasFakedStackTrace = result.trace && result.trace.stack && result.trace.stack.indexOf('__fake__') >= 0;
+                        testResult.lineNumber = testResult.passed || !hasFakedStackTrace ? 0 : findExpectationLineNumber(result.trace);
+                        if (!hasFakedStackTrace) {
+                            testResult.stackTrace = recordStackTrace(result.trace);
+                        }
                         activeTestCase.testResults.push(testResult);
                     } else {
                         // Not an ExpectationResult, probably a MessageResult. Treat as any other log message.

@@ -78,13 +78,47 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_track_line_number_of_exception_thrown_in_jasmine_spec()
+        public void Will_not_record_stack_trace_for_failed_jasmine_expectations()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Null(result.Tests.Single().TestResults.Single().StackTrace);
+        }
+
+        [Fact]
+        public void Will_not_track_line_number_of_exception_thrown_in_code_as_its_redundant()
         {
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
 
-            Assert.Equal(4, result.Tests.Single().TestResults.Single().LineNumber);
+            Assert.Equal(0, result.Tests.Single().TestResults.Single().LineNumber);
+        }
+
+        [Fact]
+        public void Will_record_stack_trace_of_exception_thrown_in_code()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
+
+            var stackTrace = result.Tests.Single().TestResults.Single().StackTrace;
+            Assert.NotNull(stackTrace);
+            Assert.Contains("/jasmine-scriptError.js:5", stackTrace);
+        }
+
+        [Fact]
+        public void Will_strip_message_line_from_stack_trace_of_exception_thrown_in_code()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
+
+            var stackTrace = result.Tests.Single().TestResults.Single().StackTrace;
+            Assert.NotNull(stackTrace);
+            Assert.DoesNotContain("Error: CODE ERROR", stackTrace);
         }
 
         [Theory]

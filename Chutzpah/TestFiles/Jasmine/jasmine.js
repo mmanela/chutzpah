@@ -111,17 +111,19 @@ jasmine.ExpectationResult = function(params) {
   this.actual = params.actual;
   this.message = this.passed_ ? 'Passed.' : params.message;
   // Patched based on: https://github.com/pivotal/jasmine/pull/291
-  this.trace = this.passed_ ? '' : (function (self) {
+  this.trace = this.passed_ ? '' : (function () {
       var trace = params.trace;
       if (!trace) {
           try {
-              throw new Error(self.message);
+              // "__fake__" lets us differentiate between real exceptions
+              // and this one.
+              throw new Error("__fake__");
           } catch (e) {
               trace = e;
           }
       }
       return trace;
-  })(this);
+  })();
 };
 
 jasmine.ExpectationResult.prototype.toString = function () {

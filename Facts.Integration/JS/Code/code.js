@@ -26,3 +26,7 @@ var errorThing = {
 function throwError() {
     throw "CODE ERROR";
 }
+
+function throwRealError() {
+    throw new Error("CODE ERROR");
+}

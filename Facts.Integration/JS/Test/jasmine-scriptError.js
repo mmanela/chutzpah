@@ -1,6 +1,7 @@
-﻿
+﻿/// <reference path="../code/code.js" />
+
 describe("A suite", function () {
-    it("Throw an error", function () {
-        throw new Error("fail");
+    it("Throws an error", function () {
+        throwRealError();
     });
 });
