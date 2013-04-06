@@ -37,5 +37,10 @@ namespace Chutzpah
 
             return container;
         }
+
+        public static T Get<T>()
+        {
+            return Current.GetInstance<T>();
+        }
     }
 }

@@ -12,17 +12,18 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using VS11.Plugin;
+using ILogger = Chutzpah.VS.Common.ILogger;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-
-    [Export(typeof(ITestContainerDiscoverer))]
+    [Export(typeof (ITestContainerDiscoverer))]
     public class ChutzpahTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
         private readonly IChutzpahSettingsMapper settingsMapper;
-        private readonly VS.Common.ILogger logger;
+        private readonly ILogger logger;
         private readonly ITestRunner testRunner;
+        private readonly IFileProbe fileProbe;
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
@@ -44,7 +45,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         [ImportingConstructor]
         public ChutzpahTestContainerDiscoverer(
-            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
             IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
@@ -56,18 +57,19 @@ namespace Chutzpah.VS2012.TestAdapter
                 solutionListener,
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
-                TestRunner.Create())
+                TestRunner.Create(),
+                ChutzpahContainer.Get<IFileProbe>())
         {
         }
 
-        public ChutzpahTestContainerDiscoverer(
-            IServiceProvider serviceProvider,
-            IChutzpahSettingsMapper settingsMapper,
-            VS.Common.ILogger logger,
-            ISolutionEventsListener solutionListener,
-            ITestFilesUpdateWatcher testFilesUpdateWatcher,
-            ITestFileAddRemoveListener testFilesAddRemoveListener,
-            ITestRunner testRunner)
+        public ChutzpahTestContainerDiscoverer(IServiceProvider serviceProvider,
+                                               IChutzpahSettingsMapper settingsMapper,
+                                               ILogger logger,
+                                               ISolutionEventsListener solutionListener,
+                                               ITestFilesUpdateWatcher testFilesUpdateWatcher,
+                                               ITestFileAddRemoveListener testFilesAddRemoveListener,
+                                               ITestRunner testRunner,
+                                               IFileProbe fileProbe)
         {
             initialContainerSearch = true;
             cachedContainers = new List<ITestContainer>();
@@ -75,6 +77,7 @@ namespace Chutzpah.VS2012.TestAdapter
             this.settingsMapper = settingsMapper;
             this.logger = logger;
             this.testRunner = testRunner;
+            this.fileProbe = fileProbe;
             this.solutionListener = solutionListener;
             this.testFilesUpdateWatcher = testFilesUpdateWatcher;
             this.testFilesAddRemoveListener = testFilesAddRemoveListener;
@@ -169,8 +172,10 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 // Don't do anything for files we are sure can't be test files
                 if (!HasTestFileExtension(e.File)) return;
-                logger.Log(string.Format("Changed detected for {0} with change type of {1}", e.File, e.ChangedReason), "ChutzpahTestContainerDiscoverer",LogType.Information);
-                
+                logger.Log(string.Format("Changed detected for {0} with change type of {1}", e.File, e.ChangedReason),
+                           "ChutzpahTestContainerDiscoverer",
+                           LogType.Information);
+
                 switch (e.ChangedReason)
                 {
                     case TestFileChangedReason.Added:
@@ -225,18 +230,18 @@ namespace Chutzpah.VS2012.TestAdapter
         private IEnumerable<ITestContainer> GetTestContainers()
         {
             logger.Log("GetTestContainers() are called", "ChutzpahTestContainerDiscoverer", LogType.Information);
-                
+
             if (initialContainerSearch)
             {
                 logger.Log("Initial test container search", "ChutzpahTestContainerDiscoverer", LogType.Information);
-                
+
                 cachedContainers.Clear();
                 var jsFiles = FindPotentialTestFiles();
                 UpdateTestContainersAndFileWatchers(jsFiles, true);
                 initialContainerSearch = false;
             }
 
-            var containers =  FilterContainers(cachedContainers);
+            var containers = FilterContainers(cachedContainers);
             return containers;
         }
 
@@ -248,7 +253,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private IEnumerable<string> FindPotentialTestFiles()
         {
-            var solution = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
+            var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
             var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
             return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
@@ -257,7 +262,7 @@ namespace Chutzpah.VS2012.TestAdapter
         private IEnumerable<string> FindPotentialTestFiles(IVsProject project)
         {
             return from item in VsSolutionHelper.GetProjectItems(project)
-                   where HasTestFileExtension(item)
+                   where HasTestFileExtension(item) && !fileProbe.IsTemporaryChutzpahFile(item)
                    select item;
         }
 
@@ -296,7 +301,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 if (testFilesUpdateWatcher != null)
                 {
                     testFilesUpdateWatcher.FileChangedEvent -= OnProjectItemChanged;
-                    ((IDisposable)testFilesUpdateWatcher).Dispose();
+                    ((IDisposable) testFilesUpdateWatcher).Dispose();
                     testFilesUpdateWatcher = null;
                 }
 
