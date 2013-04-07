@@ -48,6 +48,18 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> SyntaxErrorScripts
+        {
+            get
+            {
+                return new[]
+                           {
+                               new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\includeFileWithSyntaxError.coffee", "Unexpected '->'"},
+                               new object[] {@"JS\Test\syntaxError.ts", @"JS\Test\includeFileWithSyntaxError.ts", "Expected ';'"}
+                           };
+            }
+        }
+
         public Execution()
         {
             // Disable caching
@@ -592,41 +604,44 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(3, result.TotalCount);
         }
 
-        [Fact]
-        public void Will_report_a_failed_CoffeeScript_compilation_to_the_callback()
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_report_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
         {
             var testRunner = TestRunner.Create();
             var callback = new Mock<ITestMethodRunnerCallback>();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.coffee", callback.Object);
+            testRunner.RunTests(scriptPath, callback.Object);
 
             callback.Verify(x => x.ExceptionThrown(
-                It.Is((ChutzpahException ex) => ex.Message.Contains("Unexpected '->'")),
-                It.Is((string s) => s.Contains("syntaxError.coffee"))
+                It.Is((ChutzpahException ex) => ex.Message.Contains(errorMessage)),
+                It.Is((string s) => s.Contains(scriptPath))
                 ));
         }
 
-        [Fact]
-        public void Will_pinpoint_the_correct_file_in_the_exception_when_CoffeeScript_compilation_fails()
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_pinpoint_the_correct_file_in_the_exception_when_script_compilation_fails(string scriptPath, string includeScriptPath, string errorMessage)
         {
             var testRunner = TestRunner.Create();
             var callback = new Mock<ITestMethodRunnerCallback>();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\includeFileWithSyntaxError.coffee", callback.Object);
+            testRunner.RunTests(includeScriptPath, callback.Object);
 
             callback.Verify(x => x.ExceptionThrown(
-                It.Is((ChutzpahException ex) => ex.ToString().Contains("\\syntaxError.coffee")),
-                It.Is((string s) => s.Contains("includeFileWithSyntaxError.coffee"))
+                It.Is((ChutzpahException ex) => ex.ToString().Contains(scriptPath)),
+                It.Is((string s) => s.Contains(includeScriptPath))
                 ));
         }
 
-        [Fact]
-        public void Will_strip_unnecessary_info_when_reporting_a_failed_CoffeeScript_compilation_to_the_callback()
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_strip_unnecessary_info_when_reporting_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
         {
             var testRunner = TestRunner.Create();
             var callback = new Mock<ITestMethodRunnerCallback>();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.coffee", callback.Object);
+            testRunner.RunTests(scriptPath, callback.Object);
 
             callback.Verify(x => x.ExceptionThrown(
                 It.Is((ChutzpahException ex) => !ex.Message.Contains("Microsoft JScript runtime error") &&

@@ -1,12 +1,9 @@
-﻿using System;
-
-namespace Chutzpah.Exceptions
+﻿namespace Chutzpah.Exceptions
 {
     public class ChutzpahCompilationFailedException : ChutzpahException
     {
         public ChutzpahCompilationFailedException(string message) : base(message)
         {
-            
         }
 
         public string SourceFile { get; set; }
@@ -16,7 +13,7 @@ namespace Chutzpah.Exceptions
             var ret = Message;
             if (SourceFile != null)
             {
-                ret += string.Format(" [in file {0}]", SourceFile);
+                ret = string.Format("{0}: {1}", SourceFile, ret);
             }
             return ret;
         }

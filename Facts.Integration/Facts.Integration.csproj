@@ -80,6 +80,9 @@
     <Content Include="JS\Test\chutzpahReferenceComment.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\includeFileWithSyntaxError.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\syntaxError.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

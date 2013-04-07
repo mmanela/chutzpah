@@ -19,7 +19,7 @@ namespace Chutzpah.Facts.Exceptions
             {
                 var ex = new ChutzpahCompilationFailedException("foo");
                 ex.SourceFile = "test.coffee";
-                Assert.Contains(" [in file test.coffee]", ex.ToString());
+                Assert.Equal("test.coffee: foo", ex.ToString());
             }
 
             [Fact]
