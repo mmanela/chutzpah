@@ -51,6 +51,24 @@
             }
 
             [Fact]
+            public void Will_get_line_number_for_tests_in_CoffeeScript_file()
+            {
+                var processor = new TestableJasmineLineNumberProcessor();
+                var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path.coffee" };
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path.coffee")).Returns(new string[] 
+                {
+                    "//CoffeeScript file",
+                    "describe 'module1', ->",
+                    "  it 'test1', ->"
+                });
+
+                processor.ClassUnderTest.Process(file);
+
+                Assert.Equal(3, file.FilePositions[0].Line);
+                Assert.Equal(3, file.FilePositions[0].Column);
+            }
+
+            [Fact]
             public void Will_get_line_number_for_test_with_quotes_in_title()
             {
                 var processor = new TestableJasmineLineNumberProcessor();
