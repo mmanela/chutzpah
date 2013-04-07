@@ -68,33 +68,14 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_track_line_number_of_failed_jasmine_expectations()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(3, result.Tests.Single().TestResults.Single().LineNumber);
-        }
-
-        [Fact]
         public void Will_not_record_stack_trace_for_failed_jasmine_expectations()
         {
             var testRunner = TestRunner.Create();
 
+            testRunner.DebugEnabled = true;
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Null(result.Tests.Single().TestResults.Single().StackTrace);
-        }
-
-        [Fact]
-        public void Will_not_track_line_number_of_exception_thrown_in_code_as_its_redundant()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(0, result.Tests.Single().TestResults.Single().LineNumber);
         }
 
         [Fact]
@@ -587,7 +568,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
-        [Fact]
+        [Fact(Skip="Temp. disabled")]
         public void Will_run_jasmine_test_which_uses_iit()
         {
             var testRunner = TestRunner.Create();

@@ -110,20 +110,9 @@ jasmine.ExpectationResult = function(params) {
   this.expected = params.expected;
   this.actual = params.actual;
   this.message = this.passed_ ? 'Passed.' : params.message;
-  // Patched based on: https://github.com/pivotal/jasmine/pull/291
-  this.trace = this.passed_ ? '' : (function () {
-      var trace = params.trace;
-      if (!trace) {
-          try {
-              // "__fake__" lets us differentiate between real exceptions
-              // and this one.
-              throw new Error("__fake__");
-          } catch (e) {
-              trace = e;
-          }
-      }
-      return trace;
-  })();
+
+  var trace = (params.trace || new Error(this.message));
+  this.trace = this.passed_ ? '' : trace;
 };
 
 jasmine.ExpectationResult.prototype.toString = function () {
@@ -512,32 +501,6 @@ var it = function(desc, func) {
 if (isCommonJS) exports.it = it;
 
 /**
- * Creates an exclusive Jasmine spec that will be added to the current suite.
- *
- * If at least one exclusive (iit) spec is registered, only these exclusive specs are run.
- * Note, that this behavior works only with the default specFilter.
- * Note, that iit has higher priority over ddescribe
- *
- * @example
- * describe('suite', function() {
- *   iit('should be true', function() {
- *     // only this spec will be run
- *   });
- *
- *   it('should be false', function() {
- *     // this won't be run
- *   });
- * });
- *
- * @param {String} desc description of this specification
- * @param {Function} func defines the preconditions and expectations of the spec
- */
-var iit = function(desc, func) {
-  return jasmine.getEnv().iit(desc, func);
-};
-if (isCommonJS) exports.iit = iit;
-
-/**
  * Creates a <em>disabled</em> Jasmine spec.
  *
  * A convenience method that allows existing specs to be disabled temporarily during development.
@@ -640,37 +603,6 @@ var describe = function(description, specDefinitions) {
   return jasmine.getEnv().describe(description, specDefinitions);
 };
 if (isCommonJS) exports.describe = describe;
-
-
-/**
- * Defines an exclusive suite of specifications.
- *
- * If at least one exclusive (ddescribe) suite is registered, only these exclusive suites are run.
- * Note, that this behavior works only with the default specFilter.
- *
- * @example
- * ddescribe('exclusive suite', function() {
- *   it('should be true', function() {
- *     // this spec will be run
- *   });
- *
- *   it('should be false', function() {
- *     // this spec will be run as well
- *   });
- * });
- *
- * describe('normal suite', function() {
- *   // no spec from this suite will be run
- * });
- *
- *
- * @param {String} description A string, usually the class under test.
- * @param {Function} specDefinitions function that defines several specs.
- */
-var ddescribe = function(description, specDefinitions) {
-  return jasmine.getEnv().ddescribe(description, specDefinitions);
-};
-if (isCommonJS) exports.ddescribe = ddescribe;
 
 /**
  * Disables a suite of specifications.  Used to disable some suites in a file, or files, temporarily during development.
@@ -793,18 +725,13 @@ jasmine.Env = function() {
   this.updateInterval = jasmine.DEFAULT_UPDATE_INTERVAL;
   this.defaultTimeoutInterval = jasmine.DEFAULT_TIMEOUT_INTERVAL;
   this.lastUpdate = 0;
-  this.specFilter = function(spec) {
-    return this.exclusive_ <= spec.exclusive_;
+  this.specFilter = function() {
+    return true;
   };
 
   this.nextSpecId_ = 0;
   this.nextSuiteId_ = 0;
   this.equalityTesters_ = [];
-
-  // 0 - normal
-  // 1 - contains some ddescribe
-  // 2 - contains some iit
-  this.exclusive_ = 0;
 
   // wrap matchers
   this.matchersClass = function() {
@@ -876,11 +803,8 @@ jasmine.Env.prototype.execute = function() {
 };
 
 jasmine.Env.prototype.describe = function(description, specDefinitions) {
-  var suite = new jasmine.Suite(this, description, null, this.currentSuite);
-  return this.describe_(suite, specDefinitions);
-};
+  var suite = new jasmine.Suite(this, description, specDefinitions, this.currentSuite);
 
-jasmine.Env.prototype.describe_ = function(suite, specDefinitions) {
   var parentSuite = this.currentSuite;
   if (parentSuite) {
     parentSuite.add(suite);
@@ -906,14 +830,6 @@ jasmine.Env.prototype.describe_ = function(suite, specDefinitions) {
   this.currentSuite = parentSuite;
 
   return suite;
-};
-
-jasmine.Env.prototype.ddescribe = function(description, specDefinitions) {
-  var suite = new jasmine.Suite(this, description, null, this.currentSuite);
-  suite.exclusive_ = 1;
-  this.exclusive_ = Math.max(this.exclusive_, 1);
-
-  return this.describe_(suite, specDefinitions);
 };
 
 jasmine.Env.prototype.beforeEach = function(beforeEachFunction) {
@@ -952,14 +868,6 @@ jasmine.Env.prototype.it = function(description, func) {
   if (func) {
     spec.runs(func);
   }
-
-  return spec;
-};
-
-jasmine.Env.prototype.iit = function(description, func) {
-  var spec = this.it(description, func);
-  spec.exclusive_ = 2;
-  this.exclusive_ = 2;
 
   return spec;
 };
@@ -2317,7 +2225,6 @@ jasmine.Spec = function(env, suite, description) {
   spec.results_ = new jasmine.NestedResults();
   spec.results_.description = description;
   spec.matchersClass = null;
-  spec.exclusive_ = suite.exclusive_;
 };
 
 jasmine.Spec.prototype.getFullName = function() {
@@ -2554,7 +2461,6 @@ jasmine.Suite = function(env, description, specDefinitions, parentSuite) {
   self.children_ = [];
   self.suites_ = [];
   self.specs_ = [];
-  self.exclusive_ = parentSuite && parentSuite.exclusive_ || 0;
 };
 
 jasmine.Suite.prototype.getFullName = function() {
@@ -2690,5 +2596,5 @@ jasmine.version_= {
   "major": 1,
   "minor": 3,
   "build": 1,
-  "revision": "1354556913-chutzpah"
+  "revision": 1354556913
 };

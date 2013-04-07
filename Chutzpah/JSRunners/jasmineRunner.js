@@ -33,20 +33,6 @@
             }
         }
 
-        function findExpectationLineNumber(trace) {
-            var stack = trace && trace.stack || '';
-            var lines = stack.split('\n');
-            lines.splice(0, 1); // strip error message
-            while (lines.length > 0 && lines[0].indexOf('/jasmine.js') >= 0) {
-                lines.shift();
-            }
-            if (lines.length > 0) {
-                var lineDelim = lines[0].lastIndexOf(':');
-                return lineDelim >= 0 ? +lines[0].substring(lineDelim + 1) : 0;
-            }
-            return 0;
-        }
-        
         function recordStackTrace(trace) {
             var stack = trace && trace.stack || null;
             if (stack) {
@@ -103,13 +89,7 @@
                         // result.passed() may return (true/false) or (1,0) but we want to only return boolean
                         testResult.passed = result.passed() ? true : false;
                         testResult.message = result.message;
-                        // __fake__ is a marker used for an error thrown to get the line number
-                        // of a failed expectation.
-                        var hasFakedStackTrace = result.trace && result.trace.stack && result.trace.stack.indexOf('__fake__') >= 0;
-                        testResult.lineNumber = testResult.passed || !hasFakedStackTrace ? 0 : findExpectationLineNumber(result.trace);
-                        if (!hasFakedStackTrace) {
-                            testResult.stackTrace = recordStackTrace(result.trace);
-                        }
+                        testResult.stackTrace = recordStackTrace(result.trace);
                         activeTestCase.testResults.push(testResult);
                     } else {
                         // Not an ExpectationResult, probably a MessageResult. Treat as any other log message.
