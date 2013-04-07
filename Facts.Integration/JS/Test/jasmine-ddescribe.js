@@ -3,27 +3,28 @@ describe('normal', function () {
     it('not executed 1', function () {
         expect(true).toBe(false);
     });
-    iit('executed 1', function () {
-        expect(true).toBe(true);
+    it('not executed 2', function () {
+        expect(true).toBe(false);
     });
 });
 
 ddescribe('exclusive', function() {
-    it('not executed 2', function() {
-        expect(true).toBe(false);
+    it('executed 1', function() {
+        expect(true).toBe(true);
     });
-    iit('executed 2', function() {
+    it('executed 2', function() {
         expect(true).toBe(true);
     });
     describe('nested exclusive', function() {
-        iit('executed 3', function() {
+        it('executed 3', function() {
             expect(true).toBe(true);
         });
     });
 });
 
-ddescribe('normal 2', function() {
+describe('normal 2', function() {
     it('not executed 3', function() {
         expect(true).toBe(false);
     });
 });
+ 

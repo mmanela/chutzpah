@@ -6,8 +6,25 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function onInitialized() {}
-    
+    function onInitialized() {
+        // Add ddescribe and iit to window. If Jasmine has them, they will be overwritten.
+        // Jasmine 2.0 removes globals, so this code will probably be affected at that point.
+        window.ddescribe = function () {
+            var jasmineEnv = jasmine.getEnv();
+            var suite = jasmine.Env.prototype.describe.apply(jasmineEnv, Array.prototype.slice.call(arguments, 0));
+            chutzpah.exclusive || (chutzpah.exclusive = { suites: {}, specs: {} });
+            chutzpah.exclusive.suites[suite.getFullName()] = true;
+            return suite;
+        };
+        window.iit = function () {
+            var jasmineEnv = jasmine.getEnv();
+            var spec = jasmine.Env.prototype.it.apply(jasmineEnv, Array.prototype.slice.call(arguments, 0));
+            chutzpah.exclusive || (chutzpah.exclusive = { suites: {}, specs: {} });
+            chutzpah.exclusive.specs[spec.getFullName()] = true;
+            return spec;
+        };
+    }
+
     function isTestingDone() {
         return window.chutzpah.isTestingFinished === true;
     }
@@ -40,7 +57,22 @@
             }
             return stack;
         }
-        
+
+        function isExclusive(spec) {
+            var hasExclusiveSpecs = Object.keys(window.chutzpah.exclusive.specs).length > 0,
+                hasExclusiveSuites = Object.keys(window.chutzpah.exclusive.suites).length > 0;
+            if (hasExclusiveSpecs) {
+                // There are exclusive specs, so we run only those.
+                return window.chutzpah.exclusive.specs[spec.getFullName()];
+            }
+
+            for (var suite = spec.suite; hasExclusiveSuites && suite; suite = suite.parentSuite) {
+                if (window.chutzpah.exclusive.suites[suite.getFullName()])
+                    return true;
+            }
+            return false;
+        }
+
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
@@ -113,7 +145,10 @@
             };
 
             self.specFilter = function (spec) {
-                return true;
+                if (window.chutzpah.exclusive) {
+                    return isExclusive(spec);
+                }
+                return self.origSpecFilter.call(jasmine.getEnv(), spec);
             };
 
             function getFullSuiteName(suite) {
@@ -124,6 +159,10 @@
 
                 return description;
             }
+
+            // Jasmine doesn't call a reporter's specFilter function, so we have to patch it in.
+            self.origSpecFilter = jasmine.getEnv().specFilter;
+            jasmine.getEnv().specFilter = self.specFilter;
 
             return self;
         };
