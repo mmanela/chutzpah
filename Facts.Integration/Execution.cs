@@ -607,7 +607,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_report_a_failed_CoffeeScript_compilation_to_the_callback_and_pinpoint_the_correct_file_in_the_exception()
+        public void Will_pinpoint_the_correct_file_in_the_exception_when_CoffeeScript_compilation_fails()
         {
             var testRunner = TestRunner.Create();
             var callback = new Mock<ITestMethodRunnerCallback>();
@@ -675,6 +675,20 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_report_a_failed_TypeScript_compilation_to_the_callback()
+            {
+                var testRunner = TestRunner.Create();
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.ts", callback.Object);
+
+                callback.Verify(x => x.ExceptionThrown(
+                    It.Is((ChutzpahException ex) => ex.Message.Contains("Expected ';'")),
+                    It.Is((string s) => s.Contains("syntaxError.ts"))
+                    ));
             }
         }
 

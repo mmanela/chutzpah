@@ -54,14 +54,20 @@ function compilify_ts(fileMapStr, codeGenTarget) {
 
     var errors = new Buffer();
     var logger = new Buffer();
-    var compiler = new TypeScript.TypeScriptCompiler(errors, logger, settings);
-    for (var fileName in fileMap) {
-        if (fileMap.hasOwnProperty(fileName)) {
-            compiler.addUnit(fileMap[fileName], fileName);
+    try {
+        var compiler = new TypeScript.TypeScriptCompiler(errors, logger, settings);
+        for (var fileName in fileMap) {
+            if (fileMap.hasOwnProperty(fileName)) {
+                compiler.addUnit(fileMap[fileName], fileName);
+            }
         }
+        compiler.typeCheck();
+        compiler.emit(createFile);
+    } catch (e) {
+        // Without this, we get 'Exception thrown and not caught' as
+        // error message instead.
+        throw new Error(e.message);
     }
-    compiler.typeCheck();
-    compiler.emit(createFile);
 
     var convertedMapWithOriginalFileNames = {};
     for (var file in convertedFileMap) {
