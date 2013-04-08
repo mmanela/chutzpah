@@ -203,6 +203,9 @@
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
     <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
     <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
+    <Content Include="TestFiles\Jasmine\jasmine-ddescribe-iit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

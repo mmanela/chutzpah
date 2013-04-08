@@ -1,13 +1,14 @@
 ﻿/*globals phantom, require, console*/
 var chutzpah = {};
 
-chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) {
+chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone, onInitializedArg) {
     /// <summary>Executes a test suite and evaluates the results using the provided functions.</summary>
     /// <param name="onInitialized" type="Function">Callback function which is called when the page initialized but not loaded.</param>
     /// <param name="onPageLoaded" type="Function">Callback function which is called when the page is loaded.</param>
     /// <param name="isFrameworkLoaded" type="Function">Function that returns true of false if the test framework has been loaded.</param>
     /// <param name="onFrameworkLoaded" type="Function">Callback function which is called when the test framework is loaded.</param>
     /// <param name="isTestingDone" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
+    /// <param name="onInitializedArg" type="Object">Argument that is passed to onInitialized (must be JSON serializable).</param>
     'use strict';
 
     var page = require('webpage').create(),
@@ -137,8 +138,8 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
                 window.chutzpah = { testMode: 'execution' };
             });
         }
-        
-        page.evaluate(onInitialized);
+
+        page.evaluate(onInitialized, onInitializedArg);
     };
     
 

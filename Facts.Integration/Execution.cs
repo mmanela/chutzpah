@@ -580,30 +580,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
-        [Fact]
-        public void Will_run_jasmine_test_which_uses_iit()
-        {
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(@"JS\Test\jasmine-iit.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(3, result.PassedCount);
-            Assert.Equal(3, result.TotalCount);
-        }
-
-        [Fact]
-        public void Will_run_jasmine_test_which_uses_ddescribe()
-        {
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(3, result.PassedCount);
-            Assert.Equal(3, result.TotalCount);
-        }
-
         [Theory]
         [PropertyData("SyntaxErrorScripts")]
         public void Will_report_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
@@ -651,6 +627,49 @@ namespace Chutzpah.Facts.Integration
                     ),
                 It.IsAny<string>()
                                      ));
+        }
+
+        public class JasmineDdescribeIit
+        {
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_iit()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\jasmine-iit.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe()
+            {
+                var testRunner = TestRunner.Create();
+
+                testRunner.DebugEnabled = true;
+                var result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                testRunner.DebugEnabled = true;
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
         }
 
         public class TypeScript

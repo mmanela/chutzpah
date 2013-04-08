@@ -1,4 +1,5 @@
 ﻿/// <reference path="chutzpahRunner.js" />
+/// <reference path="../TestFiles/Jasmine/jasmine-ddescribe-iit.js" />
 /*globals phantom, chutzpah, window, jasmine*/
 
 (function () {
@@ -6,23 +7,28 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function onInitialized() {
-        // Add ddescribe and iit to window. If Jasmine has them, they will be overwritten.
-        // Jasmine 2.0 removes globals, so this code will probably be affected at that point.
-        window.ddescribe = function () {
-            var jasmineEnv = jasmine.getEnv();
-            var suite = jasmine.Env.prototype.describe.apply(jasmineEnv, Array.prototype.slice.call(arguments, 0));
-            chutzpah.exclusive || (chutzpah.exclusive = { suites: {}, specs: {} });
-            chutzpah.exclusive.suites[suite.getFullName()] = true;
-            return suite;
-        };
-        window.iit = function () {
-            var jasmineEnv = jasmine.getEnv();
-            var spec = jasmine.Env.prototype.it.apply(jasmineEnv, Array.prototype.slice.call(arguments, 0));
-            chutzpah.exclusive || (chutzpah.exclusive = { suites: {}, specs: {} });
-            chutzpah.exclusive.specs[spec.getFullName()] = true;
-            return spec;
-        };
+    function resolveAgainst(path, anotherPath) {
+        var lastSlash = path.lastIndexOf('\\');
+        return path.substring(0, lastSlash + 1) + anotherPath;
+    }
+
+    function readAll(path) {
+        var f = fs.open(path, 'r');
+        try {
+            return f.read();
+        } finally {
+            f.close();
+        }
+    }
+
+    var fs = require('fs'),
+        system = require('system'),
+        scriptPath = system.args[0],
+        ddecribeIitScriptPath = resolveAgainst(scriptPath, '..\\TestFiles\\Jasmine\\jasmine-ddescribe-iit.js'),
+        onInitializedArg = readAll(ddecribeIitScriptPath);
+
+    function onInitialized(ddecribeIitScriptData) {
+        eval(ddecribeIitScriptData);
     }
 
     function isTestingDone() {
@@ -37,7 +43,13 @@
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
-        
+
+        function patchDdescribeIitSupport() {
+            if (window.ddescribeIitSupport) {
+                window.ddescribeIitSupport.patch(jasmine.getEnv());
+            }
+        }
+
         var activeTestCase = null,
             fileStartTime = null,
             testStartTime = null;
@@ -58,26 +70,13 @@
             return stack;
         }
 
-        function isExclusive(spec) {
-            var hasExclusiveSpecs = Object.keys(window.chutzpah.exclusive.specs).length > 0,
-                hasExclusiveSuites = Object.keys(window.chutzpah.exclusive.suites).length > 0;
-            if (hasExclusiveSpecs) {
-                // There are exclusive specs, so we run only those.
-                return window.chutzpah.exclusive.specs[spec.getFullName()];
-            }
-
-            for (var suite = spec.suite; hasExclusiveSuites && suite; suite = suite.parentSuite) {
-                if (window.chutzpah.exclusive.suites[suite.getFullName()])
-                    return true;
-            }
-            return false;
-        }
-
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
             self.reportRunnerStarting = function (runner) {
-
+                // Must patch late since a HTML runner probably adds its on specFilter.
+                patchDdescribeIitSupport();
+                
                 fileStartTime = new Date().getTime();
 
                 // Testing began
@@ -145,10 +144,7 @@
             };
 
             self.specFilter = function (spec) {
-                if (window.chutzpah.exclusive) {
-                    return isExclusive(spec);
-                }
-                return self.origSpecFilter.call(jasmine.getEnv(), spec);
+                return true;
             };
 
             function getFullSuiteName(suite) {
@@ -159,10 +155,6 @@
 
                 return description;
             }
-
-            // Jasmine doesn't call a reporter's specFilter function, so we have to patch it in.
-            self.origSpecFilter = jasmine.getEnv().specFilter;
-            jasmine.getEnv().specFilter = self.specFilter;
 
             return self;
         };
@@ -198,7 +190,7 @@
     }
 
     try {
-        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);
+        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone, onInitializedArg);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }

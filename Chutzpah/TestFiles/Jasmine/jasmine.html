@@ -11,15 +11,18 @@
         (function () {
             var jasmineEnv = jasmine.getEnv();
             jasmineEnv.updateInterval = 1000;
-            
+
             var htmlReporter = new jasmine.HtmlReporter();
 
             jasmineEnv.addReporter(htmlReporter);
 
-            var oldFilter = jasmineEnv.specFilter;
             jasmineEnv.specFilter = function (spec) {
-                return oldFilter.call(jasmineEnv, spec) && htmlReporter.specFilter(spec);
+                return htmlReporter.specFilter(spec);
             };
+
+            if (ddescribeIitSupport) {
+                ddescribeIitSupport.patch(jasmineEnv);
+            }
 
             var currentWindowOnload = window.onload;
 
@@ -27,7 +30,7 @@
                 if (currentWindowOnload) {
                     currentWindowOnload();
                 }
-                
+
                 jasmineEnv.execute();
             };
 
