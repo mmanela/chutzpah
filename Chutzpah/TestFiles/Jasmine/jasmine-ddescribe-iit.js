@@ -37,10 +37,11 @@
     function patchJasmine(jasmineEnv) {
         if (jasmineEnv.specFilter_) return; // already patched
         var specFilter = function (spec) {
+            var run = true;
             if (exclusive.suites || exclusive.specs) {
-                return isExclusive(spec);
+                run = isExclusive(spec);
             }
-            return jasmineEnv.specFilter_.call(jasmineEnv, spec);
+            return run && jasmineEnv.specFilter_.call(jasmineEnv, spec);
         };
         jasmineEnv.specFilter_ = jasmineEnv.specFilter;
         jasmineEnv.specFilter = specFilter;

@@ -649,7 +649,6 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                testRunner.DebugEnabled = true;
                 var result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
@@ -662,7 +661,6 @@ namespace Chutzpah.Facts.Integration
             {
                 var testRunner = TestRunner.Create();
 
-                testRunner.DebugEnabled = true;
                 TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.html", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
@@ -670,6 +668,15 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(3, result.TotalCount);
             }
 
+            [Fact]
+            public void Will_chain_filters_correctly_when_running_jasmine_test_with_ddescribe_from_a_html_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-run-nothing.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.TotalCount);
+            }
         }
 
         public class TypeScript
