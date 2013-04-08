@@ -25,7 +25,7 @@ Buffer.prototype = {
 function compilify_ts(fileMapStr, codeGenTarget) {
 
     var settings = TypeScript.defaultSettings;
-    
+
     if (codeGenTarget === "ES3") {
         settings.codeGenTarget = TypeScript.CodeGenTarget.ES3;
         TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES3;
@@ -54,14 +54,29 @@ function compilify_ts(fileMapStr, codeGenTarget) {
 
     var errors = new Buffer();
     var logger = new Buffer();
+
     var compiler = new TypeScript.TypeScriptCompiler(errors, logger, settings);
     for (var fileName in fileMap) {
         if (fileMap.hasOwnProperty(fileName)) {
             compiler.addUnit(fileMap[fileName], fileName);
         }
     }
+    
     compiler.typeCheck();
-    compiler.emit(createFile);
+    compiler.emit({
+        createFile: createFile,
+        fileExists: function (path) {
+            return false;
+        },
+        directoryExists: function (path) {
+            return false;
+        },
+        resolvePath: function (path) {
+            return path;
+        }
+    });
+        
+
 
     var convertedMapWithOriginalFileNames = {};
     for (var file in convertedFileMap) {
