@@ -251,6 +251,36 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("RequireJsTestScripts")]
+        public void Will_include_only_given_file_patterns(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.IncludePatterns = new[] { "*\\ui\\*", "*core.js" }), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
+                               new[]
+                                   {
+                                      "tests\\ui\\ui.", "\\base\\core.js", "ui\\screen.js"
+                                   });
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
+        public void Will_exclude_given_file_patterns(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[] { "*\\ui\\*", "*core.js" }), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.CoverageObject,
+                               new[]
+                                   {
+                                       scriptPath, "tests\\base\\base."
+                                   });
+        }
+
+        [Theory]
+        [PropertyData("RequireJsTestScripts")]
         public void Will_resolve_requirejs_required_files_correctly(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -267,7 +297,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[]{"**\\require.js"}), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[]{"*\\require.js"}), new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(2, result.TotalCount);
         }
