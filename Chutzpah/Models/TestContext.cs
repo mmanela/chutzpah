@@ -8,8 +8,9 @@ namespace Chutzpah.Models
         {
             ReferencedJavaScriptFiles = new List<ReferencedFile>();
             TemporaryFiles = new List<string>();
+            TestFileSettings = new ChutzpahTestSettingsFile();    
         }
-
+        
         /// <summary>
         /// The test file given by the user
         /// </summary>
@@ -40,5 +41,10 @@ namespace Chutzpah.Models
         /// A list of temporary files that should be cleaned up after the test run is finished
         /// </summary>
         public IEnumerable<string> TemporaryFiles { get; set; }
+
+        /// <summary>
+        /// The chutzpah test settings found when building the context for this test
+        /// </summary>
+        public ChutzpahTestSettingsFile TestFileSettings { get; set; }
     }
 }

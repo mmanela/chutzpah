@@ -32,6 +32,12 @@ namespace Chutzpah.Models
             CodeCoverageExcludes = new List<string>();    
         }
 
+
+        /// <summary>
+        /// The time to wait for the tests to compelte in milliseconds
+        /// </summary>
+        public int? TestFileTimeout { get; set; }
+
         /// <summary>
         /// If not null tells Chutzpah which framework to use instead of detecting automatically
         /// </summary>

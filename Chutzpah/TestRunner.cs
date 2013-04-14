@@ -206,7 +206,7 @@ namespace Chutzpah
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildHarnessUrl(testContext.TestHarnessPath, testContext.IsRemoteHarness);
 
-            string runnerArgs = BuildRunnerArgs(options, fileUrl, runnerPath, testRunnerMode);
+            string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testRunnerMode);
             Func<ProcessStream, TestFileSummary> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
@@ -230,17 +230,18 @@ namespace Chutzpah
             }
         }
 
-        private static string BuildRunnerArgs(TestOptions options, string fileUrl, string runnerPath, TestRunnerMode testRunnerMode)
+        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestRunnerMode testRunnerMode)
         {
             string runnerArgs;
             var testModeStr = testRunnerMode.ToString().ToLowerInvariant();
-            if (options.TestFileTimeoutMilliseconds.HasValue && options.TestFileTimeoutMilliseconds > 0)
+            var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds;
+            if (timeout.HasValue && timeout > 0)
             {
                 runnerArgs = string.Format("\"{0}\" {1} {2} {3}",
                                            runnerPath,
                                            fileUrl,
                                            testModeStr,
-                                           options.TestFileTimeoutMilliseconds.Value);
+                                           timeout);
             }
             else
             {

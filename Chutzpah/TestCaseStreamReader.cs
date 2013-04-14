@@ -40,9 +40,9 @@ namespace Chutzpah
             if (processStream == null) throw new ArgumentNullException("processStream");
             if (testOptions == null) throw new ArgumentNullException("testOptions");
             if (testContext == null) throw new ArgumentNullException("testContext");
-
+            
             lastTestEvent = DateTime.Now;
-            var timeout = testOptions.TestFileTimeoutMilliseconds + 500; // Add buffer to timeout to account for serialization
+            var timeout = (testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500; // Add buffer to timeout to account for serialization
             var readerTask = Task<TestFileSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
             while (readerTask.Status == TaskStatus.WaitingToRun
                || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))

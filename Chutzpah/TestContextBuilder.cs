@@ -148,7 +148,8 @@ namespace Chutzpah
                         TestHarnessPath = testHtmlFilePath,
                         ReferencedJavaScriptFiles = referencedFiles,
                         TestRunner = definition.TestRunner,
-                        TemporaryFiles = temporaryFiles
+                        TemporaryFiles = temporaryFiles,
+                        TestFileSettings = chutzpahTestSettings
                     };
             }
 

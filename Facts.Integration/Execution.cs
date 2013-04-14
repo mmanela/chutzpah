@@ -246,6 +246,19 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact(Timeout = 4000)]
+        public void Will_execute_nothing_if_test_takes_longer_than_timeout_from_settings_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            // The time out from test options will get overridden by the one from the file
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\TimeoutSettings\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 3500 });
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(0, result.PassedCount);
+            Assert.Equal(0, result.TotalCount);
+        }
+
+        [Fact(Timeout = 4000)]
         public void Will_execute_nothing_if_test_file_has_infinite_loop()
         {
             var testRunner = TestRunner.Create();

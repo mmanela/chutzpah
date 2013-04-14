@@ -225,6 +225,27 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_use_timeout_from_context_if_exists()
+            {
+                var runner = new TestableTestRunner();
+                var summary = new TestFileSummary("somePath");
+                summary.AddTestCase(new TestCase());
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html", TestRunner = "runner", TestFileSettings = new ChutzpahTestSettingsFile{ TestFileTimeout = 6000} };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), It.IsAny<TestOptions>(), out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                string args = "\"jsPath\"" + @" ""file:///D:/harnessPath.html"" execution 6000";
+                runner.Mock<IProcessHelper>()
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, TestFileSummary>>()))
+                 .Returns(new ProcessResult<TestFileSummary>(0, summary));
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestFileTimeoutMilliseconds = 5000 });
+
+                Assert.Equal(1, res.TotalCount);
+            }
+
+            [Fact]
             public void Will_pass_testing_mode_option_to_test_runner()
             {
                 var runner = new TestableTestRunner();

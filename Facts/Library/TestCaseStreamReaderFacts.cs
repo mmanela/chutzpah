@@ -397,6 +397,23 @@ namespace Chutzpah.Facts
 
                 Assert.Null(summary);
             }
+
+            [Fact]
+            public void Will_use_timeout_from_context_if_available()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var context = new TestContext { InputTestFile = "file", TestFileSettings = new ChutzpahTestSettingsFile{ TestFileTimeout = 200} };
+                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
+                var process = new Mock<IProcessWrapper>();
+                var processStream = new ProcessStream(process.Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                process.Setup(x => x.Kill()).Throws(new InvalidOperationException());
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 2000 }, context, callback.Object, false);
+
+                Assert.Null(summary);
+            }
         }
     }
   
