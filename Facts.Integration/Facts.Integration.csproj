@@ -80,10 +80,13 @@
     <Content Include="JS\Test\chutzpahReferenceComment.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\jasmine-ddescribe-include-before.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\jasmine-ddescribe-run-nothing.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\jasmine-ddescribe.html">
+    <Content Include="JS\Test\jasmine-ddescribe-include-after.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\includeFileWithSyntaxError.ts">

@@ -18,7 +18,7 @@
     }
 
     function patchGlobal() {
-        // Add ddescribe and iit to window. If Jasmine has them, they will be overwritten.
+        // Add ddescribe and iit to window. If Jasmine has them and is included later, they will be overwritten.
         // Jasmine 2.0 removes globals, so this code will probably be affected at that point.
         window.ddescribe = function () {
             var jasmineEnv = jasmine.getEnv();
@@ -47,7 +47,9 @@
         jasmineEnv.specFilter = specFilter;
     }
 
-    patchGlobal();
+    if (!window.ddescribe) {
+        patchGlobal();
+    }
 
     return {
         patch: patchJasmine

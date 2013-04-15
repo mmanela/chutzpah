@@ -657,11 +657,23 @@ namespace Chutzpah.Facts.Integration
             }
 
             [Fact]
-            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file()
+            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_after_jasmine()
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.html", new ExceptionThrowingRunnerCallback());
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-after.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_before_jasmine()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-before.html", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(3, result.PassedCount);

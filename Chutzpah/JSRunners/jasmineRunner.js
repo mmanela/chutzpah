@@ -1,5 +1,4 @@
 ﻿/// <reference path="chutzpahRunner.js" />
-/// <reference path="../TestFiles/Jasmine/jasmine-ddescribe-iit.js" />
 /*globals phantom, chutzpah, window, jasmine*/
 
 (function () {
@@ -7,29 +6,7 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function resolveAgainst(path, anotherPath) {
-        var lastSlash = path.lastIndexOf('\\');
-        return path.substring(0, lastSlash + 1) + anotherPath;
-    }
-
-    function readAll(path) {
-        var f = fs.open(path, 'r');
-        try {
-            return f.read();
-        } finally {
-            f.close();
-        }
-    }
-
-    var fs = require('fs'),
-        system = require('system'),
-        scriptPath = system.args[0],
-        ddecribeIitScriptPath = resolveAgainst(scriptPath, '..\\TestFiles\\Jasmine\\jasmine-ddescribe-iit.js'),
-        onInitializedArg = readAll(ddecribeIitScriptPath);
-
-    function onInitialized(ddecribeIitScriptData) {
-        eval(ddecribeIitScriptData);
-    }
+    function onInitialized() { }
 
     function isTestingDone() {
         return window.chutzpah.isTestingFinished === true;
@@ -190,7 +167,7 @@
     }
 
     try {
-        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone, onInitializedArg);
+        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }
