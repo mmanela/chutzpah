@@ -1,4 +1,5 @@
-﻿using Chutzpah.Models;
+﻿using System;
+using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
 namespace Chutzpah.FileProcessors
@@ -21,13 +22,17 @@ namespace Chutzpah.FileProcessors
             {
                 return;
             }
+            var isCoffeeFile = referencedFile.Path.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase);
+            var regExp = isCoffeeFile
+                             ? RegexPatterns.QUnitTestRegexCoffeeScript
+                             : RegexPatterns.QUnitTestRegexJavaScript;
 
             var lines = fileSystem.GetLines(referencedFile.Path);
             int lineNum = 1;
 
             foreach (var line in lines)
             {
-                var match = RegexPatterns.QUnitTestRegexJavaScript.Match(line);
+                var match = regExp.Match(line);
 
                 while (match.Success)
                 {
@@ -35,7 +40,8 @@ namespace Chutzpah.FileProcessors
 
                     if (!string.IsNullOrWhiteSpace(testName))
                     {
-                        referencedFile.FilePositions.Add(lineNum, match.Index + 1);
+                        var testFunc = match.Groups["Tf"];
+                        referencedFile.FilePositions.Add(lineNum, testFunc.Index + 1);
                     }
 
                     match = match.NextMatch();

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Chutzpah.Compilers;
 using Chutzpah.Compilers.JavaScriptEngines;
+using Chutzpah.Exceptions;
 
 namespace Chutzpah.Wrappers
 {
@@ -17,8 +20,17 @@ namespace Chutzpah.Wrappers
         {
             readonly internal ManualResetEventSlim Gate = new ManualResetEventSlim();
 
+            private static readonly string[] ExcludeLines = new string[]
+                                                       {
+                                                           "Error WCode",
+                                                           "Error Code",
+                                                           "Microsoft JScript runtime error",
+                                                           "^at line"
+                                                       };
+
             public string Source { get; set; }
             public string Result { get; set; }
+            public string Error { get; set; }
             public Type CompilerType { get; set; }
             public object[] Args { get; set; }
 
@@ -29,9 +41,18 @@ namespace Chutzpah.Wrappers
                 Args = args;
             }
 
+            private static string StripErrorMessage(string msg)
+            {
+                return string.Join(Environment.NewLine, Regex.Split(msg, @"\r?\n").Where(s => !ExcludeLines.Any(l => Regex.IsMatch(s, l))));
+            }
+
             public string GetValueSync()
             {
                 Gate.Wait();
+                if (Error != null)
+                {
+                    throw new ChutzpahCompilationFailedException(StripErrorMessage(Error));
+                }
                 return Result;
             }
         }
@@ -75,6 +96,7 @@ namespace Chutzpah.Wrappers
                                                       {
                                                           // Note: You absolutely cannot let any exceptions bubble up, as it kills the app domain.
                                                           item.Result = String.Format("Conversion Error!!! - please report this if it happens frequently: {0}: {1}\n{2}", ex.GetType(), ex.Message, ex.StackTrace);
+                                                          item.Error = ex.Message;
                                                       }
 
                                                       item.Gate.Set();

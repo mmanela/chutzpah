@@ -99,6 +99,7 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
@@ -202,6 +203,9 @@
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
     <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
     <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
+    <Content Include="TestFiles\Jasmine\jasmine-ddescribe-iit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

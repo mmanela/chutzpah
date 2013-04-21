@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Chutzpah.Exceptions;
 using Chutzpah.Models;
+using Moq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -45,6 +49,24 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> SyntaxErrorScripts
+        {
+            get
+            {
+                return new[]
+                           {
+                               new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\includeFileWithSyntaxError.coffee", "unexpected ->"},
+                               new object[] {@"JS\Test\syntaxError.ts", @"JS\Test\includeFileWithSyntaxError.ts", "Expected ';'"}
+                           };
+            }
+        }
+
+        public Execution()
+        {
+            // Disable caching
+            GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = 0;
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_run_tests_from_a_js_file(string scriptPath)
@@ -56,6 +78,41 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_not_record_stack_trace_for_failed_jasmine_expectations()
+        {
+            var testRunner = TestRunner.Create();
+
+            testRunner.DebugEnabled = true;
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Null(result.Tests.Single().TestResults.Single().StackTrace);
+        }
+
+        [Fact]
+        public void Will_record_stack_trace_of_exception_thrown_in_code()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
+
+            var stackTrace = result.Tests.Single().TestResults.Single().StackTrace;
+            Assert.NotNull(stackTrace);
+            Assert.Contains("/jasmine-scriptError.js:5", stackTrace);
+        }
+
+        [Fact]
+        public void Will_strip_message_line_from_stack_trace_of_exception_thrown_in_code()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-scriptError.js", new ExceptionThrowingRunnerCallback());
+
+            var stackTrace = result.Tests.Single().TestResults.Single().StackTrace;
+            Assert.NotNull(stackTrace);
+            Assert.DoesNotContain("Error: CODE ERROR", stackTrace);
         }
 
         [Theory]
@@ -422,6 +479,39 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_run_test_which_logs_object_to_jasmine_log()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_capture_message_logged_via_console_log()
+        {
+            var testRunner = TestRunner.Create();
+
+            testRunner.DebugEnabled = true;
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal("hello", result.Logs.Single().Message);
+        }
+
+        [Fact]
+        public void Will_capture_message_logged_via_jasmine_log()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal("hello", result.Logs.Single().Message);
+        }
+
+        [Fact]
         public void Will_run_test_which_logs_object_to_console_error()
         {
             var testRunner = TestRunner.Create();
@@ -504,6 +594,120 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_report_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
+        {
+            var testRunner = TestRunner.Create();
+            Exception exception = null;
+            string path = null;
+            var callback = new Mock<ITestMethodRunnerCallback>();
+            callback.Setup(x => x.ExceptionThrown(It.IsAny<Exception>(), It.IsAny<string>()))
+                    .Callback<Exception, string>((e, s) => { exception = e; path = s; });
+
+            testRunner.RunTests(scriptPath, callback.Object);
+
+
+            Assert.True(path.Contains(scriptPath));
+            Assert.True(exception.Message.Contains(errorMessage));
+        }
+
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_pinpoint_the_correct_file_in_the_exception_when_script_compilation_fails(string scriptPath, string includeScriptPath, string errorMessage)
+        {
+            var testRunner = TestRunner.Create();
+            var callback = new Mock<ITestMethodRunnerCallback>();
+
+            testRunner.RunTests(includeScriptPath, callback.Object);
+
+            callback.Verify(x => x.ExceptionThrown(
+                It.Is((ChutzpahException ex) => ex.ToString().Contains(scriptPath)),
+                It.Is((string s) => s.Contains(includeScriptPath))
+                ));
+        }
+
+        [Theory]
+        [PropertyData("SyntaxErrorScripts")]
+        public void Will_strip_unnecessary_info_when_reporting_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
+        {
+            var testRunner = TestRunner.Create();
+            var callback = new Mock<ITestMethodRunnerCallback>();
+
+            testRunner.RunTests(scriptPath, callback.Object);
+
+            callback.Verify(x => x.ExceptionThrown(
+                It.Is((ChutzpahException ex) => !ex.Message.Contains("Microsoft JScript runtime error") &&
+                                                !ex.Message.Contains("Error Code") &&
+                                                !ex.Message.Contains("Error WCode") &&
+                                                !Regex.IsMatch(ex.Message, "^at line", RegexOptions.Multiline)
+                    ),
+                It.IsAny<string>()
+                                     ));
+        }
+
+        public class JasmineDdescribeIit
+        {
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_iit()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\jasmine-iit.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_after_jasmine()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-after.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_before_jasmine()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-before.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_chain_filters_correctly_when_running_jasmine_test_with_ddescribe_from_a_html_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-run-nothing.html", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.TotalCount);
+            }
+        }
+
         public class TypeScript
         {
             public static IEnumerable<object[]> TypeScriptTests
@@ -541,6 +745,20 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_report_a_failed_TypeScript_compilation_to_the_callback()
+            {
+                var testRunner = TestRunner.Create();
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.ts", callback.Object);
+
+                callback.Verify(x => x.ExceptionThrown(
+                    It.Is((ChutzpahException ex) => ex.Message.Contains("Expected ';'")),
+                    It.Is((string s) => s.Contains("syntaxError.ts"))
+                    ));
             }
         }
 

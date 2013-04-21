@@ -24,7 +24,8 @@
                     "jasmine\\jasmine.css", 
                     "jasmine\\jasmine.js", 
                     "jasmine\\jasmine-html.js", 
-                    "jasmine\\jasmine_favicon.png"
+                    "jasmine\\jasmine_favicon.png",
+                    "jasmine\\jasmine-ddescribe-iit.js"
                 };
         }
 

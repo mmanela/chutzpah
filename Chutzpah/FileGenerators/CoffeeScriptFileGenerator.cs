@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
 using Chutzpah.Wrappers;
@@ -28,19 +29,27 @@ namespace Chutzpah.FileGenerators
         {
             var compiledMap = (from referencedFile in referencedFiles
                                let content = fileSystem.GetText(referencedFile.Path)
-                               let jsText = GetOrAddCompiledToCache(content)
+                               let jsText = GetOrAddCompiledToCache(content, referencedFile.Path)
                                select new { FileName = referencedFile.Path, Content = jsText })
                               .ToDictionary(x => x.FileName, x => x.Content);
 
             return compiledMap;
         }
 
-        private string GetOrAddCompiledToCache(string content)
+        private string GetOrAddCompiledToCache(string content, string path)
         {
             var cached = compilerCache.Get(content);
             if(string.IsNullOrEmpty(cached))
             {
-                cached = coffeeScriptEngine.Compile(content);
+                try
+                {
+                    cached = coffeeScriptEngine.Compile(content);
+                }
+                catch (ChutzpahCompilationFailedException ex)
+                {
+                    ex.SourceFile = path;
+                    throw;
+                }
                 compilerCache.Set(content, cached);
             }
 

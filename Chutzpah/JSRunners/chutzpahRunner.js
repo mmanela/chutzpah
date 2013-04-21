@@ -137,7 +137,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
                 window.chutzpah = { testMode: 'execution' };
             });
         }
-        
+
         page.evaluate(onInitialized);
     };
     

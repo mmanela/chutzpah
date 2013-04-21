@@ -6,8 +6,8 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function onInitialized() {}
-    
+    function onInitialized() { }
+
     function isTestingDone() {
         return window.chutzpah.isTestingFinished === true;
     }
@@ -20,7 +20,13 @@
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
-        
+
+        function patchDdescribeIitSupport() {
+            if (window.ddescribeIitSupport) {
+                window.ddescribeIitSupport.patch(jasmine.getEnv());
+            }
+        }
+
         var activeTestCase = null,
             fileStartTime = null,
             testStartTime = null;
@@ -33,11 +39,21 @@
             }
         }
 
+        function recordStackTrace(trace) {
+            var stack = trace && trace.stack || null;
+            if (stack) {
+                stack = stack.split('\n').slice(1).join('\n');
+            }
+            return stack;
+        }
+
         var ChutzpahJasmineReporter = function () {
             var self = this;
 
             self.reportRunnerStarting = function (runner) {
-
+                // Must patch late since a HTML runner probably adds its on specFilter.
+                patchDdescribeIitSupport();
+                
                 fileStartTime = new Date().getTime();
 
                 // Testing began
@@ -65,18 +81,28 @@
             };
 
             self.reportSpecResults = function (spec) {
+                var results = spec.results();
+                if (results.skipped) {
+                    return;
+                }
                 var timetaken = new Date().getTime() - testStartTime;
                 activeTestCase.timetaken = timetaken;
-                var results = spec.results();
                 var resultItems = results.getItems();
                 for (var i = 0; i < resultItems.length; i++) {
                     var result = resultItems[i];
                     var testResult = {};
-                    
-                    // result.passed() may return (true/false) or (1,0) but we want to only return boolean
-                    testResult.passed = result.passed() ? true : false;
-                    testResult.message = result.message;
-                    activeTestCase.testResults.push(testResult);
+
+                    // Check the existance of result.passed, don't call it!
+                    if (result.passed) {
+                        // result.passed() may return (true/false) or (1,0) but we want to only return boolean
+                        testResult.passed = result.passed() ? true : false;
+                        testResult.message = result.message;
+                        testResult.stackTrace = recordStackTrace(result.trace);
+                        activeTestCase.testResults.push(testResult);
+                    } else {
+                        // Not an ExpectationResult, probably a MessageResult. Treat as any other log message.
+                        log({ type: 'Log', log: { message: result.toString() } });
+                    }
                 }
 
                 // Log test case when done. This will get picked up by phantom and streamed to chutzpah.
