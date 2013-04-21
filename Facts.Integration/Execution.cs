@@ -115,6 +115,20 @@ namespace Chutzpah.Facts.Integration
             Assert.DoesNotContain("Error: CODE ERROR", stackTrace);
         }
 
+        [Fact]
+        public void Will_run_tests_with_unicode_characters()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(
+                @"JS\Test\basic-unicode.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+            Assert.Equal("Polish special chars: ąćęłńóśżź", result.Tests.First().TestName);
+        }
+
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_run_tests_from_a_coffee_script_file(string scriptPath)

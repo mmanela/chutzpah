@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -15,6 +16,7 @@ namespace Chutzpah
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.FileName = exePath;
             p.StartInfo.Arguments = arguments;
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
             p.Start();
 
             // Output will be null if the stream reading times out
