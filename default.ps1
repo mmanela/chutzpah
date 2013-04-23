@@ -5,7 +5,7 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "2.3.0"
+  $mainVersion = "2.4.0"
 }
 
 # Aliases
@@ -109,6 +109,7 @@ task Package-Files -depends Clean-PackageFiles {
     
     create $filesDir, $packageDir
     copy-item "$baseDir\License.txt" -destination $filesDir
+    copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $filesDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
     
     cd $filesDir
@@ -127,6 +128,7 @@ task Package-NuGet -depends Clean-PackageFiles {
     create $nugetDir, $nugetTools, $packageDir
     
     copy-item "$baseDir\License.txt", $nuspec -destination $nugetDir
+    copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $nugetDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     $v = new-object -TypeName System.Version -ArgumentList $global:version
     regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)

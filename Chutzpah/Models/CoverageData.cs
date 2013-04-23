@@ -18,6 +18,11 @@ namespace Chutzpah.Models
         {
             get
             {
+                if (!this.Any())
+                {
+                    return 0;
+                }
+
                 if (!coveragePercentage.HasValue)
                 {
                     coveragePercentage = this.Average(x => x.Value.CoveragePercentage);

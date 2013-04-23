@@ -14,16 +14,20 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Added Chutzpah.json settings file support
-* Consistent conversion error (item 70)
-* System.IO.IOException: The handle is invalid when running from inside WebStorm (item 77)
-* Exception has been thrown by the target of an invocation. inside Visual Studio 2012 (item 65)
-* Tests are hanging (ChutzpahTimeoutException) (item 72)
-* Reference root path should be project (item 83)
-* Smarter coffeescript compilation (item 75)
-* Running with parallelism gives faulty timing (item 81)
-* Running with parallelism gives System.IO.IOException (item 74)
-* Compile all TypeScript files at the same time (item 82)
+* Added Code Coverage support (item 113)
+* Updated versions of QUnit(v1.11.0), TypeScript(v0.8.3) and CoffeeScript(v1.6.2)
+* jasmin-jQuery toContain tests fail with reason "Passed." (item 95)	
+* FileSearchLimit=300 cancels test run with more than 300 tests (item 89)
+* /failOnScriptError exits with 1 even when there are not errors (item 97)
+* 'undefined' is not a function after updating to 2.3 (item 96)
+* No tests found when using QUnit.test instead of test (item 94)
+* Allow including files without building them (item 93)
+* Improve "/openInBrowser" (item 91)
+* Add TestFileTimeout setting to chutzpah.json (item 110)
+* Need a later version of phantom bundled with Chutzpah (item 107)
+* QUnit test runner module gotcha in 2.3 (item 109)
+* Support for unicode (item 111)	
+* Improve CoffeeScript parse error reporting (item 80)
         </releaseNotes>
     </metadata>
 </package>

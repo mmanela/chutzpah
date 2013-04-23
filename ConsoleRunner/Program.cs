@@ -98,7 +98,7 @@ namespace Chutzpah
             Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
             Console.WriteLine("  /coverage              : Enable coverage collection");
             Console.WriteLine("  /coverageIncludes pat  : Only instrument files that match the given shell patterns (in glob format), comma separated.");
-            Console.WriteLine("  /coverageExclude pat   : Don't instrument files that match the given shell pattern (in glob format), comma separated.");
+            Console.WriteLine("  /coverageExcludes pat  : Don't instrument files that match the given shell pattern (in glob format), comma separated.");
             Console.WriteLine("  /compilercache         : File where compiled scripts can be cached. Defaults to a file in the temp directory.");
             Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb. Defaults to 32Mb.");
             Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
