@@ -91,9 +91,8 @@ namespace Chutzpah.Models
         public int?[] LineExecutionCounts { get; set; }
 
         /// <summary>
-        /// Contains the converted source code of the test file if the test file wasn't plain JavaScript.
-        /// Otherwise, contains <c>null</c>, in which case the path in <see cref="FilePath"/> can be
-        /// used to obtain the source code. Unlike the <see cref="LineExecutionCounts"/> array, this array
+        /// Contains the converted source code of the test file.
+        /// Unlike the <see cref="LineExecutionCounts"/> array, this array
         /// is 0-based, which means that the first item is the first line of the file.
         /// </summary>
         public string[] SourceLines { get; set; }
