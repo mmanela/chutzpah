@@ -311,9 +311,11 @@ namespace Chutzpah.Facts.Integration
 
             TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\timeoutTest.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
+            Assert.Equal(1, result.Errors.Count);
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
             Assert.Equal(0, result.TotalCount);
+
         }
 
         [Fact(Timeout = 4000)]
@@ -322,8 +324,9 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
 
             // The time out from test options will get overridden by the one from the file
-            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\TimeoutSettings\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 3500 });
+            TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\TimeoutSetting\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 3500 });
 
+            Assert.Equal(1, result.Errors.Count);
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
             Assert.Equal(0, result.TotalCount);
@@ -336,6 +339,7 @@ namespace Chutzpah.Facts.Integration
 
             TestCaseSummary result = testRunner.RunTests(new List<string> {@"JS\Test\spinWait.js"}, new TestOptions {TestFileTimeoutMilliseconds = 500});
 
+            Assert.Equal(1, result.Errors.Count);
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
             Assert.Equal(0, result.TotalCount);
