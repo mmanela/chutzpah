@@ -56,9 +56,10 @@ namespace Chutzpah
             }
             else
             {
-                // We timed out so kill the process
+                // We timed out so kill the process and return an empty test file summary
+                processStream.TimedOut = true;
                 processStream.KillProcess();
-                return null;
+                return new TestFileSummary(testContext.InputTestFile);
             }
         }
 

@@ -84,7 +84,8 @@ namespace Chutzpah
             Console.WriteLine("  /silent                : Do not output running test count");
             Console.WriteLine("  /teamcity              : Forces TeamCity mode (normally auto-detected)");
             Console.WriteLine("  /wait                  : Wait for input after completion");
-            Console.WriteLine("  /failOnScriptError     : Return a non-zero exit code if any script errors occurs");
+            Console.WriteLine("  /failOnError           : Return a non-zero exit code if any script errors or timeouts occurs");
+            Console.WriteLine("  /failOnScriptError     : Alias for failOnError (deprecated)");
             Console.WriteLine("  /debug                 : Print debugging information");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
@@ -94,7 +95,7 @@ namespace Chutzpah
             Console.WriteLine("                         : Specify more than one to add multiple paths.");
             Console.WriteLine("                         : If you give a folder, it will be scanned for testable files.");
             Console.WriteLine("                         : (e.g. /path test1.html /path testFolder)");
-            Console.WriteLine("  /file path             : Alias for /path");
+            Console.WriteLine("  /file path             : Alias for /path (deprecated)");
             Console.WriteLine("  /vsoutput              : Print output in a format that the VS error list recognizes");
             Console.WriteLine("  /coverage              : Enable coverage collection");
             Console.WriteLine("  /coverageIncludes pat  : Only instrument files that match the given shell patterns (in glob format), comma separated.");
@@ -155,7 +156,7 @@ namespace Chutzpah
             }
 
             var failedCount = testResultsSummary.FailedCount;
-            if (commandLine.FailOnScriptError && testResultsSummary.Errors.Any())
+            if (commandLine.FailOnError && testResultsSummary.Errors.Any())
             {
                 return failedCount > 0 ? failedCount : 1;
             }

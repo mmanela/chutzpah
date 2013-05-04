@@ -365,7 +365,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_null_after_test_file_timeout_and_kill_process()
+            public void Will_set_timed_out_after_test_file_timeout_and_kill_process()
             {
                 var reader = new TestableTestCaseStreamReader();
 
@@ -377,7 +377,8 @@ namespace Chutzpah.Facts
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 200 }, context, callback.Object, false);
 
-                Assert.Null(summary);
+                Assert.NotNull(summary);
+                Assert.True(processStream.TimedOut);
                 process.Verify(x => x.Kill());
             }
 
@@ -395,7 +396,8 @@ namespace Chutzpah.Facts
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 200 }, context, callback.Object, false);
 
-                Assert.Null(summary);
+                Assert.NotNull(summary);
+                process.Verify(x => x.Kill());
             }
 
             [Fact]
@@ -412,7 +414,8 @@ namespace Chutzpah.Facts
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 2000 }, context, callback.Object, false);
 
-                Assert.Null(summary);
+                Assert.NotNull(summary);
+                process.Verify(x => x.Kill());
             }
         }
     }

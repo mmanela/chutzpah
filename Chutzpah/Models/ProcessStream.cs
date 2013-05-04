@@ -27,5 +27,7 @@ namespace Chutzpah.Models
                 // Supress any exception from here since there is nothing more we can do
             }
         }
+
+        public bool TimedOut { get; set; }
     }
 }

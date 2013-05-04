@@ -20,12 +20,11 @@ namespace Chutzpah
             p.Start();
 
             // Output will be null if the stream reading times out
-            var output = streamProcessor(new ProcessStream(new ProcessWrapper(p), p.StandardOutput)); 
+            var processStream = new ProcessStream(new ProcessWrapper(p), p.StandardOutput);
+            var output = streamProcessor(processStream); 
             p.WaitForExit(5000);
-            
-            return output == null
-                       ? new ProcessResult<T>((int) TestProcessExitCode.Timeout, default(T))
-                       : new ProcessResult<T>(p.ExitCode, output);
+
+            return new ProcessResult<T>(processStream.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
         }
 
         public void LaunchFileInBrowser(string file)

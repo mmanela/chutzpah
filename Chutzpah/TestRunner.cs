@@ -132,7 +132,7 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
 
             var overallSummary = new TestCaseSummary();
-            
+
             // Concurrent collection used to gather the parallel results from
             var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
             var resultCount = 0;
@@ -162,8 +162,8 @@ namespace Chutzpah
                             testFileSummaries.Enqueue(testSummary);
                         }
 
-                        
-                        if(!DebugEnabled && !options.OpenInBrowser)
+
+                        if (!DebugEnabled && !options.OpenInBrowser)
                         {
                             // Don't clean up context if in debug mode
                             testContextBuilder.CleanupContext(testContext);
@@ -187,7 +187,7 @@ namespace Chutzpah
 
 
             // Gather TestFileSummaries into TaseCaseSummary
-            foreach(var fileSummary in testFileSummaries)
+            foreach (var fileSummary in testFileSummaries)
             {
                 overallSummary.Append(fileSummary);
             }
@@ -211,22 +211,39 @@ namespace Chutzpah
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
-            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile);
+            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile, processResult.Model.Errors, callback);
 
             return processResult.Model;
         }
 
-        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile)
+        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile, IList<TestError> errors, ITestMethodRunnerCallback callback)
         {
+            string errorMessage = null;
+
             switch ((TestProcessExitCode)exitCode)
             {
                 case TestProcessExitCode.AllPassed:
                 case TestProcessExitCode.SomeFailed:
                     return;
                 case TestProcessExitCode.Timeout:
-                    throw new ChutzpahTimeoutException("Timeout occured when running " + inputTestFile);
+                    errorMessage = "Timeout occured when executing test file";
+                    break;
                 default:
-                    throw new ChutzpahException("Unknown error occured when running " + inputTestFile);
+                    errorMessage = "Unknown error occurred when executing test file. Recieved exit code of " + exitCode;
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                var error = new TestError
+                {
+                    InputTestFile = inputTestFile,
+                    Message = errorMessage
+                };
+
+                errors.Add(error);
+
+                callback.FileError(error);
             }
         }
 

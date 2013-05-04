@@ -87,36 +87,36 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
-        public class FailOnScriptErrorOptionFacts
+        public class FailOnErrorOptionFacts
         {
             [Fact]
-            public void FailOnScriptError_Option_Not_Passed_Is_False()
+            public void FailOnError_Option_Not_Passed_Is_False()
             {
                 var arguments = new[] { "test.html" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.False(commandLine.FailOnScriptError);
+                Assert.False(commandLine.FailOnError);
             }
 
             [Fact]
-            public void FailOnScriptError_Option_Passed_Is_True()
+            public void FailOnError_Option_Passed_Is_True()
             {
-                var arguments = new[] { "test.html", "/failOnScriptError" };
+                var arguments = new[] { "test.html", "/failOnError" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.True(commandLine.FailOnScriptError);
+                Assert.True(commandLine.FailOnError);
             }
 
             [Fact]
-            public void FailOnScriptError_Option_Ignore_Case_Is_True()
+            public void FailOnError_Option_Ignore_Case_Is_True()
             {
                 var arguments = new[] { "test.html", "/fAilONScriptERRor" };
 
                 var commandLine = TestableCommandLine.Create(arguments);
 
-                Assert.True(commandLine.FailOnScriptError);
+                Assert.True(commandLine.FailOnError);
             }
         }
 

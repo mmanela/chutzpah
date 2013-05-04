@@ -462,7 +462,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_throw_and_record_timeout_exception_from_test_runner()
+            public void Will_record_timeout_exception_from_test_runner()
             {
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
@@ -479,12 +479,13 @@ namespace Chutzpah.Facts
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html"}, testCallback.Object);
 
-                testCallback.Verify(x => x.ExceptionThrown(It.IsAny<ChutzpahTimeoutException>(), @"path\tests.html"));
-                Assert.Equal(0, res.TotalCount);
+                testCallback.Verify(x => x.FileError(It.IsAny<TestError>()));
+                Assert.Equal(1, res.TotalCount);
+                Assert.Equal(1, res.Errors.Count);
             }
 
             [Fact]
-            public void Will_throw_and_record_unknown_exception_from_test_runner()
+            public void Will_record_unknown_exception_from_test_runner()
             {
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
@@ -501,8 +502,9 @@ namespace Chutzpah.Facts
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
 
-                testCallback.Verify(x => x.ExceptionThrown(It.IsAny<ChutzpahException>(), @"path\tests.html"));
-                Assert.Equal(0, res.TotalCount);
+                testCallback.Verify(x => x.FileError(It.IsAny<TestError>()));
+                Assert.Equal(1, res.TotalCount);
+                Assert.Equal(1, res.Errors.Count);
             }
         }
     }

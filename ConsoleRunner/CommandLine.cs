@@ -23,7 +23,7 @@ namespace Chutzpah
             Parse();
         }
 
-        public bool FailOnScriptError { get; set; }
+        public bool FailOnError { get; set; }
 
         public bool Debug { get; protected set; }
 
@@ -96,10 +96,10 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     Debug = true;
                 }
-                else if (optionName == "/failonscripterror")
+                else if (optionName == "/failonerror" || optionName == "/failonscripterror")
                 {
                     GuardNoOptionValue(option);
-                    FailOnScriptError = true;
+                    FailOnError = true;
                 }
                 else if (optionName == "/openinbrowser")
                 {
