@@ -129,6 +129,19 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal("Polish special chars: ąćęłńóśżź", result.Tests.First().TestName);
         }
 
+
+        [Fact]
+        public void Will_encode_file_path_of_test_file()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\C#\pathEncoding.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_run_tests_from_a_coffee_script_file(string scriptPath)

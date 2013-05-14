@@ -734,7 +734,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_prepend_scheme_and_convert_slashes_of_a_path_without_a_scheme()
+            public void Will_prepend_scheme_and_convert_slashes_of_a_path_without_a_scheme_and_encode()
             {
                 var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\file\path.js");
 
@@ -742,7 +742,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_prepend_scheme_and_convert_slashes_of_a_path_containing_a_scheme()
+            public void Will_prepend_scheme_and_convert_slashes_of_a_path_containing_a_scheme_and_encode()
             {
                 var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\http://.js");
 

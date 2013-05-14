@@ -69,6 +69,16 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_get_coverage_for_path_that_needs_encoding()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\C#\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\C#\pathEncoding.js", "JS\\Code\\code.js" });
+        }
+
+        [Fact]
         public void Will_include_files_from_settings_file()
         {
             var testRunner = TestRunner.Create();

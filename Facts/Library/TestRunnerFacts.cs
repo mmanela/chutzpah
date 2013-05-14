@@ -16,7 +16,7 @@ namespace Chutzpah.Facts
     {
         private class TestableTestRunner : Testable<TestRunner>
         {
-            public static string ExecutionPhantomArgs = BuildArgs("runner.js","file:///D:/harnessPath.html", "execution",Constants.DefaultTestFileTimeout);
+            public static string ExecutionPhantomArgs = BuildArgs("runner.js", "file:///D:/harnessPath.html", "execution", Constants.DefaultTestFileTimeout);
 
             public TestableTestRunner()
             {

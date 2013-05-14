@@ -112,6 +112,13 @@ namespace Chutzpah.Coverage
                 }
 
                 string filePath = uri.LocalPath;
+
+                // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
+                // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
+                filePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(filePath, "$1");
+                var fileUri = new Uri(filePath, UriKind.RelativeOrAbsolute);
+                filePath = fileUri.LocalPath;
+                
                 string newKey;
                 if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
                 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Web;
 using Chutzpah.Extensions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
@@ -176,6 +177,14 @@ namespace Chutzpah
                 return filePath;
 
             return null;
+        }
+
+        public static string EncodeFilePath(string path)
+        {
+            return HttpUtility.UrlEncode(path)
+                .Replace("%3a", ":")
+                .Replace("%5c", "/")
+                .Replace("%2f", "/");
         }
     }
 }

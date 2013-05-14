@@ -91,6 +91,13 @@ namespace Chutzpah.Facts.Library
             }
 
             [Fact]
+            public void Will_encode_path()
+            {
+                var script = new Script(new ReferencedFile { Path = "C#/file.js" });
+                Assert.Equal("file:///C%23/file.js", script.Attributes["src"]);
+            }
+
+            [Fact]
             public void Will_have_explicit_end_tag_and_no_content()
             {
                 var script = new Script(new ReferencedFile { Path = "file.js" });

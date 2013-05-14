@@ -277,7 +277,7 @@ namespace Chutzpah
             else
             {
                 const string fileUrlFormat = "\"file:///{0}\"";
-                return string.Format(fileUrlFormat, absolutePath.Replace("\\", "/"));
+                return string.Format(fileUrlFormat, FileProbe.EncodeFilePath(absolutePath));
             }
         }
     }

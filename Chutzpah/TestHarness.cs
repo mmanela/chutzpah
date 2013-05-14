@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using Chutzpah.Models;
 
 namespace Chutzpah
@@ -189,12 +190,12 @@ namespace Chutzpah
 
             if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath))
             {
-                return "file:///" + referencePath.Replace('\\', '/');
+                // Encode the reference path and then decode / (forward slash) and \ (back slash) into / (forward slash)
+                return "file:///" + FileProbe.EncodeFilePath(referencePath);
             }
 
             return referencePath;
         }
-
     }
 
     public class ExternalStylesheet : TestHarnessItem
