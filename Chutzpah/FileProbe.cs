@@ -182,6 +182,7 @@ namespace Chutzpah
         public static string EncodeFilePath(string path)
         {
             return HttpUtility.UrlEncode(path)
+                .Replace("+", "%20")
                 .Replace("%3a", ":")
                 .Replace("%5c", "/")
                 .Replace("%2f", "/");

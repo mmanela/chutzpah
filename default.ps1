@@ -5,7 +5,7 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "2.4.0"
+  $mainVersion = "2.4.1"
 }
 
 # Aliases

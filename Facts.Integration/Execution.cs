@@ -131,11 +131,23 @@ namespace Chutzpah.Facts.Integration
 
 
         [Fact]
-        public void Will_encode_file_path_of_test_file()
+        public void Will_encode_file_path_of_test_file_with_hash_tag()
         {
             var testRunner = TestRunner.Create();
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\C#\pathEncoding.js", new ExceptionThrowingRunnerCallback());
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\PathEncoding\C#\pathEncoding.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public void Will_encode_file_path_of_test_file_with_space()
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\PathEncoding\With Space+\pathEncoding.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);

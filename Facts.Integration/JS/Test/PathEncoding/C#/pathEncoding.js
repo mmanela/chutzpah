@@ -1,4 +1,4 @@
-﻿/// <reference path="../../code/code.js" />
+﻿/// <reference path="../../../code/code.js" />
 
   test("Will encode file path", function () {
       var count = stringLib.vowels("hello");

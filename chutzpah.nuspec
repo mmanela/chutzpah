@@ -14,20 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Added Code Coverage support (item 113)
-* Updated versions of QUnit(v1.11.0), TypeScript(v0.8.3) and CoffeeScript(v1.6.2)
-* jasmin-jQuery toContain tests fail with reason "Passed." (item 95)	
-* FileSearchLimit=300 cancels test run with more than 300 tests (item 89)
-* /failOnScriptError exits with 1 even when there are not errors (item 97)
-* 'undefined' is not a function after updating to 2.3 (item 96)
-* No tests found when using QUnit.test instead of test (item 94)
-* Allow including files without building them (item 93)
-* Improve "/openInBrowser" (item 91)
-* Add TestFileTimeout setting to chutzpah.json (item 110)
-* Need a later version of phantom bundled with Chutzpah (item 107)
-* QUnit test runner module gotcha in 2.3 (item 109)
-* Support for unicode (item 111)	
-* Improve CoffeeScript parse error reporting (item 80)
+* Code Coverage with TeamCity (item 115)
+* Console runner does not correctly set error code (item 116)
+* Chutzpah Fails When '#' Character in Test File Path (item 99)
+* Code Coverage errors if any uri is a mapped drive path (item 118)
         </releaseNotes>
     </metadata>
 </package>
