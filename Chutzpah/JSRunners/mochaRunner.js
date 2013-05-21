@@ -74,7 +74,7 @@
                 var testResult = {};
                 testResult.passed = test.state == 'passed';
                 
-                if (testResult.passed) {
+                if (!testResult.passed && !!test.pending) {
                     var str = test.err.stack || test.err.toString();
                     testResult.message = test.err.message;
                     testResult.stackTrace = str;
