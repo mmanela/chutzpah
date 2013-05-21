@@ -115,6 +115,7 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FileProbe.cs" />
     <Compile Include="FrameworkDefinitions\BaseFrameworkDefinition.cs" />
+    <Compile Include="FrameworkDefinitions\MochaDefinition.cs" />
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
@@ -192,6 +193,9 @@
     <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="JSRunners\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Coverage\blanket_jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -221,6 +225,16 @@
     <Content Include="TestFiles\Jasmine\jasmine.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestFiles\Mocha\mocha.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\version.txt" />
     <Content Include="TestFiles\QUnit\qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
