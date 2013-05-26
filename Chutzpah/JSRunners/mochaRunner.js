@@ -74,10 +74,21 @@
                 var testResult = {};
                 testResult.passed = test.state == 'passed';
                 
-                if (!testResult.passed && !!test.pending) {
+                if (!testResult.passed && !test.pending) {
                     var str = test.err.stack || test.err.toString();
                     testResult.message = test.err.message;
                     testResult.stackTrace = str;
+
+                    console.log("MESSAGE: " + test.err.message);
+                    console.log("STACK: " + test.err.stack);
+                    console.log("ERRTS: " + test.err.toString());
+                    console.log("ACTUAL: " + testResult.actual);
+                    console.log("EXPECTED: " + testResult.expected);
+                    
+                    if (test.err.actual !== undefined || test.err.expected !== undefined) {
+                        testResult.actual = test.err.actual;
+                        testResult.expected = test.err.expected;
+                    }
                 }
                 
                 activeTestCase.testResults.push(testResult);
