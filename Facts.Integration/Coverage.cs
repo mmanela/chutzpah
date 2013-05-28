@@ -69,13 +69,23 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_get_coverage_for_path_that_needs_encoding()
+        public void Will_get_coverage_for_path_with_hash_tag()
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(@"JS\Test\C#\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(@"JS\Test\PathEncoding\C#\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
 
-            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\C#\pathEncoding.js", "JS\\Code\\code.js" });
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\PathEncoding\C#\pathEncoding.js", "JS\\Code\\code.js" });
+        }
+
+        [Fact]
+        public void Will_get_coverage_for_path_with_space()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\PathEncoding\With Space+\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\PathEncoding\With Space+\pathEncoding.js", "JS\\Code\\code.js" });
         }
 
         [Fact]
@@ -143,13 +153,13 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_not_create_a_coverage_object_if_coverage_is_disabled()
+        public void Will_create_empty_coverage_object_if_coverage_is_disabled()
         {
             var testRunner = TestRunner.Create(true);
 
             var result = testRunner.RunTests(ABasicTestScript, new ExceptionThrowingRunnerCallback());
 
-            Assert.Null(result.TestFileSummaries.Single().CoverageObject);
+            Assert.Empty(result.TestFileSummaries.Single().CoverageObject);
         }
 
         [Fact]
@@ -167,7 +177,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_exclude_specified_files_from_the_coverage_report()
         {
             var testRunner = TestRunner.Create();
-
             var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePatterns = new[]{"**\\" + ABasicTestScript}),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;

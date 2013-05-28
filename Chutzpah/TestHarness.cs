@@ -169,7 +169,14 @@ namespace Chutzpah
             builder.Append(tagName);
             foreach (var entry in Attributes)
             {
-                builder.AppendFormat(@" {0}=""{1}""", entry.Key, entry.Value);
+                if (entry.Value == null)
+                {
+                    builder.AppendFormat(@" {0} ", entry.Key);
+                }
+                else
+                {
+                    builder.AppendFormat(@" {0}=""{1}""", entry.Key, entry.Value);
+                }
             }
             if (explicitEndTag || contents != null)
             {

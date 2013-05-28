@@ -8,6 +8,7 @@ namespace Chutzpah.Models
         public TestFileSummary(string path)
         {
             Path = path;
+            CoverageObject = new CoverageData();
         }
 
         /// <summary>

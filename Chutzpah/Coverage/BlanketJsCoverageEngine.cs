@@ -44,12 +44,12 @@ namespace Chutzpah.Coverage
             FrameworkSpecificInfo info = GetInfo(definition);
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
-            IEnumerable<string> dontCover =
-                harness.TestFrameworkDependencies.Where(
-                    dep =>
-                    dep.HasFile && IsScriptFile(dep.ReferencedFile)).Select(dep => dep.Attributes["src"]);
-            string dataCoverNever = "[" + string.Join(",", dontCover.Select(file => "'" + file + "'")) + "]";
-            
+            IList<string> filesToExcludeFromCoverage =
+                harness.TestFrameworkDependencies
+                .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
+                .Select(dep => dep.Attributes["src"])
+                .ToList();
+
             // Remove require.js if found amoung the referenced scripts. It's included in Blanket, and
             // it cannot come after the main Blanket include. Simplest approach is to remove it!
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
@@ -62,23 +62,28 @@ namespace Chutzpah.Coverage
                 }
             }
 
-            // Let BlanketJS handle *ALL* scripts, even if we in theory could exclude some of them
-            // already at this point. But that causes order problems.
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
             {
-                refScript.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
+                // Exclude files which the user is asking us to ignores
+                if (!IsFileEligibleForInstrumentation(refScript.ReferencedFile.Path))
+                {
+                    filesToExcludeFromCoverage.Add(refScript.Attributes["src"]);
+                }
+                else
+                {
+                    refScript.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
+                }
             }
 
             // Name the coverage object so that the JS runner can pick it up.
             harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
 
-            // Configure Blanket. We let Blanket instrument everything, and then remove stuff from the coverage
-            // object afterwards. The reasons are:
-            // *) The user should be able to use simple wildcards instead of regular expressions for include/exclude.
-            // *) The include/exclude patterns apply to original file paths rather than generated ones.
-            // *) RequireJS includes are done at "runtime", so we cannot process them in advance.
+            // Configure Blanket.
             TestHarnessItem blanketMain = harness.TestFrameworkDependencies.Single(
                                             d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
+
+            string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
+
             blanketMain.Attributes.Add("data-cover-flags", "ignoreError autoStart");
             blanketMain.Attributes.Add("data-cover-only", "//.*/");
             blanketMain.Attributes.Add("data-cover-never", dataCoverNever);
@@ -118,7 +123,7 @@ namespace Chutzpah.Coverage
                 filePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(filePath, "$1");
                 var fileUri = new Uri(filePath, UriKind.RelativeOrAbsolute);
                 filePath = fileUri.LocalPath;
-                
+
                 string newKey;
                 if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
                 {
