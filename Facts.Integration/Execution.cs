@@ -56,7 +56,7 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                            {
                                new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\includeFileWithSyntaxError.coffee", "unexpected ->"},
-                               new object[] {@"JS\Test\syntaxError.ts", @"JS\Test\includeFileWithSyntaxError.ts", "Expected ';'"}
+                               new object[] {@"JS\Test\syntaxError.ts", @"JS\Test\includeFileWithSyntaxError.ts", "'=' expected"}
                            };
             }
         }
@@ -799,7 +799,7 @@ namespace Chutzpah.Facts.Integration
                 TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.ts", callback.Object);
 
                 callback.Verify(x => x.ExceptionThrown(
-                    It.Is((ChutzpahException ex) => ex.Message.Contains("Expected ';'")),
+                    It.Is((ChutzpahException ex) => ex.Message.Contains("'=' expected")),
                     It.Is((string s) => s.Contains("syntaxError.ts"))
                     ));
             }

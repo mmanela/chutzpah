@@ -23,16 +23,14 @@ Buffer.prototype = {
 };
 
 function compilify_ts(fileMapStr, codeGenTarget) {
-
-    var settings = TypeScript.defaultSettings;
+    
+    var settings = new TypeScript.CompilationSettings();
 
     if (codeGenTarget === "ES3") {
-        settings.codeGenTarget = TypeScript.CodeGenTarget.ES3;
-        TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES3;
+        settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
     }
     else if (codeGenTarget === "ES5") {
-        settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
-        TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES5;
+        settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
     }
 
     var fileMap = JSON.parse(fileMapStr);
@@ -46,24 +44,37 @@ function compilify_ts(fileMapStr, codeGenTarget) {
         return outFname;
     }
 
-    function createFile(fileName) {
-        var buffer = new Buffer();
-        convertedFileMap[fileName] = buffer;
-        return buffer;
-    }
-
-    var errors = new Buffer();
-    var logger = new Buffer();
     try {
-        var compiler = new TypeScript.TypeScriptCompiler(errors, logger, settings);
+        var compiler = new TypeScript.TypeScriptCompiler(new TypeScript.NullLogger(), settings);
         for (var fileName in fileMap) {
             if (fileMap.hasOwnProperty(fileName)) {
-                compiler.addUnit(fileMap[fileName], fileName);
+                var snapshot = TypeScript.ScriptSnapshot.fromString(fileMap[fileName]);
+                compiler.addSourceUnit(fileName, snapshot, "None", 0, true);
             }
         }
-        compiler.typeCheck();
-        compiler.emit({
-            createFile: createFile,
+
+        // check for errors
+        var allErrors = "";
+        for (var fileName in fileMap) {
+            if (fileMap.hasOwnProperty(fileName)) {
+                var syntacticDiagnostics = compiler.getSyntacticDiagnostics(fileName);
+                for (var diag in syntacticDiagnostics) {
+                    allErrors += fileName + ": " + syntacticDiagnostics[diag].message() + "\n";
+                }
+            }
+        }
+        if (allErrors) {
+            throw new Error(allErrors);
+        }
+
+        compiler.pullTypeCheck();
+
+        compiler.emitAll({
+            writeFile: function (fileName, contents, writeByteOrderMark) {
+                var buffer = new Buffer();
+                buffer.Write(contents);
+                convertedFileMap[fileName] = buffer;
+            },
             fileExists: function (path) {
                 return false;
             },
