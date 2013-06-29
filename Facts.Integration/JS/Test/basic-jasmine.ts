@@ -1,4 +1,6 @@
-﻿/// <reference path="../code/code.ts" />
+﻿/// <reference path="TypeScript/lib.d.ts" />
+/// <reference path="TypeScript/jasmine.d.ts" />
+/// <reference path="../code/code.ts" />
 /// <reference path="jasmine.js" />
 
 describe("general", function () {

@@ -22,19 +22,107 @@ Buffer.prototype = {
     }
 };
 
+function ErrorReporter() {
+    this.errorMessages = [];
+    this.currentFile = "";
+}
+
+ErrorReporter.prototype = {
+    addDiagnostic: function (diagnostic) {
+        this.errorMessages.push(this.currentFile + ": " + diagnostic.message());
+    },
+    setCurrentFile: function (fileName) {
+        this.currentFile = fileName;
+    },
+    doThrow: function () {
+        throw new Error(this.errorMessages.join("\r\n"));
+    }
+};
+
 function compilify_ts(fileMapStr, codeGenTarget) {
-    
-    var settings = new TypeScript.CompilationSettings();
+    var compilationSettings = new TypeScript.CompilationSettings();
 
     if (codeGenTarget === "ES3") {
-        settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
-    }
-    else if (codeGenTarget === "ES5") {
-        settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+        compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
+    } else if (codeGenTarget === "ES5") {
+        compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
     }
 
     var fileMap = JSON.parse(fileMapStr);
     var convertedFileMap = {};
+
+    var logger = new Buffer();
+    var compiler = new TypeScript.TypeScriptCompiler(logger, compilationSettings);
+
+    var anySyntacticErrors = false;
+    var anySemanticErrors = false;
+
+    var errorReporter = new ErrorReporter();
+    
+    // add the rest
+    for (var fileName in fileMap) {
+        if (fileMap.hasOwnProperty(fileName)) {
+            var fileText = fileMap[fileName];
+            var snapshot = TypeScript.ScriptSnapshot.fromString(fileText);
+            var referencedFiles = TypeScript.getReferencedFiles(fileName, snapshot);
+            compiler.addSourceUnit(fileName, snapshot, "None", 0, true, referencedFiles);
+
+            var syntacticDiagnostics = compiler.getSyntacticDiagnostics(fileName);
+            errorReporter.setCurrentFile(fileName);
+            compiler.reportDiagnostics(syntacticDiagnostics, errorReporter);
+
+            if (syntacticDiagnostics.length > 0) {
+                anySyntacticErrors = true;
+            }
+        }
+    }
+
+    if (anySyntacticErrors) {
+        errorReporter.doThrow();
+    }
+
+    compiler.pullTypeCheck();
+    var fileNames = compiler.fileNameToDocument.getAllKeys();
+    for (var i = 0, n = fileNames.length; i < n; i++) {
+        var fileName = fileNames[i];
+        var semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
+        if (semanticDiagnostics.length > 0) {
+            anySemanticErrors = true;
+            errorReporter.setCurrentFile(fileName);
+            compiler.reportDiagnostics(semanticDiagnostics, errorReporter);
+        }
+    }
+
+    var emitterIOHost = {
+        writeFile: function(fileName, contents, writeByteOrderMark) {
+            var buffer = new Buffer();
+            buffer.Write(contents);
+            convertedFileMap[fileName] = buffer;
+        },
+        fileExists: function(path) {
+            return false;
+        },
+        directoryExists: function(path) {
+            return false;
+        },
+        resolvePath: function(path) {
+            return path;
+        }
+    };
+
+    var emitDiagnostics = compiler.emitAll(emitterIOHost);
+    errorReporter.setCurrentFile("");
+    compiler.reportDiagnostics(emitDiagnostics, errorReporter);
+    if (emitDiagnostics.length > 0 || anySemanticErrors) {
+        errorReporter.doThrow();
+    }
+
+    var emitDeclarationsDiagnostics = compiler.emitAllDeclarations();
+    errorReporter.setCurrentFile("");
+    compiler.reportDiagnostics(emitDeclarationsDiagnostics, errorReporter);
+    if (emitDeclarationsDiagnostics.length > 0) {
+        errorReporter.doThrow();
+    }
 
     function changeExtension(fname, ext) {
         var splitFname = fname.split(".");
@@ -42,53 +130,6 @@ function compilify_ts(fileMapStr, codeGenTarget) {
         var baseName = splitFname.join(".");
         var outFname = baseName + "." + ext;
         return outFname;
-    }
-
-    try {
-        var compiler = new TypeScript.TypeScriptCompiler(new TypeScript.NullLogger(), settings);
-        for (var fileName in fileMap) {
-            if (fileMap.hasOwnProperty(fileName)) {
-                var snapshot = TypeScript.ScriptSnapshot.fromString(fileMap[fileName]);
-                compiler.addSourceUnit(fileName, snapshot, "None", 0, true);
-            }
-        }
-
-        // check for errors
-        var allErrors = "";
-        for (var fileName in fileMap) {
-            if (fileMap.hasOwnProperty(fileName)) {
-                var syntacticDiagnostics = compiler.getSyntacticDiagnostics(fileName);
-                for (var diag in syntacticDiagnostics) {
-                    allErrors += fileName + ": " + syntacticDiagnostics[diag].message() + "\n";
-                }
-            }
-        }
-        if (allErrors) {
-            throw new Error(allErrors);
-        }
-
-        compiler.pullTypeCheck();
-
-        compiler.emitAll({
-            writeFile: function (fileName, contents, writeByteOrderMark) {
-                var buffer = new Buffer();
-                buffer.Write(contents);
-                convertedFileMap[fileName] = buffer;
-            },
-            fileExists: function (path) {
-                return false;
-            },
-            directoryExists: function (path) {
-                return false;
-            },
-            resolvePath: function (path) {
-                return path;
-            }
-        });
-    } catch (e) {
-        // Without this, we get 'Exception thrown and not caught' as
-        // error message instead.
-        throw new Error(e.message);
     }
 
     var convertedMapWithOriginalFileNames = {};

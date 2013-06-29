@@ -8,6 +8,7 @@
         Folder,
         CoffeeScript,
         TypeScript,
+        TypeScriptDef,
         Url
     }
 }

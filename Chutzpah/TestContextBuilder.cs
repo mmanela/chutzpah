@@ -213,6 +213,7 @@ namespace Chutzpah
         {
             return testFileKind != PathType.JavaScript
                    && testFileKind != PathType.TypeScript
+                   && testFileKind != PathType.TypeScriptDef
                    && testFileKind != PathType.CoffeeScript
                    && testFileKind != PathType.Url
                    && testFileKind != PathType.Html;
