@@ -44,7 +44,7 @@ namespace Chutzpah.RunnerCallbacks
         {
             Console.WriteLine();
 
-            if (testResultsSummary.CoverageObject != null)
+            if (testResultsSummary.CoverageObject != null && testResultsSummary.CoverageObject.Any())
             {
                 PrintCodeCoverageResults(testResultsSummary.CoverageObject);
             }
