@@ -33,10 +33,6 @@ var mathLib = {
     }
 };
 
-var errorThing = {
-    thing: ["thing" + someUndefinedVariable]
-};
-
 function throwError() {
     throw "CODE ERROR";
 }

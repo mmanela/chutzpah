@@ -1,4 +1,6 @@
-﻿/// <reference path="../code/code.ts" />
+﻿/// <reference path="TypeScript/lib.d.ts" />
+/// <reference path="TypeScript/jasmine.d.ts" />
+/// <reference path="../code/code.ts" />
 /// <reference path="jasmine.js" />
 
 describe("general", function () {
@@ -13,7 +15,7 @@ describe("stringLib", function () {
     it("will get vowel count", function () {
         var stringPlus = new StringPlus("hello");
 
-        var count = stringPlus.countVowels("hello");
+        var count = stringPlus.countVowels();
 
         expect(count).toEqual(2);
     });

@@ -18,6 +18,7 @@ namespace Chutzpah
             new Dictionary<string, PathType>
             {
                 {Constants.TypeScriptExtension,PathType.TypeScript},
+                {Constants.TypeScriptDefExtension,PathType.TypeScriptDef},
                 {Constants.CoffeeScriptExtension,PathType.CoffeeScript},
                 {Constants.JavaScriptExtension,PathType.JavaScript},
                 {Constants.HtmlScriptExtension,PathType.Html},
@@ -108,6 +109,7 @@ namespace Chutzpah
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
                     case PathType.TypeScript:
+                    case PathType.TypeScriptDef:
                         if (!testingMode.FileBelongsToTestingMode(path)) break;
                         yield return pathInfo;
                         break;

@@ -1,4 +1,6 @@
-﻿/// <reference path="../code/code.ts" />
+﻿/// <reference path="TypeScript/lib.d.ts" />
+/// <reference path="TypeScript/qunit.d.ts" />
+/// <reference path="../code/code.ts" />
 
  test("A basic test", function () {
       ok(true, "this test is fine");
@@ -11,7 +13,7 @@
   test("will get vowel count", function () {
       var stringPlus = new StringPlus("hello");
 
-      var count = stringPlus.countVowels("hello");
+      var count = stringPlus.countVowels();
 
       equal(count, 2, "We expect 2 vowels in hello");
   });
