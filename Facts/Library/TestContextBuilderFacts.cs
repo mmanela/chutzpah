@@ -145,10 +145,6 @@ namespace Chutzpah.Facts
         const string TestHtmlFromReferencedJsFile =
             @"/// <reference path=""js-with-html-template.js"" />";
 
-        // Need all the above with tests, last one will have a JS file with an HTML template reference to ensure we follow them always
-        // Dubplicate entries
-
-
         public class IsTestFile
         {
             [Fact]
