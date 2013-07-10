@@ -22,6 +22,9 @@ namespace Chutzpah
         private readonly Regex JsReferencePathRegex =
             new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
                       RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex JsTemplatePathRegex =
+            new Regex(@"^\s*(///|##)\s*<\s*template\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""']\s*/>",
+                      RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;
         private readonly IHttpWrapper httpClient;
@@ -294,7 +297,7 @@ namespace Chutzpah
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
-            var harness = new TestHarness(referencedFiles);
+            var harness = new TestHarness(referencedFiles, fileSystem);
 
             if (coverageEngine != null)
             {
@@ -389,6 +392,19 @@ namespace Chutzpah
                     {
                         referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
+                }
+            }
+
+            foreach (Match match in JsTemplatePathRegex.Matches(textToParse))
+            {
+                string referencePath = match.Groups["Path"].Value;
+
+                referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
+                string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
+                string absoluteFilePath = fileProbe.FindFilePath(relativeReferencePath);
+                if (referencedFiles.Select(r => r.Path == absoluteFilePath).Count() < 1)
+                {
+                    referencedFiles.Add(new ReferencedFile { Path = absoluteFilePath, IsLocal = false });
                 }
             }
 

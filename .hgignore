@@ -18,3 +18,5 @@ _build/
 _nuget/
 _package/
 _Chutzpah.*
+_UpgradeReport_Files/
+UpgradeLog.*

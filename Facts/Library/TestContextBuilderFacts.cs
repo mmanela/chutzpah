@@ -68,6 +68,7 @@ namespace Chutzpah.Facts
 <!DOCTYPE html><html><head>
     @@TestFrameworkDependencies@@
     @@ReferencedCSSFiles@@
+    @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
 
@@ -122,7 +123,32 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
-        
+        const string TestHtmlFileContents =
+            @"/// <template path=""../../templates/file.html"" />
+                        some javascript code
+                        ";
+
+        const string TestMultipleHtmlFileContents =
+            @"/// <template path=""../../templates/file.html"" />
+                        /// <template path=""../../templates/file.html"" />
+                        some javascript code
+                        ";
+
+        const string TestHtmlFileWithRootedReference =
+            @"/// <template path=""/rooted/file.html"" />
+                        some javascript code
+                        ";
+
+        const string ReferencesHtmlFile =
+            @"/// <template path=""file.html"" />";
+
+        const string TestHtmlFromReferencedJsFile =
+            @"/// <reference path=""js-with-html-template.js"" />";
+
+        // Need all the above with tests, last one will have a JS file with an HTML template reference to ensure we follow them always
+        // Dubplicate entries
+
+
         public class IsTestFile
         {
             [Fact]
@@ -632,6 +658,124 @@ namespace Chutzpah.Facts
                 Assert.True(pos1 < pos2);
                 Assert.True(pos2 < pos3);
                 Assert.Equal(1, context.ReferencedJavaScriptFiles.Count(x => x.IsFileUnderTest));
+            }
+
+            [Fact]
+            public void Will_put_test_html_file_at_end_of_references_in_html_template()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestHtmlFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../templates/file.html")))
+                    .Returns(@"path\file.html");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\file.html"))
+                    .Returns("<h1>This is the included HTML</h1>");
+
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+
+                Assert.Contains("<h1>This is the included HTML</h1>", text);
+            }
+
+            [Fact]
+            public void Will_change_path_root_given_SettingsFileDirectory_RootReferencePathMode_for_html_file()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path1\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path1\test.js"))
+                    .Returns(TestHtmlFileWithRootedReference);
+
+                creator.Mock<IFileSystemWrapper>()
+                   .Setup(x => x.GetText(@"path1\settingsPath/rooted/file.html"))
+                   .Returns("<h1>This is the included HTML from Rooted File</h1>");
+
+                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js", new TestOptions());
+
+                Assert.Contains("<h1>This is the included HTML from Rooted File</h1>", text);
+            }
+
+            [Fact]
+            public void Will_put_recursively_referenced_files_before_parent_file_in_test_harness_for_html_file()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
+                    .Returns(@"path\references.js");
+                
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"file.html")))
+                    .Returns(@"path\file.html");
+                
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestJSFileWithReferencesContents);
+                
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\references.js"))
+                    .Returns(ReferencesHtmlFile);
+
+                creator.Mock<IFileSystemWrapper>()
+                   .Setup(x => x.GetText(@"path\file.html"))
+                   .Returns("<h1>This is the included HTML from refernced js file</h1>");
+
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+
+                var expected = @"<h1>This is the included HTML from refernced js file</h1>
+
+    <script type=""text/javascript"" src=""file:///path/references.js""></script>";
+
+                Assert.Contains(expected, text);
+            }
+
+            [Fact]
+            public void Will_only_include_one_reference_with_mulitple_references_in_html_template()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(TestMultipleHtmlFileContents);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../templates/file.html")))
+                    .Returns(@"path\file.html");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\file.html"))
+                    .Returns("<h1>This is the included HTML from multiple templates</h1>");
+
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+
+                var count = Regex.Matches(text, "<h1>This is the included HTML from multiple templates</h1>", RegexOptions.CultureInvariant).Count;
+
+                Assert.Equal(1, count);
             }
 
             [Fact]
