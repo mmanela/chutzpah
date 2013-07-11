@@ -100,7 +100,7 @@ namespace Chutzpah.Coverage
                 if (!uri.IsAbsoluteUri)
                 {
                     // Resolve against the test file path.
-                    string basePath = Path.GetDirectoryName(testContext.InputTestFile);
+                    string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
                     uri = new Uri(Path.Combine(basePath, entry.Key));
                 }
 
