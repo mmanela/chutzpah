@@ -191,19 +191,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
-        [Fact]
-        public void Will_process_type_script_files_together()
-        {
-            // This test verifies that we run TypeScript compiler on all ts files at once 
-            // this is important since TS using typechecking engine to help generate code
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(1, result.PassedCount);
-            Assert.Equal(1, result.TotalCount);
-        }
 
         [Fact]
         public void Will_run_QUnit_tests_even_when_QUnit_included_twice()
@@ -329,7 +316,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
-        [Fact(Timeout = 4000)]
+        [Fact(Timeout = 40000)]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {
             var testRunner = TestRunner.Create();
@@ -343,7 +330,7 @@ namespace Chutzpah.Facts.Integration
 
         }
 
-        [Fact(Timeout = 4000)]
+        [Fact(Timeout = 40000)]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout_from_settings_file()
         {
             var testRunner = TestRunner.Create();
@@ -357,7 +344,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(0, result.TotalCount);
         }
 
-        [Fact(Timeout = 4000)]
+        [Fact(Timeout = 40000)]
         public void Will_execute_nothing_if_test_file_has_infinite_loop()
         {
             var testRunner = TestRunner.Create();
@@ -759,8 +746,8 @@ namespace Chutzpah.Facts.Integration
                 {
                     return new[]
                         {
-                            new object[] {@"JS\Test\basic-qunit.ts"},
-                            new object[] {@"JS\Test\basic-jasmine.ts"}
+                            new object[] {@"JS\Test\TypeScript\basic-qunit.ts"},
+                            new object[] {@"JS\Test\TypeScript\basic-jasmine.ts"}
                         };
                 }
             }
@@ -778,12 +765,51 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(4, result.TotalCount);
             }
 
+
+            [Fact]
+            public void Will_process_type_script_files_together()
+            {
+                // This test verifies that we run TypeScript compiler on all ts files at once 
+                // this is important since TS using typechecking engine to help generate code
+                var testRunner = TestRunner.Create();
+                testRunner.DebugEnabled = true;
+                var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_allow_user_to_speicfy_their_own_lib_d_ts()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TypeScript\ownLib.ts", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
             [Fact]
             public void Will_convert_ES5_code_given_setting()
             {
                 var testRunner = TestRunner.Create();
 
                 var result = testRunner.RunTests(@"JS\Test\TypeScript\ES5\ES5Test.ts", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_run_typescript_test_using_jquery()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TypeScript\jqueryTest.ts", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);

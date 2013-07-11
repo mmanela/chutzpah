@@ -1,6 +1,5 @@
-﻿/// <reference path="TypeScript/lib.d.ts" />
-/// <reference path="TypeScript/qunit.d.ts" />
-/// <reference path="../code/code.ts" />
+﻿/// <reference path="qunit.d.ts" />
+/// <reference path="../../code/code.ts" />
 
  test("A basic test", function () {
       ok(true, "this test is fine");

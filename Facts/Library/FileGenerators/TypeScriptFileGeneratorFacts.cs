@@ -15,6 +15,7 @@ namespace Chutzpah.Facts
             public TestableTypeScriptFileGenerator()
             {
                 Inject<IJsonSerializer>(new JsonSerializer());
+                Mock<IFileSystemWrapper>().Setup(x => x.GetFileName(It.IsAny<string>())).Returns<string>(x => x);
             }
         }
 

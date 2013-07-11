@@ -1,4 +1,6 @@
-/*! blanket - v1.0.1 */ 
+/*! blanket - v1.1.5 */ 
+
+(function(define){
 
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -32,14 +34,26 @@
 
 /*jslint bitwise:true plusplus:true */
 /*global esprima:true, define:true, exports:true, window: true,
-throwError: true, generateStatement: true, peek: true,
+throwError: true, createLiteral: true, generateStatement: true,
 parseAssignmentExpression: true, parseBlock: true, parseExpression: true,
 parseFunctionDeclaration: true, parseFunctionExpression: true,
 parseFunctionSourceElements: true, parseVariableIdentifier: true,
 parseLeftHandSideExpression: true,
 parseStatement: true, parseSourceElement: true */
 
-(function (exports) {
+(function (root, factory) {
+    'use strict';
+
+    // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js,
+    // Rhino, and plain browser loading.
+    if (typeof define === 'function' && define.amd) {
+        define(['exports'], factory);
+    } else if (typeof exports !== 'undefined') {
+        factory(exports);
+    } else {
+        factory((root.esprima = {}));
+    }
+}(this, function (exports) {
     'use strict';
 
     var Token,
@@ -48,15 +62,13 @@ parseStatement: true, parseSourceElement: true */
         PropertyKind,
         Messages,
         Regex,
-        SyntaxTreeDelegate,
         source,
         strict,
         index,
         lineNumber,
         lineStart,
         length,
-        delegate,
-        lookahead,
+        buffer,
         state,
         extra;
 
@@ -240,13 +252,38 @@ parseStatement: true, parseSourceElement: true */
     // 7.6.1.2 Future Reserved Words
 
     function isFutureReservedWord(id) {
-        return ['class', 'enum', 'export', 'extends', 'import', 'super'].
-            indexOf(id) >= 0;
+        switch (id) {
+
+        // Future reserved words.
+        case 'class':
+        case 'enum':
+        case 'export':
+        case 'extends':
+        case 'import':
+        case 'super':
+            return true;
+        }
+
+        return false;
     }
 
     function isStrictModeReservedWord(id) {
-        return ['implements', 'interface', 'package', 'private', 'protected',
-            'public', 'static', 'yield', 'let'].indexOf(id) >= 0;
+        switch (id) {
+
+        // Strict Mode reserved words.
+        case 'implements':
+        case 'interface':
+        case 'package':
+        case 'private':
+        case 'protected':
+        case 'public':
+        case 'static':
+        case 'yield':
+        case 'let':
+            return true;
+        }
+
+        return false;
     }
 
     function isRestrictedWord(id) {
@@ -256,39 +293,55 @@ parseStatement: true, parseSourceElement: true */
     // 7.6.1.1 Keywords
 
     function isKeyword(id) {
+        var keyword = false;
+        switch (id.length) {
+        case 2:
+            keyword = (id === 'if') || (id === 'in') || (id === 'do');
+            break;
+        case 3:
+            keyword = (id === 'var') || (id === 'for') || (id === 'new') || (id === 'try');
+            break;
+        case 4:
+            keyword = (id === 'this') || (id === 'else') || (id === 'case') || (id === 'void') || (id === 'with');
+            break;
+        case 5:
+            keyword = (id === 'while') || (id === 'break') || (id === 'catch') || (id === 'throw');
+            break;
+        case 6:
+            keyword = (id === 'return') || (id === 'typeof') || (id === 'delete') || (id === 'switch');
+            break;
+        case 7:
+            keyword = (id === 'default') || (id === 'finally');
+            break;
+        case 8:
+            keyword = (id === 'function') || (id === 'continue') || (id === 'debugger');
+            break;
+        case 10:
+            keyword = (id === 'instanceof');
+            break;
+        }
+
+        if (keyword) {
+            return true;
+        }
+
+        switch (id) {
+        // Future reserved words.
+        // 'const' is specialized as Keyword in V8.
+        case 'const':
+            return true;
+
+        // For compatiblity to SpiderMonkey and ES.next
+        case 'yield':
+        case 'let':
+            return true;
+        }
+
         if (strict && isStrictModeReservedWord(id)) {
             return true;
         }
 
-        // 'const' is specialized as Keyword in V8.
-        // 'yield' and 'let' are for compatiblity with SpiderMonkey and ES.next.
-        // Some others are from future reserved words.
-
-        switch (id.length) {
-        case 2:
-            return (id === 'if') || (id === 'in') || (id === 'do');
-        case 3:
-            return (id === 'var') || (id === 'for') || (id === 'new') ||
-                (id === 'try') || (id === 'let');
-        case 4:
-            return (id === 'this') || (id === 'else') || (id === 'case') ||
-                (id === 'void') || (id === 'with') || (id === 'enum');
-        case 5:
-            return (id === 'while') || (id === 'break') || (id === 'catch') ||
-                (id === 'throw') || (id === 'const') || (id === 'yield') ||
-                (id === 'class') || (id === 'super');
-        case 6:
-            return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
-                (id === 'switch') || (id === 'export') || (id === 'import');
-        case 7:
-            return (id === 'default') || (id === 'finally') || (id === 'extends');
-        case 8:
-            return (id === 'function') || (id === 'continue') || (id === 'debugger');
-        case 10:
-            return (id === 'instanceof');
-        default:
-            return false;
-        }
+        return isFutureReservedWord(id);
     }
 
     // 7.4 Comments
@@ -380,26 +433,34 @@ parseStatement: true, parseSourceElement: true */
         return String.fromCharCode(code);
     }
 
-    function getEscapedIdentifier() {
-        var ch, id, restore, type;
+    function scanIdentifier() {
+        var ch, start, id, restore;
 
-        ch = id = source[index++];
+        ch = source[index];
+        if (!isIdentifierStart(ch)) {
+            return;
+        }
+
+        start = index;
         if (ch === '\\') {
+            ++index;
             if (source[index] !== 'u') {
-                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                return;
             }
             ++index;
             restore = index;
             ch = scanHexEscape('u');
             if (ch) {
                 if (ch === '\\' || !isIdentifierStart(ch)) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    return;
                 }
                 id = ch;
             } else {
                 index = restore;
                 id = 'u';
             }
+        } else {
+            id = source[index++];
         }
 
         while (index < length) {
@@ -407,84 +468,82 @@ parseStatement: true, parseSourceElement: true */
             if (!isIdentifierPart(ch)) {
                 break;
             }
-            ++index;
-            id += ch;
             if (ch === '\\') {
-                id = id.substr(0, id.length - 1);
+                ++index;
                 if (source[index] !== 'u') {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    return;
                 }
                 ++index;
                 restore = index;
                 ch = scanHexEscape('u');
                 if (ch) {
                     if (ch === '\\' || !isIdentifierPart(ch)) {
-                        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                        return;
                     }
                     id += ch;
                 } else {
                     index = restore;
                     id += 'u';
                 }
-            }
-        }
-
-        return id;
-    }
-
-    function getIdentifier() {
-        var start, ch;
-
-        start = index++;
-        while (index < length) {
-            ch = source[index];
-            if (ch === '\\') {
-                index = start;
-                return getEscapedIdentifier();
-            }
-            if (isIdentifierPart(ch)) {
-                ++index;
             } else {
-                break;
+                id += source[index++];
             }
         }
-
-        return sliceSource(start, index);
-    }
-
-    function scanIdentifier() {
-        var start, id, type;
-
-        start = index;
-        if (!isIdentifierStart(source[index])) {
-            throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
-        }
-
-        id = (source[index] === '\\') ? getEscapedIdentifier() : getIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
         if (id.length === 1) {
-            type = Token.Identifier;
-        } else if (isKeyword(id)) {
-            type = Token.Keyword;
-        } else if (id === 'null') {
-            type = Token.NullLiteral;
-        } else if (id === 'true' || id === 'false') {
-            type = Token.BooleanLiteral;
-        } else {
-            type = Token.Identifier;
+            return {
+                type: Token.Identifier,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        if (isKeyword(id)) {
+            return {
+                type: Token.Keyword,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // 7.8.1 Null Literals
+
+        if (id === 'null') {
+            return {
+                type: Token.NullLiteral,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // 7.8.2 Boolean Literals
+
+        if (id === 'true' || id === 'false') {
+            return {
+                type: Token.BooleanLiteral,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
         }
 
         return {
-            type: type,
+            type: Token.Identifier,
             value: id,
             lineNumber: lineNumber,
             lineStart: lineStart,
             range: [start, index]
         };
     }
-
 
     // 7.7 Punctuators
 
@@ -497,9 +556,7 @@ parseStatement: true, parseSourceElement: true */
 
         // Check for most common single-character punctuators.
 
-        if (ch1 === '.' || ch1 === '(' || ch1 === ')' || ch1 === ';' || ch1 === ',' ||
-                ch1 === '{' || ch1 === '}' || ch1 === '[' || ch1 === ']' ||
-                ch1 === ':' || ch1 === '?' || ch1 === '~') {
+        if (ch1 === ';' || ch1 === '{' || ch1 === '}') {
             ++index;
             return {
                 type: Token.Punctuator,
@@ -510,9 +567,33 @@ parseStatement: true, parseSourceElement: true */
             };
         }
 
-        // Peek more characters.
+        if (ch1 === ',' || ch1 === '(' || ch1 === ')') {
+            ++index;
+            return {
+                type: Token.Punctuator,
+                value: ch1,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // Dot (.) can also start a floating-point number, hence the need
+        // to check the next character.
 
         ch2 = source[index + 1];
+        if (ch1 === '.' && !isDecimalDigit(ch2)) {
+            return {
+                type: Token.Punctuator,
+                value: source[index++],
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // Peek more characters.
+
         ch3 = source[index + 2];
         ch4 = source[index + 3];
 
@@ -591,6 +672,19 @@ parseStatement: true, parseSourceElement: true */
         // 2-character punctuators: <= >= == != ++ -- << >> && ||
         // += -= *= %= &= |= ^= /=
 
+        if (ch2 === '=') {
+            if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
+                index += 2;
+                return {
+                    type: Token.Punctuator,
+                    value: ch1 + ch2,
+                    lineNumber: lineNumber,
+                    lineStart: lineStart,
+                    range: [start, index]
+                };
+            }
+        }
+
         if (ch1 === ch2 && ('+-<>&|'.indexOf(ch1) >= 0)) {
             if ('+-<>&|'.indexOf(ch2) >= 0) {
                 index += 2;
@@ -604,22 +698,17 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
-            ++index;
-            if (ch2 === '=') {
-                ++index;
-                ch1 += ch2;
-            }
+        // The remaining 1-character punctuators.
+
+        if ('[]<>+-*%&|^!~?:=/'.indexOf(ch1) >= 0) {
             return {
                 type: Token.Punctuator,
-                value: ch1,
+                value: source[index++],
                 lineNumber: lineNumber,
                 lineStart: lineStart,
                 range: [start, index]
             };
         }
-
-        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
     }
 
     // 7.8.3 Numeric Literals
@@ -668,8 +757,7 @@ parseStatement: true, parseSourceElement: true */
                         lineStart: lineStart,
                         range: [start, index]
                     };
-                }
-                if (isOctalDigit(ch)) {
+                } else if (isOctalDigit(ch)) {
                     number += source[index++];
                     while (index < length) {
                         ch = source[index];
@@ -873,7 +961,7 @@ parseStatement: true, parseSourceElement: true */
     function scanRegExp() {
         var str, ch, start, pattern, flags, value, classMarker = false, restore, terminated = false;
 
-        lookahead = null;
+        buffer = null;
         skipComment();
 
         start = index;
@@ -930,7 +1018,8 @@ parseStatement: true, parseSourceElement: true */
                     ch = scanHexEscape('u');
                     if (ch) {
                         flags += ch;
-                        for (str += '\\u'; restore < index; ++restore) {
+                        str += '\\u';
+                        for (; restore < index; ++restore) {
                             str += source[restore];
                         }
                     } else {
@@ -953,8 +1042,6 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.InvalidRegExp);
         }
 
-        peek();
-
         return {
             literal: str,
             value: value,
@@ -970,7 +1057,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function advance() {
-        var ch;
+        var ch, token;
 
         skipComment();
 
@@ -983,397 +1070,62 @@ parseStatement: true, parseSourceElement: true */
             };
         }
 
+        token = scanPunctuator();
+        if (typeof token !== 'undefined') {
+            return token;
+        }
+
         ch = source[index];
 
-        if (isIdentifierStart(ch)) {
-            return scanIdentifier();
-        }
-        if (ch === '.') {
-            // Dot (.) can also start a floating-point number, hence the need
-            // to check the next character.
-            if (isDecimalDigit(source[index + 1])) {
-                return scanNumericLiteral();
-            }
-            return scanPunctuator();
-        }
         if (ch === '\'' || ch === '"') {
             return scanStringLiteral();
         }
-        if (isDecimalDigit(ch)) {
+
+        if (ch === '.' || isDecimalDigit(ch)) {
             return scanNumericLiteral();
         }
 
-        return scanPunctuator();
+        token = scanIdentifier();
+        if (typeof token !== 'undefined') {
+            return token;
+        }
+
+        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
     }
 
     function lex() {
         var token;
 
-        token = lookahead;
-        index = token.range[1];
-        lineNumber = token.lineNumber;
-        lineStart = token.lineStart;
+        if (buffer) {
+            index = buffer.range[1];
+            lineNumber = buffer.lineNumber;
+            lineStart = buffer.lineStart;
+            token = buffer;
+            buffer = null;
+            return token;
+        }
 
-        lookahead = advance();
-
-        index = token.range[1];
-        lineNumber = token.lineNumber;
-        lineStart = token.lineStart;
-
-        return token;
+        buffer = null;
+        return advance();
     }
 
-    function peek() {
+    function lookahead() {
         var pos, line, start;
+
+        if (buffer !== null) {
+            return buffer;
+        }
 
         pos = index;
         line = lineNumber;
         start = lineStart;
-        lookahead = advance();
+        buffer = advance();
         index = pos;
         lineNumber = line;
         lineStart = start;
+
+        return buffer;
     }
-
-    SyntaxTreeDelegate = {
-
-        name: 'SyntaxTree',
-
-        createArrayExpression: function (elements) {
-            return {
-                type: Syntax.ArrayExpression,
-                elements: elements
-            };
-        },
-
-        createAssignmentExpression: function (operator, left, right) {
-            return {
-                type: Syntax.AssignmentExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createBinaryExpression: function (operator, left, right) {
-            return {
-                type: Syntax.BinaryExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createBlockStatement: function (body) {
-            return {
-                type: Syntax.BlockStatement,
-                body: body
-            };
-        },
-
-        createBreakStatement: function (label) {
-            return {
-                type: Syntax.BreakStatement,
-                label: label
-            };
-        },
-
-        createCallExpression: function (callee, args) {
-            return {
-                type: Syntax.CallExpression,
-                callee: callee,
-                'arguments': args
-            };
-        },
-
-        createCatchClause: function (param, body) {
-            return {
-                type: Syntax.CatchClause,
-                param: param,
-                body: body
-            };
-        },
-
-        createConditionalExpression: function (test, consequent, alternate) {
-            return {
-                type: Syntax.ConditionalExpression,
-                test: test,
-                consequent: consequent,
-                alternate: alternate
-            };
-        },
-
-        createContinueStatement: function (label) {
-            return {
-                type: Syntax.ContinueStatement,
-                label: label
-            };
-        },
-
-        createDebuggerStatement: function () {
-            return {
-                type: Syntax.DebuggerStatement
-            };
-        },
-
-        createDoWhileStatement: function (body, test) {
-            return {
-                type: Syntax.DoWhileStatement,
-                body: body,
-                test: test
-            };
-        },
-
-        createEmptyStatement: function () {
-            return {
-                type: Syntax.EmptyStatement
-            };
-        },
-
-        createExpressionStatement: function (expression) {
-            return {
-                type: Syntax.ExpressionStatement,
-                expression: expression
-            };
-        },
-
-        createForStatement: function (init, test, update, body) {
-            return {
-                type: Syntax.ForStatement,
-                init: init,
-                test: test,
-                update: update,
-                body: body
-            };
-        },
-
-        createForInStatement: function (left, right, body) {
-            return {
-                type: Syntax.ForInStatement,
-                left: left,
-                right: right,
-                body: body,
-                each: false
-            };
-        },
-
-        createFunctionDeclaration: function (id, params, defaults, body) {
-            return {
-                type: Syntax.FunctionDeclaration,
-                id: id,
-                params: params,
-                defaults: defaults,
-                body: body,
-                rest: null,
-                generator: false,
-                expression: false
-            };
-        },
-
-        createFunctionExpression: function (id, params, defaults, body) {
-            return {
-                type: Syntax.FunctionExpression,
-                id: id,
-                params: params,
-                defaults: defaults,
-                body: body,
-                rest: null,
-                generator: false,
-                expression: false
-            };
-        },
-
-        createIdentifier: function (name) {
-            return {
-                type: Syntax.Identifier,
-                name: name
-            };
-        },
-
-        createIfStatement: function (test, consequent, alternate) {
-            return {
-                type: Syntax.IfStatement,
-                test: test,
-                consequent: consequent,
-                alternate: alternate
-            };
-        },
-
-        createLabeledStatement: function (label, body) {
-            return {
-                type: Syntax.LabeledStatement,
-                label: label,
-                body: body
-            };
-        },
-
-        createLiteral: function (token) {
-            return {
-                type: Syntax.Literal,
-                value: token.value,
-                raw: sliceSource(token.range[0], token.range[1])
-            };
-        },
-
-        createLogicalExpression: function (operator, left, right) {
-            return {
-                type: Syntax.LogicalExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createMemberExpression: function (accessor, object, property) {
-            return {
-                type: Syntax.MemberExpression,
-                computed: accessor === '[',
-                object: object,
-                property: property
-            };
-        },
-
-        createNewExpression: function (callee, args) {
-            return {
-                type: Syntax.NewExpression,
-                callee: callee,
-                'arguments': args
-            };
-        },
-
-        createObjectExpression: function (properties) {
-            return {
-                type: Syntax.ObjectExpression,
-                properties: properties
-            };
-        },
-
-        createPostfixExpression: function (operator, argument) {
-            return {
-                type: Syntax.UpdateExpression,
-                operator: operator,
-                argument: argument,
-                prefix: false
-            };
-        },
-
-        createProgram: function (body) {
-            return {
-                type: Syntax.Program,
-                body: body
-            };
-        },
-
-        createProperty: function (kind, key, value) {
-            return {
-                type: Syntax.Property,
-                key: key,
-                value: value,
-                kind: kind
-            };
-        },
-
-        createReturnStatement: function (argument) {
-            return {
-                type: Syntax.ReturnStatement,
-                argument: argument
-            };
-        },
-
-        createSequenceExpression: function (expressions) {
-            return {
-                type: Syntax.SequenceExpression,
-                expressions: expressions
-            };
-        },
-
-        createSwitchCase: function (test, consequent) {
-            return {
-                type: Syntax.SwitchCase,
-                test: test,
-                consequent: consequent
-            };
-        },
-
-        createSwitchStatement: function (discriminant, cases) {
-            return {
-                type: Syntax.SwitchStatement,
-                discriminant: discriminant,
-                cases: cases
-            };
-        },
-
-        createThisExpression: function () {
-            return {
-                type: Syntax.ThisExpression
-            };
-        },
-
-        createThrowStatement: function (argument) {
-            return {
-                type: Syntax.ThrowStatement,
-                argument: argument
-            };
-        },
-
-        createTryStatement: function (block, guardedHandlers, handlers, finalizer) {
-            return {
-                type: Syntax.TryStatement,
-                block: block,
-                guardedHandlers: guardedHandlers,
-                handlers: handlers,
-                finalizer: finalizer
-            };
-        },
-
-        createUnaryExpression: function (operator, argument) {
-            if (operator === '++' || operator === '--') {
-                return {
-                    type: Syntax.UpdateExpression,
-                    operator: operator,
-                    argument: argument,
-                    prefix: true
-                };
-            }
-            return {
-                type: Syntax.UnaryExpression,
-                operator: operator,
-                argument: argument
-            };
-        },
-
-        createVariableDeclaration: function (declarations, kind) {
-            return {
-                type: Syntax.VariableDeclaration,
-                declarations: declarations,
-                kind: kind
-            };
-        },
-
-        createVariableDeclarator: function (id, init) {
-            return {
-                type: Syntax.VariableDeclarator,
-                id: id,
-                init: init
-            };
-        },
-
-        createWhileStatement: function (test, body) {
-            return {
-                type: Syntax.WhileStatement,
-                test: test,
-                body: body
-            };
-        },
-
-        createWithStatement: function (object, body) {
-            return {
-                type: Syntax.WithStatement,
-                object: object,
-                body: body
-            };
-        }
-    };
 
     // Return true if there is a line terminator before the next token.
 
@@ -1488,24 +1240,26 @@ parseStatement: true, parseSourceElement: true */
     // Return true if the next token matches the specified punctuator.
 
     function match(value) {
-        return lookahead.type === Token.Punctuator && lookahead.value === value;
+        var token = lookahead();
+        return token.type === Token.Punctuator && token.value === value;
     }
 
     // Return true if the next token matches the specified keyword
 
     function matchKeyword(keyword) {
-        return lookahead.type === Token.Keyword && lookahead.value === keyword;
+        var token = lookahead();
+        return token.type === Token.Keyword && token.value === keyword;
     }
 
     // Return true if the next token is an assignment operator
 
     function matchAssign() {
-        var op;
+        var token = lookahead(),
+            op = token.value;
 
-        if (lookahead.type !== Token.Punctuator) {
+        if (token.type !== Token.Punctuator) {
             return false;
         }
-        op = lookahead.value;
         return op === '=' ||
             op === '*=' ||
             op === '/=' ||
@@ -1521,7 +1275,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function consumeSemicolon() {
-        var line;
+        var token, line;
 
         // Catch the very common case first.
         if (source[index] === ';') {
@@ -1540,8 +1294,9 @@ parseStatement: true, parseSourceElement: true */
             return;
         }
 
-        if (lookahead.type !== Token.EOF && !match('}')) {
-            throwUnexpected(lookahead);
+        token = lookahead();
+        if (token.type !== Token.EOF && !match('}')) {
+            throwUnexpected(token);
         }
     }
 
@@ -1573,7 +1328,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect(']');
 
-        return delegate.createArrayExpression(elements);
+        return {
+            type: Syntax.ArrayExpression,
+            elements: elements
+        };
     }
 
     // 11.1.5 Object Initialiser
@@ -1587,7 +1345,17 @@ parseStatement: true, parseSourceElement: true */
             throwErrorTolerant(first, Messages.StrictParamName);
         }
         strict = previousStrict;
-        return delegate.createFunctionExpression(null, param, [], body);
+
+        return {
+            type: Syntax.FunctionExpression,
+            id: null,
+            params: param,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     function parseObjectPropertyKey() {
@@ -1600,16 +1368,19 @@ parseStatement: true, parseSourceElement: true */
             if (strict && token.octal) {
                 throwErrorTolerant(token, Messages.StrictOctalLiteral);
             }
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseObjectProperty() {
-        var token, key, id, value, param;
+        var token, key, id, param;
 
-        token = lookahead;
+        token = lookahead();
 
         if (token.type === Token.Identifier) {
 
@@ -1621,32 +1392,47 @@ parseStatement: true, parseSourceElement: true */
                 key = parseObjectPropertyKey();
                 expect('(');
                 expect(')');
-                value = parsePropertyFunction([]);
-                return delegate.createProperty('get', key, value);
-            }
-            if (token.value === 'set' && !match(':')) {
+                return {
+                    type: Syntax.Property,
+                    key: key,
+                    value: parsePropertyFunction([]),
+                    kind: 'get'
+                };
+            } else if (token.value === 'set' && !match(':')) {
                 key = parseObjectPropertyKey();
                 expect('(');
-                token = lookahead;
+                token = lookahead();
                 if (token.type !== Token.Identifier) {
                     throwUnexpected(lex());
                 }
                 param = [ parseVariableIdentifier() ];
                 expect(')');
-                value = parsePropertyFunction(param, token);
-                return delegate.createProperty('set', key, value);
+                return {
+                    type: Syntax.Property,
+                    key: key,
+                    value: parsePropertyFunction(param, token),
+                    kind: 'set'
+                };
+            } else {
+                expect(':');
+                return {
+                    type: Syntax.Property,
+                    key: id,
+                    value: parseAssignmentExpression(),
+                    kind: 'init'
+                };
             }
-            expect(':');
-            value = parseAssignmentExpression();
-            return delegate.createProperty('init', id, value);
-        }
-        if (token.type === Token.EOF || token.type === Token.Punctuator) {
+        } else if (token.type === Token.EOF || token.type === Token.Punctuator) {
             throwUnexpected(token);
         } else {
             key = parseObjectPropertyKey();
             expect(':');
-            value = parseAssignmentExpression();
-            return delegate.createProperty('init', key, value);
+            return {
+                type: Syntax.Property,
+                key: key,
+                value: parseAssignmentExpression(),
+                kind: 'init'
+            };
         }
     }
 
@@ -1692,7 +1478,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createObjectExpression(properties);
+        return {
+            type: Syntax.ObjectExpression,
+            properties: properties
+        };
     }
 
     // 11.1.6 The Grouping Operator
@@ -1713,25 +1502,29 @@ parseStatement: true, parseSourceElement: true */
     // 11.1 Primary Expressions
 
     function parsePrimaryExpression() {
-        var type, token;
-
-        type = lookahead.type;
+        var token = lookahead(),
+            type = token.type;
 
         if (type === Token.Identifier) {
-            return delegate.createIdentifier(lex().value);
+            return {
+                type: Syntax.Identifier,
+                name: lex().value
+            };
         }
 
         if (type === Token.StringLiteral || type === Token.NumericLiteral) {
-            if (strict && lookahead.octal) {
-                throwErrorTolerant(lookahead, Messages.StrictOctalLiteral);
+            if (strict && token.octal) {
+                throwErrorTolerant(token, Messages.StrictOctalLiteral);
             }
-            return delegate.createLiteral(lex());
+            return createLiteral(lex());
         }
 
         if (type === Token.Keyword) {
             if (matchKeyword('this')) {
                 lex();
-                return delegate.createThisExpression();
+                return {
+                    type: Syntax.ThisExpression
+                };
             }
 
             if (matchKeyword('function')) {
@@ -1740,15 +1533,15 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (type === Token.BooleanLiteral) {
-            token = lex();
+            lex();
             token.value = (token.value === 'true');
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
         if (type === Token.NullLiteral) {
-            token = lex();
+            lex();
             token.value = null;
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
         if (match('[')) {
@@ -1764,7 +1557,7 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (match('/') || match('/=')) {
-            return delegate.createLiteral(scanRegExp());
+            return createLiteral(scanRegExp());
         }
 
         return throwUnexpected(lex());
@@ -1799,7 +1592,10 @@ parseStatement: true, parseSourceElement: true */
             throwUnexpected(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseNonComputedMember() {
@@ -1821,30 +1617,49 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function parseNewExpression() {
-        var callee, args;
+        var expr;
 
         expectKeyword('new');
-        callee = parseLeftHandSideExpression();
-        args = match('(') ? parseArguments() : [];
 
-        return delegate.createNewExpression(callee, args);
+        expr = {
+            type: Syntax.NewExpression,
+            callee: parseLeftHandSideExpression(),
+            'arguments': []
+        };
+
+        if (match('(')) {
+            expr['arguments'] = parseArguments();
+        }
+
+        return expr;
     }
 
     function parseLeftHandSideExpressionAllowCall() {
-        var expr, args, property;
+        var expr;
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
         while (match('.') || match('[') || match('(')) {
             if (match('(')) {
-                args = parseArguments();
-                expr = delegate.createCallExpression(expr, args);
+                expr = {
+                    type: Syntax.CallExpression,
+                    callee: expr,
+                    'arguments': parseArguments()
+                };
             } else if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
             }
         }
 
@@ -1853,17 +1668,25 @@ parseStatement: true, parseSourceElement: true */
 
 
     function parseLeftHandSideExpression() {
-        var expr, property;
+        var expr;
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
         while (match('.') || match('[')) {
             if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
             }
         }
 
@@ -1875,7 +1698,8 @@ parseStatement: true, parseSourceElement: true */
     function parsePostfixExpression() {
         var expr = parseLeftHandSideExpressionAllowCall(), token;
 
-        if (lookahead.type !== Token.Punctuator) {
+        token = lookahead();
+        if (token.type !== Token.Punctuator) {
             return expr;
         }
 
@@ -1889,8 +1713,12 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
-            token = lex();
-            expr = delegate.createPostfixExpression(token.value, expr);
+            expr = {
+                type: Syntax.UpdateExpression,
+                operator: lex().value,
+                argument: expr,
+                prefix: false
+            };
         }
 
         return expr;
@@ -1901,7 +1729,8 @@ parseStatement: true, parseSourceElement: true */
     function parseUnaryExpression() {
         var token, expr;
 
-        if (lookahead.type !== Token.Punctuator && lookahead.type !== Token.Keyword) {
+        token = lookahead();
+        if (token.type !== Token.Punctuator && token.type !== Token.Keyword) {
             return parsePostfixExpression();
         }
 
@@ -1917,19 +1746,30 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
-            return delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UpdateExpression,
+                operator: token.value,
+                argument: expr,
+                prefix: true
+            };
+            return expr;
         }
 
         if (match('+') || match('-') || match('~') || match('!')) {
-            token = lex();
-            expr = parseUnaryExpression();
-            return delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UnaryExpression,
+                operator: lex().value,
+                argument: parseUnaryExpression()
+            };
+            return expr;
         }
 
         if (matchKeyword('delete') || matchKeyword('void') || matchKeyword('typeof')) {
-            token = lex();
-            expr = parseUnaryExpression();
-            expr = delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UnaryExpression,
+                operator: lex().value,
+                argument: parseUnaryExpression()
+            };
             if (strict && expr.operator === 'delete' && expr.argument.type === Syntax.Identifier) {
                 throwErrorTolerant({}, Messages.StrictDelete);
             }
@@ -1939,147 +1779,186 @@ parseStatement: true, parseSourceElement: true */
         return parsePostfixExpression();
     }
 
-    function binaryPrecedence(token, allowIn) {
-        var prec = 0;
-
-        if (token.type !== Token.Punctuator && token.type !== Token.Keyword) {
-            return 0;
-        }
-
-        switch (token.value) {
-        case '||':
-            prec = 1;
-            break;
-
-        case '&&':
-            prec = 2;
-            break;
-
-        case '|':
-            prec = 3;
-            break;
-
-        case '^':
-            prec = 4;
-            break;
-
-        case '&':
-            prec = 5;
-            break;
-
-        case '==':
-        case '!=':
-        case '===':
-        case '!==':
-            prec = 6;
-            break;
-
-        case '<':
-        case '>':
-        case '<=':
-        case '>=':
-        case 'instanceof':
-            prec = 7;
-            break;
-
-        case 'in':
-            prec = allowIn ? 7 : 0;
-            break;
-
-        case '<<':
-        case '>>':
-        case '>>>':
-            prec = 8;
-            break;
-
-        case '+':
-        case '-':
-            prec = 9;
-            break;
-
-        case '*':
-        case '/':
-        case '%':
-            prec = 11;
-            break;
-
-        default:
-            break;
-        }
-
-        return prec;
-    }
-
     // 11.5 Multiplicative Operators
-    // 11.6 Additive Operators
-    // 11.7 Bitwise Shift Operators
-    // 11.8 Relational Operators
-    // 11.9 Equality Operators
-    // 11.10 Binary Bitwise Operators
-    // 11.11 Binary Logical Operators
 
-    // Reduce: make a binary expression from the three topmost entries.
-    function reduceBinary(stack) {
-        var right = stack.pop(),
-            operator = stack.pop().value,
-            left = stack.pop();
+    function parseMultiplicativeExpression() {
+        var expr = parseUnaryExpression();
 
-
-        if (operator === '||' || operator === '&&') {
-            stack.push(delegate.createLogicalExpression(operator, left, right));
-        } else {
-            stack.push(delegate.createBinaryExpression(operator, left, right));
+        while (match('*') || match('/') || match('%')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseUnaryExpression()
+            };
         }
+
+        return expr;
     }
 
-    function parseBinaryExpression() {
-        var expr, token, prec, previousAllowIn, stack;
+    // 11.6 Additive Operators
+
+    function parseAdditiveExpression() {
+        var expr = parseMultiplicativeExpression();
+
+        while (match('+') || match('-')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseMultiplicativeExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.7 Bitwise Shift Operators
+
+    function parseShiftExpression() {
+        var expr = parseAdditiveExpression();
+
+        while (match('<<') || match('>>') || match('>>>')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseAdditiveExpression()
+            };
+        }
+
+        return expr;
+    }
+    // 11.8 Relational Operators
+
+    function parseRelationalExpression() {
+        var expr, previousAllowIn;
 
         previousAllowIn = state.allowIn;
         state.allowIn = true;
 
-        expr = parseUnaryExpression();
+        expr = parseShiftExpression();
 
-        token = lookahead;
-        prec = binaryPrecedence(token, previousAllowIn);
-        if (prec === 0) {
-            return expr;
-        }
-        token.prec = prec;
-        lex();
-
-        stack = [expr, token, parseUnaryExpression()];
-
-        while ((prec = binaryPrecedence(lookahead, previousAllowIn)) > 0) {
-
-            // Reduce.
-            while ((stack.length > 2) && (prec <= stack[stack.length - 2].prec)) {
-                reduceBinary(stack);
-            }
-
-            // Shift.
-            token = lex();
-            token.prec = prec;
-            stack.push(token);
-            stack.push(parseUnaryExpression());
-        }
-
-        // Final reduce to clean-up the stack.
-        while (stack.length > 1) {
-            reduceBinary(stack);
+        while (match('<') || match('>') || match('<=') || match('>=') || (previousAllowIn && matchKeyword('in')) || matchKeyword('instanceof')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseShiftExpression()
+            };
         }
 
         state.allowIn = previousAllowIn;
-        return stack[0];
+        return expr;
     }
 
+    // 11.9 Equality Operators
+
+    function parseEqualityExpression() {
+        var expr = parseRelationalExpression();
+
+        while (match('==') || match('!=') || match('===') || match('!==')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseRelationalExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.10 Binary Bitwise Operators
+
+    function parseBitwiseANDExpression() {
+        var expr = parseEqualityExpression();
+
+        while (match('&')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '&',
+                left: expr,
+                right: parseEqualityExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseBitwiseXORExpression() {
+        var expr = parseBitwiseANDExpression();
+
+        while (match('^')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '^',
+                left: expr,
+                right: parseBitwiseANDExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseBitwiseORExpression() {
+        var expr = parseBitwiseXORExpression();
+
+        while (match('|')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '|',
+                left: expr,
+                right: parseBitwiseXORExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.11 Binary Logical Operators
+
+    function parseLogicalANDExpression() {
+        var expr = parseBitwiseORExpression();
+
+        while (match('&&')) {
+            lex();
+            expr = {
+                type: Syntax.LogicalExpression,
+                operator: '&&',
+                left: expr,
+                right: parseBitwiseORExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseLogicalORExpression() {
+        var expr = parseLogicalANDExpression();
+
+        while (match('||')) {
+            lex();
+            expr = {
+                type: Syntax.LogicalExpression,
+                operator: '||',
+                left: expr,
+                right: parseLogicalANDExpression()
+            };
+        }
+
+        return expr;
+    }
 
     // 11.12 Conditional Operator
 
     function parseConditionalExpression() {
-        var expr, previousAllowIn, consequent, alternate;
+        var expr, previousAllowIn, consequent;
 
-        expr = parseBinaryExpression();
+        expr = parseLogicalORExpression();
 
         if (match('?')) {
             lex();
@@ -2088,9 +1967,13 @@ parseStatement: true, parseSourceElement: true */
             consequent = parseAssignmentExpression();
             state.allowIn = previousAllowIn;
             expect(':');
-            alternate = parseAssignmentExpression();
 
-            expr = delegate.createConditionalExpression(expr, consequent, alternate);
+            expr = {
+                type: Syntax.ConditionalExpression,
+                test: expr,
+                consequent: consequent,
+                alternate: parseAssignmentExpression()
+            };
         }
 
         return expr;
@@ -2099,28 +1982,31 @@ parseStatement: true, parseSourceElement: true */
     // 11.13 Assignment Operators
 
     function parseAssignmentExpression() {
-        var token, left, right;
+        var token, expr;
 
-        token = lookahead;
-        left = parseConditionalExpression();
+        token = lookahead();
+        expr = parseConditionalExpression();
 
         if (matchAssign()) {
             // LeftHandSideExpression
-            if (!isLeftHandSide(left)) {
+            if (!isLeftHandSide(expr)) {
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
             // 11.13.1
-            if (strict && left.type === Syntax.Identifier && isRestrictedWord(left.name)) {
+            if (strict && expr.type === Syntax.Identifier && isRestrictedWord(expr.name)) {
                 throwErrorTolerant(token, Messages.StrictLHSAssignment);
             }
 
-            token = lex();
-            right = parseAssignmentExpression();
-            return delegate.createAssignmentExpression(token.value, left, right);
+            expr = {
+                type: Syntax.AssignmentExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseAssignmentExpression()
+            };
         }
 
-        return left;
+        return expr;
     }
 
     // 11.14 Comma Operator
@@ -2129,7 +2015,10 @@ parseStatement: true, parseSourceElement: true */
         var expr = parseAssignmentExpression();
 
         if (match(',')) {
-            expr = delegate.createSequenceExpression([ expr ]);
+            expr = {
+                type: Syntax.SequenceExpression,
+                expressions: [ expr ]
+            };
 
             while (index < length) {
                 if (!match(',')) {
@@ -2172,7 +2061,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createBlockStatement(block);
+        return {
+            type: Syntax.BlockStatement,
+            body: block
+        };
     }
 
     // 12.2 Variable Statement
@@ -2184,7 +2076,10 @@ parseStatement: true, parseSourceElement: true */
             throwUnexpected(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseVariableDeclaration(kind) {
@@ -2204,7 +2099,11 @@ parseStatement: true, parseSourceElement: true */
             init = parseAssignmentExpression();
         }
 
-        return delegate.createVariableDeclarator(id, init);
+        return {
+            type: Syntax.VariableDeclarator,
+            id: id,
+            init: init
+        };
     }
 
     function parseVariableDeclarationList(kind) {
@@ -2230,7 +2129,11 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createVariableDeclaration(declarations, 'var');
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: declarations,
+            kind: 'var'
+        };
     }
 
     // kind may be `const` or `let`
@@ -2246,22 +2149,34 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createVariableDeclaration(declarations, kind);
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: declarations,
+            kind: kind
+        };
     }
 
     // 12.3 Empty Statement
 
     function parseEmptyStatement() {
         expect(';');
-        return delegate.createEmptyStatement();
+
+        return {
+            type: Syntax.EmptyStatement
+        };
     }
 
     // 12.4 Expression Statement
 
     function parseExpressionStatement() {
         var expr = parseExpression();
+
         consumeSemicolon();
-        return delegate.createExpressionStatement(expr);
+
+        return {
+            type: Syntax.ExpressionStatement,
+            expression: expr
+        };
     }
 
     // 12.5 If statement
@@ -2286,7 +2201,12 @@ parseStatement: true, parseSourceElement: true */
             alternate = null;
         }
 
-        return delegate.createIfStatement(test, consequent, alternate);
+        return {
+            type: Syntax.IfStatement,
+            test: test,
+            consequent: consequent,
+            alternate: alternate
+        };
     }
 
     // 12.6 Iteration Statements
@@ -2315,7 +2235,11 @@ parseStatement: true, parseSourceElement: true */
             lex();
         }
 
-        return delegate.createDoWhileStatement(body, test);
+        return {
+            type: Syntax.DoWhileStatement,
+            body: body,
+            test: test
+        };
     }
 
     function parseWhileStatement() {
@@ -2336,14 +2260,21 @@ parseStatement: true, parseSourceElement: true */
 
         state.inIteration = oldInIteration;
 
-        return delegate.createWhileStatement(test, body);
+        return {
+            type: Syntax.WhileStatement,
+            test: test,
+            body: body
+        };
     }
 
     function parseForVariableDeclaration() {
-        var token = lex(),
-            declarations = parseVariableDeclarationList();
+        var token = lex();
 
-        return delegate.createVariableDeclaration(declarations, token.value);
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: parseVariableDeclarationList(),
+            kind: token.value
+        };
     }
 
     function parseForStatement() {
@@ -2413,15 +2344,29 @@ parseStatement: true, parseSourceElement: true */
 
         state.inIteration = oldInIteration;
 
-        return (typeof left === 'undefined') ?
-                delegate.createForStatement(init, test, update, body) :
-                delegate.createForInStatement(left, right, body);
+        if (typeof left === 'undefined') {
+            return {
+                type: Syntax.ForStatement,
+                init: init,
+                test: test,
+                update: update,
+                body: body
+            };
+        }
+
+        return {
+            type: Syntax.ForInStatement,
+            left: left,
+            right: right,
+            body: body,
+            each: false
+        };
     }
 
     // 12.7 The continue statement
 
     function parseContinueStatement() {
-        var label = null;
+        var token, label = null;
 
         expectKeyword('continue');
 
@@ -2433,7 +2378,10 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalContinue);
             }
 
-            return delegate.createContinueStatement(null);
+            return {
+                type: Syntax.ContinueStatement,
+                label: null
+            };
         }
 
         if (peekLineTerminator()) {
@@ -2441,10 +2389,14 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalContinue);
             }
 
-            return delegate.createContinueStatement(null);
+            return {
+                type: Syntax.ContinueStatement,
+                label: null
+            };
         }
 
-        if (lookahead.type === Token.Identifier) {
+        token = lookahead();
+        if (token.type === Token.Identifier) {
             label = parseVariableIdentifier();
 
             if (!Object.prototype.hasOwnProperty.call(state.labelSet, label.name)) {
@@ -2458,13 +2410,16 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.IllegalContinue);
         }
 
-        return delegate.createContinueStatement(label);
+        return {
+            type: Syntax.ContinueStatement,
+            label: label
+        };
     }
 
     // 12.8 The break statement
 
     function parseBreakStatement() {
-        var label = null;
+        var token, label = null;
 
         expectKeyword('break');
 
@@ -2476,7 +2431,10 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalBreak);
             }
 
-            return delegate.createBreakStatement(null);
+            return {
+                type: Syntax.BreakStatement,
+                label: null
+            };
         }
 
         if (peekLineTerminator()) {
@@ -2484,10 +2442,14 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalBreak);
             }
 
-            return delegate.createBreakStatement(null);
+            return {
+                type: Syntax.BreakStatement,
+                label: null
+            };
         }
 
-        if (lookahead.type === Token.Identifier) {
+        token = lookahead();
+        if (token.type === Token.Identifier) {
             label = parseVariableIdentifier();
 
             if (!Object.prototype.hasOwnProperty.call(state.labelSet, label.name)) {
@@ -2501,13 +2463,16 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.IllegalBreak);
         }
 
-        return delegate.createBreakStatement(label);
+        return {
+            type: Syntax.BreakStatement,
+            label: label
+        };
     }
 
     // 12.9 The return statement
 
     function parseReturnStatement() {
-        var argument = null;
+        var token, argument = null;
 
         expectKeyword('return');
 
@@ -2520,23 +2485,33 @@ parseStatement: true, parseSourceElement: true */
             if (isIdentifierStart(source[index + 1])) {
                 argument = parseExpression();
                 consumeSemicolon();
-                return delegate.createReturnStatement(argument);
+                return {
+                    type: Syntax.ReturnStatement,
+                    argument: argument
+                };
             }
         }
 
         if (peekLineTerminator()) {
-            return delegate.createReturnStatement(null);
+            return {
+                type: Syntax.ReturnStatement,
+                argument: null
+            };
         }
 
         if (!match(';')) {
-            if (!match('}') && lookahead.type !== Token.EOF) {
+            token = lookahead();
+            if (!match('}') && token.type !== Token.EOF) {
                 argument = parseExpression();
             }
         }
 
         consumeSemicolon();
 
-        return delegate.createReturnStatement(argument);
+        return {
+            type: Syntax.ReturnStatement,
+            argument: argument
+        };
     }
 
     // 12.10 The with statement
@@ -2558,7 +2533,11 @@ parseStatement: true, parseSourceElement: true */
 
         body = parseStatement();
 
-        return delegate.createWithStatement(object, body);
+        return {
+            type: Syntax.WithStatement,
+            object: object,
+            body: body
+        };
     }
 
     // 12.10 The swith statement
@@ -2588,7 +2567,11 @@ parseStatement: true, parseSourceElement: true */
             consequent.push(statement);
         }
 
-        return delegate.createSwitchCase(test, consequent);
+        return {
+            type: Syntax.SwitchCase,
+            test: test,
+            consequent: consequent
+        };
     }
 
     function parseSwitchStatement() {
@@ -2606,7 +2589,10 @@ parseStatement: true, parseSourceElement: true */
 
         if (match('}')) {
             lex();
-            return delegate.createSwitchStatement(discriminant);
+            return {
+                type: Syntax.SwitchStatement,
+                discriminant: discriminant
+            };
         }
 
         cases = [];
@@ -2633,7 +2619,11 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createSwitchStatement(discriminant, cases);
+        return {
+            type: Syntax.SwitchStatement,
+            discriminant: discriminant,
+            cases: cases
+        };
     }
 
     // 12.13 The throw statement
@@ -2651,13 +2641,16 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createThrowStatement(argument);
+        return {
+            type: Syntax.ThrowStatement,
+            argument: argument
+        };
     }
 
     // 12.14 The try statement
 
     function parseCatchClause() {
-        var param, body;
+        var param;
 
         expectKeyword('catch');
 
@@ -2670,8 +2663,12 @@ parseStatement: true, parseSourceElement: true */
             }
         }
         expect(')');
-        body = parseBlock();
-        return delegate.createCatchClause(param, body);
+
+        return {
+            type: Syntax.CatchClause,
+            param: param,
+            body: parseBlock()
+        };
     }
 
     function parseTryStatement() {
@@ -2694,7 +2691,13 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.NoCatchOrFinally);
         }
 
-        return delegate.createTryStatement(block, [], handlers, finalizer);
+        return {
+            type: Syntax.TryStatement,
+            block: block,
+            guardedHandlers: [],
+            handlers: handlers,
+            finalizer: finalizer
+        };
     }
 
     // 12.15 The debugger statement
@@ -2704,22 +2707,24 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createDebuggerStatement();
+        return {
+            type: Syntax.DebuggerStatement
+        };
     }
 
     // 12 Statements
 
     function parseStatement() {
-        var type = lookahead.type,
+        var token = lookahead(),
             expr,
             labeledBody;
 
-        if (type === Token.EOF) {
-            throwUnexpected(lookahead);
+        if (token.type === Token.EOF) {
+            throwUnexpected(token);
         }
 
-        if (type === Token.Punctuator) {
-            switch (lookahead.value) {
+        if (token.type === Token.Punctuator) {
+            switch (token.value) {
             case ';':
                 return parseEmptyStatement();
             case '{':
@@ -2731,8 +2736,8 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if (type === Token.Keyword) {
-            switch (lookahead.value) {
+        if (token.type === Token.Keyword) {
+            switch (token.value) {
             case 'break':
                 return parseBreakStatement();
             case 'continue':
@@ -2779,12 +2784,20 @@ parseStatement: true, parseSourceElement: true */
             state.labelSet[expr.name] = true;
             labeledBody = parseStatement();
             delete state.labelSet[expr.name];
-            return delegate.createLabeledStatement(expr, labeledBody);
+
+            return {
+                type: Syntax.LabeledStatement,
+                label: expr,
+                body: labeledBody
+            };
         }
 
         consumeSemicolon();
 
-        return delegate.createExpressionStatement(expr);
+        return {
+            type: Syntax.ExpressionStatement,
+            expression: expr
+        };
     }
 
     // 13 Function Definition
@@ -2796,10 +2809,10 @@ parseStatement: true, parseSourceElement: true */
         expect('{');
 
         while (index < length) {
-            if (lookahead.type !== Token.StringLiteral) {
+            token = lookahead();
+            if (token.type !== Token.StringLiteral) {
                 break;
             }
-            token = lookahead;
 
             sourceElement = parseSourceElement();
             sourceElements.push(sourceElement);
@@ -2848,17 +2861,38 @@ parseStatement: true, parseSourceElement: true */
         state.inSwitch = oldInSwitch;
         state.inFunctionBody = oldInFunctionBody;
 
-        return delegate.createBlockStatement(sourceElements);
+        return {
+            type: Syntax.BlockStatement,
+            body: sourceElements
+        };
     }
 
-    function parseParams(firstRestricted) {
-        var param, params = [], token, stricted, paramSet, message;
+    function parseFunctionDeclaration() {
+        var id, param, params = [], body, token, stricted, firstRestricted, message, previousStrict, paramSet;
+
+        expectKeyword('function');
+        token = lookahead();
+        id = parseVariableIdentifier();
+        if (strict) {
+            if (isRestrictedWord(token.value)) {
+                throwErrorTolerant(token, Messages.StrictFunctionName);
+            }
+        } else {
+            if (isRestrictedWord(token.value)) {
+                firstRestricted = token;
+                message = Messages.StrictFunctionName;
+            } else if (isStrictModeReservedWord(token.value)) {
+                firstRestricted = token;
+                message = Messages.StrictReservedWord;
+            }
+        }
+
         expect('(');
 
         if (!match(')')) {
             paramSet = {};
             while (index < length) {
-                token = lookahead;
+                token = lookahead();
                 param = parseVariableIdentifier();
                 if (strict) {
                     if (isRestrictedWord(token.value)) {
@@ -2892,42 +2926,6 @@ parseStatement: true, parseSourceElement: true */
 
         expect(')');
 
-        return {
-            params: params,
-            stricted: stricted,
-            firstRestricted: firstRestricted,
-            message: message
-        };
-    }
-
-    function parseFunctionDeclaration() {
-        var id, params = [], body, token, stricted, tmp, firstRestricted, message, previousStrict;
-
-        expectKeyword('function');
-        token = lookahead;
-        id = parseVariableIdentifier();
-        if (strict) {
-            if (isRestrictedWord(token.value)) {
-                throwErrorTolerant(token, Messages.StrictFunctionName);
-            }
-        } else {
-            if (isRestrictedWord(token.value)) {
-                firstRestricted = token;
-                message = Messages.StrictFunctionName;
-            } else if (isStrictModeReservedWord(token.value)) {
-                firstRestricted = token;
-                message = Messages.StrictReservedWord;
-            }
-        }
-
-        tmp = parseParams(firstRestricted);
-        params = tmp.params;
-        stricted = tmp.stricted;
-        firstRestricted = tmp.firstRestricted;
-        if (tmp.message) {
-            message = tmp.message;
-        }
-
         previousStrict = strict;
         body = parseFunctionSourceElements();
         if (strict && firstRestricted) {
@@ -2938,16 +2936,25 @@ parseStatement: true, parseSourceElement: true */
         }
         strict = previousStrict;
 
-        return delegate.createFunctionDeclaration(id, params, [], body);
+        return {
+            type: Syntax.FunctionDeclaration,
+            id: id,
+            params: params,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     function parseFunctionExpression() {
-        var token, id = null, stricted, firstRestricted, message, tmp, params = [], body, previousStrict;
+        var token, id = null, stricted, firstRestricted, message, param, params = [], body, previousStrict, paramSet;
 
         expectKeyword('function');
 
         if (!match('(')) {
-            token = lookahead;
+            token = lookahead();
             id = parseVariableIdentifier();
             if (strict) {
                 if (isRestrictedWord(token.value)) {
@@ -2964,13 +2971,44 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        tmp = parseParams(firstRestricted);
-        params = tmp.params;
-        stricted = tmp.stricted;
-        firstRestricted = tmp.firstRestricted;
-        if (tmp.message) {
-            message = tmp.message;
+        expect('(');
+
+        if (!match(')')) {
+            paramSet = {};
+            while (index < length) {
+                token = lookahead();
+                param = parseVariableIdentifier();
+                if (strict) {
+                    if (isRestrictedWord(token.value)) {
+                        stricted = token;
+                        message = Messages.StrictParamName;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(paramSet, token.value)) {
+                        stricted = token;
+                        message = Messages.StrictParamDupe;
+                    }
+                } else if (!firstRestricted) {
+                    if (isRestrictedWord(token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictParamName;
+                    } else if (isStrictModeReservedWord(token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictReservedWord;
+                    } else if (Object.prototype.hasOwnProperty.call(paramSet, token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictParamDupe;
+                    }
+                }
+                params.push(param);
+                paramSet[param.name] = true;
+                if (match(')')) {
+                    break;
+                }
+                expect(',');
+            }
         }
+
+        expect(')');
 
         previousStrict = strict;
         body = parseFunctionSourceElements();
@@ -2982,17 +3020,28 @@ parseStatement: true, parseSourceElement: true */
         }
         strict = previousStrict;
 
-        return delegate.createFunctionExpression(id, params, [], body);
+        return {
+            type: Syntax.FunctionExpression,
+            id: id,
+            params: params,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     // 14 Program
 
     function parseSourceElement() {
-        if (lookahead.type === Token.Keyword) {
-            switch (lookahead.value) {
+        var token = lookahead();
+
+        if (token.type === Token.Keyword) {
+            switch (token.value) {
             case 'const':
             case 'let':
-                return parseConstLetDeclaration(lookahead.value);
+                return parseConstLetDeclaration(token.value);
             case 'function':
                 return parseFunctionDeclaration();
             default:
@@ -3000,7 +3049,7 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if (lookahead.type !== Token.EOF) {
+        if (token.type !== Token.EOF) {
             return parseStatement();
         }
     }
@@ -3009,7 +3058,7 @@ parseStatement: true, parseSourceElement: true */
         var sourceElement, sourceElements = [], token, directive, firstRestricted;
 
         while (index < length) {
-            token = lookahead;
+            token = lookahead();
             if (token.type !== Token.StringLiteral) {
                 break;
             }
@@ -3044,11 +3093,13 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function parseProgram() {
-        var body;
+        var program;
         strict = false;
-        peek();
-        body = parseSourceElements();
-        return delegate.createProgram(body);
+        program = {
+            type: Syntax.Program,
+            body: parseSourceElements()
+        };
+        return program;
     }
 
     // The following functions are needed only when the option to preserve
@@ -3310,6 +3361,21 @@ parseStatement: true, parseSourceElement: true */
         extra.tokens = tokens;
     }
 
+    function createLiteral(token) {
+        return {
+            type: Syntax.Literal,
+            value: token.value
+        };
+    }
+
+    function createRawLiteral(token) {
+        return {
+            type: Syntax.Literal,
+            value: token.value,
+            raw: sliceSource(token.range[0], token.range[1])
+        };
+    }
+
     function createLocationMarker() {
         var marker = {};
 
@@ -3388,7 +3454,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function trackLeftHandSideExpression() {
-        var marker, expr, property;
+        var marker, expr;
 
         skipComment();
         marker = createLocationMarker();
@@ -3397,13 +3463,21 @@ parseStatement: true, parseSourceElement: true */
 
         while (match('.') || match('[')) {
             if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             }
@@ -3413,7 +3487,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function trackLeftHandSideExpressionAllowCall() {
-        var marker, expr, args, property;
+        var marker, expr;
 
         skipComment();
         marker = createLocationMarker();
@@ -3422,18 +3496,29 @@ parseStatement: true, parseSourceElement: true */
 
         while (match('.') || match('[') || match('(')) {
             if (match('(')) {
-                args = parseArguments();
-                expr = delegate.createCallExpression(expr, args);
+                expr = {
+                    type: Syntax.CallExpression,
+                    callee: expr,
+                    'arguments': parseArguments()
+                };
                 marker.end();
                 marker.apply(expr);
             } else if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             }
@@ -3541,6 +3626,11 @@ parseStatement: true, parseSourceElement: true */
             skipComment = scanComment;
         }
 
+        if (extra.raw) {
+            extra.createLiteral = createLiteral;
+            createLiteral = createRawLiteral;
+        }
+
         if (extra.range || extra.loc) {
 
             extra.parseGroupExpression = parseGroupExpression;
@@ -3552,18 +3642,25 @@ parseStatement: true, parseSourceElement: true */
 
             wrapTracking = wrapTrackingFunction(extra.range, extra.loc);
 
+            extra.parseAdditiveExpression = parseAdditiveExpression;
             extra.parseAssignmentExpression = parseAssignmentExpression;
-            extra.parseBinaryExpression = parseBinaryExpression;
+            extra.parseBitwiseANDExpression = parseBitwiseANDExpression;
+            extra.parseBitwiseORExpression = parseBitwiseORExpression;
+            extra.parseBitwiseXORExpression = parseBitwiseXORExpression;
             extra.parseBlock = parseBlock;
             extra.parseFunctionSourceElements = parseFunctionSourceElements;
             extra.parseCatchClause = parseCatchClause;
             extra.parseComputedMember = parseComputedMember;
             extra.parseConditionalExpression = parseConditionalExpression;
             extra.parseConstLetDeclaration = parseConstLetDeclaration;
+            extra.parseEqualityExpression = parseEqualityExpression;
             extra.parseExpression = parseExpression;
             extra.parseForVariableDeclaration = parseForVariableDeclaration;
             extra.parseFunctionDeclaration = parseFunctionDeclaration;
             extra.parseFunctionExpression = parseFunctionExpression;
+            extra.parseLogicalANDExpression = parseLogicalANDExpression;
+            extra.parseLogicalORExpression = parseLogicalORExpression;
+            extra.parseMultiplicativeExpression = parseMultiplicativeExpression;
             extra.parseNewExpression = parseNewExpression;
             extra.parseNonComputedProperty = parseNonComputedProperty;
             extra.parseObjectProperty = parseObjectProperty;
@@ -3572,25 +3669,34 @@ parseStatement: true, parseSourceElement: true */
             extra.parsePrimaryExpression = parsePrimaryExpression;
             extra.parseProgram = parseProgram;
             extra.parsePropertyFunction = parsePropertyFunction;
+            extra.parseRelationalExpression = parseRelationalExpression;
             extra.parseStatement = parseStatement;
+            extra.parseShiftExpression = parseShiftExpression;
             extra.parseSwitchCase = parseSwitchCase;
             extra.parseUnaryExpression = parseUnaryExpression;
             extra.parseVariableDeclaration = parseVariableDeclaration;
             extra.parseVariableIdentifier = parseVariableIdentifier;
 
+            parseAdditiveExpression = wrapTracking(extra.parseAdditiveExpression);
             parseAssignmentExpression = wrapTracking(extra.parseAssignmentExpression);
-            parseBinaryExpression = wrapTracking(extra.parseBinaryExpression);
+            parseBitwiseANDExpression = wrapTracking(extra.parseBitwiseANDExpression);
+            parseBitwiseORExpression = wrapTracking(extra.parseBitwiseORExpression);
+            parseBitwiseXORExpression = wrapTracking(extra.parseBitwiseXORExpression);
             parseBlock = wrapTracking(extra.parseBlock);
             parseFunctionSourceElements = wrapTracking(extra.parseFunctionSourceElements);
             parseCatchClause = wrapTracking(extra.parseCatchClause);
             parseComputedMember = wrapTracking(extra.parseComputedMember);
             parseConditionalExpression = wrapTracking(extra.parseConditionalExpression);
             parseConstLetDeclaration = wrapTracking(extra.parseConstLetDeclaration);
+            parseEqualityExpression = wrapTracking(extra.parseEqualityExpression);
             parseExpression = wrapTracking(extra.parseExpression);
             parseForVariableDeclaration = wrapTracking(extra.parseForVariableDeclaration);
             parseFunctionDeclaration = wrapTracking(extra.parseFunctionDeclaration);
             parseFunctionExpression = wrapTracking(extra.parseFunctionExpression);
             parseLeftHandSideExpression = wrapTracking(parseLeftHandSideExpression);
+            parseLogicalANDExpression = wrapTracking(extra.parseLogicalANDExpression);
+            parseLogicalORExpression = wrapTracking(extra.parseLogicalORExpression);
+            parseMultiplicativeExpression = wrapTracking(extra.parseMultiplicativeExpression);
             parseNewExpression = wrapTracking(extra.parseNewExpression);
             parseNonComputedProperty = wrapTracking(extra.parseNonComputedProperty);
             parseObjectProperty = wrapTracking(extra.parseObjectProperty);
@@ -3599,7 +3705,9 @@ parseStatement: true, parseSourceElement: true */
             parsePrimaryExpression = wrapTracking(extra.parsePrimaryExpression);
             parseProgram = wrapTracking(extra.parseProgram);
             parsePropertyFunction = wrapTracking(extra.parsePropertyFunction);
+            parseRelationalExpression = wrapTracking(extra.parseRelationalExpression);
             parseStatement = wrapTracking(extra.parseStatement);
+            parseShiftExpression = wrapTracking(extra.parseShiftExpression);
             parseSwitchCase = wrapTracking(extra.parseSwitchCase);
             parseUnaryExpression = wrapTracking(extra.parseUnaryExpression);
             parseVariableDeclaration = wrapTracking(extra.parseVariableDeclaration);
@@ -3620,15 +3728,23 @@ parseStatement: true, parseSourceElement: true */
             skipComment = extra.skipComment;
         }
 
+        if (extra.raw) {
+            createLiteral = extra.createLiteral;
+        }
+
         if (extra.range || extra.loc) {
+            parseAdditiveExpression = extra.parseAdditiveExpression;
             parseAssignmentExpression = extra.parseAssignmentExpression;
-            parseBinaryExpression = extra.parseBinaryExpression;
+            parseBitwiseANDExpression = extra.parseBitwiseANDExpression;
+            parseBitwiseORExpression = extra.parseBitwiseORExpression;
+            parseBitwiseXORExpression = extra.parseBitwiseXORExpression;
             parseBlock = extra.parseBlock;
             parseFunctionSourceElements = extra.parseFunctionSourceElements;
             parseCatchClause = extra.parseCatchClause;
             parseComputedMember = extra.parseComputedMember;
             parseConditionalExpression = extra.parseConditionalExpression;
             parseConstLetDeclaration = extra.parseConstLetDeclaration;
+            parseEqualityExpression = extra.parseEqualityExpression;
             parseExpression = extra.parseExpression;
             parseForVariableDeclaration = extra.parseForVariableDeclaration;
             parseFunctionDeclaration = extra.parseFunctionDeclaration;
@@ -3636,6 +3752,9 @@ parseStatement: true, parseSourceElement: true */
             parseGroupExpression = extra.parseGroupExpression;
             parseLeftHandSideExpression = extra.parseLeftHandSideExpression;
             parseLeftHandSideExpressionAllowCall = extra.parseLeftHandSideExpressionAllowCall;
+            parseLogicalANDExpression = extra.parseLogicalANDExpression;
+            parseLogicalORExpression = extra.parseLogicalORExpression;
+            parseMultiplicativeExpression = extra.parseMultiplicativeExpression;
             parseNewExpression = extra.parseNewExpression;
             parseNonComputedProperty = extra.parseNonComputedProperty;
             parseObjectProperty = extra.parseObjectProperty;
@@ -3644,7 +3763,9 @@ parseStatement: true, parseSourceElement: true */
             parsePostfixExpression = extra.parsePostfixExpression;
             parseProgram = extra.parseProgram;
             parsePropertyFunction = extra.parsePropertyFunction;
+            parseRelationalExpression = extra.parseRelationalExpression;
             parseStatement = extra.parseStatement;
+            parseShiftExpression = extra.parseShiftExpression;
             parseSwitchCase = extra.parseSwitchCase;
             parseUnaryExpression = extra.parseUnaryExpression;
             parseVariableDeclaration = extra.parseVariableDeclaration;
@@ -3667,26 +3788,6 @@ parseStatement: true, parseSourceElement: true */
         return result;
     }
 
-    // This is used to modify the delegate.
-
-    function extend(object, properties) {
-        var entry, result = {};
-
-        for (entry in object) {
-            if (object.hasOwnProperty(entry)) {
-                result[entry] = object[entry];
-            }
-        }
-
-        for (entry in properties) {
-            if (properties.hasOwnProperty(entry)) {
-                result[entry] = properties[entry];
-            }
-        }
-
-        return result;
-    }
-
     function parse(code, options) {
         var program, toString;
 
@@ -3695,13 +3796,12 @@ parseStatement: true, parseSourceElement: true */
             code = toString(code);
         }
 
-        delegate = SyntaxTreeDelegate;
         source = code;
         index = 0;
         lineNumber = (source.length > 0) ? 1 : 0;
         lineStart = 0;
         length = source.length;
-        lookahead = null;
+        buffer = null;
         state = {
             allowIn: true,
             labelSet: {},
@@ -3714,7 +3814,7 @@ parseStatement: true, parseSourceElement: true */
         if (typeof options !== 'undefined') {
             extra.range = (typeof options.range === 'boolean') && options.range;
             extra.loc = (typeof options.loc === 'boolean') && options.loc;
-
+            extra.raw = (typeof options.raw === 'boolean') && options.raw;
             if (typeof options.tokens === 'boolean' && options.tokens) {
                 extra.tokens = [];
             }
@@ -3769,8 +3869,8 @@ parseStatement: true, parseSourceElement: true */
         return program;
     }
 
-    // Sync with package.json and component.json.
-    exports.version = '1.1.0-dev';
+    // Sync with package.json.
+    exports.version = '1.0.2';
 
     exports.parse = parse;
 
@@ -3795,11 +3895,31 @@ parseStatement: true, parseSourceElement: true */
         return types;
     }());
 
-}(typeof exports === 'undefined' ? (esprima = {}) : exports));
+}));
 /* vim: set sw=4 ts=4 et tw=80 : */
-var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).parse;
 
-(typeof exports === 'undefined' ? window : exports).falafel = function (src, opts, fn,srcName) {
+})(null);
+
+(function(require,module){
+
+var parse = require('esprima').parse;
+var objectKeys = Object.keys || function (obj) {
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    return keys;
+};
+var forEach = function (xs, fn) {
+    if (xs.forEach) return xs.forEach(fn);
+    for (var i = 0; i < xs.length; i++) {
+        fn.call(xs, xs[i], i, xs);
+    }
+};
+
+var isArray = Array.isArray || function (xs) {
+    return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+module.exports = function (src, opts, fn) {
     if (typeof opts === 'function') {
         fn = opts;
         opts = {};
@@ -3809,7 +3929,7 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
         src = opts.source;
         delete opts.source;
     }
-    src = src || opts.source;
+    src = src === undefined ? opts.source : src;
     opts.range = true;
     if (typeof src !== 'string') src = String(src);
     
@@ -3817,22 +3937,20 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
     
     var result = {
         chunks : src.split(''),
-        toString : function () { return result.chunks.join(''); },
-        inspect : function () { return result.toString(); }
+        toString : function () { return result.chunks.join('') },
+        inspect : function () { return result.toString() }
     };
     var index = 0;
     
     (function walk (node, parent) {
         insertHelpers(node, parent, result.chunks);
-
-        Object.keys(node).forEach(function (key) {
-
+        
+        forEach(objectKeys(node), function (key) {
             if (key === 'parent') return;
-
+            
             var child = node[key];
-            if (Array.isArray(child)) {
-                child.forEach(function (c) {
-                    
+            if (isArray(child)) {
+                forEach(child, function (c) {
                     if (c && typeof c.type === 'string') {
                         walk(c, node);
                     }
@@ -3843,7 +3961,7 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
                 walk(child, node);
             }
         });
-        fn(node,srcName);
+        fn(node);
     })(ast, undefined);
     
     return result;
@@ -3855,7 +3973,6 @@ function insertHelpers (node, parent, chunks) {
     node.parent = parent;
     
     node.source = function () {
-        
         return chunks.slice(
             node.range[0], node.range[1]
         ).join('');
@@ -3863,7 +3980,7 @@ function insertHelpers (node, parent, chunks) {
     
     if (node.update && typeof node.update === 'object') {
         var prev = node.update;
-        Object.keys(prev).forEach(function (key) {
+        forEach(objectKeys(prev), function (key) {
             update[key] = prev[key];
         });
         node.update = update;
@@ -3877,10 +3994,13 @@ function insertHelpers (node, parent, chunks) {
         for (var i = node.range[0] + 1; i < node.range[1]; i++) {
             chunks[i] = '';
         }
-    }
+    };
 }
-var inBrowser = typeof exports === 'undefined';
-var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
+
+window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});
+
+var inBrowser = typeof window !== 'undefined' && this === window;
+var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
@@ -3894,7 +4014,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "FunctionDeclaration"    ,
         "IfStatement"       ,
         "WhileStatement"    ,
-        "DoWhileStatement"      ,
+        "DoWhileStatement"   ,
         "ForStatement"   ,
         "ForInStatement"  ,
         "SwitchStatement"  ,
@@ -3903,25 +4023,32 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
     linesToAddBrackets = [
         "IfStatement"       ,
         "WhileStatement"    ,
-        "DoWhileStatement"      ,
+        "DoWhileStatement"     ,
         "ForStatement"   ,
         "ForInStatement"  ,
         "WithStatement"
     ],
-    covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
     __blanket,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},options = {
         reporter: null,
         adapter:null,
         filter: null,
-        orderedLoading: true,
+        customVariable: null,
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
         autoStart: false,
         timeout: 180,
-        ignoreCors: false
+        ignoreCors: false,
+        branchTracking: false,
+        sourceURL: false,
+        debug:false,
+        engineOnly:false,
+        testReadyCallback:null,
+        commonJS:false,
+        instrumentCache:false,
+        modulePattern: null
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3955,6 +4082,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
           }
         },
+        getCovVar: function(){
+            var opt = _blanket.options("customVariable");
+            if (opt){
+                if (_blanket.options("debug")) {console.log("BLANKET-Using custom tracking variable:",opt);}
+                return inBrowser ? "window."+opt : opt;
+            }
+            return inBrowser ?   "window._$blanket" : "_$jscoverage";
+        },
         options: function(key,value){
             if (typeof key !== "string"){
                 _blanket._extend(options,key);
@@ -3965,13 +4100,29 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         instrument: function(config, next){
+            //check instrumented hash table,
+            //return instrumented code if available.
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = _blanket._prepareSource(inFile);
-            _blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
-            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
-            next(instrumented);
+            //check instrument cache
+           if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
+                if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}
+                next(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+            }else{
+                var sourceArray = _blanket._prepareSource(inFile);
+                _blanket._trackingArraySetup=[];
+                var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
+                instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
+                if (_blanket.options("sourceURL")){
+                    instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+                }
+                if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
+                if (_blanket.options("instrumentCache") && sessionStorage){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Saving instrumentation to cache: ",inFileName);}
+                    sessionStorage.setItem("blanket_instrument_store-"+inFileName,instrumented);
+                }
+                next(instrumented);
+            }
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
@@ -3979,15 +4130,28 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
+            var branches = _blanket.options("branchTracking");
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
+            var covVar = _blanket.getCovVar();
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
-            
+            if (branches){
+                intro += "var _$branchFcn=function(f,l,c,r){ ";
+                intro += "if (!!r) { ";
+                intro += covVar+"[f].branchData[l][c][0] = "+covVar+"[f].branchData[l][c][0] || [];";
+                intro += covVar+"[f].branchData[l][c][0].push(r); }";
+                intro += "else { ";
+                intro += covVar+"[f].branchData[l][c][1] = "+covVar+"[f].branchData[l][c][1] || [];";
+                intro += covVar+"[f].branchData[l][c][1].push(r); }";
+                intro += "return r;};\n";
+            }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
-            
+
             intro += covVar+"['"+filename+"']=[];\n";
-            
+            if (branches){
+                intro += covVar+"['"+filename+"'].branchData=[];\n";
+            }
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -3995,13 +4159,27 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-            
+            if (branches){
+                _blanket._branchingArraySetup.sort(function(a,b){
+                    return a.line > b.line;
+                }).sort(function(a,b){
+                    return a.column > b.column;
+                }).forEach(function(item){
+                    if (item.file === filename){
+                        intro += "if (typeof "+ covVar+"['"+filename+"'].branchData["+item.line+"] === 'undefined'){\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]=[];\n";
+                        intro += "}";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].consequent = "+JSON.stringify(item.consequent)+";\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].alternate = "+JSON.stringify(item.alternate)+";\n";
+                    }
+                });
+            }
             intro += "}";
 
             return intro;
         },
         _blockifyIf: function(node){
-            
             if (linesToAddBrackets.indexOf(node.type) > -1){
                 var bracketsExistObject = node.consequent || node.body;
                 var bracketsExistAlt = node.alternate;
@@ -4013,22 +4191,85 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                 }
             }
         },
-        _addTracking: function (node,filename) {
-            _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
-                if (node.type === "VariableDeclaration" &&
-                    (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
-                    return;
+        _trackBranch: function(node,filename){
+            //recursive on consequent and alternative
+            var line = node.loc.start.line;
+            var col = node.loc.start.column;
+
+            _blanket._branchingArraySetup.push({
+                line: line,
+                column: col,
+                file:filename,
+                consequent: node.consequent.loc,
+                alternate: node.alternate.loc
+            });
+
+            var source = node.source();
+            var updated = "_$branchFcn"+
+                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
+                          ")"+source.slice(source.indexOf("?"));
+            node.update(updated);
+        },
+        _addTracking: function (filename) {
+            //falafel doesn't take a file name
+            //so we include the filename in a closure
+            //and return the function to falafel
+            var covVar = _blanket.getCovVar();
+
+            return function(node){
+                _blanket._blockifyIf(node);
+
+                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement") {
+                    _blanket._checkDefs(node,filename);
+                    if (node.type === "VariableDeclaration" &&
+                        (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
+                        return;
+                    }
+                    if (node.loc && node.loc.start){
+                        node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
+                        _blanket._trackingArraySetup.push(node.loc.start.line);
+                    }else{
+                        //I don't think we can handle a node with no location
+                        throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
+                    }
+                }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                    _blanket._trackBranch(node,filename);
                 }
-                if (node.loc && node.loc.start){
-                    node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    _blanket._trackingArraySetup.push(node.loc.start.line);
-                }else{
-                    //I don't think we can handle a node with no location
-                    throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
+            };
+        },
+        _checkDefs: function(node,filename){
+            // Make sure developers don't redefine window. if they do, inform them it is wrong.
+            if (inBrowser){
+                if (node.type === "VariableDeclaration" && node.declarations) {
+                    node.declarations.forEach(function(declaration) {
+                        if (declaration.id.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
                 }
-            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
-                _blanket._trackBranch(node,filename);
+                if (node.type === "FunctionDeclaration" && node.params) {
+                    node.params.forEach(function(param) {
+                        if (param.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
+                }
+                //Make sure developers don't redefine the coverage variable
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    node.expression.left.object && node.expression.left.property &&
+                    node.expression.left.object.name +
+                        "." + node.expression.left.property.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
+            }else{
+                //Make sure developers don't redefine the coverage variable in node
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    !node.expression.left.object && !node.expression.left.property &&
+                    node.expression.left.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
             }
         },
         setupCoverage: function(){
@@ -4048,6 +4289,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         onTestStart: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event started");}
             this._checkIfSetup();
             coverageInfo.stats.tests++;
             coverageInfo.stats.pending++;
@@ -4066,13 +4308,16 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             coverageInfo.stats.suites++;
         },
         onTestsDone: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event done");}
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
 
-            if (typeof exports === 'undefined'){
+            if (inBrowser){
                 this.report(coverageInfo);
             }else{
-                delete _$jscoverage.branchFcn;
+                if (!_blanket.options("branchTracking")){
+                    delete (inBrowser ? window : global)[_blanket.getCovVar()].branchFcn;
+                }
                 this.options("reporter").call(this,coverageInfo);
             }
         }
@@ -4099,7 +4344,7 @@ _blanket.extend({
             oldOptions(key,value);
             newVal[key] = value;
         }
-        
+
         if (newVal.adapter){
             _blanket._loadFile(newVal.adapter);
         }
@@ -4132,7 +4377,12 @@ _blanket.extend({
             loader += "<br><br>This is likely caused by the source files being referenced locally (using the file:// protocol). ";
             loader += "<br><br>Some solutions include <a href='http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent' target='_blank'>starting Chrome with special flags</a>, <a target='_blank' href='https://github.com/remy/servedir'>running a server locally</a>, or using a browser without these CORS restrictions (Safari).";
             loader += "<br>";
-            loader += "<br><span style='float:right;cursor:pointer;' onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
+            if (typeof FileReader !== "undefined"){
+                loader += "<br>Or, try the experimental loader.  When prompted, simply click on the directory containing all the source files you want covered.";
+                loader += "<a href='javascript:document.getElementById(\"fileInput\").click();'>Start Loader</a>";
+                loader += "<input type='file' type='application/x-javascript' accept='application/x-javascript' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
+            }
+            loader += "<br><span style='float:right;cursor:pointer;'  onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
             loader += "<div style='clear:both'></div>";
             loader += "</div></div>";
 
@@ -4140,7 +4390,7 @@ _blanket.extend({
             css += "display:block;";
             css += "position:fixed;";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogOverlay {";
             css += "position:fixed;";
             css += "width:100%;";
@@ -4150,13 +4400,13 @@ _blanket.extend({
             css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
             css += "filter:alpha(opacity=50); ";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogVerticalOffset { ";
             css += "position:fixed;";
             css += "top:30%;";
             css += "width:100%;";
             css += "z-index:40002; }";
-        
+
             css += ".blanketDialogBox { ";
             css += "width:405px; ";
             css += "position:relative;";
@@ -4164,7 +4414,7 @@ _blanket.extend({
             css += "background-color:white;";
             css += "padding:10px;";
             css += "border:1px solid black; }";
-        
+
         var dom = document.createElement("style");
         dom.innerHTML = css;
         document.head.appendChild(dom);
@@ -4176,27 +4426,79 @@ _blanket.extend({
         document.body.insertBefore(div,document.body.firstChild);
 
     },
+    manualFileLoader: function(files){
+        var toArray =Array.prototype.slice;
+        files = toArray.call(files).filter(function(item){
+            return item.type !== "";
+        });
+        var sessionLength = files.length-1;
+        var sessionIndx=0;
+        var sessionArray = {};
+        if (sessionStorage["blanketSessionLoader"]){
+            sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
+        }
+
+
+        var fileLoader = function(event){
+            var fileContent = event.currentTarget.result;
+            var file = files[sessionIndx];
+            var filename = file.webkitRelativePath && file.webkitRelativePath !== '' ? file.webkitRelativePath : file.name;
+            sessionArray[filename] = fileContent;
+            sessionIndx++;
+            if (sessionIndx === sessionLength){
+                sessionStorage.setItem("blanketSessionLoader", JSON.stringify(sessionArray));
+                document.location.reload();
+            }else{
+                readFile(files[sessionIndx]);
+            }
+        };
+        function readFile(file){
+            var reader = new FileReader();
+            reader.onload = fileLoader;
+            reader.readAsText(file);
+        }
+        readFile(files[sessionIndx]);
+    },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
             request.send();
-            //load the adapter
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.text = request.responseText;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            _blanket._addScript(request.responseText);
         }
+    },
+    _addScript: function(data){
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.text = data;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
     },
     hasAdapter: function(callback){
         return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
+        if (!document.getElementById("blanketLoaderDialog")){
+            //all found, clear it
+            _blanket.blanketSession = null;
+        }
         coverage_data.files = window._$blanket;
-        if (_blanket.options("reporter")){
-            require([_blanket.options("reporter").replace(".js","")],function(r){
-                r(coverage_data);
-            });
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
+
+        // Check if we have any covered files that requires reporting
+        // otherwise just exit gracefully.
+        if (!coverage_data.files || !Object.keys(coverage_data.files).length) {
+            if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
+            return;
+        }
+
+        if (typeof coverage_data.files.branchFcn !== "undefined"){
+            delete coverage_data.files.branchFcn;
+        }
+        if (typeof _blanket.options("reporter") === "string"){
+            _blanket._loadFile(_blanket.options("reporter"));
+            _blanket.customReporter(coverage_data,_blanket.options("reporter_options"));
+        }else if (typeof _blanket.options("reporter") === "function"){
+            _blanket.options("reporter")(coverage_data);
         }else if (typeof _blanket.defaultReporter === 'function'){
             _blanket.defaultReporter(coverage_data);
         }else{
@@ -4211,53 +4513,47 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
-         
+
           propNames.forEach(function(name){
             var desc = Object.getOwnPropertyDescriptor(o, name);
             Object.defineProperty(_copy, name, desc);
           });
-         
+
           return _copy;
         }
-
+        if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
         var scripts = _blanket.utils.collectPageScripts();
         //_blanket.options("filter",scripts);
         if (scripts.length === 0){
             callback();
         }else{
-            var requireConfig = {
-                paths: {},
-                shim: {},
-                waitSeconds: _blanket.options("timeout")
-            };
-            var lastDep = {
-                deps: []
-            };
-            var isOrdered = _blanket.options("orderedLoading");
-            var initialGet=[];
-            scripts.forEach(function(file,indx){
-                //for whatever reason requirejs
-                //prefers when we don't use the full path
-                //so we just use a custom name
-                var requireKey = "blanket_"+indx;
-                initialGet.push(requireKey);
-                requireConfig.paths[requireKey] = file;
-                if (isOrdered){
-                    if (indx > 0){
-                       requireConfig.shim[requireKey] = copy(lastDep);
-                    }
-                    lastDep.deps = [requireKey];
+
+            //check session state
+            if (sessionStorage["blanketSessionLoader"]){
+                _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
+            }
+            
+            scripts.forEach(function(file,indx){   
+                _blanket.utils.cache[file+".js"]={
+                    loaded:false
+                };
+            });
+            
+            var currScript=-1;
+            _blanket.utils.loadAll(function(test){
+                if (test){
+                  return typeof scripts[currScript+1] !== 'undefined';
                 }
-            });
-            require.config(requireConfig);
-            var filt = initialGet;
-            require(filt, function(){
-                callback();
-            });
+                currScript++;
+                if (currScript >= scripts.length){
+                  return null;
+                }
+                return scripts[currScript]+".js";
+            },callback);
         }
     },
     beforeStartTestRunner: function(opts){
@@ -4269,12 +4565,25 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
+
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
                     var check = function() {
                         if (allLoaded()) {
-                            opts.callback();
+                            if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
+                            var cb = _blanket.options("testReadyCallback");
+
+                            if (cb){
+                                if (typeof cb === "function"){
+                                    cb(opts.callback);
+                                }else if (typeof cb === "string"){
+                                    _blanket._addScript(cb);
+                                    opts.callback();
+                                }
+                            }else{
+                                opts.callback();
+                            }
                         } else {
                             setTimeout(check, 13);
                         }
@@ -4295,59 +4604,22 @@ _blanket.extend({
         }
     }
 });
+
 })(blanket);
-if (typeof requirejs !== "undefined" &&
-    typeof require !== "undefined" &&
-    typeof define !== "undefined"){
-    blanket.options("existingRequireJS",true);
-}else{
 
-/*
- RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
- Available via the MIT or new BSD license.
- see: http://github.com/jrburke/requirejs for details
-*/
-var requirejs,require,define;
-(function(W){function D(b){return M.call(b)==="[object Function]"}function E(b){return M.call(b)==="[object Array]"}function t(b,c){if(b){var d;for(d=0;d<b.length;d+=1)if(b[d]&&c(b[d],d,b))break}}function N(b,c){if(b){var d;for(d=b.length-1;d>-1;d-=1)if(b[d]&&c(b[d],d,b))break}}function A(b,c){for(var d in b)if(b.hasOwnProperty(d)&&c(b[d],d))break}function O(b,c,d,g){c&&A(c,function(c,j){if(d||!F.call(b,j))g&&typeof c!=="string"?(b[j]||(b[j]={}),O(b[j],c,d,g)):b[j]=c});return b}function r(b,c){return function(){return c.apply(b,
-arguments)}}function X(b){if(!b)return b;var c=W;t(b.split("."),function(b){c=c[b]});return c}function G(b,c,d,g){c=Error(c+"\nhttp://requirejs.org/docs/errors.html#"+b);c.requireType=b;c.requireModules=g;if(d)c.originalError=d;return c}function ba(){if(H&&H.readyState==="interactive")return H;N(document.getElementsByTagName("script"),function(b){if(b.readyState==="interactive")return H=b});return H}var g,s,u,y,q,B,H,I,Y,Z,ca=/(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,da=/[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
-$=/\.js$/,ea=/^\.\//;s=Object.prototype;var M=s.toString,F=s.hasOwnProperty,fa=Array.prototype.splice,v=!!(typeof window!=="undefined"&&navigator&&document),aa=!v&&typeof importScripts!=="undefined",ga=v&&navigator.platform==="PLAYSTATION 3"?/^complete$/:/^(complete|loaded)$/,R=typeof opera!=="undefined"&&opera.toString()==="[object Opera]",w={},n={},P=[],J=!1;if(typeof define==="undefined"){if(typeof requirejs!=="undefined"){if(D(requirejs))return;n=requirejs;requirejs=void 0}typeof require!=="undefined"&&
-!D(require)&&(n=require,require=void 0);g=requirejs=function(b,c,d,p){var i,j="_";!E(b)&&typeof b!=="string"&&(i=b,E(c)?(b=c,c=d,d=p):b=[]);if(i&&i.context)j=i.context;(p=w[j])||(p=w[j]=g.s.newContext(j));i&&p.configure(i);return p.require(b,c,d)};g.config=function(b){return g(b)};g.nextTick=typeof setTimeout!=="undefined"?function(b){setTimeout(b,4)}:function(b){b()};require||(require=g);g.version="2.1.1";g.jsExtRegExp=/^\/|:|\?|\.js$/;g.isBrowser=v;s=g.s={contexts:w,newContext:function(b){function c(a,
-f,x){var e,m,b,c,d,h,i,g=f&&f.split("/");e=g;var j=k.map,l=j&&j["*"];if(a&&a.charAt(0)===".")if(f){e=k.pkgs[f]?g=[f]:g.slice(0,g.length-1);f=a=e.concat(a.split("/"));for(e=0;f[e];e+=1)if(m=f[e],m===".")f.splice(e,1),e-=1;else if(m==="..")if(e===1&&(f[2]===".."||f[0]===".."))break;else e>0&&(f.splice(e-1,2),e-=2);e=k.pkgs[f=a[0]];a=a.join("/");e&&a===f+"/"+e.main&&(a=f)}else a.indexOf("./")===0&&(a=a.substring(2));if(x&&(g||l)&&j){f=a.split("/");for(e=f.length;e>0;e-=1){b=f.slice(0,e).join("/");if(g)for(m=
-g.length;m>0;m-=1)if(x=j[g.slice(0,m).join("/")])if(x=x[b]){c=x;d=e;break}if(c)break;!h&&l&&l[b]&&(h=l[b],i=e)}!c&&h&&(c=h,d=i);c&&(f.splice(0,d,c),a=f.join("/"))}return a}function d(a){v&&t(document.getElementsByTagName("script"),function(f){if(f.getAttribute("data-requiremodule")===a&&f.getAttribute("data-requirecontext")===h.contextName)return f.parentNode.removeChild(f),!0})}function p(a){var f=k.paths[a];if(f&&E(f)&&f.length>1)return d(a),f.shift(),h.require.undef(a),h.require([a]),!0}function i(a){var f,
-b=a?a.indexOf("!"):-1;b>-1&&(f=a.substring(0,b),a=a.substring(b+1,a.length));return[f,a]}function j(a,f,b,e){var m,K,d=null,g=f?f.name:null,j=a,l=!0,k="";a||(l=!1,a="_@r"+(M+=1));a=i(a);d=a[0];a=a[1];d&&(d=c(d,g,e),K=o[d]);a&&(d?k=K&&K.normalize?K.normalize(a,function(a){return c(a,g,e)}):c(a,g,e):(k=c(a,g,e),a=i(k),d=a[0],k=a[1],b=!0,m=h.nameToUrl(k)));b=d&&!K&&!b?"_unnormalized"+(N+=1):"";return{prefix:d,name:k,parentMap:f,unnormalized:!!b,url:m,originalName:j,isDefine:l,id:(d?d+"!"+k:k)+b}}function n(a){var f=
-a.id,b=l[f];b||(b=l[f]=new h.Module(a));return b}function q(a,f,b){var e=a.id,m=l[e];if(F.call(o,e)&&(!m||m.defineEmitComplete))f==="defined"&&b(o[e]);else n(a).on(f,b)}function z(a,f){var b=a.requireModules,e=!1;if(f)f(a);else if(t(b,function(f){if(f=l[f])f.error=a,f.events.error&&(e=!0,f.emit("error",a))}),!e)g.onError(a)}function s(){P.length&&(fa.apply(C,[C.length-1,0].concat(P)),P=[])}function u(a,f,b){var e=a.map.id;a.error?a.emit("error",a.error):(f[e]=!0,t(a.depMaps,function(e,c){var d=e.id,
-g=l[d];g&&!a.depMatched[c]&&!b[d]&&(f[d]?(a.defineDep(c,o[d]),a.check()):u(g,f,b))}),b[e]=!0)}function w(){var a,f,b,e,m=(b=k.waitSeconds*1E3)&&h.startTime+b<(new Date).getTime(),c=[],g=[],i=!1,j=!0;if(!S){S=!0;A(l,function(b){a=b.map;f=a.id;if(b.enabled&&(a.isDefine||g.push(b),!b.error))if(!b.inited&&m)p(f)?i=e=!0:(c.push(f),d(f));else if(!b.inited&&b.fetched&&a.isDefine&&(i=!0,!a.prefix))return j=!1});if(m&&c.length)return b=G("timeout","Load timeout for modules: "+c,null,c),b.contextName=h.contextName,
-z(b);j&&t(g,function(a){u(a,{},{})});if((!m||e)&&i)if((v||aa)&&!T)T=setTimeout(function(){T=0;w()},50);S=!1}}function y(a){n(j(a[0],null,!0)).init(a[1],a[2])}function B(a){var a=a.currentTarget||a.srcElement,b=h.onScriptLoad;a.detachEvent&&!R?a.detachEvent("onreadystatechange",b):a.removeEventListener("load",b,!1);b=h.onScriptError;a.detachEvent&&!R||a.removeEventListener("error",b,!1);return{node:a,id:a&&a.getAttribute("data-requiremodule")}}function I(){var a;for(s();C.length;)if(a=C.shift(),a[0]===
-null)return z(G("mismatch","Mismatched anonymous define() module: "+a[a.length-1]));else y(a)}var S,U,h,L,T,k={waitSeconds:7,baseUrl:"./",paths:{},pkgs:{},shim:{},map:{},config:{}},l={},V={},C=[],o={},Q={},M=1,N=1;L={require:function(a){return a.require?a.require:a.require=h.makeRequire(a.map)},exports:function(a){a.usingExports=!0;if(a.map.isDefine)return a.exports?a.exports:a.exports=o[a.map.id]={}},module:function(a){return a.module?a.module:a.module={id:a.map.id,uri:a.map.url,config:function(){return k.config&&
-k.config[a.map.id]||{}},exports:o[a.map.id]}}};U=function(a){this.events=V[a.id]||{};this.map=a;this.shim=k.shim[a.id];this.depExports=[];this.depMaps=[];this.depMatched=[];this.pluginMaps={};this.depCount=0};U.prototype={init:function(a,b,c,e){e=e||{};if(!this.inited){this.factory=b;if(c)this.on("error",c);else this.events.error&&(c=r(this,function(a){this.emit("error",a)}));this.depMaps=a&&a.slice(0);this.errback=c;this.inited=!0;this.ignore=e.ignore;e.enabled||this.enabled?this.enable():this.check()}},
-defineDep:function(a,b){this.depMatched[a]||(this.depMatched[a]=!0,this.depCount-=1,this.depExports[a]=b)},fetch:function(){if(!this.fetched){this.fetched=!0;h.startTime=(new Date).getTime();var a=this.map;if(this.shim)h.makeRequire(this.map,{enableBuildCallback:!0})(this.shim.deps||[],r(this,function(){return a.prefix?this.callPlugin():this.load()}));else return a.prefix?this.callPlugin():this.load()}},load:function(){var a=this.map.url;Q[a]||(Q[a]=!0,h.load(this.map.id,a))},check:function(){if(this.enabled&&
-!this.enabling){var a,b,c=this.map.id;b=this.depExports;var e=this.exports,m=this.factory;if(this.inited)if(this.error)this.emit("error",this.error);else{if(!this.defining){this.defining=!0;if(this.depCount<1&&!this.defined){if(D(m)){if(this.events.error)try{e=h.execCb(c,m,b,e)}catch(d){a=d}else e=h.execCb(c,m,b,e);if(this.map.isDefine)if((b=this.module)&&b.exports!==void 0&&b.exports!==this.exports)e=b.exports;else if(e===void 0&&this.usingExports)e=this.exports;if(a)return a.requireMap=this.map,
-a.requireModules=[this.map.id],a.requireType="define",z(this.error=a)}else e=m;this.exports=e;if(this.map.isDefine&&!this.ignore&&(o[c]=e,g.onResourceLoad))g.onResourceLoad(h,this.map,this.depMaps);delete l[c];this.defined=!0}this.defining=!1;if(this.defined&&!this.defineEmitted)this.defineEmitted=!0,this.emit("defined",this.exports),this.defineEmitComplete=!0}}else this.fetch()}},callPlugin:function(){var a=this.map,b=a.id,d=j(a.prefix);this.depMaps.push(d);q(d,"defined",r(this,function(e){var m,
-d;d=this.map.name;var x=this.map.parentMap?this.map.parentMap.name:null,i=h.makeRequire(a.parentMap,{enableBuildCallback:!0,skipMap:!0});if(this.map.unnormalized){if(e.normalize&&(d=e.normalize(d,function(a){return c(a,x,!0)})||""),e=j(a.prefix+"!"+d,this.map.parentMap),q(e,"defined",r(this,function(a){this.init([],function(){return a},null,{enabled:!0,ignore:!0})})),d=l[e.id]){this.depMaps.push(e);if(this.events.error)d.on("error",r(this,function(a){this.emit("error",a)}));d.enable()}}else m=r(this,
-function(a){this.init([],function(){return a},null,{enabled:!0})}),m.error=r(this,function(a){this.inited=!0;this.error=a;a.requireModules=[b];A(l,function(a){a.map.id.indexOf(b+"_unnormalized")===0&&delete l[a.map.id]});z(a)}),m.fromText=r(this,function(b,e){var f=a.name,c=j(f),d=J;e&&(b=e);d&&(J=!1);n(c);try{g.exec(b)}catch(x){throw Error("fromText eval for "+f+" failed: "+x);}d&&(J=!0);this.depMaps.push(c);h.completeLoad(f);i([f],m)}),e.load(a.name,i,m,k)}));h.enable(d,this);this.pluginMaps[d.id]=
-d},enable:function(){this.enabling=this.enabled=!0;t(this.depMaps,r(this,function(a,b){var c,e;if(typeof a==="string"){a=j(a,this.map.isDefine?this.map:this.map.parentMap,!1,!this.skipMap);this.depMaps[b]=a;if(c=L[a.id]){this.depExports[b]=c(this);return}this.depCount+=1;q(a,"defined",r(this,function(a){this.defineDep(b,a);this.check()}));this.errback&&q(a,"error",this.errback)}c=a.id;e=l[c];!L[c]&&e&&!e.enabled&&h.enable(a,this)}));A(this.pluginMaps,r(this,function(a){var b=l[a.id];b&&!b.enabled&&
-h.enable(a,this)}));this.enabling=!1;this.check()},on:function(a,b){var c=this.events[a];c||(c=this.events[a]=[]);c.push(b)},emit:function(a,b){t(this.events[a],function(a){a(b)});a==="error"&&delete this.events[a]}};h={config:k,contextName:b,registry:l,defined:o,urlFetched:Q,defQueue:C,Module:U,makeModuleMap:j,nextTick:g.nextTick,configure:function(a){a.baseUrl&&a.baseUrl.charAt(a.baseUrl.length-1)!=="/"&&(a.baseUrl+="/");var b=k.pkgs,c=k.shim,e={paths:!0,config:!0,map:!0};A(a,function(a,b){e[b]?
-b==="map"?O(k[b],a,!0,!0):O(k[b],a,!0):k[b]=a});if(a.shim)A(a.shim,function(a,b){E(a)&&(a={deps:a});if(a.exports&&!a.exportsFn)a.exportsFn=h.makeShimExports(a);c[b]=a}),k.shim=c;if(a.packages)t(a.packages,function(a){a=typeof a==="string"?{name:a}:a;b[a.name]={name:a.name,location:a.location||a.name,main:(a.main||"main").replace(ea,"").replace($,"")}}),k.pkgs=b;A(l,function(a,b){if(!a.inited&&!a.map.unnormalized)a.map=j(b)});if(a.deps||a.callback)h.require(a.deps||[],a.callback)},makeShimExports:function(a){return function(){var b;
-a.init&&(b=a.init.apply(W,arguments));return b||X(a.exports)}},makeRequire:function(a,f){function d(e,c,i){var k,p;if(f.enableBuildCallback&&c&&D(c))c.__requireJsBuild=!0;if(typeof e==="string"){if(D(c))return z(G("requireargs","Invalid require call"),i);if(a&&L[e])return L[e](l[a.id]);if(g.get)return g.get(h,e,a);k=j(e,a,!1,!0);k=k.id;return!F.call(o,k)?z(G("notloaded",'Module name "'+k+'" has not been loaded yet for context: '+b+(a?"":". Use require([])"))):o[k]}I();h.nextTick(function(){I();p=
-n(j(null,a));p.skipMap=f.skipMap;p.init(e,c,i,{enabled:!0});w()});return d}f=f||{};O(d,{isBrowser:v,toUrl:function(b){var d=b.lastIndexOf("."),f=null;d!==-1&&(f=b.substring(d,b.length),b=b.substring(0,d));return h.nameToUrl(c(b,a&&a.id,!0),f)},defined:function(b){b=j(b,a,!1,!0).id;return F.call(o,b)},specified:function(b){b=j(b,a,!1,!0).id;return F.call(o,b)||F.call(l,b)}});if(!a)d.undef=function(b){s();var c=j(b,a,!0),d=l[b];delete o[b];delete Q[c.url];delete V[b];if(d){if(d.events.defined)V[b]=
-d.events;delete l[b]}};return d},enable:function(a){l[a.id]&&n(a).enable()},completeLoad:function(a){var b,c,d=k.shim[a]||{},g=d.exports;for(s();C.length;){c=C.shift();if(c[0]===null){c[0]=a;if(b)break;b=!0}else c[0]===a&&(b=!0);y(c)}c=l[a];if(!b&&!o[a]&&c&&!c.inited)if(k.enforceDefine&&(!g||!X(g)))if(p(a))return;else return z(G("nodefine","No define call for "+a,null,[a]));else y([a,d.deps||[],d.exportsFn]);w()},nameToUrl:function(a,b){var c,d,i,h,j,l;if(g.jsExtRegExp.test(a))h=a+(b||"");else{c=
-k.paths;d=k.pkgs;h=a.split("/");for(j=h.length;j>0;j-=1)if(l=h.slice(0,j).join("/"),i=d[l],l=c[l]){E(l)&&(l=l[0]);h.splice(0,j,l);break}else if(i){c=a===i.name?i.location+"/"+i.main:i.location;h.splice(0,j,c);break}h=h.join("/");h+=b||(/\?/.test(h)?"":".js");h=(h.charAt(0)==="/"||h.match(/^[\w\+\.\-]+:/)?"":k.baseUrl)+h}return k.urlArgs?h+((h.indexOf("?")===-1?"?":"&")+k.urlArgs):h},load:function(a,b){g.load(h,a,b)},execCb:function(a,b,c,d){return b.apply(d,c)},onScriptLoad:function(a){if(a.type===
-"load"||ga.test((a.currentTarget||a.srcElement).readyState))H=null,a=B(a),h.completeLoad(a.id)},onScriptError:function(a){var b=B(a);if(!p(b.id))return z(G("scripterror","Script error",a,[b.id]))}};h.require=h.makeRequire();return h}};g({});t(["toUrl","undef","defined","specified"],function(b){g[b]=function(){var c=w._;return c.require[b].apply(c,arguments)}});if(v&&(u=s.head=document.getElementsByTagName("head")[0],y=document.getElementsByTagName("base")[0]))u=s.head=y.parentNode;g.onError=function(b){throw b;
-};g.load=function(b,c,d){var g=b&&b.config||{},i;if(v)return i=g.xhtml?document.createElementNS("http://www.w3.org/1999/xhtml","html:script"):document.createElement("script"),i.type=g.scriptType||"text/javascript",i.charset="utf-8",i.async=!0,i.setAttribute("data-requirecontext",b.contextName),i.setAttribute("data-requiremodule",c),i.attachEvent&&!(i.attachEvent.toString&&i.attachEvent.toString().indexOf("[native code")<0)&&!R?(J=!0,i.attachEvent("onreadystatechange",b.onScriptLoad)):(i.addEventListener("load",
-b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y?u.insertBefore(i,y):u.appendChild(i),I=null,i;else aa&&(importScripts(d),b.completeLoad(c))};v&&N(document.getElementsByTagName("script"),function(b){if(!u)u=b.parentNode;if(q=b.getAttribute("data-main")){if(!n.baseUrl)B=q.split("/"),Y=B.pop(),Z=B.length?B.join("/")+"/":"./",n.baseUrl=Z,q=Y;q=q.replace($,"");n.deps=n.deps?n.deps.concat(q):[q];return!0}});define=function(b,c,d){var g,i;typeof b!=="string"&&(d=c,c=b,b=
-null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
-
-    
-}
 blanket.defaultReporter = function(coverage){
-    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space:nowrap;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center; } .bl-source .miss{background-color:#e6c3c7}",
+    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space: pre;font-family: monospace;} .bl-source > div > span:first-child{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 30px;} .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
         successRate = 60,
         head = document.head,
         fileNumber = 0,
         body = document.body,
         headerContent,
-        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://migrii.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div><div style='clear:both;'></div></div>",
-        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div><div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+        hasBranchTracking = Object.keys(coverage.files).some(function(elem){
+          return typeof coverage.files[elem].branchData !== 'undefined';
+        }),
+        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
+        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>{{rowTitle}}</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -4382,7 +4654,126 @@ blanket.defaultReporter = function(coverage){
             .replace(/\'/g, "&apos;");
     }
 
+    function isBranchFollowed(data,bool){
+        var mode = bool ? 0 : 1;
+        if (typeof data === 'undefined' ||
+            typeof data === null ||
+            typeof data[mode] === 'undefined'){
+            return false;
+        }
+        return data[mode].length > 0;
+    }
+
+    var branchStack = [];
+
+    function branchReport(colsIndex,src,cols,offset,lineNum){
+      var newsrc="";
+       var postfix="";
+      if (branchStack.length > 0){
+        newsrc += "<span class='" + (isBranchFollowed(branchStack[0][1],branchStack[0][1].consequent === branchStack[0][0]) ? 'branchOkay' : 'branchWarning') + "'>";
+        if (branchStack[0][0].end.line === lineNum){
+          newsrc += escapeInvalidXmlChars(src.slice(0,branchStack[0][0].end.column)) + "</span>";
+          src = src.slice(branchStack[0][0].end.column);
+          branchStack.shift();
+          if (branchStack.length > 0){
+            newsrc += "<span class='" + (isBranchFollowed(branchStack[0][1],false) ? 'branchOkay' : 'branchWarning') + "'>";
+            if (branchStack[0][0].end.line === lineNum){
+              newsrc += escapeInvalidXmlChars(src.slice(0,branchStack[0][0].end.column)) + "</span>";
+              src = src.slice(branchStack[0][0].end.column);
+              branchStack.shift();
+              if (!cols){
+                return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
+              }
+            }
+            else if (!cols){
+              return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+            }
+            else{
+              postfix = "</span>";
+            }
+          }else if (!cols){
+            return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
+          }
+        }else if(!cols){
+          return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+        }else{
+          postfix = "</span>";
+        }
+      }
+      var thisline = cols[colsIndex];
+      //consequent
+      
+      var cons = thisline.consequent;
+      if (cons.start.line > lineNum){
+        branchStack.unshift([thisline.alternate,thisline]);
+        branchStack.unshift([cons,thisline]);
+        src = escapeInvalidXmlChars(src);
+      }else{
+        var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
+        newsrc += escapeInvalidXmlChars(src.slice(0,cons.start.column-offset)) + style;
+        
+        if (cols.length > colsIndex+1 &&
+          cols[colsIndex+1].consequent.start.line === lineNum &&
+          cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].consequent.end.column-offset)
+        {
+          var res = branchReport(colsIndex+1,src.slice(cons.start.column-offset,cons.end.column-offset),cols,cons.start.column-offset,lineNum);
+          newsrc += res.src;
+          cols = res.cols;
+          cols[colsIndex+1] = cols[colsIndex+2];
+          cols.length--;
+        }else{
+          newsrc += escapeInvalidXmlChars(src.slice(cons.start.column-offset,cons.end.column-offset));
+        }
+        newsrc += "</span>";
+
+        var alt = thisline.alternate;
+        if (alt.start.line > lineNum){
+          newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset));
+          branchStack.unshift([alt,thisline]);
+        }else{
+          newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset,alt.start.column-offset));
+          style = "<span class='" + (isBranchFollowed(thisline,false) ? 'branchOkay' : 'branchWarning') + "'>";
+          newsrc +=  style;
+          if (cols.length > colsIndex+1 &&
+            cols[colsIndex+1].consequent.start.line === lineNum &&
+            cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].alternate.end.column-offset)
+          {
+            var res2 = branchReport(colsIndex+1,src.slice(alt.start.column-offset,alt.end.column-offset),cols,alt.start.column-offset,lineNum);
+            newsrc += res2.src;
+            cols = res2.cols;
+            cols[colsIndex+1] = cols[colsIndex+2];
+            cols.length--;
+          }else{
+            newsrc += escapeInvalidXmlChars(src.slice(alt.start.column-offset,alt.end.column-offset));
+          }
+          newsrc += "</span>";
+          newsrc += escapeInvalidXmlChars(src.slice(alt.end.column-offset));
+          src = newsrc;
+        }
+      }
+      return {src:src+postfix, cols:cols};
+    }
+
+    var isUndefined =  function(item){
+            return typeof item !== 'undefined';
+      };
+
     var files = coverage.files;
+    var totals = {
+      totalSmts: 0,
+      numberOfFilesCovered: 0,
+      passedBranches: 0,
+      totalBranches: 0,
+      moduleTotalStatements : {},
+      moduleTotalCoveredStatements : {},
+      moduleTotalBranches : {},
+      moduleTotalCoveredBranches : {}   
+    };
+
+    // check if a data-cover-modulepattern was provided for per-module coverage reporting
+    var modulePattern = _blanket.options("modulePattern");
+    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );    
+
     for(var file in files)
     {
         fileNumber++;
@@ -4392,26 +4783,90 @@ blanket.defaultReporter = function(coverage){
             numberOfFilesCovered = 0,
             code = [],
             i;
+        
 
+        var end = [];
         for(i = 0; i < statsForFile.source.length; i +=1){
-            code[i + 1] = "<div class='{{executed}}'><span class=''>"+(i + 1)+"</span>"+escapeInvalidXmlChars(statsForFile.source[i])+"</div>";
-        }
-
-        for(i = 1; i < statsForFile.length; i++)
-        {
-            if(statsForFile[i]) {
+            var src = statsForFile.source[i];
+            
+            if (branchStack.length > 0 ||
+                typeof statsForFile.branchData !== 'undefined')
+            {
+                if (typeof statsForFile.branchData[i+1] !== 'undefined')
+                {
+                  var cols = statsForFile.branchData[i+1].filter(isUndefined);
+                  var colsIndex=0;
+                  
+                    
+                  src = branchReport(colsIndex,src,cols,0,i+1).src;
+                  
+                }else if (branchStack.length){
+                  src = branchReport(0,src,null,0,i+1).src;
+                }else{
+                  src = escapeInvalidXmlChars(src);
+                }
+              }else{
+                src = escapeInvalidXmlChars(src);
+              }
+              var lineClass="";
+              if(statsForFile[i+1]) {
                 numberOfFilesCovered += 1;
                 totalSmts += 1;
-                code[i] = code[i].replace("{{executed}}",'hit');
-            }else{
-                if(statsForFile[i] === 0){
+                lineClass = 'hit';
+              }else{
+                if(statsForFile[i+1] === 0){
                     totalSmts++;
-                    code[i] = code[i].replace("{{executed}}",'miss');
-                }else{
-                    code[i] = code[i].replace("{{executed}}","");
+                    lineClass = 'miss';
                 }
-            }
+              }
+              code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
         }
+        totals.totalSmts += totalSmts;
+        totals.numberOfFilesCovered += numberOfFilesCovered;
+        var totalBranches=0;
+        var passedBranches=0;
+        if (typeof statsForFile.branchData !== 'undefined'){
+          for(var j=0;j<statsForFile.branchData.length;j++){
+            if (typeof statsForFile.branchData[j] !== 'undefined'){
+              for(var k=0;k<statsForFile.branchData[j].length;k++){
+                if (typeof statsForFile.branchData[j][k] !== 'undefined'){
+                  totalBranches++;
+                  if (typeof statsForFile.branchData[j][k][0] !== 'undefined' &&
+                    statsForFile.branchData[j][k][0].length > 0 &&
+                    typeof statsForFile.branchData[j][k][1] !== 'undefined' &&
+                    statsForFile.branchData[j][k][1].length > 0){
+                    passedBranches++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        totals.passedBranches += passedBranches;
+        totals.totalBranches += totalBranches;
+
+        // if "data-cover-modulepattern" was provided, 
+        // track totals per module name as well as globally
+        if (modulePatternRegex) {
+            var moduleName = file.match(modulePatternRegex)[1];
+
+            if(!totals.moduleTotalStatements.hasOwnProperty(moduleName)) {
+                totals.moduleTotalStatements[moduleName] = 0;
+                totals.moduleTotalCoveredStatements[moduleName] = 0;
+            }
+
+            totals.moduleTotalStatements[moduleName] += totalSmts;
+            totals.moduleTotalCoveredStatements[moduleName] += numberOfFilesCovered;
+
+            if(!totals.moduleTotalBranches.hasOwnProperty(moduleName)) {
+                totals.moduleTotalBranches[moduleName] = 0;
+                totals.moduleTotalCoveredBranches[moduleName] = 0;
+            }
+
+            totals.moduleTotalBranches[moduleName] += totalBranches;
+            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+        }
+
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -4419,6 +4874,8 @@ blanket.defaultReporter = function(coverage){
                                  .replace("{{numberCovered}}", numberOfFilesCovered)
                                  .replace(/\{\{fileNumber\}\}/g, fileNumber)
                                  .replace("{{totalSmts}}", totalSmts)
+                                 .replace("{{totalBranches}}", totalBranches)
+                                 .replace("{{passedBranches}}", passedBranches)
                                  .replace("{{source}}", code.join(" "));
         if(result < successRate)
         {
@@ -4428,7 +4885,45 @@ blanket.defaultReporter = function(coverage){
         }
         bodyContent += output;
     }
+
+    // create temporary function for use by the global totals reporter, 
+    // as well as the per-module totals reporter
+    var createAggregateTotal = function(numSt, numCov, numBranch, numCovBr, moduleName) {
+
+        var totalPercent = percentage(numCov, numSt);
+        var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
+        var rowTitle = ( moduleName ? "Total for module: " + moduleName : "Global total" );
+        var totalsOutput = grandTotalTemplate.replace("{{rowTitle}}", rowTitle)
+            .replace("{{percentage}}", totalPercent)
+            .replace("{{numberCovered}}", numCov)
+            .replace("{{totalSmts}}", numSt)
+            .replace("{{passedBranches}}", numCovBr)
+            .replace("{{totalBranches}}", numBranch)
+            .replace("{{statusclass}}", statusClass);
+
+        bodyContent += totalsOutput;
+    };
+
+    // if "data-cover-modulepattern" was provided, 
+    // output the per-module totals alongside the global totals    
+    if (modulePatternRegex) {
+        for (var thisModuleName in totals.moduleTotalStatements) {
+            if (totals.moduleTotalStatements.hasOwnProperty(thisModuleName)) {
+
+                var moduleTotalSt = totals.moduleTotalStatements[thisModuleName];
+                var moduleTotalCovSt = totals.moduleTotalCoveredStatements[thisModuleName];
+
+                var moduleTotalBr = totals.moduleTotalBranches[thisModuleName];
+                var moduleTotalCovBr = totals.moduleTotalCoveredBranches[thisModuleName];
+
+                createAggregateTotal(moduleTotalSt, moduleTotalCovSt, moduleTotalBr, moduleTotalCovBr, thisModuleName);
+            }
+        }        
+    }
+
+    createAggregateTotal(totals.totalSmts, totals.numberOfFilesCovered, totals.totalBranches, totals.passedBranches, null);
     bodyContent += "</div>"; //closing main
+
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
@@ -4440,6 +4935,7 @@ blanket.defaultReporter = function(coverage){
     }
     //appendHtml(body, '</div>');
 };
+
 (function(){
     var newOptions={};
     //http://stackoverflow.com/a/2954896
@@ -4465,11 +4961,26 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-modulepattern") {
+                            newOptions.modulePattern = es.nodeValue;
+                        }                        
+                        if (es.nodeName === "data-cover-reporter-options"){
+                            try{
+                                newOptions.reporter_options = JSON.parse(es.nodeValue);
+                            }catch(e){
+                                if (blanket.options("debug")){
+                                    throw new Error("Invalid reporter options.  Must be a valid stringified JSON object.");
+                                }
+                            }
+                        }
+                        if (es.nodeName === "data-cover-testReadyCallback"){
+                            newOptions.testReadyCallback = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-customVariable"){
+                            newOptions.customVariable = es.nodeValue;
+                        }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
-                            if (flags.indexOf(" unordered ") > -1){
-                                newOptions.order = false;
-                            }
                             if (flags.indexOf(" ignoreError ") > -1){
                                 newOptions.ignoreScriptError = true;
                             }
@@ -4479,183 +4990,366 @@ blanket.defaultReporter = function(coverage){
                             if (flags.indexOf(" ignoreCors ") > -1){
                                 newOptions.ignoreCors = true;
                             }
+                            if (flags.indexOf(" branchTracking ") > -1){
+                                newOptions.branchTracking = true;
+                            }
+                            if (flags.indexOf(" sourceURL ") > -1){
+                                newOptions.sourceURL = true;
+                            }
+                            if (flags.indexOf(" debug ") > -1){
+                                newOptions.debug = true;
+                            }
+                            if (flags.indexOf(" engineOnly ") > -1){
+                                newOptions.engineOnly = true;
+                            }
+                            if (flags.indexOf(" commonJS ") > -1){
+                                newOptions.commonJS = true;
+                            }
+                             if (flags.indexOf(" instrumentCache ") > -1){
+                                newOptions.instrumentCache = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
+
+    if (typeof requirejs !== 'undefined'){
+        blanket.options("existingRequireJS",true);
+    }
+    /* setup requirejs loader, if needed */
+    
+    if (blanket.options("commonJS")){
+        blanket._commonjs = {};
+    }
 })();
 (function(_blanket){
 _blanket.extend({
     utils: {
-    normalizeBackslashes: function(str) {
-        return str.replace(/\\/g, '/');
-    },
-    matchPatternAttribute: function(filename,pattern){
-        if (typeof pattern === 'string'){
-            if (pattern.indexOf("[") === 0){
-                //treat as array
-                var pattenArr = pattern.slice(1,pattern.length-1).split(",");
-                return pattenArr.some(function(elem){
-                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
-                });
-            }else if ( pattern.indexOf("//") === 0){
-                var ex = pattern.slice(2,pattern.lastIndexOf('/'));
-                var mods = pattern.slice(pattern.lastIndexOf('/')+1);
-                var regex = new RegExp(ex,mods);
-                return regex.test(filename);
-            }else{
-                return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
-            }
-        }else if ( pattern instanceof Array ){
-            return pattern.some(function(elem){
-                return _blanket.utils.matchPatternAttribute(filename,elem);
-            });
-        }else if (pattern instanceof RegExp){
-            return pattern.test(filename);
-        }
-    },
-    blanketEval: function(data){
-        return ( window.execScript || function( data ) {
-            //borrowed from jquery
-            window[ "eval" ].call( window, data );
-        } )( data );
-    },
-    collectPageScripts: function(){
-        var toArray = Array.prototype.slice;
-        var scripts = toArray.call(document.scripts);
-        var selectedScripts=[],scriptNames=[];
-        var filter = _blanket.options("filter");
-        if(filter){
-            //global filter in place, data-cover-only
-            var antimatch = _blanket.options("antifilter");
-            selectedScripts = toArray.call(document.scripts)
-                            .filter(function(s){
-                                return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
-                                        (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
-                                }).length === 1;
-                            });
-        }else{
-            selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-        }
-        scriptNames = selectedScripts.map(function(s){
-                                return _blanket.utils.qualifyURL(
-                                    toArray.call(s.attributes).filter(
-                                        function(sn){
-                                            return sn.nodeName === "src";
-                                        })[0].nodeValue).replace(".js","");
-                                });
-        if (!filter){
-            _blanket.options("filter","['"+scriptNames.join("','")+"']");
-        }
-        return scriptNames;
-    }
-}
-});
-
-_blanket.utils.oldloader = requirejs.load;
-
-requirejs.load = function (context, moduleName, url) {
-    _blanket.requiringFile(url);
-    requirejs.cget(url, function (content) {
-        _blanket.requiringFile(url,true);
-        var match = _blanket.options("filter");
-        //we check the never matches first
-        var antimatch = _blanket.options("antifilter");
-        if (typeof antimatch !== "undefined" &&
-                _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
-            ){
-            _blanket.utils.oldloader(context, moduleName, url);
-        }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
-            _blanket.instrument({
-                inputFile: content,
-                inputFileName: url
-            },function(instrumented){
-                try{
-                    _blanket.utils.blanketEval(instrumented);
-                    context.completeLoad(moduleName);
+        normalizeBackslashes: function(str) {
+            return str.replace(/\\/g, '/');
+        },
+        matchPatternAttribute: function(filename,pattern){
+            if (typeof pattern === 'string'){
+                if (pattern.indexOf("[") === 0){
+                    //treat as array
+                    var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+                    return pattenArr.some(function(elem){
+                        return _blanket.utils.matchPatternAttribute(filename,_blanket.utils.normalizeBackslashes(elem.slice(1,-1)));
+                        //return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
+                    });
+                }else if ( pattern.indexOf("//") === 0){
+                    var ex = pattern.slice(2,pattern.lastIndexOf('/'));
+                    var mods = pattern.slice(pattern.lastIndexOf('/')+1);
+                    var regex = new RegExp(ex,mods);
+                    return regex.test(filename);
+                }else if (pattern.indexOf("#") === 0){
+                    return window[pattern.slice(1)].call(window,filename);
+                }else{
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
                 }
-                catch(err){
-                    if (_blanket.options("ignoreScriptError")){
-                        //we can continue like normal if
-                        //we're ignoring script errors,
-                        //but otherwise we don't want
-                        //to completeLoad or the error might be
-                        //missed.
-                        context.completeLoad(moduleName);
-                    }else{
-                        throw new Error("Error parsing instrumented code: "+err);
+            }else if ( pattern instanceof Array ){
+                return pattern.some(function(elem){
+                    return _blanket.utils.matchPatternAttribute(filename,elem);
+                });
+            }else if (pattern instanceof RegExp){
+                return pattern.test(filename);
+            }else if (typeof pattern === "function"){
+                return pattern.call(window,filename);
+            }
+        },
+        blanketEval: function(data){
+            _blanket._addScript(data);
+        },
+        collectPageScripts: function(){
+            var toArray = Array.prototype.slice;
+            var scripts = toArray.call(document.scripts);
+            var selectedScripts=[],scriptNames=[];
+            var filter = _blanket.options("filter");
+            if(filter != null){
+                //global filter in place, data-cover-only
+                var antimatch = _blanket.options("antifilter");
+                selectedScripts = toArray.call(document.scripts)
+                                .filter(function(s){
+                                    return toArray.call(s.attributes).filter(function(sn){
+                                        return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                            (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
+                                    }).length === 1;
+                                });
+            }else{
+                selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+            }
+            scriptNames = selectedScripts.map(function(s){
+                                    return _blanket.utils.qualifyURL(
+                                        toArray.call(s.attributes).filter(
+                                            function(sn){
+                                                return sn.nodeName === "src";
+                                            })[0].nodeValue).replace(".js","");
+                                    });
+            if (!filter){
+                _blanket.options("filter","['"+scriptNames.join("','")+"']");
+            }
+            return scriptNames;
+        },
+        loadAll: function(nextScript,cb,preprocessor){
+            /**
+             * load dependencies
+             * @param {nextScript} factory for priority level
+             * @param {cb} the done callback
+             */
+            var currScript=nextScript();
+            var isLoaded = _blanket.utils.scriptIsLoaded(
+                                currScript,
+                                _blanket.utils.ifOrdered,
+                                nextScript,
+                                cb
+                            );
+            
+            if (!(_blanket.utils.cache[currScript] && _blanket.utils.cache[currScript].loaded)){
+                var attach = function(){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Mark script:"+currScript+", as loaded and move to next script.");}
+                    isLoaded();
+                };
+                var whenDone = function(result){
+                    if (_blanket.options("debug")) {console.log("BLANKET-File loading finished");}
+                    if (typeof result !== 'undefined'){
+                        if (_blanket.options("debug")) {console.log("BLANKET-Add file to DOM.");}
+                        _blanket._addScript(result);
+                    }
+                    attach();
+                };
+
+                _blanket.utils.attachScript(
+                    {
+                        url: currScript
+                    },
+                    function (content){
+                        _blanket.utils.processFile(
+                            content,
+                            currScript,
+                            whenDone,
+                            whenDone
+                        );
+                    }
+                );
+            }else{
+                isLoaded();
+            }
+        },
+        attachScript: function(options,cb){
+           var timeout = _blanket.options("timeout") || 3000;
+           setTimeout(function(){
+                if (!_blanket.utils.cache[options.url].loaded){
+                    throw new Error("error loading source script");
+                }
+           },timeout);
+           _blanket.utils.getFile(
+                options.url,
+                cb, 
+                function(){ throw new Error("error loading source script");}
+            );
+        },
+        ifOrdered: function(nextScript,cb){
+            /**
+             * ordered loading callback
+             * @param {nextScript} factory for priority level
+             * @param {cb} the done callback
+             */
+            var currScript = nextScript(true);
+            if (currScript){
+              _blanket.utils.loadAll(nextScript,cb);
+            }else{
+              cb(new Error("Error in loading chain."));
+            }
+        },
+        scriptIsLoaded: function(url,orderedCb,nextScript,cb){
+            /**
+           * returns a callback that checks a loading list to see if a script is loaded.
+           * @param {orderedCb} callback if ordered loading is being done
+           * @param {nextScript} factory for next priority level
+           * @param {cb} the done callback
+           */
+           if (_blanket.options("debug")) {console.log("BLANKET-Returning function");}
+            return function(){
+                if (_blanket.options("debug")) {console.log("BLANKET-Marking file as loaded: "+url);}
+           
+                _blanket.utils.cache[url].loaded=true;
+            
+                if (_blanket.utils.allLoaded()){
+                    if (_blanket.options("debug")) {console.log("BLANKET-All files loaded");}
+                    cb();
+                }else if (orderedCb){
+                    //if it's ordered we need to
+                    //traverse down to the next
+                    //priority level
+                    if (_blanket.options("debug")) {console.log("BLANKET-Load next file.");}
+                    orderedCb(nextScript,cb);
+                }
+            };
+        },
+        cache: {},
+        allLoaded: function (){
+            /**
+             * check if depdencies are loaded in cache
+             */
+            var cached = Object.keys(_blanket.utils.cache);
+            for (var i=0;i<cached.length;i++){
+                if (!_blanket.utils.cache[cached[i]].loaded){
+                    return false;
+                }
+            }
+            return true;
+        },
+        processFile: function (content,url,cb,oldCb) {
+            var match = _blanket.options("filter");
+            //we check the never matches first
+            var antimatch = _blanket.options("antifilter");
+            if (typeof antimatch !== "undefined" &&
+                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                ){
+                oldCb(content);
+                if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
+                _blanket.requiringFile(url,true);
+            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+                if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
+                _blanket.instrument({
+                    inputFile: content,
+                    inputFileName: url
+                },function(instrumented){
+                    try{
+                        if (_blanket.options("debug")) {console.log("BLANKET-instrument of:"+url+" was successfull.");}
+                        _blanket.utils.blanketEval(instrumented);
+                        cb();
+                        _blanket.requiringFile(url,true);
+                    }
+                    catch(err){
+                        if (_blanket.options("ignoreScriptError")){
+                            //we can continue like normal if
+                            //we're ignoring script errors,
+                            //but otherwise we don't want
+                            //to completeLoad or the error might be
+                            //missed.
+                            if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
+                            cb(content);
+                            _blanket.requiringFile(url,true);
+                        }else{
+                            throw new Error("Error parsing instrumented code: "+err);
+                        }
+                    }
+                });
+            }else{
+                if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
+                oldCb(content);
+                _blanket.requiringFile(url,true);
+            }
+
+        },
+        createXhr: function(){
+            var xhr, i, progId;
+            if (typeof XMLHttpRequest !== "undefined") {
+                return new XMLHttpRequest();
+            } else if (typeof ActiveXObject !== "undefined") {
+                for (i = 0; i < 3; i += 1) {
+                    progId = progIds[i];
+                    try {
+                        xhr = new ActiveXObject(progId);
+                    } catch (e) {}
+
+                    if (xhr) {
+                        progIds = [progId];  // so faster next time
+                        break;
                     }
                 }
+            }
+
+            return xhr;
+        },
+        getFile: function(url, callback, errback, onXhr){
+            var foundInSession = false;
+            if (_blanket.blanketSession){
+                var files = Object.keys(_blanket.blanketSession);
+                for (var i=0; i<files.length;i++ ){
+                    var key = files[i];
+                    if (url.indexOf(key) > -1){
+                        callback(_blanket.blanketSession[key]);
+                        foundInSession=true;
+                        return;
+                    }
+                }
+            }
+            if (!foundInSession){
+                var xhr = _blanket.utils.createXhr();
+                xhr.open('GET', url, true);
+
+                //Allow overrides specified in config
+                if (onXhr) {
+                    onXhr(xhr, url);
+                }
+
+                xhr.onreadystatechange = function (evt) {
+                    var status, err;
+                    
+                    //Do not explicitly handle errors, those should be
+                    //visible via console output in the browser.
+                    if (xhr.readyState === 4) {
+                        status = xhr.status;
+                        if ((status > 399 && status < 600) /*||
+                            (status === 0 &&
+                                navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+                           */ ) {
+                            //An http 4xx or 5xx error. Signal an error.
+                            err = new Error(url + ' HTTP status: ' + status);
+                            err.xhr = xhr;
+                            errback(err);
+                        } else {
+                            callback(xhr.responseText);
+                        }
+                    }
+                };
+                try{
+                    xhr.send(null);
+                }catch(e){
+                    if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
+                        //running locally and getting error from browser
+                        _blanket.showManualLoader();
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        }
+    }
+});
+
+(function(){
+    var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
+    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : window.requirejs;
+    if (!_blanket.options("engineOnly") && _blanket.options("existingRequireJS")){
+
+        _blanket.utils.oldloader = requirejs.load;
+
+        requirejs.load = function (context, moduleName, url) {
+            _blanket.requiringFile(url);
+            _blanket.utils.getFile(url, 
+                function(content){ 
+                    _blanket.utils.processFile(
+                        content,
+                        url,
+                        function newLoader(){
+                            context.completeLoad(moduleName);
+                        },
+                        function oldLoader(){
+                            _blanket.utils.oldloader(context, moduleName, url);
+                        }
+                    );
+                }, function (err) {
+                _blanket.requiringFile();
+                throw err;
             });
-        }else{
-            _blanket.utils.oldloader(context, moduleName, url);
-        }
-
-    }, function (err) {
-        _blanket.requiringFile();
-        throw err;
-    });
-};
-
-
-requirejs.createXhr = function () {
-    //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
-    var xhr, i, progId;
-    if (typeof XMLHttpRequest !== "undefined") {
-        return new XMLHttpRequest();
-    } else if (typeof ActiveXObject !== "undefined") {
-        for (i = 0; i < 3; i += 1) {
-            progId = progIds[i];
-            try {
-                xhr = new ActiveXObject(progId);
-            } catch (e) {}
-
-            if (xhr) {
-                progIds = [progId];  // so faster next time
-                break;
-            }
-        }
+        };
     }
+})();
 
-    return xhr;
-};
-
-
-requirejs.cget = function (url, callback, errback, onXhr) {
-    var xhr = requirejs.createXhr();
-    xhr.open('GET', url, true);
-
-    //Allow overrides specified in config
-    if (onXhr) {
-        onXhr(xhr, url);
-    }
-
-    xhr.onreadystatechange = function (evt) {
-        var status, err;
-        //Do not explicitly handle errors, those should be
-        //visible via console output in the browser.
-        if (xhr.readyState === 4) {
-            status = xhr.status;
-            if (status > 399 && status < 600) {
-                //An http 4xx or 5xx error. Signal an error.
-                err = new Error(url + ' HTTP status: ' + status);
-                err.xhr = xhr;
-                errback(err);
-            } else {
-                callback(xhr.responseText);
-            }
-        }
-    };
-    try{
-        xhr.send(null);
-    }catch(e){
-        if (e.code && e.code === 101 && _blanket.options("ignoreCors") === false){
-            //running locally and getting error from browser
-            _blanket.showManualLoader();
-        }
-    }
-};
 })(blanket);
+
 (function() {
 
     if (! jasmine) {
@@ -4740,6 +5434,9 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
-            jasmine.getEnv().execute = jasmine.getEnv().currentRunner().execute;     }
+            jasmine.getEnv().execute = function () {
+                jasmine.getEnv().currentRunner().execute();   
+            };  
+        }
     });
 })();

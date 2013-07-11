@@ -118,7 +118,7 @@ namespace Chutzpah
                 var fileUnderTest = GetFileUnderTest(testFilePath);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
-
+                
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
@@ -213,7 +213,6 @@ namespace Chutzpah
         {
             return testFileKind != PathType.JavaScript
                    && testFileKind != PathType.TypeScript
-                   && testFileKind != PathType.TypeScriptDef
                    && testFileKind != PathType.CoffeeScript
                    && testFileKind != PathType.Url
                    && testFileKind != PathType.Html;

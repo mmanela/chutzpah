@@ -6,7 +6,7 @@ namespace Chutzpah
     {
         public static Stream GetEmbeddedResoureStream<T>(string path)
         {
-            return typeof (T).Assembly.GetManifestResourceStream(path);
+            return typeof (T).Assembly.GetManifestResourceStream(typeof(T), path);
         }
 
         public static string GetEmbeddedResoureText<T>(string path)

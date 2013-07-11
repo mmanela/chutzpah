@@ -1,5 +1,4 @@
-﻿/// <reference path="lib.d.ts" />
-/// <reference path="qunit.d.ts" />
+﻿/// <reference path="qunit.d.ts" />
 /// <reference path="child.ts" />
 
 test("inheritance working?", function () {

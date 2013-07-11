@@ -73,7 +73,10 @@ namespace Chutzpah
         private IList<TestHarnessItem> ChooseRefList(ReferencedFile referencedFile, string referencePath)
         {
             IList<TestHarnessItem> list = null;
-            if (referencedFile.IsTestFrameworkDependency)
+            if (referencedFile.IsTestFrameworkDependency 
+                
+                // Mark requirejs as a framework dependency since it needs to be loaded before coverage
+                || RegexPatterns.IsRequireJsReference.IsMatch(Path.GetFileName(referencedFile.Path)))
             {
                 list = TestFrameworkDependencies;
             }
@@ -125,7 +128,7 @@ namespace Chutzpah
 
                 var lastSlash = reference.ReferencedFile.Path.LastIndexOfAny(new[] { '/', '\\' });
                 string fileName = reference.ReferencedFile.Path.Substring(lastSlash + 1);
-                if (Regex.IsMatch(fileName, "^qunit(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.IgnoreCase))
+                if (RegexPatterns.IsQUnitReference.IsMatch(fileName))
                 {
                     ReferencedScripts.Remove(reference);
                 }

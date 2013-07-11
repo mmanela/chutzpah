@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.Compilers.TypeScript;
 
 namespace Chutzpah.FileGenerators
 {
@@ -25,9 +26,13 @@ namespace Chutzpah.FileGenerators
 
         public override IDictionary<string, string> GenerateCompiledSources(IEnumerable<ReferencedFile> referencedFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
+
             var referenceList = (from referencedFile in referencedFiles
                                  let content = fileSystem.GetText(referencedFile.Path)
-                                 select new { FileName = referencedFile.Path, Content = content }).ToList();
+                                 select new TypeScriptFile { FileName = referencedFile.Path, Content = content }).ToList();
+
+
+            InsertLibDeclarationFile(referenceList);
 
             var compiledMap = new Dictionary<string, string>();
             var needsCompileMap = referenceList.ToDictionary(x => x.FileName, x => x.Content);
@@ -40,6 +45,29 @@ namespace Chutzpah.FileGenerators
             }
 
             return compiledMap;
+        }
+
+        /// <summary>
+        /// Add the lib.d.ts declaration as the first file. We need to do this since we load typescript in memory so it can't find
+        /// its own local lib.d.ts file
+        /// </summary>
+        /// <param name="referenceList"></param>
+        private void InsertLibDeclarationFile(List<TypeScriptFile> referenceList)
+        {
+            var libDeclarationFileName = "lib.d.ts";
+            
+            // If the user already included their own lib.d.ts then don't add our own
+            if (!referenceList.Any(x => fileSystem.GetFileName(x.FileName).Equals(libDeclarationFileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var libDeclarationFileContent = EmbeddedManifestResourceReader.GetEmbeddedResoureText<TypeScriptCompiler>(libDeclarationFileName);
+                referenceList.Insert(0, new TypeScriptFile { FileName = libDeclarationFileName, Content = libDeclarationFileContent });
+            }
+        }
+
+        private class TypeScriptFile
+        {
+            public string FileName { get; set; }
+            public string Content { get; set; }
         }
     }
 }

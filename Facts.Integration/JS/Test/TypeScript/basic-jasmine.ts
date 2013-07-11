@@ -1,7 +1,6 @@
-﻿/// <reference path="TypeScript/lib.d.ts" />
-/// <reference path="TypeScript/jasmine.d.ts" />
-/// <reference path="../code/code.ts" />
-/// <reference path="jasmine.js" />
+﻿/// <reference path="jasmine.d.ts" />
+/// <reference path="../../code/code.ts" />
+/// <chutzpah_reference path="jasmine.js" />
 
 describe("general", function () {
     it("A basic test", function () {

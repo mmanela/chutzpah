@@ -192,6 +192,7 @@
     <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Compilers\TypeScript\lib.d.ts" />
     <Content Include="TestFiles\Coverage\blanket_jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -15,5 +15,8 @@
         public static Regex SchemePrefixRegex = new Regex(@"^(http|https|file)://", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static Regex InvalidPrefixedLocalFilePath = new Regex(@"^\/([a-z]:/)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        public static Regex IsQUnitReference = new Regex("^qunit(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex IsRequireJsReference = new Regex("^require(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     }
 }

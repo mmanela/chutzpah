@@ -50,18 +50,6 @@ namespace Chutzpah.Coverage
                 .Select(dep => dep.Attributes["src"])
                 .ToList();
 
-            // Remove require.js if found amoung the referenced scripts. It's included in Blanket, and
-            // it cannot come after the main Blanket include. Simplest approach is to remove it!
-            foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
-            {
-                string fileName = Path.GetFileName(refScript.ReferencedFile.Path);
-                if (fileName.Equals("require.js", StringComparison.OrdinalIgnoreCase))
-                {
-                    harness.ReferencedScripts.Remove(refScript);
-                    break;
-                }
-            }
-
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
             {
                 // Exclude files which the user is asking us to ignores
