@@ -14,10 +14,11 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Code Coverage with TeamCity (item 115)
-* Console runner does not correctly set error code (item 116)
-* Chutzpah Fails When '#' Character in Test File Path (item 99)
-* Code Coverage errors if any uri is a mapped drive path (item 118)
+* Support for HTML template imports (item 144)	
+* Code Coverage issue with jquery.jstepper.min.js (item 120)
+* Code coverage timeout issue (item 114)
+* How can I update to make it work with TypeScript Generics? (item 141)
+* Upgrade TypeScript to 0.9.0 (item 138)
         </releaseNotes>
     </metadata>
 </package>

@@ -234,7 +234,8 @@ namespace Chutzpah.Facts.Integration
         public void Will_load_html_template(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-
+            testRunner.DebugEnabled = true;
+            
             TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
