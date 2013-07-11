@@ -6,17 +6,23 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
     public class TestHarness
     {
+        private readonly IFileSystemWrapper fileSystem;
+
         public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
+        public IList<TestHarnessItem> ReferencedHtmlTemplates { get; private set; }
         public IList<TestHarnessItem> ReferencedScripts { get; private set; }
         public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
-        public TestHarness(IEnumerable<ReferencedFile> referencedFiles)
+        public TestHarness(IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem)
         {
+            this.fileSystem = fileSystem;
+
             BuildTags(referencedFiles);
             CleanupTestHarness();
         }
@@ -27,22 +33,26 @@ namespace Chutzpah
             var testFrameworkDependencies = new StringBuilder();
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
+            var referenceHtmlTemplateReplacement = new StringBuilder();
 
             BuildReferenceHtml(testFrameworkDependencies,
                                referenceCssReplacement,
                                testJsReplacement,
-                               referenceJsReplacement);
+                               referenceJsReplacement,
+                               referenceHtmlTemplateReplacement);
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@TestHtmlTemplateFiles@@", referenceHtmlTemplateReplacement.ToString());
 
             return testHtmlTemplate;
         }
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)
         {
+            ReferencedHtmlTemplates = new List<TestHarnessItem>();
             ReferencedScripts = new List<TestHarnessItem>();
             ReferencedStyles = new List<TestHarnessItem>();
             TestFrameworkDependencies = new List<TestHarnessItem>();
@@ -67,6 +77,11 @@ namespace Chutzpah
                 {
                     refList.Add(new Script(referencedFile));
                 }
+                else if (referencePath.EndsWith(Constants.HtmlScriptExtension, StringComparison.OrdinalIgnoreCase) ||
+                         referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    refList.Add(new Html(referencedFile, fileSystem));
+                }
             }
         }
 
@@ -88,13 +103,19 @@ namespace Chutzpah
             {
                 list = ReferencedScripts;
             }
+            else if (referencePath.EndsWith(Constants.HtmlScriptExtension, StringComparison.OrdinalIgnoreCase) ||
+                     referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                list = ReferencedHtmlTemplates;
+            }
             return list;
         }
 
         private void BuildReferenceHtml(StringBuilder testFrameworkDependencies,
                                         StringBuilder referenceCssReplacement,
                                         StringBuilder testJsReplacement,
-                                        StringBuilder referenceJsReplacement)
+                                        StringBuilder referenceJsReplacement,
+                                        StringBuilder referenceHtmlTemplateReplacement)
         {
             foreach (TestHarnessItem item in TestFrameworkDependencies)
             {
@@ -114,6 +135,10 @@ namespace Chutzpah
             foreach (TestHarnessItem item in ReferencedStyles)
             {
                 referenceCssReplacement.AppendLine(item.ToString());
+            }
+            foreach (TestHarnessItem item in ReferencedHtmlTemplates)
+            {
+                referenceHtmlTemplateReplacement.AppendLine(item.ToString());
             }
         }
 
@@ -210,7 +235,8 @@ namespace Chutzpah
 
     public class ExternalStylesheet : TestHarnessItem
     {
-        public ExternalStylesheet(ReferencedFile referencedFile) : base(referencedFile, "link", false)
+        public ExternalStylesheet(ReferencedFile referencedFile)
+            : base(referencedFile, "link", false)
         {
             Attributes.Add("rel", "stylesheet");
             Attributes.Add("type", "text/css");
@@ -220,7 +246,8 @@ namespace Chutzpah
 
     public class ShortcutIcon : TestHarnessItem
     {
-        public ShortcutIcon(ReferencedFile referencedFile) : base(referencedFile, "link", false)
+        public ShortcutIcon(ReferencedFile referencedFile)
+            : base(referencedFile, "link", false)
         {
             Attributes.Add("rel", "shortcut icon");
             Attributes.Add("type", "image/png");
@@ -244,4 +271,19 @@ namespace Chutzpah
         }
     }
 
+    public class Html : TestHarnessItem
+    {
+        private readonly string contents;
+
+        public Html(ReferencedFile referencedFile, IFileSystemWrapper fileSystem)
+            : base(referencedFile, null, false)
+        {
+            contents = fileSystem.GetText(referencedFile.Path);
+        }
+
+        public override string ToString()
+        {
+            return contents;
+        }
+    }
 }

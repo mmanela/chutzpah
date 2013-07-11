@@ -24,6 +24,18 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> HtmlTemplateTestScripts
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Test\HtmlTemplate\template-qunit.js"},
+                        new object[] {@"JS\Test\HtmlTemplate\template-jasmine.js"}
+                    };
+            }
+        }
+
         public static IEnumerable<object[]> CoffeeScriptTests
         {
             get
@@ -217,6 +229,19 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
+        [Theory]
+        [PropertyData("HtmlTemplateTestScripts")]
+        public void Will_load_html_template(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.TotalCount);
+        }
+        
         [Fact]
         public void Will_run_qunit_tests_from_a_folder()
         {
