@@ -13,6 +13,7 @@ namespace Chutzpah.Utility
         private readonly IFileSystemWrapper filesystem;
         private readonly IBinarySerializer binarySerializer;
         private readonly string filename;
+        private bool mutated = false;
 
         public CompilerCache(IFileSystemWrapper fileSystem, IBinarySerializer binarySerializer)
         {
@@ -52,6 +53,9 @@ namespace Chutzpah.Utility
         public void Set(string source, string compiled)
         {
             if (GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes <= 0) return;
+            
+            // Mark that a mutation occured so we know to save
+            mutated = true;
 
             var hash = hasher.Hash(source);
             var cachedEntry = Tuple.Create(DateTime.UtcNow, compiled);
@@ -60,8 +64,11 @@ namespace Chutzpah.Utility
 
         public void Save()
         {
-            LimitSize();
-            SerializeObject(filename, compilerCache);
+            if (mutated)
+            {
+                LimitSize();
+                SerializeObject(filename, compilerCache);
+            }
         }
 
         private void LimitSize()

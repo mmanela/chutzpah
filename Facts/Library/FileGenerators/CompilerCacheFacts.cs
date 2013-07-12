@@ -106,6 +106,7 @@ namespace Chutzpah.Facts
                 .Returns(new ConcurrentDictionary<string, Tuple<DateTime, string>>());
             cache.Mock<IFileSystemWrapper>().Setup(x => x.Open(cacheFile, FileMode.Create, FileAccess.Write))
                  .Returns(new MemoryStream());
+            cache.ClassUnderTest.Set("a", "a");
 
 
             var result = cache.ClassUnderTest.Get("Coffee");
@@ -130,6 +131,7 @@ namespace Chutzpah.Facts
             
             cache.Mock<IFileSystemWrapper>().Setup(x => x.Open(cacheFile, FileMode.Create, FileAccess.Write))
                  .Returns(new MemoryStream());
+            cache.ClassUnderTest.Set("a","a");
             
             var result = cache.ClassUnderTest.Get("Coffee");
 
@@ -137,6 +139,27 @@ namespace Chutzpah.Facts
             cache.Mock<IFileSystemWrapper>().Verify(x => x.FileExists(cacheFile), Times.Once());
             cache.Mock<IFileSystemWrapper>()
                  .Verify(x => x.Open(cacheFile, FileMode.Create, FileAccess.Write), Times.Once());
+        }
+
+        [Fact]
+        public void Will_not_save_cachefile_if_not_change_was_made()
+        {
+            GlobalOptions.Instance.CompilerCacheFile = null;
+            var cache = new Testable<CompilerCache>();
+            cache.Mock<IFileSystemWrapper>()
+                 .Setup(x => x.GetTemporaryFolder(Constants.ChutzpahCompilerCacheFolder))
+                 .Returns("tmp");
+            var cacheFile = Path.Combine("tmp", Constants.ChutzpahCompilerCacheFileName);
+            cache.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(cacheFile)).Returns(false);
+
+            cache.Mock<IFileSystemWrapper>().Setup(x => x.Open(cacheFile, FileMode.Create, FileAccess.Write))
+                 .Returns(new MemoryStream());
+
+            var result = cache.ClassUnderTest.Get("Coffee");
+
+            cache.ClassUnderTest.Save();
+            cache.Mock<IFileSystemWrapper>()
+                 .Verify(x => x.Open(cacheFile, FileMode.Create, FileAccess.Write), Times.Never());
         }
 
         [Fact]

@@ -27,14 +27,17 @@ namespace Chutzpah.FileGenerators
             // Filter down to just the referenced files this generator supports
             referencedFiles = referencedFiles.Where(CanHandleFile).ToList();
 
-            var compiledMap = GenerateCompiledSources(referencedFiles, chutzpahTestSettings);
-
-            foreach (var referencedFile in referencedFiles)
+            if (referencedFiles.Any())
             {
-                if (!compiledMap.ContainsKey(referencedFile.Path)) continue;
+                var compiledMap = GenerateCompiledSources(referencedFiles, chutzpahTestSettings);
 
-                var jsText = compiledMap[referencedFile.Path];
-                WriteGeneratedReferencedFile(referencedFile, jsText, temporaryFiles);
+                foreach (var referencedFile in referencedFiles)
+                {
+                    if (!compiledMap.ContainsKey(referencedFile.Path)) continue;
+
+                    var jsText = compiledMap[referencedFile.Path];
+                    WriteGeneratedReferencedFile(referencedFile, jsText, temporaryFiles);
+                }
             }
         }
 
