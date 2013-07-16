@@ -2,6 +2,8 @@ namespace Chutzpah
 {
     public static class Constants
     {
+        public const string LogFileName = "chutzpah.log";
+
         // Name of the test settings file
         public const string SettingsFileName = "chutzpah.json";
 

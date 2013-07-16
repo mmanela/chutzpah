@@ -16,7 +16,8 @@
 
         public static Regex InvalidPrefixedLocalFilePath = new Regex(@"^\/([a-z]:/)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static Regex IsQUnitReference = new Regex("^qunit(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static Regex IsRequireJsReference = new Regex("^require(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex IsJasmineFileName = new Regex("^jasmine(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex IsQUnitFileName = new Regex("^qunit(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static Regex IsRequireJsFileName = new Regex("^require(-[0-9]+\\.[0-9]+\\.[0-9]+)?\\.js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     }
 }

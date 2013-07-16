@@ -23,6 +23,8 @@ namespace Chutzpah
             Parse();
         }
 
+        public bool Trace { get; set; }
+
         public bool FailOnError { get; set; }
 
         public bool Debug { get; protected set; }
@@ -95,6 +97,11 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     Debug = true;
+                }
+                else if (optionName == "/trace")
+                {
+                    GuardNoOptionValue(option);
+                    Trace = true;
                 }
                 else if (optionName == "/failonerror" || optionName == "/failonscripterror")
                 {

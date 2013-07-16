@@ -21,14 +21,16 @@ namespace Chutzpah
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
         private readonly ICompilerCache compilerCache;
-
-
-        public bool DebugEnabled { get; set; }
+        private bool m_debugEnabled;
 
         public static ITestRunner Create(bool debugEnabled = false)
         {
             var runner = ChutzpahContainer.Current.GetInstance<TestRunner>();
-            runner.DebugEnabled = debugEnabled;
+            if (debugEnabled)
+            {
+                runner.EnableDebugMode();
+            }
+
             return runner;
         }
 
@@ -46,6 +48,13 @@ namespace Chutzpah
             this.compilerCache = compilerCache;
         }
 
+
+        public void EnableDebugMode()
+        {
+            m_debugEnabled = true;
+            ChutzpahTracer.AddConsoleListener();
+
+        }
 
         public void CleanTestContext(TestContext context)
         {
@@ -163,7 +172,7 @@ namespace Chutzpah
                         }
 
 
-                        if (!DebugEnabled && !options.OpenInBrowser)
+                        if (!m_debugEnabled && !options.OpenInBrowser)
                         {
                             // Don't clean up context if in debug mode
                             testContextBuilder.CleanupContext(testContext);
@@ -208,7 +217,7 @@ namespace Chutzpah
 
             string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testRunnerMode);
             Func<ProcessStream, TestFileSummary> streamProcessor =
-                processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, DebugEnabled);
+                processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, m_debugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
             HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile, processResult.Model.Errors, callback);

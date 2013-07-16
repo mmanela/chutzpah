@@ -31,7 +31,6 @@ namespace Chutzpah.Compilers.JavaScriptEngines
             }
             catch
             {
-                // TODO: Make catch more specific
                 jsEngine = null;
             }
 

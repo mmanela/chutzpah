@@ -6,11 +6,6 @@ namespace Chutzpah
     public interface ITestRunner
     {
         /// <summary>
-        /// Puts the runner in debug mode which forces it to ouput diagnostic information
-        /// </summary>
-        bool DebugEnabled { get; set; }
-
-        /// <summary>
         /// Gets a test context for a given test file. The test context contains the paths
         /// of all the items needs to run the test
         /// </summary>
@@ -39,5 +34,6 @@ namespace Chutzpah
         bool IsTestFile(string testFile);
         IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options);
         void CleanTestContext(TestContext context);
+        void EnableDebugMode();
     }
 }

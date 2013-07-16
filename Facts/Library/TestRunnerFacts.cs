@@ -414,7 +414,7 @@ namespace Chutzpah.Facts
                 runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), It.IsAny<TestOptions>(), out context)).Returns(true);
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
-                runner.ClassUnderTest.DebugEnabled = true;
+                runner.ClassUnderTest.EnableDebugMode();
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
 

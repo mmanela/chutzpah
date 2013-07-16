@@ -51,7 +51,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_discover_tests_from_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.DebugEnabled = true;
             var result = testRunner.DiscoverTests(scriptPath);
 
             Assert.Equal(4, result.Count());
@@ -65,7 +64,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_discover_tests_from_a_coffee_script_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.DebugEnabled = true;
             var result = testRunner.DiscoverTests(scriptPath);
 
             Assert.Equal(4, result.Count());

@@ -153,6 +153,39 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class TraceOptionFacts
+        {
+            [Fact]
+            public void Debug_Option_Not_Passed_Debug_False()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.Trace);
+            }
+
+            [Fact]
+            public void Debug_Option_Debug_Is_True()
+            {
+                var arguments = new[] { "test.html", "/trace" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.Trace);
+            }
+
+            [Fact]
+            public void Debug_Option_Ignore_Case_Debug_Is_True()
+            {
+                var arguments = new[] { "test.html", "/tRAce" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.Trace);
+            }
+        }
+
         public class SilentOptionFacts
         {
             [Fact]

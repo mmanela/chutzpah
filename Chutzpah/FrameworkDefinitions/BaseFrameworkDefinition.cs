@@ -85,9 +85,7 @@ namespace Chutzpah.FrameworkDefinitions
             string fileName = Path.GetFileName(referenceFileName);
             if (!string.IsNullOrEmpty(fileName))
             {
-                return
-                    FileDependencies.Any(
-                        x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
+                return FileDependencies.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;

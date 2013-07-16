@@ -97,7 +97,6 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            testRunner.DebugEnabled = true;
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Null(result.Tests.Single().TestResults.Single().StackTrace);
@@ -234,7 +233,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_load_html_template(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.DebugEnabled = true;
             
             TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
@@ -526,7 +524,6 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            testRunner.DebugEnabled = true;
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
@@ -551,7 +548,6 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            testRunner.DebugEnabled = true;
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\consoleLog.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal("hello", result.Logs.Single().Message);
@@ -798,7 +794,6 @@ namespace Chutzpah.Facts.Integration
                 // This test verifies that we run TypeScript compiler on all ts files at once 
                 // this is important since TS using typechecking engine to help generate code
                 var testRunner = TestRunner.Create();
-                testRunner.DebugEnabled = true;
                 var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);

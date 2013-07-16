@@ -106,6 +106,7 @@ namespace Chutzpah
                 // For HTML test files we don't need to create a test harness to just return this file
                 if (testFileKind == PathType.Html || testFileKind == PathType.Url)
                 {
+                    ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the suplied test harness and not building our own", testFileKind);
                     return new TestContext
                         {
                             InputTestFile = testFilePath,
@@ -121,22 +122,15 @@ namespace Chutzpah
                 var fileUnderTest = GetFileUnderTest(testFilePath);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
-                
+
                 GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
-                ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options, chutzpahTestSettings);
                 IEnumerable<string> deps = definition.FileDependencies;
-                if (coverageEngine != null)
-                {
-                    deps = deps.Concat(coverageEngine.GetFileDependencies(definition));
-                }
 
-                foreach (string item in deps)
-                {
-                    string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
-                    referencedFiles.Add(new ReferencedFile { IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath });
-                }
+                var coverageEngine = SetupCodeCoverageEngine(options, chutzpahTestSettings, definition, ref deps);
+
+                AddTestFrameworkDependencies(deps, referencedFiles);
 
                 string testHtmlFilePath = CreateTestHarness(definition,
                                                             chutzpahTestSettings,
@@ -155,8 +149,34 @@ namespace Chutzpah
                         TestFileSettings = chutzpahTestSettings
                     };
             }
+            else
+            {
+                ChutzpahTracer.TraceWarning("Failed to detect test framework for '{0}'", testFilePath);
+            }
 
             return null;
+        }
+
+        private void AddTestFrameworkDependencies(IEnumerable<string> deps, List<ReferencedFile> referencedFiles)
+        {
+            foreach (string item in deps)
+            {
+                string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
+                referencedFiles.Add(new ReferencedFile {IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath});
+            }
+        }
+
+        private ICoverageEngine SetupCodeCoverageEngine(TestOptions options,
+                                                        ChutzpahTestSettingsFile chutzpahTestSettings,
+                                                        IFrameworkDefinition definition,
+                                                        ref IEnumerable<string> deps)
+        {
+            ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options, chutzpahTestSettings);
+            if (coverageEngine != null)
+            {
+                deps = deps.Concat(coverageEngine.GetFileDependencies(definition));
+            }
+            return coverageEngine;
         }
 
         public bool TryBuildContext(string file, TestOptions options, out TestContext context)
@@ -235,6 +255,7 @@ namespace Chutzpah
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             if (options == null || !options.CoverageOptions.Enabled) return null;
+            ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
             mainCoverageEngine.IncludePatterns = chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns).ToList();
             mainCoverageEngine.ExcludePatterns = chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns).ToList();
             return mainCoverageEngine;
@@ -354,9 +375,10 @@ namespace Chutzpah
                     var referenceUri = new Uri(referencePath, UriKind.RelativeOrAbsolute);
                     string referenceFileName = Path.GetFileName(referencePath);
 
-                    // Don't copy over test runner, since we use our own.
+                    //  Ignore test runner, since we use our own.
                     if (definition.ReferenceIsDependency(referenceFileName))
                     {
+                        ChutzpahTracer.TraceInformation("Ignoring reference file '{0}' as a duplicate reference to {1}", referenceFileName, definition.FrameworkKey);
                         continue;
                     }
 
@@ -419,6 +441,10 @@ namespace Chutzpah
             if (chutzpahTestSettings.RootReferencePathMode == RootReferencePathMode.SettingsFileDirectory &&
                 (referencePath.StartsWith("/") || referencePath.StartsWith("\\")))
             {
+                ChutzpahTracer.TraceInformation("Changing reference '{0}' to be rooted from settings directory '{1}'",
+                                                referencePath,
+                                                chutzpahTestSettings.SettingsFileDirectory);
+
                 referencePath = chutzpahTestSettings.SettingsFileDirectory + referencePath;
             }
 
@@ -450,10 +476,10 @@ namespace Chutzpah
                 string textToParse = fileSystem.GetText(currentFilePath);
                 return GetReferencedFiles(discoveredPaths, definition, textToParse, currentFilePath, chutzpahTestSettings);
             }
-            catch (IOException)
+            catch (IOException e)
             {
                 // Unable to get file text
-                // TODO: log this!
+                ChutzpahTracer.TraceError(e, "Unable to get file text from test reference with path {0}", currentFilePath);
             }
 
             return new List<ReferencedFile>();
@@ -492,6 +518,8 @@ namespace Chutzpah
                     return true;
                 }
             }
+
+            ChutzpahTracer.TraceInformation("Excluding reference file because it contains a postitive chutzpah-exclude attribute");
 
             return false;
         }

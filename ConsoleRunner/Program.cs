@@ -86,7 +86,8 @@ namespace Chutzpah
             Console.WriteLine("  /wait                  : Wait for input after completion");
             Console.WriteLine("  /failOnError           : Return a non-zero exit code if any script errors or timeouts occurs");
             Console.WriteLine("  /failOnScriptError     : Alias for failOnError (deprecated)");
-            Console.WriteLine("  /debug                 : Print debugging information");
+            Console.WriteLine("  /debug                 : Print debugging information and tracing to console");
+            Console.WriteLine("  /trace level           : Logs tracing information to chutzpah.log with given tracing level");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /parallelism [n]       : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
@@ -118,6 +119,11 @@ namespace Chutzpah
 
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
+            if (commandLine.Trace)
+            {
+                ChutzpahTracer.AddFileListener();
+            }
+
             var chutzpahAssemblyName = testRunner.GetType().Assembly.GetName();
 
 
@@ -128,7 +134,6 @@ namespace Chutzpah
             TestCaseSummary testResultsSummary = null;
             try
             {
-
                 var callback = commandLine.TeamCity ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput);
                 callback = new ParallelRunnerCallbackAdapter(callback);
 

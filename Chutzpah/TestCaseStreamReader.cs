@@ -57,6 +57,8 @@ namespace Chutzpah
             else
             {
                 // We timed out so kill the process and return an empty test file summary
+                ChutzpahTracer.TraceError("Test file timed out after running for {0} milliseconds", (DateTime.Now - lastTestEvent).TotalMilliseconds);
+
                 processStream.TimedOut = true;
                 processStream.KillProcess();
                 return new TestFileSummary(testContext.InputTestFile);
@@ -129,9 +131,10 @@ namespace Chutzpah
                             break;
                     }
                 }
-                catch (SerializationException)
+                catch (SerializationException e)
                 {
                     // Ignore malformed json and move on
+                    ChutzpahTracer.TraceError(e, "Recieved malformed json from Phantom in this line: '{0}'", line);
                 }
             }
 

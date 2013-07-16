@@ -91,7 +91,7 @@ namespace Chutzpah
             if (referencedFile.IsTestFrameworkDependency 
                 
                 // Mark requirejs as a framework dependency since it needs to be loaded before coverage
-                || RegexPatterns.IsRequireJsReference.IsMatch(Path.GetFileName(referencedFile.Path)))
+                || RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path)))
             {
                 list = TestFrameworkDependencies;
             }
@@ -145,15 +145,16 @@ namespace Chutzpah
 
         private void CleanupTestHarness()
         {
+            // TODO: Remove this need for this by updating the logic in the framework definition to support regex matches in ReferenceIsDependency
+
             // Remove additional references to QUnit.
             // (Iterate over a copy to avoid concurrent modification of the list!)
             foreach (TestHarnessItem reference in ReferencedScripts.Where(r => r.HasFile).ToList())
             {
                 if (reference.ReferencedFile.IsFileUnderTest) continue;
 
-                var lastSlash = reference.ReferencedFile.Path.LastIndexOfAny(new[] { '/', '\\' });
-                string fileName = reference.ReferencedFile.Path.Substring(lastSlash + 1);
-                if (RegexPatterns.IsQUnitReference.IsMatch(fileName))
+                string fileName = Path.GetFileName(reference.ReferencedFile.Path);
+                if (!string.IsNullOrEmpty(fileName) && RegexPatterns.IsQUnitFileName.IsMatch(fileName))
                 {
                     ReferencedScripts.Remove(reference);
                 }

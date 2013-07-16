@@ -159,6 +159,7 @@
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
+    <Compile Include="ChutzpahTracer.cs" />
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />

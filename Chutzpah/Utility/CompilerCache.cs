@@ -93,8 +93,7 @@ namespace Chutzpah.Utility
             }
         }
 
-        private void SerializeObject(string name,
-                                     ConcurrentDictionary<string, Tuple<DateTime, string>> objectToSerialize)
+        private void SerializeObject(string name, ConcurrentDictionary<string, Tuple<DateTime, string>> objectToSerialize)
         {
             try
             {
@@ -103,9 +102,9 @@ namespace Chutzpah.Utility
                     binarySerializer.Serialize(stream, objectToSerialize);
                 }
             }
-            catch (IOException)
+            catch (IOException e)
             {
-                //TODO: log
+                ChutzpahTracer.TraceError(e, "Failed to save compiler cache");
             }
         }
 

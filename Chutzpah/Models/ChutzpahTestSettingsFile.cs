@@ -145,7 +145,7 @@ namespace Chutzpah.Models
                 if (settings.TestHarnessDirectory == null)
                 {
                     settings.TestHarnessLocationMode = TestHarnessLocationMode.TestFileAdjacent;
-                    // TODO: log failure to find custom test harness directory
+                    ChutzpahTracer.TraceWarning("Unable to find custom test harness directory at {0}", settings.TestHarnessDirectory);
                 }
             }
         }
