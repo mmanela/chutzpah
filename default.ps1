@@ -20,7 +20,9 @@ task Build-2010 -depends  Clean-Solution-2010, Build-Solution-2010, Run-UnitTest
 task Build-2012 -depends  Clean-Solution-2012, Build-Solution-2012, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
-  $global:version = $mainVersion  + "." + (hg log --limit 9999999 --template '{rev}:{node}\n' | measure-object).Count
+
+	$version = git describe --abbrev=0 --tags
+	$global:version = $version.substring(1) + '.' + (git log $($version + '..') --pretty=oneline | measure-object).Count
 }
 
 task Update-AssemblyInfoFiles {

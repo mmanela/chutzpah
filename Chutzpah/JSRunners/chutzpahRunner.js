@@ -142,7 +142,8 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     };
     
 
-    page.onResourceReceived = function (url) {
+    page.onResourceReceived = function (res) {
+        //console.log("Resource: " + res.url);
         trySetupTestFramework();
     };
 

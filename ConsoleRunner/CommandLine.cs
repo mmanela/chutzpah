@@ -23,6 +23,8 @@ namespace Chutzpah
             Parse();
         }
 
+        public bool Discovery { get; set; }
+
         public bool Trace { get; set; }
 
         public bool FailOnError { get; set; }
@@ -92,6 +94,11 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     Wait = true;
+                }
+                else if (optionName == "/discovery")
+                {
+                    GuardNoOptionValue(option);
+                    Discovery = true;
                 }
                 else if (optionName == "/debug")
                 {

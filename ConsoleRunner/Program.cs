@@ -151,9 +151,24 @@ namespace Chutzpah
                                               }
                     };
 
-                testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
+                if (!commandLine.Discovery)
+                {
+                    testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
+                    ProcessTestSummaryTransformers(commandLine, testResultsSummary);
+                }
+                else
+                {
+                    Console.WriteLine("Test Discovery");
+                    var tests = testRunner.DiscoverTests(commandLine.Files, testOptions).ToList();
+                    Console.WriteLine("\nDiscovered {0} tests", tests.Count);
 
-                ProcessTestSummaryTransformers(commandLine, testResultsSummary);
+                    foreach (var test in tests)
+                    {
+                        Console.WriteLine("Test '{0}' from '{1}'", test.TestName, test.InputTestFile);
+                    }
+                    return 0;
+                }
+
             }
             catch (ArgumentException ex)
             {

@@ -52,12 +52,14 @@ namespace Chutzpah
 
             if (readerTask.IsCompleted)
             {
+                ChutzpahTracer.TraceError("Finished reading stream from test file '{0}'", testContext.InputTestFile);
+
                 return readerTask.Result;
             }
             else
             {
                 // We timed out so kill the process and return an empty test file summary
-                ChutzpahTracer.TraceError("Test file timed out after running for {0} milliseconds", (DateTime.Now - lastTestEvent).TotalMilliseconds);
+                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.InputTestFile, (DateTime.Now - lastTestEvent).TotalMilliseconds);
 
                 processStream.TimedOut = true;
                 processStream.KillProcess();

@@ -139,6 +139,11 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
 
+        const string TestHtmlFileWithRootedReferenceAndTilde =
+                    @"/// <template path=""~/rooted/file.html"" />
+                        some javascript code
+                        ";
+
         const string ReferencesHtmlFile =
             @"/// <template path=""file.html"" />";
 
@@ -694,6 +699,28 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path1\test.js"))
                     .Returns(TestHtmlFileWithRootedReference);
+
+                creator.Mock<IFileSystemWrapper>()
+                   .Setup(x => x.GetText(@"path1\settingsPath/rooted/file.html"))
+                   .Returns("<h1>This is the included HTML from Rooted File</h1>");
+
+                var context = creator.ClassUnderTest.BuildContext(@"path1\test.js", new TestOptions());
+
+                Assert.Contains("<h1>This is the included HTML from Rooted File</h1>", text);
+            }
+
+            [Fact]
+            public void Will_change_path_root_given_even_if_has_tilde()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory;
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path1\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path1\test.js"))
+                    .Returns(TestHtmlFileWithRootedReferenceAndTilde);
 
                 creator.Mock<IFileSystemWrapper>()
                    .Setup(x => x.GetText(@"path1\settingsPath/rooted/file.html"))
