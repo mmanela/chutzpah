@@ -6,17 +6,24 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function onInitialized() { }
+    function onInitialized() {
+        console.log("!!_!! onInitialized");
+    }
 
     function isTestingDone() {
+        console.log("!!_!! isTestingDone");
         return window.chutzpah.isTestingFinished === true;
     }
     
     function isJamineLoaded() {
+        console.log("!!_!! isJasmineLoaded");
         return window.jasmine;
     }
     
     function onJasmineLoaded() {
+
+        console.log("!!_!! onJasmineLoaded");
+        
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -149,22 +156,33 @@
     }
 
     function onPageLoaded() {
-        var _cachedWindowLoad = window.onload;
-        window.onload = function () {
-            if (_cachedWindowLoad) {
-                _cachedWindowLoad();
-            }
-            
-            var jasmineEnv = jasmine.getEnv();
-            var runner = jasmineEnv.currentRunner();
+        console.log("!!_!! onPageLoaded");
+        function startJasmine() {
 
-            // Check if runner hasn't been executed
-            // If so, run it
-            if (!runner.queue.running && runner.queue.index <= 0) {
-                jasmineEnv.execute();
+            if (!window.chutzpah.requirePendingCalls) {
+
+                console.log("!!_!! Starting Jasmine...");
+                
+                var jasmineEnv = jasmine.getEnv();
+                var runner = jasmineEnv.currentRunner();
+
+                // Check if runner hasn't been executed
+                // If so, run it
+                if (!runner.queue.running && runner.queue.index <= 0) {
+                    jasmineEnv.execute();
+                }
+                
+            } else {
+
+                console.log("!!_!! Delaying start Jasmine until require calls finish");
+                window.setTimeout(startJasmine, 15);
             }
-        };
+        }
+
+        startJasmine();
+        
     }
+    
 
     try {
         chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);

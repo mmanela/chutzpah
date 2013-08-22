@@ -8,10 +8,12 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     /// <param name="isFrameworkLoaded" type="Function">Function that returns true of false if the test framework has been loaded.</param>
     /// <param name="onFrameworkLoaded" type="Function">Callback function which is called when the test framework is loaded.</param>
     /// <param name="isTestingDone" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
+
     'use strict';
 
     var page = require('webpage').create(),
         testFrameworkLoaded = false,
+        requireFrameworkLoaded = false,
         testFile = null,
         testMode = null,
         timeOut = null,
@@ -26,6 +28,95 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
             }
         }
     }
+
+
+    function isRequireLoaded() {
+        /// <summary>Check if RequireJS is loaded by checking some key functions</summary>
+
+        return window.requirejs && window.require && window.define;
+    }
+
+    function onRequireLoaded() {
+        /// <summary>
+        /// Install the hooks we need into Require loader. To do this we create out own versions of require and define functions.
+        /// Then we track how many pending calls for require or define are pending
+        ///</summary>
+
+        window.chutzpah.requirePendingCalls = 0;
+
+        console.log("!!_!! Overriding Requir methods");
+
+
+        window.chutzpah.cachedRequire = window.requirejs;
+        window.chutzpah.cachedDefine = window.define;
+
+        function isFunction(x) {
+            return Object.prototype.toString.call(x) === '[object Function]';
+        }
+
+        function wrapCallback(inner) {
+
+            return function () {
+
+                window.chutzpah.requirePendingCalls--;
+                console.log("!!_!! Pending Require Calls: " + window.chutzpah.requirePendingCalls);
+                
+                if (inner) {
+                    return inner.apply(this, arguments);
+                }
+            };
+        };
+
+        window.require = window.requirejs = function (deps, callback, errback, optional) {
+            window.chutzpah.requirePendingCalls++;
+
+            console.log("!!_!! Pending Require Calls: " + window.chutzpah.requirePendingCalls);
+
+            callback = wrapCallback(callback);
+            errback = wrapCallback(errback);
+
+            window.chutzpah.cachedRequire.apply(this, [deps, callback, errback, optional]);
+        };
+
+        window.define = function (name, deps, callback) {
+
+            // If name is a function then this is not a pending call. It is just a implicit module
+            // which will return immediately and has no callback
+            if (!isFunction(name)) {
+                window.chutzpah.requirePendingCalls++;
+            }
+
+            console.log("!!_!! Pending Require Calls: " + window.chutzpah.requirePendingCalls);
+
+            if (isFunction(deps)) {
+                deps = wrapCallback(deps);
+            } else if (isFunction(callback)) {
+                callback = wrapCallback(callback);
+            }
+
+            window.chutzpah.cachedDefine.apply(this, [name, deps, callback]);
+        };
+
+        for (var prop in window.chutzpah.cachedRequire) {
+            window.require[prop] = window.chutzpah.cachedRequire[prop];
+        }
+
+        for (prop in window.chutzpah.cachedDefine) {
+            window.define[prop] = window.chutzpah.cachedDefine[prop];
+        }
+    }
+
+    function trySetupRequireFramework() {
+        /// <summary>Try to setup the hooks we need into RequireJS</summary>
+
+        if (!requireFrameworkLoaded) {
+            var loaded = page.evaluate(isRequireLoaded);
+            if (loaded) {
+                requireFrameworkLoaded = true;
+                page.evaluate(onRequireLoaded);
+            }
+        }
+    };
 
 
     function waitFor(testIfDone, timeOutMillis) {
@@ -67,12 +158,12 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
             case 'CoverageObject':
                 console.log(wrap(eventObj.type) + json);
                 break;
-                
+
             case 'FileDone':
                 console.log(wrap(eventObj.type) + json);
                 phantom.exit(eventObj.failed > 0 ? 1 : 0);
                 break;
-               
+
             default:
                 break;
         }
@@ -88,9 +179,13 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         }
         catch (e) {
             // The message was not a test status object so log as message
-            var log = { type: 'Log', log: { message: message } };
-            writeEvent(log, JSON.stringify(log));
+            rawLog(message);
         }
+    }
+
+    function rawLog(message) {
+        var log = { type: 'Log', log: { message: message } };
+        writeEvent(log, JSON.stringify(log));
     }
 
     function onError(msg, stack) {
@@ -140,10 +235,12 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
         page.evaluate(onInitialized);
     };
-    
+
 
     page.onResourceReceived = function (res) {
-        //console.log("Resource: " + res.url);
+        rawLog("!!_!! Resource Recieved: " + res.url);
+
+        trySetupRequireFramework();
         trySetupTestFramework();
     };
 

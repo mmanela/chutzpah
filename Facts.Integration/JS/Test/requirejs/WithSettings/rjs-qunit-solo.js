@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../Code/RequireJS/require.js" />
+﻿/// <reference path="../../../Code/RequireJS/require-2.1.8.js" />
 
 requirejs(['base/core', 'ui/screen'],
     function (core, screen) {

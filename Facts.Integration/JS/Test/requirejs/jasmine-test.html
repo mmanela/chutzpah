@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="../jasmine.css">
     <script type="text/javascript" src="../jasmine.js"></script>
     <script type="text/javascript" src="../jasmine-html.js"></script>
-	<script type="text/javascript" src="../../Code/RequireJS/require.js"></script>
+	<script type="text/javascript" src="../../Code/RequireJS/require-2.1.8.js"></script>
     <script type="text/javascript">
         (function () {
             var jasmineEnv = jasmine.getEnv();
@@ -20,15 +20,16 @@
 
             var currentWindowOnload = window.onload;
 
-            window.onload = function () {
+            if (!window.chutzpah) {
+                window.onload = function() {
 
-                if (currentWindowOnload) {
-                    currentWindowOnload();
-                }
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
 
-                jasmineEnv.execute();
-            };
-
+                    jasmineEnv.execute();
+                };
+            }
 
         })();
         

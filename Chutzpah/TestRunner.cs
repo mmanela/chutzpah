@@ -52,7 +52,6 @@ namespace Chutzpah
         public void EnableDebugMode()
         {
             m_debugEnabled = true;
-            ChutzpahTracer.AddConsoleListener();
 
         }
 

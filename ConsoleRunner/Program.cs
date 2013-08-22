@@ -87,7 +87,7 @@ namespace Chutzpah
             Console.WriteLine("  /failOnError           : Return a non-zero exit code if any script errors or timeouts occurs");
             Console.WriteLine("  /failOnScriptError     : Alias for failOnError (deprecated)");
             Console.WriteLine("  /debug                 : Print debugging information and tracing to console");
-            Console.WriteLine("  /trace level           : Logs tracing information to chutzpah.log with given tracing level");
+            Console.WriteLine("  /trace                 : Logs tracing information to chutzpah.log");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /parallelism [n]       : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");

@@ -8,6 +8,11 @@ namespace Chutzpah.Facts.Integration
 {
     public class Coverage
     {
+        public Coverage()
+        {
+            ChutzpahTracer.Enabled = false;
+        }
+
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
         private const string ACoffeeTestScript = @"JS\Test\basic-jasmine.coffee";
 
@@ -29,8 +34,10 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                 {
-                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
-                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"}
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.old.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.new.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.old.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.new.js"}
                 };
             }
         }
@@ -257,14 +264,20 @@ namespace Chutzpah.Facts.Integration
         public void Will_cover_the_correct_files_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
             ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
                                new[]
                                    {
-                                       scriptPath, "tests\\base\\base.", "tests\\ui\\ui.", "\\base\\core.js",
-                                       "ui\\screen.js"
+                                       scriptPath, 
+                                       "tests\\base\\base.", 
+                                       "tests\\ui\\ui.", 
+                                       "\\base\\core.js",
+                                       "ui\\screen.js",
+                                       "jquery.js",
+                                       "base\\jquery.alpha.js"
                                    });
         }
 

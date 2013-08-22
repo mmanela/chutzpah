@@ -7,21 +7,21 @@
     phantom.injectJs('chutzpahRunner.js');
 
     function onInitialized() {
-        //console.log("onInitialized");
+        console.log("!!_!! onInitialized");
     }
 
     function isTestingDone() {
-        //console.log("isTestingDone");
+        console.log("!!_!! isTestingDone");
         return window.chutzpah.isTestingFinished === true;
     }
 
     function isQunitLoaded() {
-        //console.log("isQunitLoaded");
+        console.log("!!_!! isQunitLoaded");
         return window.QUnit;
     }
 
     function onQUnitLoaded() {
-        //console.log("onQUnitLoaded");
+        console.log("!!_!! onQUnitLoaded");
 
         // Prevent QUnit from autostarting so have better control of the timing
         window.QUnit.config.autostart = false;
@@ -177,9 +177,23 @@
     }
 
     function onPageLoaded() {
-        //console.log("onPageLoaded");
+        console.log("!!_!! onPageLoaded");
+        function startQUnit() {
+            
+            if (!window.chutzpah.requirePendingCalls) {
+
+                console.log("!!_!! Starting QUnit...");
+                
+                window.QUnit.start();
+            } else {
+
+                console.log("!!_!! Delaying start QUnit until require calls finish");
+                window.setTimeout(startQUnit, 15);
+            }
+        }
+        
         if (!window._Chutzpah_covobj_name) {
-            window.QUnit.start();
+            startQUnit();
         }
     }
 

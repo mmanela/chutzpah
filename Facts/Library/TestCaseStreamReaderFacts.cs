@@ -164,6 +164,24 @@ namespace Chutzpah.Facts
                 Assert.Equal("file", result.InputTestFile);
             }
 
+
+            [Fact]
+            public void Will_supress_internal_log_event()
+            {
+                var reader = new TestableTestCaseStreamReader();
+                var json = @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""!!_!! hi""}}";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+                TestLog result = null;
+                callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
+
+                reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.Null(result);
+            }
+
             [Fact]
             public void Will_fire_error_event()
             {

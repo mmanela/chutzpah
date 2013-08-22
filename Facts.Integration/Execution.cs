@@ -75,6 +75,7 @@ namespace Chutzpah.Facts.Integration
 
         public Execution()
         {
+            ChutzpahTracer.Enabled = false;
             // Disable caching
             GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = 0;
         }
@@ -700,6 +701,10 @@ namespace Chutzpah.Facts.Integration
 
         public class JasmineDdescribeIit
         {
+            public JasmineDdescribeIit()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
 
             [Fact]
             public void Will_run_jasmine_test_which_uses_iit()
@@ -762,6 +767,11 @@ namespace Chutzpah.Facts.Integration
 
         public class TypeScript
         {
+            public TypeScript()
+            {
+                ChutzpahTracer.Enabled = false;    
+            }
+
             public static IEnumerable<object[]> TypeScriptTests
             {
                 get
@@ -854,6 +864,25 @@ namespace Chutzpah.Facts.Integration
 
         public class AMD
         {
+            public AMD()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
+
+            public static IEnumerable<object[]> RequireJsTestScripts
+            {
+                get
+                {
+                    return new[]
+                {
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.old.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.new.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.old.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.new.js"}
+                };
+                }
+            }
+
             [Fact]
             public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
             {
@@ -878,24 +907,13 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(2, result.TotalCount);
             }
 
-            [Fact]
-            public void Will_run_qunit_require_js_test_where_test_file_uses_requirejs_command()
+            [Theory]
+            [PropertyData("RequireJsTestScripts")]
+            public void Will_run_require_js_test_where_test_file_uses_requirejs_command(string path)
             {
                 var testRunner = TestRunner.Create();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.qunit.js", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(2, result.PassedCount);
-                Assert.Equal(2, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_jasmine_require_js_test_where_test_file_uses_requirejs_command()
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js", new ExceptionThrowingRunnerCallback());
+                TestCaseSummary result = testRunner.RunTests(path, new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
@@ -929,6 +947,11 @@ namespace Chutzpah.Facts.Integration
 
         public class ChutzpahSettingsFile
         {
+            public ChutzpahSettingsFile()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
+
             [Fact]
             public void Will_use_settings_file_to_determine_framework()
             {

@@ -63,8 +63,17 @@ namespace Chutzpah.Coverage
                 }
             }
 
-            // Name the coverage object so that the JS runner can pick it up.
-            harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
+            // We run some code after blanket it loaded to modify behavior a bit.
+            // First we name the coverage object so that the JS runner can pick it up.
+            // Second, we forward the load function which blanket overrides onto the real require function. 
+            // This is needed since Chutzpah overrides require and define so when blanket tried to override the load method it doesn't get the real one.
+            const string blanketConfigureScript = @"
+    	    window.{0}='_$blanket';
+            if(window.chutzpah && window.requirejs){{
+    	        window.chutzpah.cachedRequire.load = window.requirejs.load;
+            }}";
+
+            harness.ReferencedScripts.Add(new Script(string.Format(blanketConfigureScript, Constants.ChutzpahCoverageObjectReference)));
 
             // Configure Blanket.
             TestHarnessItem blanketMain = harness.TestFrameworkDependencies.Single(

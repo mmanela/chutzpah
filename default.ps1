@@ -94,14 +94,13 @@ task Run-IntegrationTests {
 }
 
 task Run-Phantom {
-  $type = $arg1;
-  $mode = $arg2;
+  $testFilePath = Resolve-Path $arg1;
+  $type = $arg2;
+  $mode = $arg3;
   if(-not $type){
     $type = "qunit";
   }
   $phantom = "3rdParty\Phantom\phantomjs.exe";
-  
-  $testFilePath = Resolve-Path "Facts.Integration/JS/Test/basic-$($type).html";
   $testFilePath = $testFilePath.Path.Replace("\","/");
   
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner.js" "file:///$testFilePath" $mode }
