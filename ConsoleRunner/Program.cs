@@ -87,7 +87,7 @@ namespace Chutzpah
             Console.WriteLine("  /failOnError           : Return a non-zero exit code if any script errors or timeouts occurs");
             Console.WriteLine("  /failOnScriptError     : Alias for failOnError (deprecated)");
             Console.WriteLine("  /debug                 : Print debugging information and tracing to console");
-            Console.WriteLine("  /trace level           : Logs tracing information to chutzpah.log with given tracing level");
+            Console.WriteLine("  /trace                 : Logs tracing information to chutzpah.log");
             Console.WriteLine("  /openInBrowser         : Launch the tests in the default browser");
             Console.WriteLine("  /timeoutMilliseconds   : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /parallelism [n]       : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
@@ -151,9 +151,24 @@ namespace Chutzpah
                                               }
                     };
 
-                testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
+                if (!commandLine.Discovery)
+                {
+                    testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
+                    ProcessTestSummaryTransformers(commandLine, testResultsSummary);
+                }
+                else
+                {
+                    Console.WriteLine("Test Discovery");
+                    var tests = testRunner.DiscoverTests(commandLine.Files, testOptions).ToList();
+                    Console.WriteLine("\nDiscovered {0} tests", tests.Count);
 
-                ProcessTestSummaryTransformers(commandLine, testResultsSummary);
+                    foreach (var test in tests)
+                    {
+                        Console.WriteLine("Test '{0}' from '{1}'", test.TestName, test.InputTestFile);
+                    }
+                    return 0;
+                }
+
             }
             catch (ArgumentException ex)
             {

@@ -46,6 +46,11 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public Discovery()
+        {
+            ChutzpahTracer.Enabled = false;
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_discover_tests_from_a_js_file(string scriptPath)

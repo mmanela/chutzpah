@@ -42,16 +42,6 @@ namespace Chutzpah.Facts.ConsoleRunner
                 Assert.Equal("Log Message: hello from test.js", _out.ToString().Trim());
             }
 
-            [Fact]
-            public void It_will_not_write_file_log_messages_to_console_when_silen()
-            {
-                var cb = new StandardConsoleRunnerCallback(true, false);
-                var log = new TestLog { InputTestFile = "test.js", Message = "hello" };
-                cb.FileLog(log);
-
-                Assert.Equal("", _out.ToString());
-            }
-
         }
 
         public class TeamCityConsoleRunnerCallbackFacts : ConsoleRedirector

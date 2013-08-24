@@ -88,9 +88,13 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         }
         catch (e) {
             // The message was not a test status object so log as message
-            var log = { type: 'Log', log: { message: message } };
-            writeEvent(log, JSON.stringify(log));
+            rawLog(message);
         }
+    }
+
+    function rawLog(message) {
+        var log = { type: 'Log', log: { message: message } };
+        writeEvent(log, JSON.stringify(log));
     }
 
     function onError(msg, stack) {
@@ -140,9 +144,11 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
         page.evaluate(onInitialized);
     };
-    
 
-    page.onResourceReceived = function (url) {
+
+    page.onResourceReceived = function (res) {
+        rawLog("!!_!! Resource Recieved: " + res.url);
+
         trySetupTestFramework();
     };
 

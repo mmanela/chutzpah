@@ -24,6 +24,7 @@ namespace Chutzpah
     {
         private readonly IJsonSerializer jsonSerializer;
         private readonly Regex prefixRegex = new Regex("^#_#(?<type>[a-z]+)#_#(?<json>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private const string internalLogPrefix = "!!_!!";
 
         // Tracks the last time we got an event/update from phantom. 
         private DateTime lastTestEvent;
@@ -52,12 +53,14 @@ namespace Chutzpah
 
             if (readerTask.IsCompleted)
             {
+                ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.InputTestFile);
+
                 return readerTask.Result;
             }
             else
             {
                 // We timed out so kill the process and return an empty test file summary
-                ChutzpahTracer.TraceError("Test file timed out after running for {0} milliseconds", (DateTime.Now - lastTestEvent).TotalMilliseconds);
+                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.InputTestFile, (DateTime.Now - lastTestEvent).TotalMilliseconds);
 
                 processStream.TimedOut = true;
                 processStream.KillProcess();
@@ -73,13 +76,19 @@ namespace Chutzpah
             string line;
             while ((line = stream.ReadLine()) != null)
             {
-                lastTestEvent = DateTime.Now;
                 if (debugEnabled) Console.WriteLine(line);
 
                 var match = prefixRegex.Match(line);
                 if (!match.Success) continue;
                 var type = match.Groups["type"].Value;
                 var json = match.Groups["json"].Value;
+
+                // Only update last event timestamp if it is an important event.
+                // Log and error could happen even though no test progress is made
+                if (!type.Equals("Log") && !type.Equals("Error"))
+                {
+                    lastTestEvent = DateTime.Now;
+                }
 
                 try
                 {
@@ -118,6 +127,14 @@ namespace Chutzpah
 
                         case "Log":
                             var log = jsonSerializer.Deserialize<JsLog>(json);
+                            
+                            // This is an internal log message
+                            if (log.Log.Message.StartsWith(internalLogPrefix))
+                            {
+                                ChutzpahTracer.TraceInformation("Phantom Log - {0}",log.Log.Message.Substring(internalLogPrefix.Length).Trim());
+                                break;
+                            }
+
                             log.Log.InputTestFile = testContext.InputTestFile;
                             callback.FileLog(log.Log);
                             summary.Logs.Add(log.Log);

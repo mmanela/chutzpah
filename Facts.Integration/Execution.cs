@@ -75,6 +75,7 @@ namespace Chutzpah.Facts.Integration
 
         public Execution()
         {
+            ChutzpahTracer.Enabled = false;
             // Disable caching
             GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = 0;
         }
@@ -700,6 +701,10 @@ namespace Chutzpah.Facts.Integration
 
         public class JasmineDdescribeIit
         {
+            public JasmineDdescribeIit()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
 
             [Fact]
             public void Will_run_jasmine_test_which_uses_iit()
@@ -762,6 +767,11 @@ namespace Chutzpah.Facts.Integration
 
         public class TypeScript
         {
+            public TypeScript()
+            {
+                ChutzpahTracer.Enabled = false;    
+            }
+
             public static IEnumerable<object[]> TypeScriptTests
             {
                 get
@@ -854,6 +864,12 @@ namespace Chutzpah.Facts.Integration
 
         public class AMD
         {
+            public AMD()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
+
+
             [Fact]
             public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
             {
@@ -894,6 +910,7 @@ namespace Chutzpah.Facts.Integration
             public void Will_run_jasmine_require_js_test_where_test_file_uses_requirejs_command()
             {
                 var testRunner = TestRunner.Create();
+                testRunner.EnableDebugMode();
 
                 TestCaseSummary result = testRunner.RunTests(@"JS\Code\RequireJS\all.tests.jasmine.js", new ExceptionThrowingRunnerCallback());
 
@@ -929,6 +946,11 @@ namespace Chutzpah.Facts.Integration
 
         public class ChutzpahSettingsFile
         {
+            public ChutzpahSettingsFile()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
+
             [Fact]
             public void Will_use_settings_file_to_determine_framework()
             {

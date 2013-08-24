@@ -25,15 +25,18 @@
                 ddescribeIitSupport.patch(jasmineEnv);
             }
 
-            var currentWindowOnload = window.onload;
+            // If we are not running in chutzpah then run the tests onload
+            if (!window.chutzpah) {
+                var currentWindowOnload = window.onload;
 
-            window.onload = function () {
-                if (currentWindowOnload) {
-                    currentWindowOnload();
-                }
+                window.onload = function() {
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
 
-                jasmineEnv.execute();
-            };
+                    jasmineEnv.execute();
+                };
+            }
 
         })();
     </script>

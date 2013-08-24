@@ -6,6 +6,13 @@ namespace Chutzpah
 {
     public class ChutzpahTracer
     {
+        public static bool Enabled { get; set; }
+        
+        static ChutzpahTracer()
+        {
+            Enabled = true;
+        }
+
         public static void AddConsoleListener()
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
@@ -21,7 +28,7 @@ namespace Chutzpah
 
         public static void TraceInformation(string messageFormat, params object[] args)
         {
-            if (Trace.Listeners.Count <= 0) return;
+            if (!Enabled || Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, args);
             Trace.TraceInformation(message);
@@ -29,7 +36,7 @@ namespace Chutzpah
 
         public static void TraceWarning(string messageFormat, params object[] args)
         {
-            if (Trace.Listeners.Count <= 0) return;
+            if (!Enabled || Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, args);
             Trace.TraceWarning(message);
@@ -37,7 +44,7 @@ namespace Chutzpah
 
         public static void TraceError(string messageFormat, params object[] args)
         {
-            if (Trace.Listeners.Count <= 0) return;
+            if (!Enabled || Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, args);
             Trace.TraceError(message);
@@ -60,7 +67,7 @@ namespace Chutzpah
         {
             var innerMessage = args != null && args.Length > 0 ? string.Format(innerMessageFormat, args) : innerMessageFormat;
 
-            var messageFormat = exception == null ? "Time:{0}; Thread:{1}; Message:{2}" 
+            var messageFormat = exception == null ? "Time:{0}; Thread:{1}; Message:{2}"
                                                   : "Time:{0}; Thread:{1}; Message:{2}, Exception:{3}";
 
             var message = string.Format(messageFormat,

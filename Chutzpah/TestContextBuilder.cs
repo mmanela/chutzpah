@@ -20,10 +20,10 @@ namespace Chutzpah
         private const string TestFileFolder = "TestFiles";
 
         private readonly Regex JsReferencePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
+            new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
                       RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex JsTemplatePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*template\s+path\s*=\s*[""'](?<Path>[^""<>|]+)[""']\s*/>",
+            new Regex(@"^\s*(///|##)\s*<\s*template\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""']\s*/>",
                       RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly IFileProbe fileProbe;
@@ -106,7 +106,7 @@ namespace Chutzpah
                 // For HTML test files we don't need to create a test harness to just return this file
                 if (testFileKind == PathType.Html || testFileKind == PathType.Url)
                 {
-                    ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the suplied test harness and not building our own", testFileKind);
+                    ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the supplied test harness and not building our own", testFileKind);
                     return new TestContext
                         {
                             InputTestFile = testFilePath,
@@ -162,6 +162,7 @@ namespace Chutzpah
             foreach (string item in deps)
             {
                 string sourcePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, item)).FullPath;
+                ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
                 referencedFiles.Add(new ReferencedFile {IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath});
             }
         }
@@ -411,6 +412,7 @@ namespace Chutzpah
                     }
                     else if (referenceUri.IsAbsoluteUri)
                     {
+                        ChutzpahTracer.TraceInformation("Added url '{0}' to referenced files", referencePath);
                         referencedFiles.Add(new ReferencedFile { Path = referencePath, IsLocal = false });
                     }
                 }
@@ -425,6 +427,8 @@ namespace Chutzpah
                 string absoluteFilePath = fileProbe.FindFilePath(relativeReferencePath);
                 if (referencedFiles.All(r => r.Path != absoluteFilePath))
                 {
+
+                    ChutzpahTracer.TraceInformation("Added html template '{0}' to referenced files", absoluteFilePath);
                     referencedFiles.Add(new ReferencedFile { Path = absoluteFilePath, IsLocal = false });
                 }
             }
@@ -460,6 +464,8 @@ namespace Chutzpah
             // If the file doesn't exit exist or we have seen it already then return
             if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;
 
+
+            ChutzpahTracer.TraceInformation("Added local file '{0}' to referenced files", absoluteFilePath);
             var referencedFile = new ReferencedFile { Path = absoluteFilePath, IsLocal = true };
             referencedFiles.Add(referencedFile);
             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops

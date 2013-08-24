@@ -8,6 +8,11 @@ namespace Chutzpah.Facts.Integration
 {
     public class Coverage
     {
+        public Coverage()
+        {
+            ChutzpahTracer.Enabled = false;
+        }
+
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
         private const string ACoffeeTestScript = @"JS\Test\basic-jasmine.coffee";
 

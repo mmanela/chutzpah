@@ -6,17 +6,24 @@
 
     phantom.injectJs('chutzpahRunner.js');
 
-    function onInitialized() { }
+    function onInitialized() {
+        console.log("!!_!! onInitialized");
+    }
 
     function isTestingDone() {
+        console.log("!!_!! isTestingDone");
         return window.chutzpah.isTestingFinished === true;
     }
-    
+
     function isJamineLoaded() {
+        console.log("!!_!! isJasmineLoaded");
         return window.jasmine;
     }
-    
+
     function onJasmineLoaded() {
+
+        console.log("!!_!! onJasmineLoaded");
+
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -53,7 +60,7 @@
             self.reportRunnerStarting = function (runner) {
                 // Must patch late since a HTML runner probably adds its on specFilter.
                 patchDdescribeIitSupport();
-                
+
                 fileStartTime = new Date().getTime();
 
                 // Testing began
@@ -149,22 +156,35 @@
     }
 
     function onPageLoaded() {
+        console.log("!!_!! onPageLoaded");
+
         var _cachedWindowLoad = window.onload;
-        window.onload = function () {
+      
+        function startJasmine() {
+	        console.log("!!_!! Starting Jasmine...");
+                
+	        var jasmineEnv = jasmine.getEnv();
+	        var runner = jasmineEnv.currentRunner();
+
+	        // Check if runner hasn't been executed
+	        // If so, run it
+	        if (!runner.queue.running && runner.queue.index <= 0) {
+	            jasmineEnv.execute();
+	        }
+                
+        }
+
+        window.onload = function() {
             if (_cachedWindowLoad) {
                 _cachedWindowLoad();
             }
-            
-            var jasmineEnv = jasmine.getEnv();
-            var runner = jasmineEnv.currentRunner();
 
-            // Check if runner hasn't been executed
-            // If so, run it
-            if (!runner.queue.running && runner.queue.index <= 0) {
-                jasmineEnv.execute();
-            }
+            startJasmine();
         };
+
+
     }
+
 
     try {
         chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);

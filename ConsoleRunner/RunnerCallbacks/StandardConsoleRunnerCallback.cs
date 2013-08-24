@@ -29,15 +29,12 @@ namespace Chutzpah.RunnerCallbacks
             {
                 haveConsole = false;
             }
-            
+
         }
 
         public override void FileLog(TestLog log)
         {
-            if (!silent)
-            {
-                Console.WriteLine(GetFileLogMessage(log));
-            }
+            Console.WriteLine(GetFileLogMessage(log));
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
@@ -72,7 +69,7 @@ namespace Chutzpah.RunnerCallbacks
         }
 
         protected override void TestFailed(TestCase testCase)
-        {            
+        {
             ClearCounter();
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -85,7 +82,7 @@ namespace Chutzpah.RunnerCallbacks
         }
 
         protected override string GetTestFailureLocationString(TestCase testCase)
-        {            
+        {
             if (vsoutput)
             {
                 var s = String.Empty;

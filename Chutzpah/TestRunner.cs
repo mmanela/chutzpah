@@ -52,7 +52,6 @@ namespace Chutzpah
         public void EnableDebugMode()
         {
             m_debugEnabled = true;
-            ChutzpahTracer.AddConsoleListener();
 
         }
 
@@ -159,10 +158,12 @@ namespace Chutzpah
                     {
                         if (options.OpenInBrowser)
                         {
+                            ChutzpahTracer.TraceInformation("Launching test harness '{0}' for file '{1}' in a browser", testContext.TestHarnessPath, testContext.InputTestFile);
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
                         else
                         {
+                            ChutzpahTracer.TraceInformation("Invoking test runner on  test harness '{0}' for file '{1}'", testContext.TestHarnessPath, testContext.InputTestFile);
                             var testSummary = InvokeTestRunner(headlessBrowserPath,
                                                                options,
                                                                testContext,
@@ -174,6 +175,7 @@ namespace Chutzpah
 
                         if (!m_debugEnabled && !options.OpenInBrowser)
                         {
+                            ChutzpahTracer.TraceInformation("Cleaning up test context artifacts");
                             // Don't clean up context if in debug mode
                             testContextBuilder.CleanupContext(testContext);
                         }
