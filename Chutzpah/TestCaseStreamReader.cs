@@ -54,7 +54,6 @@ namespace Chutzpah
             if (readerTask.IsCompleted)
             {
                 ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.InputTestFile);
-
                 return readerTask.Result;
             }
             else
