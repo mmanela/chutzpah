@@ -35,7 +35,7 @@ namespace Chutzpah.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true)]
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
-    [InstalledProductRegistration("#110", "#112", "2.4.3", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "2.5.0", IconResourceID = 400)]
     [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]

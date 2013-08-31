@@ -8,6 +8,30 @@
 
     function onInitialized() {
         console.log("!!_!! onInitialized");
+
+        var _cachedWindowLoad = window.onload;
+
+        function startJasmine() {
+            console.log("!!_!! Starting Jasmine...");
+
+            var jasmineEnv = jasmine.getEnv();
+            var runner = jasmineEnv.currentRunner();
+
+            // Check if runner hasn't been executed
+            // If so, run it
+            if (!runner.queue.running && runner.queue.index <= 0) {
+                jasmineEnv.execute();
+            }
+
+        }
+
+        window.onload = function () {
+            if (_cachedWindowLoad) {
+                _cachedWindowLoad();
+            }
+
+            startJasmine();
+        };
     }
 
     function isTestingDone() {
@@ -157,32 +181,6 @@
 
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
-
-        var _cachedWindowLoad = window.onload;
-      
-        function startJasmine() {
-	        console.log("!!_!! Starting Jasmine...");
-                
-	        var jasmineEnv = jasmine.getEnv();
-	        var runner = jasmineEnv.currentRunner();
-
-	        // Check if runner hasn't been executed
-	        // If so, run it
-	        if (!runner.queue.running && runner.queue.index <= 0) {
-	            jasmineEnv.execute();
-	        }
-                
-        }
-
-        window.onload = function() {
-            if (_cachedWindowLoad) {
-                _cachedWindowLoad();
-            }
-
-            startJasmine();
-        };
-
-
     }
 
 

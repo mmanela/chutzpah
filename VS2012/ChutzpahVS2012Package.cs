@@ -26,7 +26,7 @@ namespace Chutzpah.VS2012
     [ProvideOptionPage(typeof (ChutzpahUTESettings), "Chutzpah", "Chutzpah Test Adapter Settings", 115, 116, true)]
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
-    [InstalledProductRegistration("#110", "#112", "2.4.3", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "2.5.0", IconResourceID = 400)]
     [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
     [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
     [Guid(GuidList.guidVS2012ChutzpahPkgString)]
