@@ -1,22 +1,38 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Mocha Runner</title>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
     @@TestFrameworkDependencies@@
     @@ReferencedCSSFiles@@
-    @@TestHtmlTemplateFiles@@
+    
+    <script type="text/javascript">
+        mocha.setup('bdd');
+    </script>
+    <script>
+        function assert(expr, msg) {
+            if (!expr) throw new Error(msg || 'failed');
+        }
+    </script>
+
     @@ReferencedJSFiles@@
     @@TestJSFile@@
-    <script type="text/javascript">      
-        (function () {
-            if (!window.chutzpah) {
-                mocha.run();
-            }
-        })();
-    </script>
 </head>
 <body>
     <div id="mocha"></div>
+    <script type="text/javascript">
+
+        var currentWindowOnload = window.onload;
+        window.onload = function () {
+            if (currentWindowOnload) {
+                currentWindowOnload();
+            }
+
+            //mocha.checkLeaks();
+            //mocha.globals(['jQuery']);
+            mocha.run();
+        };
+
+    </script>
 </body>
 </html>

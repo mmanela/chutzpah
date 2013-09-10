@@ -180,6 +180,12 @@ namespace Chutzpah.Coverage
                                                       {
                                                           BlanketScriptName = "blanket_qunit.js"
                                                       }
+                        },
+                    {
+                        typeof (MochaDefinition), new FrameworkSpecificInfo
+                                                      {
+                                                          BlanketScriptName = "blanket_mocha.js"
+                                                      }
                         }
                 };
 

@@ -103,6 +103,8 @@
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
+    <Compile Include="FileProcessors\IMochaReferencedFileProcessor.cs" />
+    <Compile Include="FileProcessors\MochaLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IQUnitReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
