@@ -197,10 +197,18 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Compilers\TypeScript\lib.d.ts" />
+    <Content Include="JSRunners\Copy of mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JSRunners\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Coverage\blanket_jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Coverage\blanket_mocha.js" />
+    <Content Include="TestFiles\Coverage\blanket_mocha.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Coverage\blanket_qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -227,9 +235,15 @@
     <Content Include="TestFiles\Jasmine\jasmine.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Mocha\mocha.css" />
-    <Content Include="TestFiles\Mocha\mocha.html" />
-    <Content Include="TestFiles\Mocha\mocha.js" />
+    <Content Include="TestFiles\Mocha\mocha.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\QUnit\qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
