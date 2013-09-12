@@ -1,4 +1,5 @@
-﻿using System.Data.SqlTypes;
+﻿using System;
+using System.Data.SqlTypes;
 
 namespace Chutzpah.FrameworkDefinitions
 {
@@ -51,5 +52,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// </summary>
         /// <param name="referencedFile">A referenced file to process.</param>
         void Process(ReferencedFile referencedFile);
+
+        IEnumerable<Tuple<string, string>> GetFrameworkReplacements(string testFilePath, string testFileText);
     }
 }

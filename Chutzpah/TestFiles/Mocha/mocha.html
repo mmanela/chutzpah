@@ -5,34 +5,20 @@
     <title>Mocha Tests</title>
     @@TestFrameworkDependencies@@
     @@ReferencedCSSFiles@@
-    
-    <script type="text/javascript">
-        mocha.setup('bdd');
-    </script>
-    <script>
-        function assert(expr, msg) {
-            if (!expr) throw new Error(msg || 'failed');
-        }
-    </script>
-
     @@ReferencedJSFiles@@
+    <script type="text/javascript">mocha.setup('@@MochaUi@@');</script>
     @@TestJSFile@@
 </head>
 <body>
     <div id="mocha"></div>
     <script type="text/javascript">
-
         var currentWindowOnload = window.onload;
         window.onload = function () {
             if (currentWindowOnload) {
                 currentWindowOnload();
             }
-
-            //mocha.checkLeaks();
-            //mocha.globals(['jQuery']);
             mocha.run();
         };
-
     </script>
 </body>
 </html>

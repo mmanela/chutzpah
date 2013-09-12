@@ -107,12 +107,13 @@ namespace Chutzpah
                 if (testFileKind == PathType.Html || testFileKind == PathType.Url)
                 {
                     ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the supplied test harness and not building our own", testFileKind);
+                    
                     return new TestContext
                         {
                             InputTestFile = testFilePath,
                             TestHarnessPath = testFilePath,
                             IsRemoteHarness = testFileKind == PathType.Url,
-                            TestRunner = definition.TestRunner
+                            TestRunner = definition.TestRunner,
                         };
                 }
 
@@ -317,7 +318,6 @@ namespace Chutzpah
 
             string templatePath = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
-
             var harness = new TestHarness(referencedFiles, fileSystem);
 
             if (coverageEngine != null)
@@ -325,7 +325,10 @@ namespace Chutzpah
                 coverageEngine.PrepareTestHarnessForCoverage(harness, definition);
             }
 
-            string testHtmlText = harness.CreateHtmlText(testHtmlTemplate);
+            string testFileContents = fileSystem.GetText(inputTestFilePath);
+            IEnumerable<Tuple<string, string>> frameworkReplacements = definition.GetFrameworkReplacements(inputTestFilePath, testFileContents);
+
+            string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
         }

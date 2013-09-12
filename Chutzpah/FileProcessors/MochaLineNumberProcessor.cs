@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Chutzpah.FileProcessors
 {
@@ -32,13 +30,13 @@ namespace Chutzpah.FileProcessors
 
             var coffeeScriptTestPatterns = new[] {
                 RegexPatterns.MochaBddTestRegexCoffeeScript,
-                RegexPatterns.MochaTddTestRegexCoffeeScript,
+                RegexPatterns.MochaTddOrQunitTestRegexCoffeeScript,
                 RegexPatterns.MochaExportsTestRegexCoffeeScript
             };
 
             var javaScriptTestPatterns = new[] {
                 RegexPatterns.MochaBddTestRegexJavaScript,
-                RegexPatterns.MochaTddTestRegexJavaScript,
+                RegexPatterns.MochaTddOrQunitTestRegexJavaScript,
                 RegexPatterns.MochaExportsTestRegexJavaScript
             };
 

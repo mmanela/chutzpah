@@ -27,7 +27,7 @@ namespace Chutzpah
             CleanupTestHarness();
         }
 
-        public string CreateHtmlText(string testHtmlTemplate)
+        public string CreateHtmlText(string testHtmlTemplate, IEnumerable<Tuple<string, string>> frameworkReplacements)
         {
             var testJsReplacement = new StringBuilder();
             var testFrameworkDependencies = new StringBuilder();
@@ -41,13 +41,16 @@ namespace Chutzpah
                                referenceJsReplacement,
                                referenceHtmlTemplateReplacement);
 
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestHtmlTemplateFiles@@", referenceHtmlTemplateReplacement.ToString());
+            var replacements = new[]
+            {
+                Tuple.Create("TestFrameworkDependencies", testFrameworkDependencies.ToString()),
+                Tuple.Create("TestJSFile", testJsReplacement.ToString()),
+                Tuple.Create("ReferencedJSFiles", referenceJsReplacement.ToString()),
+                Tuple.Create("ReferencedCSSFiles", referenceCssReplacement.ToString()),
+                Tuple.Create("TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString())
+            };
 
-            return testHtmlTemplate;
+            return replacements.Union(frameworkReplacements).Aggregate(testHtmlTemplate, (c, r) => c.Replace("@@" + r.Item1 + "@@", r.Item2));
         }
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)
