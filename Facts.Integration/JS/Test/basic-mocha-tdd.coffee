@@ -1,21 +1,24 @@
 ﻿## <reference path="mocha.js" />
+## <reference path="chai.js" />
 ## <reference path="../code/code.coffee" />
 
+assert = chai.assert
+
 test "A basic test", ->
-  ok true, "this test is fine"
+  assert.ok true
   value = "hello"
-  equal "hello", value, "We expect value to be hello"
+  assert.equal value, "hello"
 
-module "stringLib"
-test "will get vowel count", ->
-  count = stringLib.vowels("hello")
-  equal count, 2, "We expect 2 vowels in hello"
+suite "stringLib", ->
+    test "will get vowel count", ->
+      count = stringLib.vowels "hello"
+      assert.equal count, 2
 
-module "mathLib"
-test "will add 5 to number", ->
-  res = mathLib.add5(10)
-  equal res, 15, "should add 5"
+suite "mathLib", ->
+    test "will add 5 to number", ->
+      res = mathLib.add5 10
+      assert.equal res, 15
 
-test "will multiply 5 to number", ->
-  res = mathLib.mult5(10)
-  equal res, 55, "should multiply by 5"
+    test "will multiply 5 to number", ->
+      res = mathLib.mult5 10
+      assert.equal res, 55

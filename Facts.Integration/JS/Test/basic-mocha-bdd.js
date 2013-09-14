@@ -1,32 +1,32 @@
 /// <reference path="mocha.js" />
+/// <reference path="chai.js" />
 /// <reference path="../code/code.coffee" />
 
-describe("general", function () {
-    it("A basic test", function () {
-        expect(true).toBeTruthy();
+var expect = chai.expect;
+
+describe("general", function() {
+    it("A basic test", function() {
+        expect(true).to.be.ok;
         var value = "hello";
-        expect("hello").toEqual(value);
+        expect(value).to.equal("hello");
     });
 });
 
-describe("stringLib", function () {
-    it("will get vowel count", function () {
+describe("stringLib", function() {
+    it("will get vowel count", function() {
         var count = stringLib.vowels("hello");
-        expect(count).toEqual(2);
+        expect(count).to.equal(2);
     });
 });
 
-describe("mathLib", function () {
-    beforeEach(function () {
-        console.log("beforeEach");
-    });
+describe("mathLib", function() {
     it("will add 5 to number", function () {
         var res = mathLib.add5(10);
-        expect(res).toEqual(15);
+        expect(res).to.equal(15);
     });
 
     it("will multiply 5 to number", function () {
         var res = mathLib.mult5(10);
-        expect(res).toEqual(55);
+        expect(res).to.equal(55);
     });
 });

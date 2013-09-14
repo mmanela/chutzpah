@@ -1,30 +1,30 @@
 ﻿/// <reference path="mocha.js" />
+/// <reference path="chai.js" />
 /// <reference path="../code/code.js" />
 
- test("A basic test", function () {
-      ok(true, "this test is fine");
-      var value = "hello";
-      equal("hello", value, "We expect value to be hello");
-  });
+var assert = chai.assert;
 
-  module("stringLib");
+test("A basic test", function () {
+    assert.ok(true);
+    var value = "hello";
+    assert.equal(value, "hello");
+});
 
-  test("will get vowel count", function () {
-      var count = stringLib.vowels("hello");
+suite("stringLib", function() {
+    test("will get vowel count", function () {
+        var count = stringLib.vowels("hello");
+        assert.equal(count, 2);
+    });
+});
 
-      equal(count, 2, "We expect 2 vowels in hello");
-  });
+suite("mathLib", function() {
+    test("will add 5 to number", function () {
+        var res = mathLib.add5(10);
+        assert.equal(res, 15);
+    });
 
-  module("mathLib");
-
-  test("will add 5 to number", function () {
-      var res = mathLib.add5(10);
-
-      equal(res, 15, "should add 5");
-  });
-
-  test("will multiply 5 to number", function () {
-      var res = mathLib.mult5(10);
-
-      equal(res, 55, "should multiply by 5");
-  });
+    test("will multiply 5 to number", function () {
+        var res = mathLib.mult5(10);
+        assert.equal(res, 55);
+    });
+});

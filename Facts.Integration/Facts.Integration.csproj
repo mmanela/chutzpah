@@ -82,6 +82,7 @@
     <Content Include="JS\Test\calcMocha.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\chai.js" />
     <Content Include="JS\Test\HtmlTemplate\template.tmpl.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
