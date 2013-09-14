@@ -18,16 +18,28 @@
             console.log(JSON.stringify(obj));
         }
 
+        function discoverTests(suite) {
+            suite.tests.forEach(function (test) {
+                var testCase = { moduleName: suite.fullTitle(), testName: test.title };
+                log({ type: "TestDone", testCase: testCase });
+            });
+
+            suite.suites.forEach(discoverTests);
+        }
+
+        if (chutzpah.testMode === 'discovery') {
+            window.mocha.run = function () {
+                discoverTests(window.mocha.suite);
+            };
+            return;
+        }
+
         var chutzpahMochaReporter = function (runner) {
             var startTime = null,
                 activeTestCase = null,
                 passed = 0,
                 failed = 0,
                 skipped = 0;
-
-            if (chutzpah.testMode === 'discovery') {
-                runner.runTest = function(fn) { fn(); };
-            }
 
             runner.on('start', function () {
                 startTime = new Date();
@@ -83,7 +95,7 @@
                 passed++;
                 activeTestCase.testResults.push({ passed: true });
             });
-           
+
             runner.on('fail', function (test, err) {
                 failed++;
 
@@ -96,7 +108,7 @@
 
             runner.on('pending', function (test) {
                 skipped++;
-                
+
             });
         };
 
