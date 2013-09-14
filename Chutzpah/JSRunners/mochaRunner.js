@@ -71,7 +71,6 @@
 
             runner.on('test end', function (test) {
                 activeTestCase.timetaken = test.duration;
-
                 log({ type: "TestDone", testCase: activeTestCase });
             });
 
@@ -80,10 +79,12 @@
 
             runner.on('pass', function (test) {
                 passed++;
+                activeTestCase.testResults.push({ passed: true });
             });
-
+           
             runner.on('fail', function (test, err) {
                 failed++;
+                activeTestCase.testResults.push({passed: false,stackTrace: err.stack});
             });
 
             runner.on('pending', function (test) {
