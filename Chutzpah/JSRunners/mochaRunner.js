@@ -26,7 +26,7 @@
                 skipped = 0;
 
             if (chutzpah.testMode === 'discovery') {
-                runner.runTest = function() {};
+                runner.runTest = function(fn) { fn(); };
             }
 
             runner.on('start', function () {
