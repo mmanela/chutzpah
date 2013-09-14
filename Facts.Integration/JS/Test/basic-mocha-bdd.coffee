@@ -4,11 +4,10 @@
 
 expect = chai.expect
 
-describe "general", ->
-    it "A basic test", ->
-        expect(true).to.be.ok
-        value = "hello"
-        expect(value).to.equal "hello"
+it "A basic test", ->
+    expect(true).to.be.ok
+    value = "hello"
+    expect(value).to.equal "hello"
   
 describe "stringLib", ->
     it "will get vowel count", ->

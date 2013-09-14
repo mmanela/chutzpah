@@ -4,12 +4,10 @@
 
 var expect = chai.expect;
 
-describe("general", function() {
-    it("A basic test", function() {
-        expect(true).to.be.ok;
-        var value = "hello";
-        expect(value).to.equal("hello");
-    });
+it("A basic test", function() {
+    expect(true).to.be.ok;
+    var value = "hello";
+    expect(value).to.equal("hello");
 });
 
 describe("stringLib", function() {
