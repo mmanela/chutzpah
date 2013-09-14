@@ -18,10 +18,6 @@
             console.log(JSON.stringify(obj));
         }
 
-        if (chutzpah.testMode === 'discovery') {
-            // not quite sure here.
-        }
-
         var chutzpahMochaReporter = function (runner) {
             var startTime = null,
                 activeTestCase = null,
@@ -29,6 +25,9 @@
                 failed = 0,
                 skipped = 0;
 
+            if (chutzpah.testMode === 'discovery') {
+                runner.runTest = function() {};
+            }
 
             runner.on('start', function () {
                 startTime = new Date();
@@ -70,6 +69,9 @@
             });
 
             runner.on('test end', function (test) {
+                if (test.pending) {
+                    return;
+                }
                 activeTestCase.timetaken = test.duration;
                 log({ type: "TestDone", testCase: activeTestCase });
             });
@@ -84,11 +86,17 @@
            
             runner.on('fail', function (test, err) {
                 failed++;
-                activeTestCase.testResults.push({passed: false,stackTrace: err.stack});
+
+                activeTestCase.testResults.push({
+                    passed: false,
+                    stackTrace: err.stack ? err.stack.split("\n").slice(1).join("\n") : null,
+                    message: err.message
+                });
             });
 
             runner.on('pending', function (test) {
                 skipped++;
+                
             });
         };
 
