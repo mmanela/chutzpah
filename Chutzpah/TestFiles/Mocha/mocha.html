@@ -6,19 +6,15 @@
     @@TestFrameworkDependencies@@
     @@ReferencedCSSFiles@@
     @@ReferencedJSFiles@@
-    <script type="text/javascript">mocha.setup('@@MochaUi@@');</script>
+    <script type="text/javascript">
+        mocha.setup('@@MochaUi@@');
+    </script>
     @@TestJSFile@@
 </head>
 <body>
     <div id="mocha"></div>
     <script type="text/javascript">
-        var currentWindowOnload = window.onload;
-        window.onload = function () {
-            if (currentWindowOnload) {
-                currentWindowOnload();
-            }
-            mocha.run();
-        };
+        mocha.run();
     </script>
 </body>
 </html>
