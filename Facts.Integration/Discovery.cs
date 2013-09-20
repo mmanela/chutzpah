@@ -15,7 +15,8 @@ namespace Chutzpah.Facts.Integration
                 return new object[][]
                 {
                     new object[] { @"JS\Test\basic-qunit.js" },
-                    new object[] { @"JS\Test\basic-jasmine.js" }
+                    new object[] { @"JS\Test\basic-jasmine.js" },
+                    new object[] { @"JS\Test\basic-mocha-bdd.js" }, 
                 };
             }
         }
@@ -28,7 +29,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                 {
                     new object[] { @"JS\Test\basic-qunit.coffee" },
-                    new object[] { @"JS\Test\basic-jasmine.coffee" }
+                    new object[] { @"JS\Test\basic-jasmine.coffee" },
+                    new object[] { @"JS\Test\basic-mocha-bdd.coffee" }
                 };
             }
         }
@@ -70,7 +72,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
             var result = testRunner.DiscoverTests(scriptPath);
-
+            
             Assert.Equal(4, result.Count());
             Assert.Equal("A basic test", result.ElementAt(0).TestName);
             Assert.Equal("will multiply 5 to number", result.ElementAt(3).TestName);
