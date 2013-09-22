@@ -29,7 +29,8 @@ namespace Chutzpah.Models
         public ChutzpahTestSettingsFile()
         {
             CodeCoverageIncludes = new List<string>();
-            CodeCoverageExcludes = new List<string>();    
+            CodeCoverageExcludes = new List<string>();
+            References = new List<ConditionalFileRefrence>();
         }
 
 
@@ -80,6 +81,11 @@ namespace Chutzpah.Models
         /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
         /// </summary>
         public ICollection<string> CodeCoverageExcludes { get; set; }
+
+        /// <summary>
+        /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
+        /// </summary>
+        public ICollection<ConditionalFileRefrence> References { get; set; }
 
         /// <summary>
         /// The path to the settings file

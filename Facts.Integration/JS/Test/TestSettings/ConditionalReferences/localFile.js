@@ -1,0 +1,1 @@
+﻿globalValue = "expected value";

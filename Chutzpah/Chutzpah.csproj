@@ -125,6 +125,7 @@
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
+    <Compile Include="Models\ConditionalFileRefrence.cs" />
     <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\ChutzpahTestSettingsFile.cs" />
     <Compile Include="Models\FilePosition.cs" />
@@ -214,6 +215,12 @@
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
     <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
     <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
+    <Content Include="TestFiles\IncludedLibraries\chai.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\IncludedLibraries\expect.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Jasmine\jasmine-ddescribe-iit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Chutzpah.Coverage;
 using Chutzpah.Extensions;
@@ -34,6 +32,7 @@ namespace Chutzpah
         private readonly IHasher hasher;
         private readonly ICoverageEngine mainCoverageEngine;
         private readonly IJsonSerializer serializer;
+        private readonly Dictionary<string, string> includedLibraries; 
 
         public TestContextBuilder(IFileSystemWrapper fileSystem,
                                   IHttpWrapper httpWrapper,
@@ -52,6 +51,12 @@ namespace Chutzpah
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
             mainCoverageEngine = coverageEngine;
+
+            includedLibraries = new Dictionary<string, string>
+            {
+                {"chai", @"IncludedLibraries\chai.js"},
+                {"expect", @"IncludedLibraries\expect.js"}
+            };
         }
 
         public TestContext BuildContext(string file, TestOptions options)
@@ -133,6 +138,8 @@ namespace Chutzpah
 
                 AddTestFrameworkDependencies(deps, referencedFiles);
 
+                AddConditionalReferences(testFilePath, testFileText, chutzpahTestSettings, referencedFiles);
+
                 string testHtmlFilePath = CreateTestHarness(definition,
                                                             chutzpahTestSettings,
                                                             testFilePath,
@@ -156,6 +163,48 @@ namespace Chutzpah
             }
 
             return null;
+        }
+
+        private void AddConditionalReferences(string testFilePath, string testFileText, ChutzpahTestSettingsFile chutzpahTestSettings, List<ReferencedFile> referencedFiles)
+        {
+            foreach (var settingsReference in chutzpahTestSettings.References)
+            {
+                var include = settingsReference.Include;
+
+                if (!string.IsNullOrEmpty(settingsReference.PathPattern) && 
+                    !Regex.IsMatch(testFilePath, settingsReference.PathPattern))
+                {
+                    ChutzpahTracer.TraceInformation("Skipping conditional reference '{0}' for path mismatch", include);
+                    continue;   
+                }
+
+                if (!string.IsNullOrEmpty(settingsReference.ContentPattern) && 
+                    !Regex.IsMatch(testFileText, settingsReference.ContentPattern))
+                {
+                    ChutzpahTracer.TraceInformation("Skipping conditional reference '{0}' for contents mismatch", include);
+                    continue;   
+                }
+
+                var referencedFile = new ReferencedFile
+                {
+                    IsTestFrameworkDependency = false
+                };
+
+                string internalReference;
+                if (includedLibraries.TryGetValue(include.ToLower(), out internalReference))
+                {
+                    referencedFile.Path = fileProbe.GetPathInfo(Path.Combine(TestFileFolder, internalReference)).FullPath;
+                    referencedFile.IsLocal = false;
+                }
+                else
+                {
+                    referencedFile.Path = fileProbe.GetPathInfo(Path.Combine(chutzpahTestSettings.SettingsFileDirectory, include)).FullPath;
+                    referencedFile.IsLocal = true;
+                }
+
+                ChutzpahTracer.TraceInformation("Added conditional reference '{0}' to referenced files", referencedFile.Path);
+                referencedFiles.Add(referencedFile);
+            }
         }
 
         private void AddTestFrameworkDependencies(IEnumerable<string> deps, List<ReferencedFile> referencedFiles)
@@ -366,6 +415,7 @@ namespace Chutzpah
                                                          ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             var referencedFiles = new List<ReferencedFile>();
+
             Regex regex = JsReferencePathRegex;
             foreach (Match match in regex.Matches(textToParse))
             {
