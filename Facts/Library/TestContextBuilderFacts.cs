@@ -71,7 +71,8 @@ namespace Chutzpah.Facts
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
-
+    @@CustomReplacement1@@
+    @@CustomReplacement2@@
 </head>
 <body><div id=""qunit-fixture""></div></body></html>
 
@@ -851,6 +852,41 @@ namespace Chutzpah.Facts
                 Assert.Contains(styleStatement, text);
                 Assert.DoesNotContain("@@ReferencedCSSFiles@@", text);
             }
+
+            [Fact]
+            public void Will_replace_custom_framework_placeholders_with_contents_from_framwork_definition()
+            {
+                TestableTestContextBuilder creator = new TestableTestContextBuilder();
+                string text = null;
+                
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Returns(string.Empty);
+
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.GetPathInfo("test.js"))
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+
+                creator.Mock<IFrameworkDefinition>()
+                    .Setup(x => x.GetFrameworkReplacements(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(new Dictionary<string, string>
+                        {
+                            {"CustomReference1", "CustomReplacement1"},
+                            {"CustomReference2", "CustomReplacement2"}
+                        });
+
+                creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+
+                Assert.DoesNotContain("@@CustomReference1@@", text);
+                Assert.DoesNotContain("@@CustomReference2@@", text);
+                Assert.Contains("CustomReplacement1", text);
+                Assert.Contains("CustomReplacement2", text);
+            }
+
 
             [Fact]
             public void Will_not_copy_referenced_path_if_not_a_file()

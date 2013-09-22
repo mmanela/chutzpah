@@ -106,9 +106,9 @@ namespace Chutzpah.FrameworkDefinitions
             }
         }
 
-        public virtual IEnumerable<Tuple<string, string>> GetFrameworkReplacements(string testFilePath, string testFileText)
+        public virtual Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText)
         {
-            return Enumerable.Empty<Tuple<string, string>>();
+            return new Dictionary<string, string>();
         }
     }
 }

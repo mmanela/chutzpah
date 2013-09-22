@@ -375,7 +375,8 @@ namespace Chutzpah
             }
 
             string testFileContents = fileSystem.GetText(inputTestFilePath);
-            IEnumerable<Tuple<string, string>> frameworkReplacements = definition.GetFrameworkReplacements(inputTestFilePath, testFileContents);
+            var frameworkReplacements = definition.GetFrameworkReplacements(inputTestFilePath, testFileContents)
+                ?? new Dictionary<string, string>();
 
             string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);
             fileSystem.Save(testHtmlFilePath, testHtmlText);

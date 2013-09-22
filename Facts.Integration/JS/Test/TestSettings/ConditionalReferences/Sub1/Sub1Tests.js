@@ -5,7 +5,7 @@
 
     var expect = chai.expect;
 
-    it("should have referenced someLib", function () {
+    it("should have referenced someLib in settings relative folder", function () {
         expect(someLib).to.exist;
         expect(someLib.hello()).to.equal("Hello there");
     });

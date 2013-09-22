@@ -27,7 +27,7 @@ namespace Chutzpah
             CleanupTestHarness();
         }
 
-        public string CreateHtmlText(string testHtmlTemplate, IEnumerable<Tuple<string, string>> frameworkReplacements)
+        public string CreateHtmlText(string testHtmlTemplate, Dictionary<string, string> frameworkReplacements)
         {
             var testJsReplacement = new StringBuilder();
             var testFrameworkDependencies = new StringBuilder();
@@ -41,16 +41,23 @@ namespace Chutzpah
                                referenceJsReplacement,
                                referenceHtmlTemplateReplacement);
 
-            var replacements = new[]
+            var replacements = new Dictionary<string, string>
             {
-                Tuple.Create("TestFrameworkDependencies", testFrameworkDependencies.ToString()),
-                Tuple.Create("TestJSFile", testJsReplacement.ToString()),
-                Tuple.Create("ReferencedJSFiles", referenceJsReplacement.ToString()),
-                Tuple.Create("ReferencedCSSFiles", referenceCssReplacement.ToString()),
-                Tuple.Create("TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString())
+                {"TestFrameworkDependencies", testFrameworkDependencies.ToString()},
+                {"TestJSFile", testJsReplacement.ToString()},
+                {"ReferencedJSFiles", referenceJsReplacement.ToString()},
+                {"ReferencedCSSFiles", referenceCssReplacement.ToString()},
+                {"TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString()}
             };
 
-            return replacements.Union(frameworkReplacements).Aggregate(testHtmlTemplate, (c, r) => c.Replace("@@" + r.Item1 + "@@", r.Item2));
+            var testHtmlStringBuilder = new StringBuilder(testHtmlTemplate);
+            
+            foreach (var replacement in replacements.Union(frameworkReplacements))
+            {
+                testHtmlStringBuilder.Replace("@@" + replacement.Key + "@@", replacement.Value);
+            }
+
+            return testHtmlStringBuilder.ToString();
         }
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)

@@ -92,11 +92,12 @@ namespace Chutzpah.FrameworkDefinitions
             return "bdd";
         }
 
-        public override IEnumerable<Tuple<string, string>> GetFrameworkReplacements(string testFilePath, string testFileText)
+        public override Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText)
         {
-            string interfaceType = GetInterfaceType(testFilePath, testFileText);
-
-            return new[] { Tuple.Create("MochaUi", interfaceType) };
+            return new Dictionary<string, string>
+            {
+                { "MochaUi", GetInterfaceType(testFilePath, testFileText) }
+            };
         }
     }
 }
