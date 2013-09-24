@@ -19,7 +19,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\references-qunit.js"},
-                        new object[] {@"JS\Test\references-jasmine.js"}
+                        new object[] {@"JS\Test\references-jasmine.js"},
+                        new object[] {@"JS\Test\references-mocha.js"}
                     };
             }
         }
@@ -31,7 +32,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\HtmlTemplate\template-qunit.js"},
-                        new object[] {@"JS\Test\HtmlTemplate\template-jasmine.js"}
+                        new object[] {@"JS\Test\HtmlTemplate\template-jasmine.js"},
+                        new object[] {@"JS\Test\HtmlTemplate\template-mocha.js"}
                     };
             }
         }
@@ -43,7 +45,11 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\basic-qunit.coffee"},
-                        new object[] {@"JS\Test\basic-jasmine.coffee"}
+                        new object[] {@"JS\Test\basic-jasmine.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-bdd.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-tdd.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-qunit.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-exports.coffee"}
                     };
             }
         }
@@ -56,7 +62,11 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\basic-qunit.js"},
-                        new object[] {@"JS\Test\basic-jasmine.js"}
+                        new object[] {@"JS\Test\basic-jasmine.js"},
+                        new object[] {@"JS\Test\basic-mocha-bdd.js"},
+                        new object[] {@"JS\Test\basic-mocha-tdd.js"},
+                        new object[] {@"JS\Test\basic-mocha-qunit.js"},
+                        new object[] {@"JS\Test\basic-mocha-exports.js"}
                     };
             }
         }
