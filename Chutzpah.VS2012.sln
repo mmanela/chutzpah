@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2012", "VS2012\VS2012.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89BF7E7C-588C-40AA-B992-906342FA526E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Common", "VS.Common\VS.Common.csproj", "{1689355D-3366-460C-8CF3-5F035EE21B05}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E3F42AA2-5A2C-450A-89BD-3A225561DE25}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
@@ -104,16 +102,6 @@ Global
 		{F118797D-F9D5-440E-83BA-E7354DB9A75F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F118797D-F9D5-440E-83BA-E7354DB9A75F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F118797D-F9D5-440E-83BA-E7354DB9A75F}.Release|x86.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
