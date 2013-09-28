@@ -7,25 +7,27 @@ namespace Chutzpah.Extensions
 {
     public static class TestingModeExtensions
     {
-        private static readonly Dictionary<TestingMode, List<string>> extensionMap;
+        public static Dictionary<TestingMode, List<string>> ExtensionMap { get; private set; }
+
+
         static TestingModeExtensions()
         {
-            extensionMap = new Dictionary<TestingMode,List<string>>();
-            extensionMap[TestingMode.JavaScript] = new  List<string>{Constants.JavaScriptExtension};
-            extensionMap[TestingMode.CoffeeScript] = new  List<string>{Constants.CoffeeScriptExtension};
-            extensionMap[TestingMode.TypeScript] = new  List<string>{Constants.TypeScriptExtension};
-            extensionMap[TestingMode.HTML] = new  List<string>{Constants.HtmlScriptExtension, Constants.HtmScriptExtension};
+            ExtensionMap = new Dictionary<TestingMode,List<string>>();
+            ExtensionMap[TestingMode.JavaScript] = new  List<string>{Constants.JavaScriptExtension};
+            ExtensionMap[TestingMode.CoffeeScript] = new  List<string>{Constants.CoffeeScriptExtension};
+            ExtensionMap[TestingMode.TypeScript] = new  List<string>{Constants.TypeScriptExtension};
+            ExtensionMap[TestingMode.HTML] = new  List<string>{Constants.HtmlScriptExtension, Constants.HtmScriptExtension};
 
-            extensionMap[TestingMode.All] = new List<string>();
-            extensionMap.Values.ForEach(ext => extensionMap[TestingMode.All].AddRange(ext));
+            ExtensionMap[TestingMode.All] = new List<string>();
+            ExtensionMap.Values.ForEach(ext => ExtensionMap[TestingMode.All].AddRange(ext));
 
-            extensionMap[TestingMode.AllExceptHTML] = extensionMap[TestingMode.All].Except(extensionMap[TestingMode.HTML]).ToList();
+            ExtensionMap[TestingMode.AllExceptHTML] = ExtensionMap[TestingMode.All].Except(ExtensionMap[TestingMode.HTML]).ToList();
         }
 
         public static bool FileBelongsToTestingMode(this TestingMode testingMode, string file)
         {
             if (string.IsNullOrEmpty(file)) return false;
-            var extensions = extensionMap[testingMode];
+            var extensions = ExtensionMap[testingMode];
             return extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
 
         }

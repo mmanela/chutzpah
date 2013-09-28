@@ -1,15 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
-using Chutzpah.VS.Common;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
+
     [FileExtension(Chutzpah.Constants.CoffeeScriptExtension)]
     [FileExtension(Chutzpah.Constants.TypeScriptExtension)]
     [FileExtension(Chutzpah.Constants.JavaScriptExtension)]

@@ -55,6 +55,7 @@
     <Compile Include="ChutzpahExtensionMethods.cs" />
     <Compile Include="ChutzpahMapperSettingsService.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="RunContextFileExtensions.cs" />
     <Compile Include="EventWatchers\EventArgs\TestFileChangedEventArgs.cs" />
     <Compile Include="EventWatchers\EventArgs\SolutionEventsListenerEventArgs.cs" />
     <Compile Include="EventWatchers\ISolutionEventsListener.cs" />
@@ -68,7 +69,6 @@
     <Compile Include="Logger\ILogger.cs" />
     <Compile Include="Logger\Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="EventWatchers\SolutionEventsListener.cs" />
     <Compile Include="EventWatchers\TestFileAddRemoveListener.cs" />
     <Compile Include="EventWatchers\TestFilesUpdateWatcher.cs" />
@@ -96,6 +96,10 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestWindow.Interfaces">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestWindow.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestWindow">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestWindow.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
