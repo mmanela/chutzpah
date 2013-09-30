@@ -72,6 +72,7 @@
     <Compile Include="EventWatchers\SolutionEventsListener.cs" />
     <Compile Include="EventWatchers\TestFileAddRemoveListener.cs" />
     <Compile Include="EventWatchers\TestFilesUpdateWatcher.cs" />
+    <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Settings\ChutzpahSettings.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -96,10 +97,6 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestWindow.Interfaces">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestWindow.Interfaces.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestWindow">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestWindow.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
