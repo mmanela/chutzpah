@@ -18,11 +18,11 @@ namespace Chutzpah
             Trace.Listeners.Add(new ConsoleTraceListener());
         }
 
-        public static void AddFileListener()
+        public static void AddFileListener(string path = null)
         {
             var listener = new DefaultTraceListener();
             listener.Filter = new EventTypeFilter(SourceLevels.All);
-            listener.LogFileName = Constants.LogFileName;
+            listener.LogFileName = string.IsNullOrEmpty(path) ? Constants.LogFileName : path;
             Trace.Listeners.Add(listener);
         }
 
