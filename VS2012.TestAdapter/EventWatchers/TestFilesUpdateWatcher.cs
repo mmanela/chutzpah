@@ -46,9 +46,21 @@ namespace Chutzpah.VS11.EventWatchers
                     fileWatchers.Add(path, watcherInfo);
 
                     watcherInfo.Watcher.Changed += OnChanged;
+
+                    // We are monitoring for this file to be renamed. 
+                    // This is needed to catch file modifications in VS2013+. In these version VS won't update an existing file.
+                    // It will create a new file, and then delete old one and swap in the new one transactionally
+                    watcherInfo.Watcher.Renamed += OnRenamed;
+
+
                     watcherInfo.Watcher.EnableRaisingEvents = true;
                 }
             }
+        }
+
+        private void OnRenamed(object sender, RenamedEventArgs renamedEventArgs)
+        {
+            OnChanged(sender, renamedEventArgs);
         }
 
         public void RemoveWatch(string path)
