@@ -1,4 +1,5 @@
-﻿using Chutzpah.Models;
+﻿using System;
+using Chutzpah.Models;
 using Xunit;
 
 namespace Chutzpah.Facts.Library.Models
@@ -48,12 +49,11 @@ namespace Chutzpah.Facts.Library.Models
             coverageData2["file2"] = new CoverageFileData();
             coverageData2["file1"].LineExecutionCounts = new int?[] {/* index 0 ignored */ 0, 0, 1, null, 0, 1 };
             coverageData2["file2"].LineExecutionCounts = new int?[] {/* index 0 ignored */ 0, 5, 1, 2, 1, null };
-
+            
             coverageData1.Merge(coverageData2);
-
             Assert.Equal(0.6, coverageData1["file1"].CoveragePercentage);
             Assert.Equal(1, coverageData1["file2"].CoveragePercentage);
-            Assert.Equal(0.8, coverageData1.CoveragePercentage);
+            Assert.Equal(0.778, Math.Round(coverageData1.CoveragePercentage,3));
         }
     }
 }

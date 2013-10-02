@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Web.UI;
 
 namespace Chutzpah.Models
 {
@@ -25,7 +28,13 @@ namespace Chutzpah.Models
 
                 if (!coveragePercentage.HasValue)
                 {
-                    coveragePercentage = this.Average(x => x.Value.CoveragePercentage);
+                    var pairs = from file in Values
+                                select file.GetCoveredCount();
+
+                    var sumPair = pairs.Aggregate((x, y) => Tuple.Create(x.Item1 + y.Item1, x.Item2 + y.Item2));
+                    var percentage = sumPair.Item1 / sumPair.Item2;
+
+                    coveragePercentage = percentage;
                 }
 
                 return coveragePercentage.Value;
@@ -59,6 +68,7 @@ namespace Chutzpah.Models
     {
 
         private double? coveragePercentage;
+        private Tuple<double, double> coveredCount;
 
         public CoverageFileData()
         {
@@ -120,7 +130,23 @@ namespace Chutzpah.Models
                 return 0;
             }
 
-            var sum = 0;
+            var pair = GetCoveredCount();
+
+            return pair.Item1 / pair.Item2;
+        }
+
+        public Tuple<double, double> GetCoveredCount()
+        {
+            if (coveredCount != null) return coveredCount;
+
+            if (LineExecutionCounts == null || LineExecutionCounts.Length == 0)
+            {
+                coveredCount = Tuple.Create(0.0, 0.0);
+                return coveredCount;
+            }
+
+
+            double sum = 0;
             double count = 0;
 
             for (var i = 1; i < LineExecutionCounts.Length; i++)
@@ -136,7 +162,8 @@ namespace Chutzpah.Models
                 }
             }
 
-            return sum / count;
+            coveredCount = Tuple.Create(sum, count);
+            return coveredCount;
         }
 
         public void Merge(CoverageFileData coverageFileData)

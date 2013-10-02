@@ -43,6 +43,9 @@ namespace Chutzpah.Coverage
             {
                 writer.WriteLine(HtmlFragments.BodyContentStartFormat, HtmlFragments.Js, HtmlFragments.Css);
 
+                var totalLines = 0;
+                var totalLinesCovered = 0;
+
                 var fileNumber = 0;
                 foreach (var pair in coverage)
                 {
@@ -80,28 +83,39 @@ namespace Chutzpah.Coverage
                             markup[i] = markup[i].Replace("{{executed}}", "");
                         }
                     }
-                    var result = FormatPercentage(linesCovered, totalSmts);
 
-                    var output = HtmlFragments.FileTemplate.Replace("{{file}}", fileName)
-                                              .Replace("{{percentage}}", result.ToString(CultureInfo.InvariantCulture))
-                                              .Replace("{{numberCovered}}", linesCovered.ToString(CultureInfo.InvariantCulture))
-                                              .Replace("{{fileNumber}}", fileNumber.ToString(CultureInfo.InvariantCulture))
-                                              .Replace("{{totalSmts}}", totalSmts.ToString(CultureInfo.InvariantCulture))
-                                              .Replace("{{source}}", String.Join(" ", markup));
-                    if (result < SuccessPercentage)
-                    {
-                        output = output.Replace("{{statusclass}}", "chutzpah-error");
-                    }
-                    else
-                    {
-                        output = output.Replace("{{statusclass}}", "chutzpah-success");
-                    }
+                    totalLinesCovered += linesCovered;
+                    totalLines += totalSmts;
 
-                    writer.WriteLine(output);
+                    AppendResultLine(linesCovered, totalSmts, fileName, fileNumber, markup, writer);
                 }
 
+
+                AppendResultLine(totalLinesCovered, totalLines, "Total", 1+fileNumber, new string[0], writer);
                 writer.WriteLine(HtmlFragments.BodyContentEnd);
             }
+        }
+
+        private static void AppendResultLine(int linesCovered, int totalSmts, string fileName, int fileNumber, string[] markup, StreamWriter writer)
+        {
+            var result = FormatPercentage(linesCovered, totalSmts);
+
+            var output = HtmlFragments.FileTemplate.Replace("{{file}}", fileName)
+                .Replace("{{percentage}}", result.ToString(CultureInfo.InvariantCulture))
+                .Replace("{{numberCovered}}", linesCovered.ToString(CultureInfo.InvariantCulture))
+                .Replace("{{fileNumber}}", fileNumber.ToString(CultureInfo.InvariantCulture))
+                .Replace("{{totalSmts}}", totalSmts.ToString(CultureInfo.InvariantCulture))
+                .Replace("{{source}}", String.Join(" ", markup));
+            if (result < SuccessPercentage)
+            {
+                output = output.Replace("{{statusclass}}", "chutzpah-error");
+            }
+            else
+            {
+                output = output.Replace("{{statusclass}}", "chutzpah-success");
+            }
+
+            writer.WriteLine(output);
         }
 
         public static double FormatPercentage(int number, int total)
