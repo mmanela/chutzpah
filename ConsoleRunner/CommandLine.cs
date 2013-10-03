@@ -23,6 +23,9 @@ namespace Chutzpah
             Parse();
         }
 
+
+        public bool ShowFailureReport { get; set; }
+
         public bool Discovery { get; set; }
 
         public bool Trace { get; set; }
@@ -176,6 +179,11 @@ namespace Chutzpah
                         TestMode = resultMode; 
                     }
 
+                }
+                else if (optionName == "/showfailurereport")
+                {
+                    GuardNoOptionValue(option);
+                    ShowFailureReport = true;
                 }
                 else
                 {

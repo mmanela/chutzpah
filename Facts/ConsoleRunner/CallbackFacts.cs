@@ -35,7 +35,7 @@ namespace Chutzpah.Facts.ConsoleRunner
             [Fact]
             public void It_will_write_file_log_messages_to_console()
             {
-                var cb = new StandardConsoleRunnerCallback(false, false);
+                var cb = new StandardConsoleRunnerCallback(false, false, false);
                 var log = new TestLog {InputTestFile = "test.js", Message = "hello"};
                 cb.FileLog(log);
 

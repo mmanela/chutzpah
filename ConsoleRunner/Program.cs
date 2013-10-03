@@ -104,6 +104,7 @@ namespace Chutzpah
             Console.WriteLine("  /compilercache         : File where compiled scripts can be cached. Defaults to a file in the temp directory.");
             Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb. Defaults to 32Mb.");
             Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
+            Console.WriteLine("  /showFailureReport     : Show a failure report after the test run. Usefull if you have a large number of tests.");
 
 
             foreach (var transformer in SummaryTransformerFactory.GetTransformers())
@@ -134,7 +135,10 @@ namespace Chutzpah
             TestCaseSummary testResultsSummary = null;
             try
             {
-                var callback = commandLine.TeamCity ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput);
+                var callback = commandLine.TeamCity 
+                                ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() 
+                                : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport);
+
                 callback = new ParallelRunnerCallbackAdapter(callback);
 
                 var testOptions = new TestOptions

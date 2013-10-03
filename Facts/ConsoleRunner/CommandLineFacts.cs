@@ -87,6 +87,31 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class ShowFailureReportOptionFacts
+        {
+            [Fact]
+            public void ShowFailureReport_Option_Not_Passed_Is_False()
+            {
+                var arguments = new[] {"test.html"};
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.ShowFailureReport);
+            }
+
+            [Fact]
+            public void ShowFailureReport_Option_Passed_Is_True()
+            {
+                var arguments = new[] { "test.html", "/ShowFailureReport" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.ShowFailureReport);
+            }
+
+
+        }
+
         public class FailOnErrorOptionFacts
         {
             [Fact]

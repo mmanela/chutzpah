@@ -12,13 +12,16 @@ namespace Chutzpah.RunnerCallbacks
     {
         readonly bool silent;
         readonly bool vsoutput;
+        private bool showFailureReport;
         int testCount;
         private readonly bool haveConsole;
 
-        public StandardConsoleRunnerCallback(bool silent, bool vsoutput)
+        public StandardConsoleRunnerCallback(bool silent, bool vsoutput, bool showFailureReport)
         {
             this.silent = silent;
             this.vsoutput = vsoutput;
+            this.showFailureReport = showFailureReport;
+
             try
             {
                 // BufferWidth throws an IOException if there is no console attached
@@ -34,23 +37,66 @@ namespace Chutzpah.RunnerCallbacks
 
         public override void FileLog(TestLog log)
         {
+            ClearCounter();
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(GetFileLogMessage(log));
+            Console.ResetColor();
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
-            Console.WriteLine();
 
             if (testResultsSummary.CoverageObject != null && testResultsSummary.CoverageObject.Any())
             {
+                Console.WriteLine();
                 PrintCodeCoverageResults(testResultsSummary.CoverageObject);
             }
+
+            if (showFailureReport)
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                PrintErrorReport(testResultsSummary);
+            }
+
 
             Console.WriteLine();
             var seconds = testResultsSummary.TotalRuntime / 1000.0;
             Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
 
             base.TestSuiteFinished(testResultsSummary);
+        }
+
+        private void PrintErrorReport(TestCaseSummary testResultsSummary)
+        {
+            var failedTests = (from fileResult in testResultsSummary.TestFileSummaries 
+                              from testResult in fileResult.Tests 
+                              where !testResult.Passed
+                              select testResult).ToList();
+
+            var fileErrors = (from fileResult in testResultsSummary.TestFileSummaries
+                              from fileError in fileResult.Errors
+                              select fileError).ToList();
+
+            if (failedTests.Count > 0)
+            {
+                Console.WriteLine("--- Failure Report :: {0} Failed Tests, {1} File Errors ---", failedTests.Count, fileErrors.Count);
+
+                foreach (var fileError in fileErrors)
+                {
+                    FileError(fileError);    
+                }
+
+                foreach (var result in failedTests)
+                {
+                    TestFailed(result);
+                }
+
+
+                Console.WriteLine("-----------------------------------------");
+            }
         }
 
         public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
