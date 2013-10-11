@@ -4,7 +4,7 @@ module es5Conversion {
 
     export class Options {
 
-        static get debug(): bool { return true; }
+        static get debug(): boolean { return true; }
 
     }
 

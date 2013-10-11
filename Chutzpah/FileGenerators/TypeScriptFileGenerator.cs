@@ -40,11 +40,16 @@ namespace Chutzpah.FileGenerators
             {
                 var needsCompileMapJson = jsonSerializer.Serialize(needsCompileMap);
 
-                var resultJson = typeScriptEngine.Compile(needsCompileMapJson, chutzpahTestSettings.TypeScriptCodeGenTarget.ToString());
+                var resultJson = typeScriptEngine.Compile(needsCompileMapJson, chutzpahTestSettings.TypeScriptCodeGenTarget.ToString(), chutzpahTestSettings.TypeScriptModuleKind.ToString());
                 compiledMap = jsonSerializer.Deserialize<Dictionary<string, string>>(resultJson);
             }
 
-            return compiledMap;
+            return compiledMap.ToDictionary(x => ToFilePath(x.Key), x => x.Value);
+        }
+
+        private string ToFilePath(string path)
+        {
+            return path.Replace('/', '\\');
         }
 
         /// <summary>

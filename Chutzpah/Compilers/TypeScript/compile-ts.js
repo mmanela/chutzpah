@@ -39,13 +39,19 @@ ErrorReporter.prototype = {
     }
 };
 
-function compilify_ts(fileMapStr, codeGenTarget) {
+function compilify_ts(fileMapStr, codeGenTarget, moduleKind) {
     var compilationSettings = new TypeScript.CompilationSettings();
 
     if (codeGenTarget === "ES3") {
         compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
     } else if (codeGenTarget === "ES5") {
         compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+    }
+    
+    if (moduleKind === "CommonJS") {
+        compilationSettings.moduleGenTarget = 1;
+    } else if (moduleKind === "AMD") {
+        compilationSettings.moduleGenTarget = 2;
     }
 
     var fileMap = JSON.parse(fileMapStr);

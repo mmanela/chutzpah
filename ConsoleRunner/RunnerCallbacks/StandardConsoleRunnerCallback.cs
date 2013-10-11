@@ -55,9 +55,6 @@ namespace Chutzpah.RunnerCallbacks
 
             if (showFailureReport)
             {
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine();
                 PrintErrorReport(testResultsSummary);
             }
 
@@ -82,7 +79,8 @@ namespace Chutzpah.RunnerCallbacks
 
             if (failedTests.Count > 0)
             {
-                Console.WriteLine("--- Failure Report :: {0} Failed Tests, {1} File Errors ---", failedTests.Count, fileErrors.Count);
+
+                Console.WriteLine("\n\n--- Failure Report :: {0} Failed Tests, {1} File Errors ---", failedTests.Count, fileErrors.Count);
 
                 foreach (var fileError in fileErrors)
                 {

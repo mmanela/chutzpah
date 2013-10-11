@@ -72,6 +72,14 @@ namespace Chutzpah.Models
 
 
         /// <summary>
+        /// The type of module code TypeScript should generate
+        /// CommonJS - CommonJS Style
+        /// AMD - AMD Style
+        /// </summary>
+        public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
+
+
+        /// <summary>
         /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.
         /// </summary>
         public ICollection<string> CodeCoverageIncludes { get; set; }

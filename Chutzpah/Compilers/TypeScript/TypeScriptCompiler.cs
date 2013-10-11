@@ -8,6 +8,12 @@ namespace Chutzpah.Compilers.TypeScript
         ES5
     }
 
+    public enum TypeScriptModuleKind
+    {
+        CommonJS,
+        AMD
+    }
+
     public class TypeScriptCompiler : JavaScriptCompilerBase
     {
         public override string[] CompilerLibraryResourceNames
