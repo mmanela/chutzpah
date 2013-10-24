@@ -1,0 +1,5 @@
+{
+   "TestHarnessReferenceMode": "AMD",
+   "TestHarnessLocationMode": "SettingsFileAdjacent",
+   "TypeScriptModuleKind": "AMD"
+}

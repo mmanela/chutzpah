@@ -4,6 +4,7 @@
 <head>
     <title>Jasmine Spec Runner</title>
     @@TestFrameworkDependencies@@
+    @@CodeCoverageDependencies@@
     @@ReferencedCSSFiles@@
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
@@ -25,17 +26,29 @@
                 ddescribeIitSupport.patch(jasmineEnv);
             }
 
-            // If we are not running in chutzpah then run the tests onload
-            if (!window.chutzpah) {
-                var currentWindowOnload = window.onload;
+            var amdTestPath = "@@AMDTestPath@@";
+            if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+                if (window.chutzpah) {
+                    window.chutzpah.usingModuleLoader = true;
+                }
 
-                window.onload = function() {
-                    if (currentWindowOnload) {
-                        currentWindowOnload();
-                    }
-
+                window.require([amdTestPath], function () {
                     jasmineEnv.execute();
-                };
+                });
+            }
+            else {
+            // If we are not running in chutzpah then run the tests onload
+                if (!window.chutzpah) {
+                    var currentWindowOnload = window.onload;
+
+                    window.onload = function() {
+                        if (currentWindowOnload) {
+                            currentWindowOnload();
+                        }
+
+                        jasmineEnv.execute();
+                    };
+                }
             }
 
         })();

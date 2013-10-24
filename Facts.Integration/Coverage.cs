@@ -293,7 +293,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_exclude_given_file_patterns(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-
+            testRunner.EnableDebugMode();
             var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[] { "*\\ui\\*", "*core.js" }), new ExceptionThrowingRunnerCallback());
 
             ExpectKeysMatching(result.CoverageObject,

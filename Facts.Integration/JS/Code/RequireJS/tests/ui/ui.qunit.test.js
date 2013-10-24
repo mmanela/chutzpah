@@ -1,4 +1,6 @@
-﻿define(['ui/screen'],
+﻿/// <reference path="../../require.js" />
+
+define(['ui/screen'],
     function (screen) {
         module("ui/screen");
         test("will build display version", function () {

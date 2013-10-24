@@ -2,10 +2,25 @@
 <html>
 <head>
     @@TestFrameworkDependencies@@
+    @@CodeCoverageDependencies@@
     @@ReferencedCSSFiles@@
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
+    
+    <script>
+        var amdTestPath = "@@AMDTestPath@@";
+        if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+            if (window.chutzpah) {
+                window.chutzpah.usingModuleLoader = true;
+            }
+
+            window.QUnit.config.autostart = false;
+            window.require([amdTestPath], function() {
+                window.QUnit.start();
+            });
+        }
+    </script>
 </head>
 
 <body>

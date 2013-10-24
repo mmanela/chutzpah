@@ -178,6 +178,12 @@
 
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
+        
+        if (window.chutzpah.usingModuleLoader) {
+            // Since we are using a module loader let the harness determine when its ready to run tests
+            return;
+        }
+        
         function startQUnit() {
         	console.log("!!_!! Starting QUnit...");
                 window.QUnit.start();

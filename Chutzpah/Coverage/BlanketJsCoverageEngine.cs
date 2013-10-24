@@ -45,7 +45,7 @@ namespace Chutzpah.Coverage
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
             IList<string> filesToExcludeFromCoverage =
-                harness.TestFrameworkDependencies
+                harness.TestFrameworkDependencies.Concat(harness.CodeCoverageDependencies)
                 .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
                 .Select(dep => dep.Attributes["src"])
                 .ToList();
@@ -67,7 +67,7 @@ namespace Chutzpah.Coverage
             harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
 
             // Configure Blanket.
-            TestHarnessItem blanketMain = harness.TestFrameworkDependencies.Single(
+            TestHarnessItem blanketMain = harness.CodeCoverageDependencies.Single(
                                             d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
 
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";

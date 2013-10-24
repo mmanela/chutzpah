@@ -7,6 +7,12 @@ using Chutzpah.Wrappers;
 
 namespace Chutzpah.Models
 {
+    public enum TestHarnessReferenceMode
+    {
+        Normal,
+        AMD
+    }
+
     public enum TestHarnessLocationMode
     {
         TestFileAdjacent,
@@ -43,6 +49,15 @@ namespace Chutzpah.Models
         /// </summary>
         public string Framework { get; set; }
 
+
+        /// <summary>
+        /// Determines how Chutzpah handles referenced files in the test harness
+        /// Normal - Sets the test harness for normal test running
+        /// AMD - Sets the test harness to running tests using AMD
+        /// </summary>
+        public TestHarnessReferenceMode TestHarnessReferenceMode { get; set; }
+
+
         /// <summary>
         /// Tells Chutzpah where it should place the generated test harness html.
         /// TestFileAdjacent - Places the harness next to the file under test. This is the default.
@@ -70,14 +85,12 @@ namespace Chutzpah.Models
         /// </summary>
         public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
 
-
         /// <summary>
         /// The type of module code TypeScript should generate
         /// CommonJS - CommonJS Style
         /// AMD - AMD Style
         /// </summary>
         public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
-
 
         /// <summary>
         /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.
@@ -158,4 +171,5 @@ namespace Chutzpah.Models
             }
         }
     }
+
 }

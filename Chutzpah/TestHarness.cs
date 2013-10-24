@@ -12,16 +12,23 @@ namespace Chutzpah
 {
     public class TestHarness
     {
+        private readonly ChutzpahTestSettingsFile chutzpahTestSettings;
+        private readonly TestOptions testOptions;
         private readonly IFileSystemWrapper fileSystem;
+        private readonly string amdModulePath;
 
+        public IList<TestHarnessItem> CodeCoverageDependencies { get; private set; }
         public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
         public IList<TestHarnessItem> ReferencedHtmlTemplates { get; private set; }
         public IList<TestHarnessItem> ReferencedScripts { get; private set; }
         public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
-        public TestHarness(IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem)
+        public TestHarness(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions testOptions, IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem, string amdModulePath)
         {
+            this.chutzpahTestSettings = chutzpahTestSettings;
+            this.testOptions = testOptions;
             this.fileSystem = fileSystem;
+            this.amdModulePath = amdModulePath;
 
             BuildTags(referencedFiles);
             CleanupTestHarness();
@@ -31,6 +38,7 @@ namespace Chutzpah
         {
             var testJsReplacement = new StringBuilder();
             var testFrameworkDependencies = new StringBuilder();
+            var codeCoverageDependencies = new StringBuilder();
             var referenceJsReplacement = new StringBuilder();
             var referenceCssReplacement = new StringBuilder();
             var referenceHtmlTemplateReplacement = new StringBuilder();
@@ -39,13 +47,19 @@ namespace Chutzpah
                                referenceCssReplacement,
                                testJsReplacement,
                                referenceJsReplacement,
-                               referenceHtmlTemplateReplacement);
+                               referenceHtmlTemplateReplacement,
+                               codeCoverageDependencies);
 
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
+            testHtmlTemplate = testHtmlTemplate.Replace("@@CodeCoverageDependencies@@", codeCoverageDependencies.ToString());
+
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
+
             testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
             testHtmlTemplate = testHtmlTemplate.Replace("@@TestHtmlTemplateFiles@@", referenceHtmlTemplateReplacement.ToString());
+
+            testHtmlTemplate = testHtmlTemplate.Replace("@@AMDTestPath@@", amdModulePath);
 
             return testHtmlTemplate;
         }
@@ -56,6 +70,7 @@ namespace Chutzpah
             ReferencedScripts = new List<TestHarnessItem>();
             ReferencedStyles = new List<TestHarnessItem>();
             TestFrameworkDependencies = new List<TestHarnessItem>();
+            CodeCoverageDependencies = new List<TestHarnessItem>();
 
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
@@ -87,13 +102,17 @@ namespace Chutzpah
 
         private IList<TestHarnessItem> ChooseRefList(ReferencedFile referencedFile, string referencePath)
         {
+            // If CodeCoverage is enabled make sure we load requirejs before the code coverage files
+            var amdLoader = testOptions.CoverageOptions.Enabled && RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path));
+
             IList<TestHarnessItem> list = null;
-            if (referencedFile.IsTestFrameworkDependency 
-                
-                // Mark requirejs as a framework dependency since it needs to be loaded before coverage
-                || RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path)))
+            if (referencedFile.IsTestFrameworkDependency)
             {
                 list = TestFrameworkDependencies;
+            }
+            else if (referencedFile.IsCodeCoverageDependency || amdLoader)
+            {
+                list = CodeCoverageDependencies;
             }
             else if (referencePath.EndsWith(Constants.CssExtension, StringComparison.OrdinalIgnoreCase))
             {
@@ -102,6 +121,7 @@ namespace Chutzpah
             else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
             {
                 list = ReferencedScripts;
+
             }
             else if (referencePath.EndsWith(Constants.HtmlScriptExtension, StringComparison.OrdinalIgnoreCase) ||
                      referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase))
@@ -111,18 +131,21 @@ namespace Chutzpah
             return list;
         }
 
-        private void BuildReferenceHtml(StringBuilder testFrameworkDependencies,
-                                        StringBuilder referenceCssReplacement,
-                                        StringBuilder testJsReplacement,
-                                        StringBuilder referenceJsReplacement,
-                                        StringBuilder referenceHtmlTemplateReplacement)
+        private void BuildReferenceHtml(StringBuilder testFrameworkDependencies, StringBuilder referenceCssReplacement, StringBuilder testJsReplacement, StringBuilder referenceJsReplacement, StringBuilder referenceHtmlTemplateReplacement, StringBuilder codeCoverageDependencies)
         {
             foreach (TestHarnessItem item in TestFrameworkDependencies)
             {
                 testFrameworkDependencies.AppendLine(item.ToString());
             }
-            foreach (TestHarnessItem item in ReferencedScripts)
+
+            foreach (TestHarnessItem item in CodeCoverageDependencies)
             {
+                codeCoverageDependencies.AppendLine(item.ToString());
+            }
+
+            foreach (TestHarnessItem item in ReferencedScripts.Where(x => !x.HasFile || x.ReferencedFile.IncludeInTestHarness))
+            {
+
                 if (item.ReferencedFile != null && item.ReferencedFile.IsFileUnderTest)
                 {
                     testJsReplacement.AppendLine(item.ToString());

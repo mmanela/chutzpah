@@ -8,6 +8,8 @@ namespace Chutzpah.Models
         {
             FilePositions = new FilePositions();
             ReferencedFiles = new List<ReferencedFile>();
+            IncludeInTestHarness = true;
+
         }
 
         public bool IsFileUnderTest { get; set; }
@@ -31,5 +33,15 @@ namespace Chutzpah.Models
         /// Gets if this is a dependency of the test framework
         /// </summary>
         public bool IsTestFrameworkDependency { get; set; }
+
+        /// <summary>
+        /// Gets if this is a dependency of the code coverage framework
+        /// </summary>
+        public bool IsCodeCoverageDependency { get; set; }
+
+        /// <summary>
+        /// Should this reference be included into the test harness.
+        /// </summary>
+        public bool IncludeInTestHarness { get; set; }
     }
 }

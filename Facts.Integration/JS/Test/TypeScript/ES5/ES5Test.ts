@@ -12,7 +12,7 @@ module es5Conversion {
 }
 
 declare function test(message:string, func: () => void) : void;
-declare function ok(expression: bool, message?: string) : void;
+declare function ok(expression: boolean, message?: string) : void;
 
 
 test("ES5 should work when set to", () =>

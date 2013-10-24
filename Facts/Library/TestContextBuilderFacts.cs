@@ -414,10 +414,10 @@ namespace Chutzpah.Facts
             public void Will_set_js_test_file_to_file_under_test()
             {
                 var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
-                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns("contents");
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\test.js")).Returns(@"C:\path\test.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"C:\path\test.js")).Returns("contents");
 
-                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+                var context = creator.ClassUnderTest.BuildContext(@"C:\test.js", new TestOptions());
 
                 Assert.True(context.ReferencedJavaScriptFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
             }
@@ -428,9 +428,9 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 var fileGenerator = new Mock<IFileGenerator>();
                 creator.InjectArray(new[] { fileGenerator.Object });
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"C:\test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
 
-                var context = creator.ClassUnderTest.BuildContext("test.coffee", new TestOptions());
+                var context = creator.ClassUnderTest.BuildContext(@"C:\test.coffee", new TestOptions());
 
                 fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
@@ -857,12 +857,12 @@ namespace Chutzpah.Facts
             {
                 TestableTestContextBuilder creator = new TestableTestContextBuilder();
                 string TestFileContents = @"/// <reference path=""http://a.com/lib.js"" />";
-                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"path\test.js");
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\test.js")).Returns(@"C:\path\test.js");
                 creator.Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\test.js"))
+                    .Setup(x => x.GetText(@"C:\path\test.js"))
                     .Returns(TestFileContents);
 
-                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+                var context = creator.ClassUnderTest.BuildContext(@"C:\test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(It.Is<string>(p => p.Contains("lib.js")), It.IsAny<string>(), true), Times.Never());
             }
