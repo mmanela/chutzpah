@@ -23,6 +23,7 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                 {
                    new object[] { @"JS\Test\basic-qunit.js" },
+                   new object[] { @"JS\Test\basic-mocha-bdd.js" },
                    new object[] { ABasicTestScript }
                 };
             }
@@ -35,7 +36,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                 {
                     new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
-                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"}
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"}
                 };
             }
         }

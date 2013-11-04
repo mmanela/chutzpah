@@ -34,7 +34,7 @@ namespace Chutzpah
             CleanupTestHarness();
         }
 
-        public string CreateHtmlText(string testHtmlTemplate)
+        public string CreateHtmlText(string testHtmlTemplate, Dictionary<string, string> frameworkReplacements)
         {
             var testJsReplacement = new StringBuilder();
             var testFrameworkDependencies = new StringBuilder();
@@ -50,18 +50,25 @@ namespace Chutzpah
                                referenceHtmlTemplateReplacement,
                                codeCoverageDependencies);
 
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestFrameworkDependencies@@", testFrameworkDependencies.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@CodeCoverageDependencies@@", codeCoverageDependencies.ToString());
+            var replacements = new Dictionary<string, string>
+            {
+                {"TestFrameworkDependencies", testFrameworkDependencies.ToString()},
+                {"CodeCoverageDependencies", codeCoverageDependencies.ToString()},
+                {"TestJSFile", testJsReplacement.ToString()},
+                {"ReferencedJSFiles", referenceJsReplacement.ToString()},
+                {"ReferencedCSSFiles", referenceCssReplacement.ToString()},
+                {"TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString()},
+                {"AMDTestPath", amdModulePath}
+            };
 
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestJSFile@@", testJsReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedJSFiles@@", referenceJsReplacement.ToString());
+            var testHtmlStringBuilder = new StringBuilder(testHtmlTemplate);
+            
+            foreach (var replacement in replacements.Union(frameworkReplacements))
+            {
+                testHtmlStringBuilder.Replace("@@" + replacement.Key + "@@", replacement.Value);
+            }
 
-            testHtmlTemplate = testHtmlTemplate.Replace("@@ReferencedCSSFiles@@", referenceCssReplacement.ToString());
-            testHtmlTemplate = testHtmlTemplate.Replace("@@TestHtmlTemplateFiles@@", referenceHtmlTemplateReplacement.ToString());
-
-            testHtmlTemplate = testHtmlTemplate.Replace("@@AMDTestPath@@", amdModulePath);
-
-            return testHtmlTemplate;
+            return testHtmlStringBuilder.ToString();
         }
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)

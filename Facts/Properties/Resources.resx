@@ -145,4 +145,13 @@
   <data name="QUnitSuiteCoffee" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\QUnitSuite.coffee;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="MochaHarness" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MochaHarness.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="MochaSuite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MochaSuite.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="MochaSuiteCoffee" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MochaSuite.coffee;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

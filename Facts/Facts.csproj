@@ -65,6 +65,8 @@
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Exceptions\ExceptionFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
+    <Compile Include="Library\MochaLineNumberProcessorFacts.cs" />
+    <Compile Include="Library\MochaDefinitionFacts.cs" />
     <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />
     <Compile Include="Library\FileGenerators\CompilerCacheFacts.cs" />
     <Compile Include="Library\FileGenerators\TypeScriptFileGeneratorFacts.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />
     <Compile Include="Library\FileProbeFacts.cs" />
     <Compile Include="Library\FileGenerators\CoffeeScriptFileGeneratorFacts.cs" />
+    <Compile Include="Library\ReferenceProcessorFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\TestHarnessFacts.cs" />
@@ -111,11 +114,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\MochaSuite.coffee" />
     <None Include="Resources\QUnitSuite.js" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +141,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\JasmineSuite.coffee" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MochaSuite.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MochaHarness.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

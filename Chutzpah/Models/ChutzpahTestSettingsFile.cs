@@ -26,6 +26,7 @@ namespace Chutzpah.Models
         SettingsFileDirectory
     }
 
+
     /// <summary>
     /// Represents the Chutzpah Test Settings file (chutzpah.json)
     /// Applies to all test files in its directory and below.
@@ -35,7 +36,8 @@ namespace Chutzpah.Models
         public ChutzpahTestSettingsFile()
         {
             CodeCoverageIncludes = new List<string>();
-            CodeCoverageExcludes = new List<string>();    
+            CodeCoverageExcludes = new List<string>();
+            References = new List<SettingsFileReference>();
         }
 
 
@@ -101,6 +103,11 @@ namespace Chutzpah.Models
         /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
         /// </summary>
         public ICollection<string> CodeCoverageExcludes { get; set; }
+
+        /// <summary>
+        /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
+        /// </summary>
+        public ICollection<SettingsFileReference> References { get; set; }
 
         /// <summary>
         /// The path to the settings file

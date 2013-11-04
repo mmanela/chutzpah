@@ -31,7 +31,7 @@ namespace Chutzpah.Coverage
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
         {
-            FrameworkSpecificInfo info = GetInfo(definition);
+            BlanketJsCoverageEngine.FrameworkSpecificInfo info = GetInfo(definition);
             yield return "Coverage\\" + info.BlanketScriptName;
         }
 
@@ -41,7 +41,7 @@ namespace Chutzpah.Coverage
 
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
-            FrameworkSpecificInfo info = GetInfo(definition);
+            BlanketJsCoverageEngine.FrameworkSpecificInfo info = GetInfo(definition);
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
             IList<string> filesToExcludeFromCoverage =
@@ -85,7 +85,7 @@ namespace Chutzpah.Coverage
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
-            BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
+            BlanketJsCoverageEngine.BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketJsCoverageEngine.BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
                 testContext.ReferencedJavaScriptFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
 
@@ -132,19 +132,16 @@ namespace Chutzpah.Coverage
             return coverageData;
         }
 
-        [DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
-        static extern bool PathMatchSpec([In] String pszFileParam, [In] String pszSpec);
-
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
-            if (IncludePatterns.Any() && !IncludePatterns.Any(includePattern => PathMatchSpec(filePath, includePattern)))
+            if (IncludePatterns.Any() && !IncludePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, includePattern)))
             {
                 return false;
             }
 
             // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
-            if (ExcludePatterns.Any() && ExcludePatterns.Any(excludePattern => PathMatchSpec(filePath, excludePattern)))
+            if (ExcludePatterns.Any() && ExcludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, excludePattern)))
             {
                 return false;
             }
@@ -156,9 +153,9 @@ namespace Chutzpah.Coverage
         {
         }
 
-        private FrameworkSpecificInfo GetInfo(IFrameworkDefinition def)
+        private BlanketJsCoverageEngine.FrameworkSpecificInfo GetInfo(IFrameworkDefinition def)
         {
-            FrameworkSpecificInfo info;
+            BlanketJsCoverageEngine.FrameworkSpecificInfo info;
             if (!FrameworkInfoMap.TryGetValue(def.GetType(), out info))
             {
                 throw new ArgumentException("Unknown framework: " + def.GetType().Name);
@@ -167,18 +164,24 @@ namespace Chutzpah.Coverage
         }
 
         private static readonly IDictionary<Type, FrameworkSpecificInfo> FrameworkInfoMap =
-            new Dictionary<Type, FrameworkSpecificInfo>
+            new Dictionary<Type, BlanketJsCoverageEngine.FrameworkSpecificInfo>
                 {
                     {
-                        typeof (JasmineDefinition), new FrameworkSpecificInfo
+                        typeof (JasmineDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
                                                         {
                                                             BlanketScriptName = "blanket_jasmine.js"
                                                         }
                         },
                     {
-                        typeof (QUnitDefinition), new FrameworkSpecificInfo
+                        typeof (QUnitDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
                                                       {
                                                           BlanketScriptName = "blanket_qunit.js"
+                                                      }
+                        },
+                    {
+                        typeof (MochaDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
+                                                      {
+                                                          BlanketScriptName = "blanket_mocha.js"
                                                       }
                         }
                 };

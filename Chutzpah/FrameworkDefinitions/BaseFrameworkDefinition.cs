@@ -14,7 +14,7 @@ namespace Chutzpah.FrameworkDefinitions
     public abstract class BaseFrameworkDefinition : IFrameworkDefinition
     {
         private static readonly Regex FrameworkReferenceRegex =
-            new Regex(@"\<(?:script|reference|chutzpah_reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine)).*?\.js[""']",
+            new Regex(@"\<(?:script|reference|chutzpah_reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine|mocha)).*?\.js[""']",
                       RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
@@ -25,12 +25,12 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Gets a regular expression pattern to match a testable javascript file.
         /// </summary>
-        protected abstract Regex FrameworkSignatureJavaScript { get; }
+        protected virtual Regex FrameworkSignatureJavaScript { get { return null; } }
 
         /// <summary>
         /// Gets a regular expression pattern to match a testable coffeescript file.
         /// </summary>
-        protected abstract Regex FrameworkSignatureCoffeeScript { get; }
+        protected virtual Regex FrameworkSignatureCoffeeScript { get { return null; } }
 
         /// <summary>
         /// Gets a list of file processors to call within the Process method.
@@ -67,7 +67,7 @@ namespace Chutzpah.FrameworkDefinitions
             if (bestGuess)
             {
                 var regex = pathType == PathType.CoffeeScript ? FrameworkSignatureCoffeeScript : FrameworkSignatureJavaScript;
-                return regex.IsMatch(fileContents);
+                return regex != null && regex.IsMatch(fileContents);
             }
 
             Match match = FrameworkReferenceRegex.Match(fileContents);
@@ -104,6 +104,11 @@ namespace Chutzpah.FrameworkDefinitions
                     item.Process(referencedFile);
                 }
             }
+        }
+
+        public virtual Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText)
+        {
+            return new Dictionary<string, string>();
         }
     }
 }

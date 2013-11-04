@@ -99,10 +99,13 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="NativeImports.cs" />
     <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
     <Compile Include="FileGenerators\IFileGenerator.cs" />
     <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
+    <Compile Include="FileProcessors\IMochaReferencedFileProcessor.cs" />
+    <Compile Include="FileProcessors\MochaLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IQUnitReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
@@ -115,6 +118,7 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FileProbe.cs" />
     <Compile Include="FrameworkDefinitions\BaseFrameworkDefinition.cs" />
+    <Compile Include="FrameworkDefinitions\MochaDefinition.cs" />
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
@@ -122,6 +126,7 @@
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
+    <Compile Include="Models\SettingsFileReference.cs" />
     <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\ChutzpahTestSettingsFile.cs" />
     <Compile Include="Models\FilePosition.cs" />
@@ -145,6 +150,7 @@
     <Compile Include="Models\TestCase.cs" />
     <Compile Include="Models\TestRunnerMode.cs" />
     <Compile Include="Models\TestProcessExitCode.cs" />
+    <Compile Include="ReferenceProcessor.cs" />
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="Callbacks\RunnerCallback.cs" />
     <Compile Include="TestCaseStreamReaderFactory.cs" />
@@ -194,7 +200,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Compilers\TypeScript\lib.d.ts" />
+    <Content Include="JSRunners\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Coverage\blanket_jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Coverage\blanket_mocha.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\Coverage\blanket_qunit.js">
@@ -221,6 +233,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\Jasmine\jasmine.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Mocha\mocha.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\QUnit\qunit.js">

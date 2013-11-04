@@ -19,7 +19,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\references-qunit.js"},
-                        new object[] {@"JS\Test\references-jasmine.js"}
+                        new object[] {@"JS\Test\references-jasmine.js"},
+                        new object[] {@"JS\Test\references-mocha.js"}
                     };
             }
         }
@@ -31,7 +32,8 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\HtmlTemplate\template-qunit.js"},
-                        new object[] {@"JS\Test\HtmlTemplate\template-jasmine.js"}
+                        new object[] {@"JS\Test\HtmlTemplate\template-jasmine.js"},
+                        new object[] {@"JS\Test\HtmlTemplate\template-mocha.js"}
                     };
             }
         }
@@ -43,7 +45,15 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\basic-qunit.coffee"},
-                        new object[] {@"JS\Test\basic-jasmine.coffee"}
+                        new object[] {@"JS\Test\basic-jasmine.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-bdd.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-tdd.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-qunit.coffee"},
+
+                        
+                        // Exports does not work. Not sure how it is supposed to get the 
+                        // exports variable in the browser
+                        //new object[] {@"JS\Test\basic-mocha-exports.coffee"}
                     };
             }
         }
@@ -56,7 +66,14 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Test\basic-qunit.js"},
-                        new object[] {@"JS\Test\basic-jasmine.js"}
+                        new object[] {@"JS\Test\basic-jasmine.js"},
+                        new object[] {@"JS\Test\basic-mocha-bdd.js"},
+                        new object[] {@"JS\Test\basic-mocha-tdd.js"},
+                        new object[] {@"JS\Test\basic-mocha-qunit.js"},
+                        
+                        // Exports does not work. Not sure how it is supposed to get the 
+                        // exports variable in the browser
+                        //new object[] {@"JS\Test\basic-mocha-exports.js"}
                     };
             }
         }
@@ -1009,6 +1026,30 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
+            }
+            
+            [Fact]
+            public void Will_include_conditional_references()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\ConditionalReferences\ReferencesTests.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(2, result.PassedCount);
+                Assert.Equal(2, result.TotalCount);
+            }
+
+            [Fact]
+            public void Will_include_conditional_references_from_folders_relative_to_settings_file()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\ConditionalReferences\Sub1\Sub1Tests.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(3, result.PassedCount);
+                Assert.Equal(3, result.TotalCount);
             }
         }
     }
