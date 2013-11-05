@@ -1,6 +1,6 @@
 ﻿/// <reference path="require.js" />
 /// <reference path="mocha.js" />
-/// <reference path="../../../../Test/chai.js" />
+/// <reference path="chai.js" />
 
 var expect = chai.expect;
 

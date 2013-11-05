@@ -159,7 +159,6 @@
     <Content Include="JS\Test\PathEncoding\With Space+\pathEncoding.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\ReferenceSetting\test.js" />
     <Content Include="JS\Test\syntaxError.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -205,19 +204,19 @@
     <Content Include="JS\Test\TestSettings\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\Lib\someLib.js">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\Lib\skipThis.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\ReferencesTests.js">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\Lib\takeThis.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\localFile.js">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\Lib\someLib.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\Sub1\Sub1Tests.js">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\ReferencesTests.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\Sub1\localFile.js">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\localFile.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\TestSettings\RootReferencePathModeTests\settingsFileDirectoryTest.js">
@@ -268,7 +267,7 @@
     <Content Include="JS\Test\basic-mocha-tdd.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\TestSettings\ConditionalReferences\chutzpah.json">
+    <Content Include="JS\Test\TestSettings\ReferencePaths\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="JS\Test\basic-mocha-qunit.coffee">
@@ -281,9 +280,7 @@
     <None Include="JS\Code\TypeScriptRequireJS\chutzpah.json" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="JS\Test\ReferenceSetting\Refs\Ignore\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Chutzpah\Chutzpah.csproj">
       <Project>{5E8EE6D2-52A1-46EE-BD2B-449B0B8FDA6F}</Project>

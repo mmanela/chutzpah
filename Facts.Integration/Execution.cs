@@ -1029,28 +1029,17 @@ namespace Chutzpah.Facts.Integration
             }
             
             [Fact]
-            public void Will_include_conditional_references()
+            public void Will_include_reference_from_settings_file()
             {
                 var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\ConditionalReferences\ReferencesTests.js", new ExceptionThrowingRunnerCallback());
+                testRunner.EnableDebugMode();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\ReferencePaths\ReferencesTests.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);
                 Assert.Equal(2, result.TotalCount);
             }
 
-            [Fact]
-            public void Will_include_conditional_references_from_folders_relative_to_settings_file()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\TestSettings\ConditionalReferences\Sub1\Sub1Tests.js", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(3, result.TotalCount);
-            }
         }
     }
 }

@@ -235,6 +235,7 @@ namespace Chutzpah
                     if (absoluteFilePath != null)
                     {
                         VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings);
+                        return;
                     }
                 }
                 
