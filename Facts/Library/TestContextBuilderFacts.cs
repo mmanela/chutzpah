@@ -517,7 +517,7 @@ namespace Chutzpah.Facts
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
 
                 creator.Mock<IFrameworkDefinition>()
-                    .Setup(x => x.GetFrameworkReplacements(It.IsAny<string>(), It.IsAny<string>()))
+                    .Setup(x => x.GetFrameworkReplacements(It.IsAny<ChutzpahTestSettingsFile>(), It.IsAny<string>(), It.IsAny<string>()))
                     .Returns(new Dictionary<string, string>
                         {
                             {"CustomReference1", "CustomReplacement1"},

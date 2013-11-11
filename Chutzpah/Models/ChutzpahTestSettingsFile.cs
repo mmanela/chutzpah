@@ -51,6 +51,11 @@ namespace Chutzpah.Models
         /// </summary>
         public string Framework { get; set; }
 
+        /// <summary>
+        /// The name of the Mocha interface the tests use
+        /// This will override the detection mechanism for tests
+        /// </summary>
+        public string MochaInterface { get; set; }
 
         /// <summary>
         /// Determines how Chutzpah handles referenced files in the test harness

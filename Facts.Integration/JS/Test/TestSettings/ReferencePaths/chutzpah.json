@@ -1,7 +1,7 @@
 ﻿{
     "Framework": "mocha",
 	"References": [
-		{ "Path": "chai.js" },
+		{ "Path": "../../chai.js" },
 	    { "Path": "localFile.js"},
 	    { "Path": "Lib", "Include": "*Take*", "Exclude": "*Skip*" }
 	]

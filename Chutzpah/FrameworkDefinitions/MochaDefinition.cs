@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Chutzpah.Models;
 
 namespace Chutzpah.FrameworkDefinitions
 {
@@ -13,6 +14,14 @@ namespace Chutzpah.FrameworkDefinitions
     {
         private IEnumerable<IMochaReferencedFileProcessor> fileProcessors;
         private IEnumerable<string> fileDependencies;
+
+        private static string[] knownInterfaces = new[]
+        {
+            "bdd",
+            "qunit",
+            "tdd",
+            "exports"
+        };
 
         /// <summary>
         /// Initializes a new instance of the MochaDefinition class.
@@ -66,8 +75,14 @@ namespace Chutzpah.FrameworkDefinitions
             }
         }
 
-        public static string GetInterfaceType(string testFilePath, string testFileText)
+        public static string GetInterfaceType(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText)
         {
+            if(!string.IsNullOrEmpty(chutzpahTestSettings.MochaInterface) 
+                && knownInterfaces.Contains(chutzpahTestSettings.MochaInterface,StringComparer.OrdinalIgnoreCase))
+            {
+                return chutzpahTestSettings.MochaInterface.ToLowerInvariant();
+            }
+
             var isCoffeeFile = testFilePath.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase);
 
             if (isCoffeeFile)
@@ -92,11 +107,11 @@ namespace Chutzpah.FrameworkDefinitions
             return "bdd";
         }
 
-        public override Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText)
+        public override Dictionary<string, string> GetFrameworkReplacements(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText)
         {
             return new Dictionary<string, string>
             {
-                { "MochaUi", GetInterfaceType(testFilePath, testFileText) }
+                { "MochaUi", GetInterfaceType(chutzpahTestSettings, testFilePath, testFileText) }
             };
         }
     }

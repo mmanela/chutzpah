@@ -17,6 +17,12 @@ namespace Chutzpah.Models
         public bool AlwaysIncludeInTestHarness { get; set; }
 
         /// <summary>
+        /// Marks this reference as a test framework dependency. This means the files are referenced towards the top of the harness
+        /// along with the test framework reference 
+        /// </summary>
+        public bool IsTestFrameworkDependency { get; set; }
+
+        /// <summary>
         /// A glob expression of the paths to include. This is usefull when you specify the path as a folder
         /// </summary>
         public string Include { get; set; }

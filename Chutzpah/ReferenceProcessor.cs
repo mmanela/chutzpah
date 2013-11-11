@@ -24,6 +24,7 @@ namespace Chutzpah
             Include = settingsFileReference.Include;
             Exclude = settingsFileReference.Exclude;
             AlwaysIncludeInTestHarness = settingsFileReference.AlwaysIncludeInTestHarness;
+            IsTestFrameworkDependency = settingsFileReference.IsTestFrameworkDependency;
         }
 
         /// <summary>
@@ -36,6 +37,7 @@ namespace Chutzpah
         public string Include { get; set; }
         public string Exclude { get; set; }
         public bool AlwaysIncludeInTestHarness { get; set; }
+        public bool IsTestFrameworkDependency { get; set; }
     }
 
     public interface IReferenceProcessor
@@ -60,18 +62,11 @@ namespace Chutzpah
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IFileProbe fileProbe;
-        private readonly HashSet<string> includedLibraries;
 
         public ReferenceProcessor(IFileSystemWrapper fileSystem, IFileProbe fileProbe)
         {
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
-
-            includedLibraries = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                @"chai.js",
-                @"expect.js"
-            };
         }
 
         /// <summary>
@@ -92,7 +87,7 @@ namespace Chutzpah
             var referencePathSet = new HashSet<string>(referencedFiles.Select(x => x.Path));
 
             // Process the references that the user specifies in the chutzpah settings file
-            foreach (var reference in chutzpahTestSettings.References)
+            foreach (var reference in chutzpahTestSettings.References.Where(reference => reference != null))
             {
                 ProcessFilePathAsReference(
                     referencePathSet,
@@ -226,26 +221,20 @@ namespace Chutzpah
                     return;
                 }
 
-                // Check if this is a libarry packaged with Chutzpah (for user convienience)
-                if (includedLibraries.Contains(referencePath))
-                {
-                    ChutzpahTracer.TraceInformation("Checking if  referenced file '{0}' is an included library", referencePath);
-
-                    absoluteFilePath = fileProbe.FindFilePath(Path.Combine(Constants.TestFileFolder, Constants.IncludedLibrariesFolder, referencePath));
-                    if (absoluteFilePath != null)
-                    {
-                        VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings);
-                        return;
-                    }
-                }
-                
                 // At this point we know that this file/folder does not exist!
                 ChutzpahTracer.TraceWarning("Referenced file '{0}' which was resolved to '{1}' does not exist", referencePath, relativeProcessingPathFolder);
                 
             }
             else if (referenceUri.IsAbsoluteUri)
             {
-                var referencedFile = new ReferencedFile { Path = referencePath, IsLocal = false, IncludeInTestHarness = true };
+                var referencedFile = new ReferencedFile
+                {
+                    Path = referencePath,
+                    IsLocal = false,
+                    IncludeInTestHarness = true,
+                    IsTestFrameworkDependency = pathSettings.IsTestFrameworkDependency,
+                };
+
                 ChutzpahTracer.TraceInformation("Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}", referencedFile.Path, referencedFile.IsLocal, referencedFile.IncludeInTestHarness);
                 referencedFiles.Add(referencedFile);
             }
@@ -271,7 +260,7 @@ namespace Chutzpah
             return referencePath;
         }
 
-        private void VisitReferencedFile(
+        private ReferencedFile VisitReferencedFile(
             string absoluteFilePath,
             IFrameworkDefinition definition,
             HashSet<string> discoveredPaths,
@@ -280,12 +269,13 @@ namespace Chutzpah
             ReferencePathSettings pathSettings)
         {
             // If the file doesn't exit exist or we have seen it already then return
-            if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return;
+            if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return null;
 
             var referencedFile = new ReferencedFile
             {
                 Path = absoluteFilePath,
                 IsLocal = true,
+                IsTestFrameworkDependency = pathSettings.IsTestFrameworkDependency,
                 IncludeInTestHarness = pathSettings.AlwaysIncludeInTestHarness || chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
             };
 
@@ -300,6 +290,8 @@ namespace Chutzpah
             {
                 referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath, chutzpahTestSettings);
             }
+
+            return referencedFile;
         }
 
         private IList<ReferencedFile> ExpandNestedReferences(

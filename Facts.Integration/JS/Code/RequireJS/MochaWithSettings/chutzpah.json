@@ -1,0 +1,10 @@
+﻿{
+    "Framework": "mocha",
+    "CodeCoverageExcludes": ["*chai.js"],
+    "MochaInterface": "qunit",    
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "../",
+    "References": [
+	    { "Path": "../../chai.js", "IsTestFrameworkDependency": "true" }
+    ]
+}

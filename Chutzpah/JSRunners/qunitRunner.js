@@ -180,6 +180,7 @@
         console.log("!!_!! onPageLoaded");
         
         if (window.chutzpah.usingModuleLoader) {
+            console.log("!!_!! Test file is using module loader.");
             // Since we are using a module loader let the harness determine when its ready to run tests
             return;
         }

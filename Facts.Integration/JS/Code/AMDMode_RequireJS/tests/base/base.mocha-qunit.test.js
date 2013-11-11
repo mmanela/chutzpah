@@ -1,4 +1,8 @@
-﻿define(['base/core'],
+﻿/// <reference path="mocha.js"/>
+
+var expect = chai.expect;
+
+define(['base/core'],
     function (core) {
 
         suite("base/core");

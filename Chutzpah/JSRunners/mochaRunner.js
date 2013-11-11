@@ -2,18 +2,25 @@
     'use strict';
 
     function onInitialized() {
+        console.log("!!_!! onInitialized");
+        
         chutzpah.isTestingFinished = false;
         chutzpah.testCases = [];
     }
 
     function onPageLoaded() {
+        console.log("!!_!! onPageLoaded");
     }
 
     function isMochaLoaded() {
+        console.log("!!_!! isMochaLoaded");
+        
         return typeof global != 'undefined' && typeof global.mocha != 'undefined';
     }
 
     function onMochaLoaded() {
+        console.log("!!_!! onMochaLoaded");
+        
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -116,6 +123,7 @@
     }
 
     function isTestingDone() {
+        console.log("!!_!! isTestingDone");
         return chutzpah.isTestingFinished === true;
     }
 

@@ -106,7 +106,7 @@ namespace Chutzpah.FrameworkDefinitions
             }
         }
 
-        public virtual Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText)
+        public virtual Dictionary<string, string> GetFrameworkReplacements(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText)
         {
             return new Dictionary<string, string>();
         }

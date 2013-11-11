@@ -423,40 +423,5 @@ namespace Chutzpah.Facts
             Assert.False(referenceFiles.Any(x => x.Path == @"path\parentFile.js"));
             Assert.False(referenceFiles.Any(x => x.Path == @"other\newFile.js"));
         }
-
-        [Fact]
-        public void Will_add_reference_file_from_included_libraries()
-        {
-            var processor = new TestableReferenceProcessor();
-            var referenceFiles = new List<ReferencedFile>();
-            var settings = new ChutzpahTestSettingsFile { };
-            processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\chai.js")).Returns<string>(null);
-            var text = (@"/// <reference path=""chai.js"" />
-                        some javascript code");
-
-            processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, text, @"path\test.js", settings);
-
-            Assert.True(referenceFiles.Any(x => x.Path == @"TestFiles\IncludedLibraries\chai.js"));
-        }
-
-        [Fact]
-        public void Will_add_file_from_included_files_from_settings()
-        {
-            var processor = new TestableReferenceProcessor();
-            var referenceFiles = new List<ReferencedFile>();
-            var settings = new ChutzpahTestSettingsFile { };
-            processor.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
-            processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"c:\dir\chai.js")).Returns<string>(null);
-            settings.SettingsFileDirectory = @"c:\dir";
-            settings.References.Add(new SettingsFileReference
-            {
-                Path = "chai.js"
-            });
-            var text = (@"some javascript code");
-
-            processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, text, @"path\test.js", settings);
-
-            Assert.True(referenceFiles.Any(x => x.Path == @"TestFiles\IncludedLibraries\chai.js"));
-        }
     }
 }

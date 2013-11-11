@@ -156,11 +156,11 @@ namespace Chutzpah
 
         private void AddTestFrameworkDependencies(IEnumerable<string> deps, List<ReferencedFile> referencedFiles)
         {
-            foreach (string item in deps)
+            foreach (string item in deps.Reverse())
             {
                 string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
                 ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
-                referencedFiles.Add(new ReferencedFile {IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath, IncludeInTestHarness = true});
+                referencedFiles.Insert(0, new ReferencedFile {IsLocal = true, IsTestFrameworkDependency = true, Path = sourcePath, IncludeInTestHarness = true});
             }
         }
 
@@ -358,7 +358,7 @@ namespace Chutzpah
             }
 
             string testFileContents = fileSystem.GetText(inputTestFilePath);
-            var frameworkReplacements = definition.GetFrameworkReplacements(inputTestFilePath, testFileContents)
+            var frameworkReplacements = definition.GetFrameworkReplacements(chutzpahTestSettings, inputTestFilePath, testFileContents)
                                         ?? new Dictionary<string, string>();
 
             string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);

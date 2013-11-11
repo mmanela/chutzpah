@@ -29,7 +29,7 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
-        public static IEnumerable<object[]> RequireJsTestScripts
+        public static IEnumerable<object[]> AmdTestScriptWithForcedRequire
         {
             get
             {
@@ -37,7 +37,8 @@ namespace Chutzpah.Facts.Integration
                 {
                     new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
                     new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"},
-                    new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"}
+                    new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"},
+                    new object[] {@"JS\Code\RequireJS\MochaWithSettings\all.tests.mocha-qunit.js"},
                 };
             }
         }
@@ -249,10 +250,12 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
+            
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -260,7 +263,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_cover_the_correct_files_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -276,7 +279,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_include_only_given_file_patterns(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -291,7 +294,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_exclude_given_file_patterns(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -306,10 +309,11 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_resolve_requirejs_required_files_correctly(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -318,7 +322,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("RequireJsTestScripts")]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_get_results_for_test_where_test_file_uses_requirejs_command_with_coverage_enabled(string scriptPath)
         {
             var testRunner = TestRunner.Create();

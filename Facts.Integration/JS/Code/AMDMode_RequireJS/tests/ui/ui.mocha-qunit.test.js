@@ -1,4 +1,6 @@
-﻿/// <reference path="../../require.js" />
+﻿/// <reference path="mocha.js"/>
+
+var expect = chai.expect;
 
 define(['ui/screen'],
     function (screen) {

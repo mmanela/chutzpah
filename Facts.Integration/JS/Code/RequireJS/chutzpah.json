@@ -1,0 +1,4 @@
+﻿{
+	"MochaInterface": "qunit",
+    "CodeCoverageExcludes": ["*chai.js"]
+}

@@ -53,6 +53,6 @@ namespace Chutzpah.FrameworkDefinitions
         /// <param name="referencedFile">A referenced file to process.</param>
         void Process(ReferencedFile referencedFile);
 
-        Dictionary<string, string> GetFrameworkReplacements(string testFilePath, string testFileText);
+        Dictionary<string, string> GetFrameworkReplacements(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText);
     }
 }

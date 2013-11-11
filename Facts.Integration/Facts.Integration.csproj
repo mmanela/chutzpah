@@ -62,10 +62,55 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="JS\Code\AMDMode_RequireJS\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="JS\Code\encoding.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="JS\Code\chai.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\base\core.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\main.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\site.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\AMDMode_RequireJS\ui\screen.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\require-2.0.2.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\require-2.1.8.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Code\RequireJS\all.tests.mocha-qunit.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\MochaWithSettings\all.tests.mocha-qunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\RequireJS\tests\base\base.mocha-qunit.test.js">
@@ -80,13 +125,17 @@
     <Content Include="JS\Code\SubFolder\name.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Code\TypeScriptRequireJS\all.tests.jasmine.js" />
-    <Content Include="JS\Code\TypeScriptRequireJS\all.tests.qunit.js" />
     <Content Include="JS\Code\TypeScriptRequireJS\main.js" />
     <Content Include="JS\Code\TypeScriptRequireJS\require.js" />
     <Content Include="JS\Code\TypeScriptRequireJS\site.html" />
-    <Content Include="JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.js" />
-    <Content Include="JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.js" />
+    <None Include="JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts" />
+    <None Include="JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts" />
+    <Content Include="JS\Code\RequireJS\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\RequireJS\MochaWithSettings\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts" />
     <None Include="JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts" />
     <None Include="JS\Code\TypeScriptRequireJS\ui\screen.ts" />
@@ -278,6 +327,9 @@
     </Content>
     <None Include="JS\Code\TypeScriptRequireJS\base\core.ts" />
     <None Include="JS\Code\TypeScriptRequireJS\chutzpah.json" />
+    <Content Include="JS\Test\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

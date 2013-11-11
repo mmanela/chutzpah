@@ -9,14 +9,17 @@
     function onInitialized() {
         console.log("!!_!! onInitialized");
 
-        if (window.chutzpah.usingModuleLoader) {
-            // Since we are using a module loader let the harness determine when its ready to run tests
-            return;
-        }
 
         var _cachedWindowLoad = window.onload;
 
         function startJasmine() {
+            
+            if (window.chutzpah.usingModuleLoader) {
+                console.log("!!_!! Test file is using module loader.");
+                // Since we are using a module loader let the harness determine when its ready to run tests
+                return;
+            }
+            
             console.log("!!_!! Starting Jasmine...");
 
             var jasmineEnv = jasmine.getEnv();

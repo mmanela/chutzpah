@@ -2,8 +2,6 @@ namespace Chutzpah
 {
     public static class Constants
     {
-        public const string IncludedLibrariesFolder = "IncludedLibraries";
-
         public const string TestFileFolder = "TestFiles";
 
         public const string LogFileName = "chutzpah.log";
