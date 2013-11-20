@@ -5412,10 +5412,7 @@ _blanket.extend({
     };
     blanket.beforeStartTestRunner({
         callback: function () {
-            /// ### CHUTZPAH EDIT ###
-            /// ### Changed to execute mocha.run when the autostart option is giving
-            /// ### CHUTZPAH EDIT ###
-            if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))) {
+            if (!blanket.options("existingRequireJS")) {
                 oldRun(oldCallback);
             }
             mocha.run = oldRun;

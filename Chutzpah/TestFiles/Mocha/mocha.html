@@ -16,24 +16,33 @@
 <body>
     <div id="mocha"></div>
     <script type="text/javascript">
+        var requireExists = window.require && typeof window.require === "function";
         var amdTestPath = "@@AMDTestPath@@";
-        if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+        if (requireExists && amdTestPath !== "") {
             if (window.chutzpah) {
+
+                console.log("!!_!! Test file is using module loader.");
                 window.chutzpah.usingModuleLoader = true;
             }
-
+            
             window.require([amdTestPath], function () {
                 mocha.run();
             });
 
         } else {
+            if (window._Chutzpah_covobj_name) {
+                blanket.options("existingRequireJS", false);
+           }
+            
             var currentWindowOnload = window.onload;
             window.onload = function() {
                 if (currentWindowOnload) {
                     currentWindowOnload();
                 }
 
-                mocha.run();
+                if (!window._Chutzpah_covobj_name || requireExists) {
+                    mocha.run();
+                }
             };
         }
     </script>

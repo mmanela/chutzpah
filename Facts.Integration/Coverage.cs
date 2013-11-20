@@ -43,6 +43,48 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> AmdTestScriptWithAMDMode
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js"},
+                    };
+            }
+        }
+
+        public static IEnumerable<object[]> AmdTestScriptWithAMDMode_BASE
+        {
+            get
+            {
+                return new[]
+                    {
+                       new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js"},
+                       new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js"},
+                       new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js"},
+                    };
+            }
+        }
+
+        public static IEnumerable<object[]> AmdTestScriptWithAMDMode_UI
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js"},
+                    };
+            }
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_create_a_coverage_object(string scriptPath)
@@ -248,18 +290,47 @@ namespace Chutzpah.Facts.Integration
 
             Assert.False(HasKeyWithSubstring(dict, "file://"));
         }
-
+        
         [Theory]
         [PropertyData("AmdTestScriptWithForcedRequire")]
+        [PropertyData("AmdTestScriptWithAMDMode")]
         public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
-            
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
             Assert.NotNull(result.TestFileSummaries.Single().CoverageObject);
+        }
+
+        [Theory]
+        [PropertyData("AmdTestScriptWithAMDMode_BASE")]
+        public void Will_cover_where_test_file_uses_amd_mode_with_base_scripts(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
+                               new[]
+                                   {
+                                       scriptPath, "\\base\\core.js",
+                                   });
+        }
+
+        [Theory]
+        [PropertyData("AmdTestScriptWithAMDMode_UI")]
+        public void Will_cover_where_test_file_uses_amd_mode_with_UI_scripts(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
+                               new[]
+                                   {
+                                       scriptPath, "\\base\\core.js", "ui\\screen.js"
+                                   });
         }
 
         [Theory]
@@ -298,7 +369,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_exclude_given_file_patterns(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
+
             var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[] { "*\\ui\\*", "*core.js" }), new ExceptionThrowingRunnerCallback());
 
             ExpectKeysMatching(result.CoverageObject,
@@ -313,7 +384,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_resolve_requirejs_required_files_correctly(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 

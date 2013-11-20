@@ -1,6 +1,11 @@
-﻿(function () {
+﻿/// <reference path="chutzpahRunner.js" />
+/*globals phantom, chutzpah, window, mocha*/
+
+(function () {
     'use strict';
 
+    phantom.injectJs('chutzpahRunner.js');
+    
     function onInitialized() {
         console.log("!!_!! onInitialized");
         
@@ -54,6 +59,7 @@
                 log({ type: "FileStart" });
             });
 
+            
             runner.on('end', function () {
                 if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
                     log({ type: "CoverageObject", object: window[window._Chutzpah_covobj_name] });
@@ -69,6 +75,8 @@
                 chutzpah.isTestingFinished = true;
             });
 
+            
+            
             runner.on('suite', function (suite) {
                 chutzpah.currentModule = suite.fullTitle();
             });
@@ -94,7 +102,8 @@
                 activeTestCase.timetaken = test.duration;
                 log({ type: "TestDone", testCase: activeTestCase });
             });
-
+            
+            
             //runner.on('hook', function(hook) { });
             //runner.on('hook end', function(hook) { });
 
@@ -128,7 +137,6 @@
     }
 
     try {
-        phantom.injectJs('chutzpahRunner.js');
         chutzpah.runner(onInitialized, onPageLoaded, isMochaLoaded, onMochaLoaded, isTestingDone);
     } catch (e) {
         phantom.exit(2); // Unkown error

@@ -16,8 +16,11 @@
             }
 
             window.QUnit.config.autostart = false;
-            window.require([amdTestPath], function() {
-                window.QUnit.start();
+            window.require([amdTestPath], function () {
+                console.log("!!_!! Starting QUnit from inline AMD call...");
+                if (!window._Chutzpah_covobj_name) {
+                    window.QUnit.start();
+                }
             });
         }
     </script>
