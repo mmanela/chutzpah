@@ -140,10 +140,14 @@ namespace Chutzpah
                             break;
 
                         case "Error":
+
                             var error = jsonSerializer.Deserialize<JsError>(json);
                             error.Error.InputTestFile = testContext.InputTestFile;
                             callback.FileError(error.Error);
                             summary.Errors.Add(error.Error);
+
+                            ChutzpahTracer.TraceError("Eror recieved from Phantom {0}", error.Error.Message);
+
                             break;
                     }
                 }

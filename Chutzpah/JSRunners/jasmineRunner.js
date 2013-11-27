@@ -14,13 +14,7 @@
 
         function startJasmine() {
             
-            if (window.chutzpah.usingModuleLoader) {
-                console.log("!!_!! Test file is using module loader.");
-                // Since we are using a module loader let the harness determine when its ready to run tests
-                return;
-            }
-            
-            console.log("!!_!! Starting Jasmine...");
+            console.log("!!_!! Starting Jasmine from window onload...");
 
             var jasmineEnv = jasmine.getEnv();
             var runner = jasmineEnv.currentRunner();
@@ -37,6 +31,15 @@
             if (_cachedWindowLoad) {
                 _cachedWindowLoad();
             }
+
+
+            if (window.chutzpah.usingModuleLoader) {
+                console.log("!!_!! Test file is using module loader.");
+                // Since we are using a module loader let the harness determine when its ready to run tests
+                return;
+            }
+            
+
 
             startJasmine();
         };

@@ -796,8 +796,25 @@ namespace Chutzpah.Facts.Integration
                     return new[]
                         {
                             new object[] {@"JS\Test\TypeScript\basic-qunit.ts"},
-                            new object[] {@"JS\Test\TypeScript\basic-jasmine.ts"}
+                            new object[] {@"JS\Test\TypeScript\basic-jasmine.ts"},
+                            new object[] {@"JS\Test\TypeScript\basic-mocha-bdd.ts"},
                         };
+                }
+            }
+
+            public static IEnumerable<object[]> AMDTypeScriptTestScripts
+            {
+                get
+                {
+                    return new[]
+                {
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.mocha-qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.mocha-qunit.test.ts"},
+                };
                 }
             }
 
@@ -806,6 +823,7 @@ namespace Chutzpah.Facts.Integration
             public void Will_run_tests_from_a_type_script_file(string scriptPath)
             {
                 var testRunner = TestRunner.Create();
+                testRunner.EnableDebugMode();
 
                 var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
@@ -814,6 +832,19 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(4, result.TotalCount);
             }
 
+
+            [Theory]
+            [PropertyData("AMDTypeScriptTestScripts")]
+            public void Will_run_requirejs_tests_with_chutzpah_in_amd_mode(string path)
+            {
+                var testRunner = TestRunner.Create();
+
+                TestCaseSummary result = testRunner.RunTests(path, new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
 
             [Fact]
             public void Will_process_type_script_files_together()
@@ -911,19 +942,6 @@ namespace Chutzpah.Facts.Integration
                 }
             }
 
-            public static IEnumerable<object[]> RequireJsTypeScriptTestScripts
-            {
-                get
-                {
-                    return new[]
-                {
-                   new object[] {@"JS\Code\RequireJS\all.tests.qunit.ts"},
-                   new object[] {@"JS\Code\RequireJS\all.tests.jasmine.ts"},
-                  // new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"},
-                  // new object[] {@"JS\Code\RequireJS\MochaWithSettings\all.tests.mocha-qunit.js"}
-                };
-                }
-            }
 
             public AMD()
             {
@@ -936,7 +954,6 @@ namespace Chutzpah.Facts.Integration
             public void Will_run_requirejs_tests_with_chutzpah_in_amd_mode(string path)
             {
                 var testRunner = TestRunner.Create();
-                testRunner.EnableDebugMode();
 
                 TestCaseSummary result = testRunner.RunTests(path, new ExceptionThrowingRunnerCallback());
 

@@ -1,4 +1,6 @@
-﻿define(['base/core'],
+﻿/// <reference path="../../qunit.d.ts" />
+
+define(['base/core'],
     function (core) {
 
         QUnit.module("base/core");

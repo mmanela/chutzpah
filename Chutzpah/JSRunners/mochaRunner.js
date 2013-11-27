@@ -37,9 +37,12 @@
             });
 
             suite.suites.forEach(discoverTests);
+
+            chutzpah.isTestingFinished = true;
         }
 
         if (chutzpah.testMode === 'discovery') {
+            console.log("!!_!! Starting Mocha in discovery mode");
             window.mocha.run = function () {
                 discoverTests(window.mocha.suite);
             };
@@ -132,7 +135,7 @@
     }
 
     function isTestingDone() {
-        console.log("!!_!! isTestingDone");
+        console.log("!!_!! isTestingDone: " + (chutzpah.isTestingFinished === true));
         return chutzpah.isTestingFinished === true;
     }
 

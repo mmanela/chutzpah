@@ -43,7 +43,56 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                 {
                     new object[] { @"JS\Test\basic-qunit.ts" },
-                    new object[] { @"JS\Test\basic-jasmine.ts" }
+                    new object[] { @"JS\Test\basic-jasmine.ts" },
+                    new object[] {@"JS\Test\TypeScript\basic-mocha-bdd.ts"},
+                };
+            }
+        }
+
+
+        public static IEnumerable<object[]> AmdTestScriptWithForcedRequire
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"},
+                    new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"},
+                    new object[] {@"JS\Code\RequireJS\MochaWithSettings\all.tests.mocha-qunit.js"},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> AmdTestScriptWithAMDMode
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js"},
+                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js"},
+                    };
+            }
+        }
+
+
+        public static IEnumerable<object[]> AMDTypeScriptTestScripts
+        {
+            get
+            {
+                return new[]
+                {
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.mocha-qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.mocha-qunit.test.ts"},
                 };
             }
         }
@@ -58,25 +107,50 @@ namespace Chutzpah.Facts.Integration
         public void Will_discover_tests_from_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+
             var result = testRunner.DiscoverTests(scriptPath);
 
             Assert.Equal(4, result.Count());
             Assert.Equal("A basic test", result.ElementAt(0).TestName);
             Assert.Equal("will multiply 5 to number", result.ElementAt(3).TestName);
             Assert.Equal("mathLib", result.ElementAt(3).ModuleName);
-        }        
-        
+        }
+
         [Theory]
         [PropertyData("CoffeeScriptTests")]
         public void Will_discover_tests_from_a_coffee_script_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
             var result = testRunner.DiscoverTests(scriptPath);
-            
+
             Assert.Equal(4, result.Count());
             Assert.Equal("A basic test", result.ElementAt(0).TestName);
             Assert.Equal("will multiply 5 to number", result.ElementAt(3).TestName);
             Assert.Equal("mathLib", result.ElementAt(3).ModuleName);
+        }
+
+
+        [Theory]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
+        public void Will_discover_amd_forced_require_tests(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(scriptPath);
+
+            Assert.Equal(2, result.Count());
+        }
+
+        [Theory]
+        [PropertyData("AmdTestScriptWithAMDMode")]
+        [PropertyData("AMDTypeScriptTestScripts")]
+        public void Will_discover_amd_mode_tests(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(scriptPath);
+
+            Assert.Equal(1, result.Count());
         }
 
         [Fact]

@@ -1,4 +1,6 @@
-﻿define(['base/core'],
+﻿/// <reference path="../../jasmine.d.ts" />
+
+define(['base/core'],
     function (core) {
         describe("base/core", function () {
             it("will return correct version from core", function () {

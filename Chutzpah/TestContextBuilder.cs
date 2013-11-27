@@ -43,8 +43,6 @@ namespace Chutzpah
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
             mainCoverageEngine = coverageEngine;
-
-
         }
 
         public TestContext BuildContext(string file, TestOptions options)
@@ -113,13 +111,19 @@ namespace Chutzpah
                 var referencedFiles = new List<ReferencedFile>();
                 var temporaryFiles = new List<string>();
 
+
+                string inputTestFileDir = Path.GetDirectoryName(testFilePath);
+                var testHarnessDirectory = GetTestHarnessDirectory(chutzpahTestSettings, inputTestFileDir);
                 var fileUnderTest = GetFileUnderTest(testFilePath, chutzpahTestSettings);
                 referencedFiles.Add(fileUnderTest);
                 definition.Process(fileUnderTest);
 
-                referenceProcessor.GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
+
+                referenceProcessor.GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath,chutzpahTestSettings);
 
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
+
+                SetupAmdPathsIfNeeded(chutzpahTestSettings, referencedFiles, testHarnessDirectory);
 
                 IEnumerable<string> deps = definition.FileDependencies;
 
@@ -131,7 +135,9 @@ namespace Chutzpah
                     definition,
                     chutzpahTestSettings,
                     options,
+                    fileUnderTest,
                     testFilePath,
+                    testHarnessDirectory,
                     referencedFiles,
                     coverageEngine,
                     temporaryFiles);
@@ -152,6 +158,14 @@ namespace Chutzpah
             }
 
             return null;
+        }
+
+        private void SetupAmdPathsIfNeeded(ChutzpahTestSettingsFile chutzpahTestSettings, List<ReferencedFile> referencedFiles, string testHarnessDirectory)
+        {
+            if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
+            {
+                referenceProcessor.SetupAmdFilePaths(referencedFiles, testHarnessDirectory);
+            }
         }
 
         private void AddTestFrameworkDependencies(IEnumerable<string> deps, List<ReferencedFile> referencedFiles)
@@ -308,29 +322,14 @@ namespace Chutzpah
             IFrameworkDefinition definition,
             ChutzpahTestSettingsFile chutzpahTestSettings,
             TestOptions options,
+            ReferencedFile fileUnderTest,
             string inputTestFilePath,
+            string testHarnessDirectory,
             IEnumerable<ReferencedFile> referencedFiles,
             ICoverageEngine coverageEngine,
             IList<string> temporaryFiles)
         {
-            string inputTestFileDir = Path.GetDirectoryName(inputTestFilePath);
             string testFilePathHash = hasher.Hash(inputTestFilePath);
-
-            string testHarnessDirectory;
-            switch (chutzpahTestSettings.TestHarnessLocationMode)
-            {
-                case TestHarnessLocationMode.TestFileAdjacent:
-                    testHarnessDirectory = inputTestFileDir;
-                    break;
-                case TestHarnessLocationMode.SettingsFileAdjacent:
-                    testHarnessDirectory = chutzpahTestSettings.SettingsFileDirectory;
-                    break;
-                case TestHarnessLocationMode.Custom:
-                    testHarnessDirectory = chutzpahTestSettings.TestHarnessDirectory;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("chutzpahTestSettings");
-            }
 
             string testHtmlFilePath = Path.Combine(testHarnessDirectory, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
             temporaryFiles.Add(testHtmlFilePath);
@@ -338,19 +337,7 @@ namespace Chutzpah
             string templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.TestHarness)).FullPath;
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
-
-            string amdModulePath = "";
-            if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD && inputTestFilePath.Contains(testHarnessDirectory))
-            {
-                amdModulePath = inputTestFilePath
-                    .Replace(Path.GetExtension(inputTestFilePath), "")
-                    .Replace(testHarnessDirectory, "")
-                    .Replace("\\", "/")
-                    .Trim('/', '\\');
-            }
-
-
-            var harness = new TestHarness(chutzpahTestSettings, options, referencedFiles, fileSystem, amdModulePath);
+            var harness = new TestHarness(chutzpahTestSettings, options, referencedFiles, fileSystem);
 
             if (coverageEngine != null)
             {
@@ -366,5 +353,24 @@ namespace Chutzpah
             return testHtmlFilePath;
         }
 
+        private static string GetTestHarnessDirectory(ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFileDir)
+        {
+            string testHarnessDirectory;
+            switch (chutzpahTestSettings.TestHarnessLocationMode)
+            {
+                case TestHarnessLocationMode.TestFileAdjacent:
+                    testHarnessDirectory = inputTestFileDir;
+                    break;
+                case TestHarnessLocationMode.SettingsFileAdjacent:
+                    testHarnessDirectory = chutzpahTestSettings.SettingsFileDirectory;
+                    break;
+                case TestHarnessLocationMode.Custom:
+                    testHarnessDirectory = chutzpahTestSettings.TestHarnessDirectory;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("chutzpahTestSettings");
+            }
+            return testHarnessDirectory;
+        }
     }
 }

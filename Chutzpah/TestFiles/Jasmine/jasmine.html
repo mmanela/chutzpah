@@ -31,8 +31,18 @@
                 if (window.chutzpah) {
                     window.chutzpah.usingModuleLoader = true;
                 }
+                
+                requirejs.config({
+                    map: {
+                        '*': {
+                            @@AMDModuleMap@@
+                        }
+                    }
+                });
 
                 window.require([amdTestPath], function () {
+
+                    console.log("!!_!! Stating Jasmine from AMD callback...");
                     jasmineEnv.execute();
                 });
             }

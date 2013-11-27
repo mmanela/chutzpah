@@ -43,5 +43,15 @@ namespace Chutzpah.Models
         /// Should this reference be included into the test harness.
         /// </summary>
         public bool IncludeInTestHarness { get; set; }
+
+        /// <summary>
+        /// The path a AMD loader would use to find this file
+        /// </summary>
+        public string AmdFilePath { get; set; }
+
+        /// <summary>
+        /// The path a AMD loader would use to find the generated file
+        /// </summary>
+        public string AmdGeneratedFilePath { get; set; }
     }
 }

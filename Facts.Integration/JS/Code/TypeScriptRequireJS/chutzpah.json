@@ -2,4 +2,14 @@
    "TestHarnessReferenceMode": "AMD",
    "TestHarnessLocationMode": "SettingsFileAdjacent",
    "TypeScriptModuleKind": "AMD"
+	"MochaInterface": "qunit",
+    "CodeCoverageExcludes": ["*chai.js"],
+    "References" : [
+        { "Path": "../require-2.1.8.js", "AlwaysIncludeInTestHarness": "true" },
+	    { "Path": "../chai.js", "IsTestFrameworkDependency": "true", "AlwaysIncludeInTestHarness": "true" },
+	    { "Path": "require.d.ts" },
+	    { "Path": "require.js" },
+	    { "Path": "base" },
+	    { "Path": "ui" }
+    ]
 }

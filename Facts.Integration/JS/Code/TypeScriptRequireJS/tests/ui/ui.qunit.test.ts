@@ -1,6 +1,4 @@
-﻿/// <reference path="../../require.js" />
-/// <reference path="../../require.d.ts" />
-/// <reference path="../../qunit.d.ts" />
+﻿/// <reference path="../../qunit.d.ts" />
 
 import screen = require('ui/screen');
 

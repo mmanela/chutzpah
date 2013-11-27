@@ -56,6 +56,8 @@ namespace Chutzpah
             string textToParse,
             string currentFilePath,
             ChutzpahTestSettingsFile chutzpahTestSettings);
+
+        void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory);
     }
 
     public class ReferenceProcessor : IReferenceProcessor
@@ -112,6 +114,39 @@ namespace Chutzpah
                 from flattened in FlattenReferenceGraph(root)
                 select flattened;
             referencedFiles.AddRange(flattenedReferenceTree);
+        }
+
+        /// <summary>
+        /// Add the AMD file paths for the Path and GeneratePath fields
+        /// </summary>
+        /// <param name="referencedFiles"></param>
+        /// <param name="testHarnessDirectory"></param>
+        public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory)
+        {
+            foreach (var referencedFile in referencedFiles)
+            {
+                referencedFile.AmdFilePath = GetAmdPath(testHarnessDirectory, referencedFile.Path);
+
+                if (!string.IsNullOrEmpty(referencedFile.GeneratedFilePath))
+                {
+                    referencedFile.AmdGeneratedFilePath = GetAmdPath(testHarnessDirectory, referencedFile.GeneratedFilePath);
+                }
+
+            }
+        }
+
+        private static string GetAmdPath(string testHarnessDirectory, string filePath)
+        {
+            string amdModulePath = "";
+            if (filePath.Contains(testHarnessDirectory))
+            {
+                amdModulePath = filePath
+                    .Replace(Path.GetExtension(filePath), "")
+                    .Replace(testHarnessDirectory, "")
+                    .Replace("\\", "/")
+                    .Trim('/', '\\');
+            }
+            return amdModulePath;
         }
 
         private IList<ReferencedFile> GetReferencedFiles(

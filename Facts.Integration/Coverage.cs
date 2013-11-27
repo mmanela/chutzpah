@@ -85,6 +85,23 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+
+        public static IEnumerable<object[]> AMDTypeScriptTestScripts
+        {
+            get
+            {
+                return new[]
+                {
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.mocha-qunit.test.ts"},
+                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.mocha-qunit.test.ts"},
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_create_a_coverage_object(string scriptPath)
@@ -294,13 +311,16 @@ namespace Chutzpah.Facts.Integration
         [Theory]
         [PropertyData("AmdTestScriptWithForcedRequire")]
         [PropertyData("AmdTestScriptWithAMDMode")]
+        [PropertyData("AMDTypeScriptTestScripts")]
         public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
             Assert.NotNull(result.TestFileSummaries.Single().CoverageObject);
+            Assert.True(result.TestFileSummaries.Single().CoverageObject.Count > 0);
         }
 
         [Theory]

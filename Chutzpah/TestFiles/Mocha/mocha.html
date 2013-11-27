@@ -25,6 +25,14 @@
                 window.chutzpah.usingModuleLoader = true;
             }
             
+            requirejs.config({
+                map: {
+                    '*': {
+                        @@AMDModuleMap@@
+                        }
+                }
+            });
+            
             window.require([amdTestPath], function () {
                 mocha.run();
             });

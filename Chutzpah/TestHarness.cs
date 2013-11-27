@@ -14,8 +14,8 @@ namespace Chutzpah
     {
         private readonly ChutzpahTestSettingsFile chutzpahTestSettings;
         private readonly TestOptions testOptions;
+        private readonly IEnumerable<ReferencedFile> referencedFiles;
         private readonly IFileSystemWrapper fileSystem;
-        private readonly string amdModulePath;
 
         public IList<TestHarnessItem> CodeCoverageDependencies { get; private set; }
         public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
@@ -23,12 +23,12 @@ namespace Chutzpah
         public IList<TestHarnessItem> ReferencedScripts { get; private set; }
         public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
-        public TestHarness(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions testOptions, IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem, string amdModulePath)
+        public TestHarness(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions testOptions, IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem)
         {
             this.chutzpahTestSettings = chutzpahTestSettings;
             this.testOptions = testOptions;
+            this.referencedFiles = referencedFiles;
             this.fileSystem = fileSystem;
-            this.amdModulePath = amdModulePath;
 
             BuildTags(referencedFiles);
             CleanupTestHarness();
@@ -50,6 +50,15 @@ namespace Chutzpah
                                referenceHtmlTemplateReplacement,
                                codeCoverageDependencies);
 
+
+            string amdTestFilePath = "";
+            string amdModuleMap = "";
+            if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
+            {
+                amdTestFilePath = referencedFiles.First(x => x.IsFileUnderTest).AmdFilePath;
+                amdModuleMap = BuildModuleMapForGeneratedFiles();
+            }
+
             var replacements = new Dictionary<string, string>
             {
                 {"TestFrameworkDependencies", testFrameworkDependencies.ToString()},
@@ -58,7 +67,8 @@ namespace Chutzpah
                 {"ReferencedJSFiles", referenceJsReplacement.ToString()},
                 {"ReferencedCSSFiles", referenceCssReplacement.ToString()},
                 {"TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString()},
-                {"AMDTestPath", amdModulePath}
+                {"AMDTestPath", amdTestFilePath},
+                {"AMDModuleMap", amdModuleMap}
             };
 
             var testHtmlStringBuilder = new StringBuilder(testHtmlTemplate);
@@ -69,6 +79,21 @@ namespace Chutzpah
             }
 
             return testHtmlStringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// Generates the module map which is used to map from the original amd file path to the generated one
+        /// </summary>
+        /// <returns></returns>
+        private string BuildModuleMapForGeneratedFiles()
+        {
+            var builder = new StringBuilder();
+            foreach (var referencedFile in referencedFiles.Where(x => !string.IsNullOrEmpty(x.GeneratedFilePath)))
+            {
+                builder.AppendFormat("\"{0}\":\"{1}\",\n", referencedFile.AmdFilePath, referencedFile.AmdGeneratedFilePath);
+            }
+
+            return builder.ToString();
         }
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)
