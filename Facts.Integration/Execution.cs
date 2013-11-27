@@ -158,6 +158,17 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal("Polish special chars: ąćęłńóśżź", result.Tests.First().TestName);
         }
 
+        [Fact]
+        public void Will_run_tests_using_custom_test_harness_path()
+        {
+            var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
+            TestCaseSummary result = testRunner.RunTests(@"JS\Test\TestSettings\CustomTestHarness\customHarnessTest.js", new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(2, result.PassedCount);
+            Assert.Equal(2, result.TotalCount);
+        }
 
         [Fact]
         public void Will_encode_file_path_of_test_file_with_hash_tag()

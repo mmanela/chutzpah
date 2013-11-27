@@ -79,6 +79,15 @@ namespace Chutzpah.Models
         public string TestHarnessDirectory { get; set; }
 
         /// <summary>
+        /// The path to your own test harness for Chutzpah to use. 
+        /// This is an *advanced* scenario since Chutzpah has specific requirements on the test harness
+        /// If you deploy your own then you must copy from Chutzpah's and if you upgrade Chutzpah
+        /// you must keep parity
+        /// There are no guarantees about anything working once you deploy your own.
+        /// </summary>
+        public string CustomTestHarnessPath { get; set; }
+
+        /// <summary>
         /// Determines what a reference path that starts with / or \  (.e.g <reference path="/" />) is relative to
         /// DriveRoot - Make it relative to the root of the drive (e.g. C:\). This is default.
         /// SettingsFileDirectory - Makes root path relative to the directory of the settings file

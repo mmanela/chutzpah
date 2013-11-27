@@ -53,9 +53,9 @@ namespace Chutzpah.Facts
                 Mock<IHasher>().Setup(x => x.Hash(It.IsAny<string>())).Returns("hash");
                 Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo(@"TestFiles\qunit.html"))
-                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\qunit.js" });
+                    .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\qunit.html" });
                 Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\qunit.js"))
+                    .Setup(x => x.GetText(@"path\qunit.html"))
                     .Returns(TestTempateContents);
 
                 ChutzpahTestSettingsFile = new ChutzpahTestSettingsFile();
@@ -345,6 +345,36 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_use_custom_template_path()
+            {
+                var creator = new TestableTestContextBuilder();
+                string text = null;
+                creator.ChutzpahTestSettingsFile.CustomTestHarnessPath = @"folder\customHarness.html";
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
+                    .Callback<string, string>((x, y) => text = y);
+                creator.Mock<IFileProbe>()
+                    .Setup(x => x.FindFilePath(@"folder\customHarness.html"))
+                    .Returns(@"path\customHarness.html");
+                creator.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetText(@"path\customHarness.html"))
+                    .Returns(TestTempateContents);
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"TestFiles\qunit.js")).Returns(new PathInfo { FullPath = @"path\qunit.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"TestFiles\qunit.css")).Returns(new PathInfo { FullPath = @"path\qunit.css" });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\temp\qunit.js")).Returns(false);
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(TestJSFileContents);
+
+                var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
+
+                string scriptStatement = TestContextBuilder_GetScriptStatement(@"path\qunit.js");
+                string cssStatement = TestContextBuilder_GetStyleStatement(@"path\qunit.css");
+                Assert.Contains(scriptStatement, text);
+                Assert.Contains(cssStatement, text);
+                Assert.DoesNotContain("@@TestFrameworkDependencies@@", text);
+            }
+
+            [Fact]
             public void Will_replace_test_dependency_placeholder_in_test_harness_html()
             {
                 var creator = new TestableTestContextBuilder();
@@ -447,13 +477,12 @@ namespace Chutzpah.Facts
                 Assert.Contains("<h1>This is the included HTML</h1>", text);
             }
 
-
             [Fact]
             public void Will_not_copy_referenced_file_if_it_is_the_test_runner()
             {
                 var creator = new TestableTestContextBuilder();
                 creator.ReferenceFiles.Add(new ReferencedFile { Path = @"path\qunit.js" });
-                
+
                 var context = creator.ClassUnderTest.BuildContext("test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(@"path\qunit.js", @"C:\temp\qunit.js", true), Times.Never());
@@ -531,7 +560,6 @@ namespace Chutzpah.Facts
                 Assert.Contains("CustomReplacement1", text);
                 Assert.Contains("CustomReplacement2", text);
             }
-
 
             [Fact]
             public void Will_not_copy_referenced_path_if_not_a_file()

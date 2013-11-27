@@ -135,7 +135,6 @@ namespace Chutzpah
                     definition,
                     chutzpahTestSettings,
                     options,
-                    fileUnderTest,
                     testFilePath,
                     testHarnessDirectory,
                     referencedFiles,
@@ -322,7 +321,6 @@ namespace Chutzpah
             IFrameworkDefinition definition,
             ChutzpahTestSettingsFile chutzpahTestSettings,
             TestOptions options,
-            ReferencedFile fileUnderTest,
             string inputTestFilePath,
             string testHarnessDirectory,
             IEnumerable<ReferencedFile> referencedFiles,
@@ -334,7 +332,8 @@ namespace Chutzpah
             string testHtmlFilePath = Path.Combine(testHarnessDirectory, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
             temporaryFiles.Add(testHtmlFilePath);
 
-            string templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.TestHarness)).FullPath;
+            var templatePath = GetTestHarnessTemplatePath(definition, chutzpahTestSettings);
+
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
             var harness = new TestHarness(chutzpahTestSettings, options, referencedFiles, fileSystem);
@@ -351,6 +350,35 @@ namespace Chutzpah
             string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             return testHtmlFilePath;
+        }
+
+        private string GetTestHarnessTemplatePath(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            string templatePath = null;
+
+            if (!string.IsNullOrEmpty(chutzpahTestSettings.CustomTestHarnessPath))
+            {
+                // If CustomTestHarnessPath is absolute path then Path.Combine just returns it
+                var harnessPath = Path.Combine(chutzpahTestSettings.SettingsFileDirectory, chutzpahTestSettings.CustomTestHarnessPath);
+                var fullPath = fileProbe.FindFilePath(harnessPath);
+                if (fullPath != null)
+                {
+                    ChutzpahTracer.TraceInformation("Using Custom Test Harness from {0}", fullPath);
+                    templatePath = fullPath;
+                }
+                else
+                {
+                    ChutzpahTracer.TraceError("Cannot find Custom Test Harness at {0}", chutzpahTestSettings.CustomTestHarnessPath);
+                }
+            }
+
+            if (templatePath == null)
+            {
+                templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.TestHarness)).FullPath;
+
+                ChutzpahTracer.TraceInformation("Using builtin Test Harness from {0}", templatePath);
+            }
+            return templatePath;
         }
 
         private static string GetTestHarnessDirectory(ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFileDir)
