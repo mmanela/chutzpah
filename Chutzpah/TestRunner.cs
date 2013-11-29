@@ -192,7 +192,14 @@ namespace Chutzpah
                 }
                 catch (Exception e)
                 {
-                    callback.ExceptionThrown(e, testFile.FullPath);
+                    var error = new TestError
+                    {
+                        InputTestFile = testFile.FullPath,
+                        Message = e.ToString()
+                    };
+
+                    overallSummary.Errors.Add(error);
+                    callback.FileError(error);
                 }
             });
 

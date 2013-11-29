@@ -354,7 +354,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.Save(@"path\_Chutzpah.hash.test.html", It.IsAny<string>()))
                     .Callback<string, string>((x, y) => text = y);
                 creator.Mock<IFileProbe>()
-                    .Setup(x => x.FindFilePath(@"folder\customHarness.html"))
+                    .Setup(x => x.FindFilePath(@"settingsPath\folder\customHarness.html"))
                     .Returns(@"path\customHarness.html");
                 creator.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\customHarness.html"))

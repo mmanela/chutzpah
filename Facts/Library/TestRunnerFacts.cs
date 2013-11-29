@@ -436,7 +436,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_call_exception_thrown_on_callback_and_move_to_next_test_file()
+            public void Will_add_exception_to_errors_and_move_to_next_test_file()
             {
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
@@ -457,7 +457,8 @@ namespace Chutzpah.Facts
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests1.html", @"path\tests2.html" }, testCallback.Object);
 
-                testCallback.Verify(x => x.ExceptionThrown(exception, @"path\tests1.html"));
+                testCallback.Verify(x => x.FileError(It.IsAny<TestError>()));
+                Assert.Equal(1, res.Errors.Count);
                 Assert.Equal(1, res.TotalCount);
             }
 

@@ -68,16 +68,13 @@ namespace Chutzpah.RunnerCallbacks
 
         private void PrintErrorReport(TestCaseSummary testResultsSummary)
         {
-            var failedTests = (from fileResult in testResultsSummary.TestFileSummaries 
-                              from testResult in fileResult.Tests 
+            var failedTests = (from testResult in testResultsSummary.Tests 
                               where !testResult.Passed
                               select testResult).ToList();
 
-            var fileErrors = (from fileResult in testResultsSummary.TestFileSummaries
-                              from fileError in fileResult.Errors
-                              select fileError).ToList();
+            var fileErrors = testResultsSummary.Errors;
 
-            if (failedTests.Count > 0)
+            if (failedTests.Count > 0 || fileErrors.Count > 0)
             {
 
                 Console.WriteLine("\n\n--- Failure Report :: {0} Failed Tests, {1} File Errors ---", failedTests.Count, fileErrors.Count);
