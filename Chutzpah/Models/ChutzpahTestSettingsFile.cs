@@ -109,6 +109,12 @@ namespace Chutzpah.Models
         public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
 
         /// <summary>
+        /// This turns on code coverage automatically on all test runs. This is useful for CI servers where you want to force Chutzpah to collect
+        /// code coverage information
+        /// </summary>
+        public bool EnableCodeCoverage { get; set; }
+
+        /// <summary>
         /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.
         /// </summary>
         public ICollection<string> CodeCoverageIncludes { get; set; }

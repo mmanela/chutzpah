@@ -54,9 +54,6 @@ namespace Chutzpah
             set { maxDegreeOfParallelism = GetDegreeOfParallelism(value); }
         }
 
-       
-
-
         /// <summary>
         /// Get the degree of parallism making sure the value is no less than 1 and not more
         /// then the number of processors

@@ -135,7 +135,8 @@ namespace Chutzpah
         private IList<TestHarnessItem> ChooseRefList(ReferencedFile referencedFile, string referencePath)
         {
             // If CodeCoverage is enabled make sure we load requirejs before the code coverage files
-            var amdLoader = testOptions.CoverageOptions.Enabled && RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path));
+            var amdLoader = (testOptions.CoverageOptions.Enabled || chutzpahTestSettings.EnableCodeCoverage) 
+                            && RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path));
 
             IList<TestHarnessItem> list = null;
             if (referencedFile.IsTestFrameworkDependency)

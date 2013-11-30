@@ -281,7 +281,8 @@ namespace Chutzpah
 
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            if (options == null || !options.CoverageOptions.Enabled) return null;
+            if (!options.CoverageOptions.Enabled && !chutzpahTestSettings.EnableCodeCoverage) return null;
+
             ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
             mainCoverageEngine.IncludePatterns = chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns).ToList();
             mainCoverageEngine.ExcludePatterns = chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns).ToList();
