@@ -173,6 +173,11 @@ namespace Chutzpah.Models
             return settings;
         }
 
+        public static void ClearCache()
+        {
+            ChutzpahSettingsFileCache.Clear();
+        }
+
         private static void ValidateTestHarnessLocationMode(ChutzpahTestSettingsFile settings, IFileProbe fileProbe)
         {
             if (settings.TestHarnessLocationMode == TestHarnessLocationMode.Custom)

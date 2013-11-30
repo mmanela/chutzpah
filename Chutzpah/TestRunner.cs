@@ -241,6 +241,10 @@ namespace Chutzpah
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
             compilerCache.Save();
 
+            // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
+            // If we don't clear then the user can never update the file.
+            ChutzpahTestSettingsFile.ClearCache();
+
 
             ChutzpahTracer.TraceInformation("Chutzpah run finsihed ");
 
