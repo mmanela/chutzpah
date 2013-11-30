@@ -680,32 +680,11 @@ namespace Chutzpah.Facts.Integration
         public void Will_report_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
         {
             var testRunner = TestRunner.Create();
-            Exception exception = null;
-            string path = null;
             var callback = new Mock<ITestMethodRunnerCallback>();
-            callback.Setup(x => x.ExceptionThrown(It.IsAny<Exception>(), It.IsAny<string>()))
-                    .Callback<Exception, string>((e, s) => { exception = e; path = s; });
 
             testRunner.RunTests(scriptPath, callback.Object);
 
-
-            Assert.True(path.Contains(scriptPath));
-            Assert.True(exception.Message.Contains(errorMessage));
-        }
-
-        [Theory]
-        [PropertyData("SyntaxErrorScripts")]
-        public void Will_pinpoint_the_correct_file_in_the_exception_when_script_compilation_fails(string scriptPath, string includeScriptPath, string errorMessage)
-        {
-            var testRunner = TestRunner.Create();
-            var callback = new Mock<ITestMethodRunnerCallback>();
-
-            testRunner.RunTests(includeScriptPath, callback.Object);
-
-            callback.Verify(x => x.ExceptionThrown(
-                It.Is((ChutzpahException ex) => ex.ToString().Contains(scriptPath)),
-                It.Is((string s) => s.Contains(includeScriptPath))
-                ));
+            callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains(errorMessage) && e.Message.Contains(scriptPath))));
         }
 
         [Theory]
@@ -717,14 +696,12 @@ namespace Chutzpah.Facts.Integration
 
             testRunner.RunTests(scriptPath, callback.Object);
 
-            callback.Verify(x => x.ExceptionThrown(
-                It.Is((ChutzpahException ex) => !ex.Message.Contains("Microsoft JScript runtime error") &&
-                                                !ex.Message.Contains("Error Code") &&
-                                                !ex.Message.Contains("Error WCode") &&
-                                                !Regex.IsMatch(ex.Message, "^at line", RegexOptions.Multiline)
-                    ),
-                It.IsAny<string>()
-                                     ));
+
+            callback.Verify(x => x.FileError(It.Is<TestError>(e => !e.Message.Contains("Microsoft JScript runtime error") &&
+                                                !e.Message.Contains("Error Code") &&
+                                                !e.Message.Contains("Error WCode") &&
+                                                !Regex.IsMatch(e.Message, "^at line", RegexOptions.Multiline))));
+
         }
 
         public class JasmineDdescribeIit
@@ -914,10 +891,7 @@ namespace Chutzpah.Facts.Integration
 
                 TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.ts", callback.Object);
 
-                callback.Verify(x => x.ExceptionThrown(
-                    It.Is((ChutzpahException ex) => ex.Message.Contains("'=' expected")),
-                    It.Is((string s) => s.Contains("syntaxError.ts"))
-                    ));
+                callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains("'=' expected"))));
             }
         }
 
