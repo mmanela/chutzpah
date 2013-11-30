@@ -231,6 +231,9 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             logger.Log("GetTestContainers() are called", "ChutzpahTestContainerDiscoverer", LogType.Information);
 
+
+            ChutzpahTracingHelper.Toggle(settingsMapper.Settings.EnabledTracing);
+
             if (initialContainerSearch)
             {
                 logger.Log("Initial test container search", "ChutzpahTestContainerDiscoverer", LogType.Information);

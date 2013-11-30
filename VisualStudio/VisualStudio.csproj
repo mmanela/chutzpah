@@ -115,7 +115,12 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChutzpahSettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Guids.cs" />
+    <Compile Include="ILogger.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="RunnerCallback\VisualStudioRunnerCallback.cs" />
     <Compile Include="TestFileType.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -170,10 +175,6 @@
       <Project>{5E8EE6D2-52A1-46EE-BD2B-449B0B8FDA6F}</Project>
       <Name>Chutzpah</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VS.Common\VS.Common.csproj">
-      <Project>{1689355D-3366-460C-8CF3-5F035EE21B05}</Project>
-      <Name>VS.Common</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
@@ -181,7 +182,7 @@
     <!-- <TargetRegistryRoot>Software\Microsoft\VisualStudio\11.0</TargetRegistryRoot> -->
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />
   <!-- <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\VSSDK\Microsoft.VsSDK.targets" />  -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -94,6 +94,15 @@ namespace Chutzpah
             return summary.Tests;
         }
 
+
+        public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, out IList<TestError> errors)
+        {
+            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Discovery, RunnerCallback.Empty);
+            errors = summary.Errors;
+            return summary.Tests;
+        }
+
+
         public TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
             return RunTests(testPath, new TestOptions(), callback);
@@ -130,6 +139,9 @@ namespace Chutzpah
                                                  TestRunnerMode testRunnerMode,
                                                  ITestMethodRunnerCallback callback)
         {
+
+            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testRunnerMode, options.MaxDegreeOfParallelism);
+
             stopWatch.Start();
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
             if (testPaths == null)
@@ -148,6 +160,8 @@ namespace Chutzpah
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token };
             Parallel.ForEach(fileProbe.FindScriptFiles(testPaths, options.TestingMode), parallelOptions, testFile =>
             {
+                ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testFile.FullPath, testRunnerMode);
+
                 try
                 {
                     if (cancellationSource.IsCancellationRequested) return;
@@ -158,17 +172,24 @@ namespace Chutzpah
                     {
                         if (options.OpenInBrowser)
                         {
-                            ChutzpahTracer.TraceInformation("Launching test harness '{0}' for file '{1}' in a browser", testContext.TestHarnessPath, testContext.InputTestFile);
+                            ChutzpahTracer.TraceInformation(
+                                "Launching test harness '{0}' for file '{1}' in a browser",
+                                testContext.TestHarnessPath,
+                                testContext.InputTestFile);
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
                         else
                         {
-                            ChutzpahTracer.TraceInformation("Invoking test runner on  test harness '{0}' for file '{1}'", testContext.TestHarnessPath, testContext.InputTestFile);
-                            var testSummary = InvokeTestRunner(headlessBrowserPath,
-                                                               options,
-                                                               testContext,
-                                                               testRunnerMode,
-                                                               callback);
+                            ChutzpahTracer.TraceInformation(
+                                "Invoking test runner on  test harness '{0}' for file '{1}'",
+                                testContext.TestHarnessPath,
+                                testContext.InputTestFile);
+                            var testSummary = InvokeTestRunner(
+                                headlessBrowserPath,
+                                options,
+                                testContext,
+                                testRunnerMode,
+                                callback);
                             testFileSummaries.Enqueue(testSummary);
                         }
 
@@ -200,6 +221,13 @@ namespace Chutzpah
 
                     overallSummary.Errors.Add(error);
                     callback.FileError(error);
+
+                    ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testFile.FullPath);
+                }
+                finally
+                {
+
+                    ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testFile.FullPath, testRunnerMode);
                 }
             });
 
@@ -212,6 +240,10 @@ namespace Chutzpah
             stopWatch.Stop();
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
             compilerCache.Save();
+
+
+            ChutzpahTracer.TraceInformation("Chutzpah run finsihed ");
+
             return overallSummary;
         }
 

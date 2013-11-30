@@ -35,6 +35,7 @@ namespace Chutzpah.VS2012.TestAdapter
             Settings.TestingMode = settings.TestingMode;
             Settings.TimeoutMilliseconds = settings.TimeoutMilliseconds;
             Settings.MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism;
+            Settings.EnabledTracing = settings.EnabledTracing;
         }
 
         public IXPathNavigable AddRunSettings(IXPathNavigable inputRunSettingDocument, IRunSettingsConfigurationInfo configurationInfo, ILogger log)

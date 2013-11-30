@@ -17,6 +17,7 @@ namespace Chutzpah.VS2012.TestAdapter
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;
             MaxDegreeOfParallelism = 1;
+            EnabledTracing = false;
         }
 
         /// <summary>
@@ -33,6 +34,11 @@ namespace Chutzpah.VS2012.TestAdapter
         /// Determines the maximum degree of paralleism Chutzpah should use
         /// </summary>
         public int MaxDegreeOfParallelism { get; set; }
+
+        /// <summary>
+        /// Determines if chutzpah tracing is enabled
+        /// </summary>
+        public bool EnabledTracing { get; set; }
 
         public override XmlElement ToXml()
         {

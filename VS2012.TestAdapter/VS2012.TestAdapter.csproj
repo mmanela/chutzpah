@@ -54,6 +54,7 @@
     <Compile Include="ChutzpahAdapterSettings.cs" />
     <Compile Include="ChutzpahExtensionMethods.cs" />
     <Compile Include="ChutzpahMapperSettingsService.cs" />
+    <Compile Include="ChutzpahTracingHelper.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="RunContextFileExtensions.cs" />
     <Compile Include="EventWatchers\EventArgs\TestFileChangedEventArgs.cs" />
@@ -73,9 +74,6 @@
     <Compile Include="EventWatchers\TestFileAddRemoveListener.cs" />
     <Compile Include="EventWatchers\TestFilesUpdateWatcher.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
-    <Compile Include="Settings\ChutzpahSettings.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Settings\ChutzpahUTESettings.cs">
       <SubType>Component</SubType>
     </Compile>

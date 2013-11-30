@@ -35,5 +35,6 @@ namespace Chutzpah
         IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options);
         void CleanTestContext(TestContext context);
         void EnableDebugMode();
+        IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, out IList<TestError> errors);
     }
 }

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
-    <VisualStudioVersionOverride Condition="'$(VisualStudioVersionOverride)'==''"></VisualStudioVersionOverride>
+    <VisualStudioVersionOverride Condition="'$(VisualStudioVersionOverride)'==''">12.0</VisualStudioVersionOverride>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>

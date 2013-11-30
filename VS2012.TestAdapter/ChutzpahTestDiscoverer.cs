@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using Chutzpah.Models;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-
     [FileExtension(Chutzpah.Constants.CoffeeScriptExtension)]
     [FileExtension(Chutzpah.Constants.TypeScriptExtension)]
     [FileExtension(Chutzpah.Constants.JavaScriptExtension)]
@@ -25,18 +28,27 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
-            var testOptions = new TestOptions
-                {
-                    TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
-                    TestingMode = settings.TestingMode,
-                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
-                };
 
-            var testCases = testRunner.DiscoverTests(sources, testOptions);
+            ChutzpahTracingHelper.Toggle(settings.EnabledTracing);
+
+            var testOptions = new TestOptions
+            {
+                TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
+                TestingMode = settings.TestingMode,
+                MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism
+            };
+
+            IList<TestError> errors;
+            var testCases = testRunner.DiscoverTests(sources, testOptions, out errors);
             foreach (var testCase in testCases)
             {
                 var vsTestCase = testCase.ToVsTestCase();
                 discoverySink.SendTestCase(vsTestCase);
+            }
+
+            foreach (var error in errors)
+            {
+                logger.SendMessage(TestMessageLevel.Error, RunnerCallback.FormatFileErrorMessage(error));
             }
         }
     }

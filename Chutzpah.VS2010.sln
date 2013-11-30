@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio", "VisualStudi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfTester", "PerfTester\PerfTester.csproj", "{26C0C606-CE4B-49F0-B1DF-1ECC43F5C7B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Common", "VS.Common\VS.Common.csproj", "{1689355D-3366-460C-8CF3-5F035EE21B05}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,16 +83,6 @@ Global
 		{26C0C606-CE4B-49F0-B1DF-1ECC43F5C7B5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{26C0C606-CE4B-49F0-B1DF-1ECC43F5C7B5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{26C0C606-CE4B-49F0-B1DF-1ECC43F5C7B5}.Release|x86.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1689355D-3366-460C-8CF3-5F035EE21B05}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

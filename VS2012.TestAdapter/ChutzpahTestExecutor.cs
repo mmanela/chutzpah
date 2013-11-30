@@ -30,6 +30,9 @@ namespace Chutzpah.VS2012.TestAdapter
 
             var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
+
+            ChutzpahTracingHelper.Toggle(settings.EnabledTracing);
+
             var testOptions = new TestOptions
                 {
                     TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,

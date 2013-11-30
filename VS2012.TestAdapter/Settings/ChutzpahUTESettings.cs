@@ -22,6 +22,7 @@ namespace Chutzpah.VS.Common.Settings
         private TestingMode? testingMode;
         private int? timeoutMilliseconds;
         private int maxDegreeOfParallelism;
+        private bool enableTracing;
 
 
         [Browsable(true)]
@@ -67,8 +68,23 @@ namespace Chutzpah.VS.Common.Settings
         }
 
 
+        [Browsable(true)]
+        [Category("UTE")]
+        [DisplayName("Enable Chutzpah Tracing")]
+        [Description("Saves a trace of Chutzpah execution to %temp%\\chutzpah.log")]
+        public bool EnabledTracing
+        {
+            get { return enableTracing; }
+            set
+            {
+                enableTracing = value;
+                OnPropertyChanged("EnabledTracing");
+            }
+        }
+
         public override void ResetSettings()
         {
+            EnabledTracing = false;
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;
             MaxDegreeOfParallelism = 1;

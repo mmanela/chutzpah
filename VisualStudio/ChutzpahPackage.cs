@@ -157,6 +157,8 @@ namespace Chutzpah.VisualStudio
 
         private void RunJSTestInBrowserCmdCallback(object sender, EventArgs e)
         {
+            CheckTracing();
+
             IEnumerable<string> selectedFiles = null;
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
@@ -186,6 +188,8 @@ namespace Chutzpah.VisualStudio
 
         private void RunJSTestCmdCallback(object sender, EventArgs e)
         {
+            CheckTracing();
+
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
@@ -199,6 +203,8 @@ namespace Chutzpah.VisualStudio
 
         private void RunCodeCoverageCmdCallback(object sender, EventArgs e)
         {
+            CheckTracing();
+
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
@@ -511,6 +517,19 @@ namespace Chutzpah.VisualStudio
                 }
             }
             return codeDoc;
+        }
+
+        public void CheckTracing()
+        {
+            var path = Path.Combine(Path.GetTempPath(), Chutzpah.Constants.LogFileName);
+            if (Settings.EnabledTracing)
+            {
+                ChutzpahTracer.AddFileListener(path);
+            }
+            else
+            {
+                ChutzpahTracer.RemoveFileListener(path);
+            }
         }
     }
 }

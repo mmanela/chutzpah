@@ -19,10 +19,16 @@ namespace Chutzpah
             p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
             p.Start();
 
+            ChutzpahTracer.TraceInformation("Started headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
+
             // Output will be null if the stream reading times out
             var processStream = new ProcessStream(new ProcessWrapper(p), p.StandardOutput);
             var output = streamProcessor(processStream); 
             p.WaitForExit(5000);
+
+
+
+            ChutzpahTracer.TraceInformation("Ended headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
 
             return new ProcessResult<T>(processStream.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
         }

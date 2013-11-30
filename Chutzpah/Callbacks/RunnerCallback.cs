@@ -22,9 +22,16 @@ namespace Chutzpah
         public virtual void TestFinished(TestCase testCase)
         {
             if (testCase.Passed)
+            {
+                ChutzpahTracer.TraceInformation("File {0}, Test {1} passed", testCase.InputTestFile, testCase.TestName);
                 TestPassed(testCase);
+            }
+
             if (!testCase.Passed)
+            {
+                ChutzpahTracer.TraceInformation("File {0}, Test {1} failed", testCase.InputTestFile, testCase.TestName);
                 TestFailed(testCase);
+            }
 
             TestComplete(testCase);
         }
@@ -55,7 +62,7 @@ namespace Chutzpah
             return string.Format("Chutzpah Error: {0}\n While Running:{1}\n\n", exception, fileName);
         }
 
-        protected virtual string GetFileErrorMessage(TestError error)
+        public static string FormatFileErrorMessage(TestError error)
         {
             var stack = "";
             foreach (var item in error.Stack)
@@ -75,7 +82,12 @@ namespace Chutzpah
                 stack += "\n";
             }
 
-            return string.Format("JS Error: {0}\n{1}While Running:{2}\n", error.Message, stack, error.InputTestFile);
+            return string.Format("Error: {0}\n{1}While Running:{2}\n", error.Message, stack, error.InputTestFile);
+        }
+
+        protected virtual string GetFileErrorMessage(TestError error)
+        {
+            return FormatFileErrorMessage(error);
         }
 
         protected virtual string GetTestFailureMessage(TestCase testCase)

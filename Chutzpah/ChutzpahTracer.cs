@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
 namespace Chutzpah
@@ -20,10 +21,22 @@ namespace Chutzpah
 
         public static void AddFileListener(string path = null)
         {
-            var listener = new DefaultTraceListener();
-            listener.Filter = new EventTypeFilter(SourceLevels.All);
-            listener.LogFileName = string.IsNullOrEmpty(path) ? Constants.LogFileName : path;
-            Trace.Listeners.Add(listener);
+            var logPath = string.IsNullOrEmpty(path) ? Constants.LogFileName : path;
+        
+            if(Trace.Listeners[logPath] == null)
+            {
+                var listener = new DefaultTraceListener();
+                listener.Filter = new EventTypeFilter(SourceLevels.All);
+                listener.LogFileName = logPath;
+                listener.Name = logPath;
+                Trace.Listeners.Add(listener);
+            }
+        }
+
+        public static void RemoveFileListener(string path = null)
+        {
+            var logPath = string.IsNullOrEmpty(path) ? Constants.LogFileName : path;
+            Trace.Listeners.Remove(logPath);
         }
 
         public static void TraceInformation(string messageFormat, params object[] args)
