@@ -81,7 +81,7 @@ namespace Chutzpah.Facts
                 var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file }, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("compiled", result[file.Path]);
-                generator.Mock<ICompilerCache>().Verify(x => x.Set("content", "compiled"));
+                generator.Mock<ICompilerCache>().Verify(x => x.Set("coffeeScriptBareMode:True,Source:content", "compiled"));
             }
 
             [Fact]

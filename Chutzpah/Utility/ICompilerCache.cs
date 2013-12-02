@@ -4,8 +4,8 @@ namespace Chutzpah.Utility
 {
     public interface ICompilerCache
     {
-        string Get(string source);
-        void Set(string source, string compiled);
+        string Get(string key);
+        void Set(string key, string compiled);
         void Save();
     }
 }

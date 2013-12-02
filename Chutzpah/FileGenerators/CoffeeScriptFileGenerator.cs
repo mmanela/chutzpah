@@ -29,28 +29,29 @@ namespace Chutzpah.FileGenerators
         {
             var compiledMap = (from referencedFile in referencedFiles
                                let content = fileSystem.GetText(referencedFile.Path)
-                               let jsText = GetOrAddCompiledToCache(content, referencedFile.Path)
+                               let jsText = GetOrAddCompiledToCache(content, referencedFile.Path, chutzpahTestSettings.CoffeeScriptBareMode)
                                select new { FileName = referencedFile.Path, Content = jsText })
                               .ToDictionary(x => x.FileName, x => x.Content);
 
             return compiledMap;
         }
 
-        private string GetOrAddCompiledToCache(string content, string path)
+        private string GetOrAddCompiledToCache(string content, string path, bool coffeeScriptBareMode)
         {
-            var cached = compilerCache.Get(content);
+            var key = string.Format("coffeeScriptBareMode:{0},Source:{1}", coffeeScriptBareMode, content);
+            var cached = compilerCache.Get(key);
             if(string.IsNullOrEmpty(cached))
             {
                 try
                 {
-                    cached = coffeeScriptEngine.Compile(content);
+                    cached = coffeeScriptEngine.Compile(content, coffeeScriptBareMode);
                 }
                 catch (ChutzpahCompilationFailedException ex)
                 {
                     ex.SourceFile = path;
                     throw;
                 }
-                compilerCache.Set(content, cached);
+                compilerCache.Set(key, cached);
             }
 
             return cached;

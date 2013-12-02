@@ -40,24 +40,24 @@ namespace Chutzpah.Utility
             }
         }
 
-        public string Get(string source)
+        public string Get(string key)
         {
             if (GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes <= 0) return null;
 
-            var hash = hasher.Hash(source);
+            var hash = hasher.Hash(key);
             Tuple<DateTime, string> cachedEntry;
             compilerCache.TryGetValue(hash, out cachedEntry);
             return cachedEntry == null ? null : cachedEntry.Item2;
         }
 
-        public void Set(string source, string compiled)
+        public void Set(string key, string compiled)
         {
             if (GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes <= 0) return;
             
             // Mark that a mutation occured so we know to save
             mutated = true;
 
-            var hash = hasher.Hash(source);
+            var hash = hasher.Hash(key);
             var cachedEntry = Tuple.Create(DateTime.UtcNow, compiled);
             compilerCache.TryAdd(hash, cachedEntry);
         }

@@ -38,6 +38,7 @@ namespace Chutzpah.Models
             CodeCoverageIncludes = new List<string>();
             CodeCoverageExcludes = new List<string>();
             References = new List<SettingsFileReference>();
+            CoffeeScriptBareMode = true;
         }
 
 
@@ -133,6 +134,11 @@ namespace Chutzpah.Models
         /// The path to the settings file
         /// </summary>
         public string SettingsFileDirectory { get; set; }
+
+        /// <summary>
+        /// Determines if CoffeeScript should run in bare mode or not. Default is true.
+        /// </summary>
+        public bool CoffeeScriptBareMode { get; set; }
 
         /// <summary>
         /// Cache settings file
