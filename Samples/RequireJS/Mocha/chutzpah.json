@@ -4,8 +4,8 @@
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "References" : [
-        {"Path" : "require-2.1.8.js", "AlwaysIncludeInTestHarness": "true" }, 
-        { "Path": "chai.js", "IsTestFrameworkDependency": "true", "AlwaysIncludeInTestHarness": "true" },
-        {"Path" : "config.js", "AlwaysIncludeInTestHarness": "true" }
+        {"Path" : "require-2.1.8.js" }, 
+        { "Path": "chai.js", "IsTestFrameworkFile": "true" },
+        {"Path" : "config.js" }
     ]
 }

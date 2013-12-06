@@ -358,7 +358,7 @@ namespace Chutzpah.Facts
                     new SettingsFileReference
                     {
                         Path = "here.js",
-                        AlwaysIncludeInTestHarness = true
+                        IncludeInTestHarness = true
                     });
                 var text = (@"some javascript code");
 

@@ -2,6 +2,10 @@ namespace Chutzpah.Models
 {
     public class SettingsFileReference
     {
+        public SettingsFileReference()
+        {
+            IncludeInTestHarness = true;
+        }
 
         /// <summary>
         /// The path of file/folder to include. This could be the path to one file or a folder.
@@ -10,11 +14,11 @@ namespace Chutzpah.Models
         public string Path { get; set; }
 
         /// <summary>
-        /// Force this file to always be included in the test harness. When running Chutzpah with
-        /// TestHarnessReferenceMode set to AMD by default Chutzpah will not add references (besides ones for the test framework)
-        /// into the test harness. If you have a file you want to always be included in the test harness set this bit.
+        /// Inidcate this file should be included in the test harness. When running Chutzpah with
+        /// TestHarnessReferenceMode set to AMD by default Chutzpah will not add references from reference comments
+        /// but will add referenced from reference settings unless you set this to false
         /// </summary>
-        public bool AlwaysIncludeInTestHarness { get; set; }
+        public bool IncludeInTestHarness { get; set; }
 
         /// <summary>
         /// Marks this reference as a test framework dependency. This means the files are referenced towards the top of the harness

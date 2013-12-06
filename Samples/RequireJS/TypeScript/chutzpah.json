@@ -4,10 +4,10 @@
    "TestHarnessLocationMode": "SettingsFileAdjacent",
    "TypeScriptModuleKind": "AMD",
     "References" : [
-      { "Path": "require-2.1.8.js", "AlwaysIncludeInTestHarness": "true" },
-	    { "Path": "require.d.ts" },
-	    { "Path": "qunit.d.ts" },
-	    { "Path": "base" },
-	    { "Path": "ui" }
+      { "Path": "require-2.1.8.js" },
+	    { "Path": "require.d.ts", "IncludeInTestHarness": "false" },
+	    { "Path": "qunit.d.ts", "IncludeInTestHarness": "false" },
+	    { "Path": "base", "IncludeInTestHarness": "false" },
+	    { "Path": "ui", "IncludeInTestHarness": "false" }
     ]
 }

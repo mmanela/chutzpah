@@ -5,11 +5,11 @@
 	"MochaInterface": "qunit",
     "CodeCoverageExcludes": ["*chai.js"],
     "References" : [
-        { "Path": "../require-2.1.8.js", "AlwaysIncludeInTestHarness": "true" },
-	    { "Path": "../chai.js", "IsTestFrameworkFile": "true", "AlwaysIncludeInTestHarness": "true" },
-	    { "Path": "require.d.ts" },
-	    { "Path": "require.js" },
-	    { "Path": "base" },
-	    { "Path": "ui" }
+        { "Path": "../require-2.1.8.js" },
+	    { "Path": "../chai.js", "IsTestFrameworkFile": "true" },
+	    { "Path": "require.d.ts", "IncludeInTestHarness": "false"  },
+	    { "Path": "require.js", "IncludeInTestHarness": "false"  },
+	    { "Path": "base", "IncludeInTestHarness": "false"  },
+	    { "Path": "ui", "IncludeInTestHarness": "false"  }
     ]
 }
