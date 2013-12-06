@@ -24,7 +24,7 @@ namespace Chutzpah
             Include = settingsFileReference.Include;
             Exclude = settingsFileReference.Exclude;
             AlwaysIncludeInTestHarness = settingsFileReference.AlwaysIncludeInTestHarness;
-            IsTestFrameworkDependency = settingsFileReference.IsTestFrameworkDependency;
+            IsTestFrameworkFile = settingsFileReference.IsTestFrameworkFile;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Chutzpah
         public string Include { get; set; }
         public string Exclude { get; set; }
         public bool AlwaysIncludeInTestHarness { get; set; }
-        public bool IsTestFrameworkDependency { get; set; }
+        public bool IsTestFrameworkFile { get; set; }
     }
 
     public interface IReferenceProcessor
@@ -267,7 +267,7 @@ namespace Chutzpah
                     Path = referencePath,
                     IsLocal = false,
                     IncludeInTestHarness = true,
-                    IsTestFrameworkDependency = pathSettings.IsTestFrameworkDependency,
+                    IsTestFrameworkFile = pathSettings.IsTestFrameworkFile,
                 };
 
                 ChutzpahTracer.TraceInformation("Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}", referencedFile.Path, referencedFile.IsLocal, referencedFile.IncludeInTestHarness);
@@ -310,7 +310,7 @@ namespace Chutzpah
             {
                 Path = absoluteFilePath,
                 IsLocal = true,
-                IsTestFrameworkDependency = pathSettings.IsTestFrameworkDependency,
+                IsTestFrameworkFile = pathSettings.IsTestFrameworkFile,
                 IncludeInTestHarness = pathSettings.AlwaysIncludeInTestHarness || chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
             };
 

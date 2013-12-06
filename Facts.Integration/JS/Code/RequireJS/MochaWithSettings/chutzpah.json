@@ -5,6 +5,6 @@
     "TestHarnessLocationMode": "Custom",
     "TestHarnessDirectory": "../",
     "References": [
-	    { "Path": "../../chai.js", "IsTestFrameworkDependency": "true" }
+	    { "Path": "../../chai.js", "IsTestFrameworkFile": "true" }
     ]
 }

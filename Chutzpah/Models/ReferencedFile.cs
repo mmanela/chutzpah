@@ -32,7 +32,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// Gets if this is a dependency of the test framework
         /// </summary>
-        public bool IsTestFrameworkDependency { get; set; }
+        public bool IsTestFrameworkFile { get; set; }
 
         /// <summary>
         /// Gets if this is a dependency of the code coverage framework

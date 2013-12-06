@@ -139,7 +139,7 @@ namespace Chutzpah
                             && RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path));
 
             IList<TestHarnessItem> list = null;
-            if (referencedFile.IsTestFrameworkDependency)
+            if (referencedFile.IsTestFrameworkFile)
             {
                 list = TestFrameworkDependencies;
             }

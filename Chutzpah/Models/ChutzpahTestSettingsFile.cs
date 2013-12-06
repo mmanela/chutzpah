@@ -165,10 +165,12 @@ namespace Chutzpah.Models
                 var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
                 if(string.IsNullOrEmpty(testSettingsFilePath))
                 {
+                    ChutzpahTracer.TraceInformation("Chutzpah.json file not found");
                     settings = new ChutzpahTestSettingsFile();
                 }
                 else if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
                 {
+                    ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
@@ -187,6 +189,7 @@ namespace Chutzpah.Models
 
         public static void ClearCache()
         {
+            ChutzpahTracer.TraceInformation("Chutzpah.json file cache cleared");
             ChutzpahSettingsFileCache.Clear();
         }
 
