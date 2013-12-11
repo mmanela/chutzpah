@@ -6,13 +6,10 @@
 
 var expect = chai.expect;
 
-define(['base/core'],
-    function (core) {
+import core = require('base/core');
 
-        suite("base/core");
-        test("will return correct version from core", function () {
-            var version = core.version;
-            expect(version).to.equal(8);
-        });
-
-    });
+suite("base/core");
+test("will return correct version from core", function () {
+    var version = core.version;
+    expect(version).to.equal(8);
+});

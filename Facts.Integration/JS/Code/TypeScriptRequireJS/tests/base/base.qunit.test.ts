@@ -1,12 +1,9 @@
 ﻿/// <reference path="../../qunit.d.ts" />
 
-define(['base/core'],
-    function (core) {
+import core = require('base/core');
 
-        QUnit.module("base/core");
-        test("will return correct version from core", function () {
-            var version = core.version;
-            equal(version, 8);
-        });
-
-    });
+QUnit.module("base/core");
+test("will return correct version from core", function () {
+    var version = core.version;
+    equal(version, 8);
+});
