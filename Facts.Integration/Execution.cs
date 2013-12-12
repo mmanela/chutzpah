@@ -84,8 +84,8 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                            {
-                               new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\includeFileWithSyntaxError.coffee", "unexpected ->"},
-                               new object[] {@"JS\Test\syntaxError.ts", @"JS\Test\includeFileWithSyntaxError.ts", "'=' expected"}
+                               new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\syntaxError.coffee", "unexpected ->"},
+                               new object[] {@"JS\Test\syntaxError.ts", @"JS/Test/syntaxError.ts", "'=' expected"}
                            };
             }
         }
@@ -684,7 +684,7 @@ namespace Chutzpah.Facts.Integration
 
             testRunner.RunTests(scriptPath, callback.Object);
 
-            callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains(errorMessage) && e.Message.Contains(scriptPath))));
+            callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains(errorMessage) && e.Message.Contains(includeScriptPath))));
         }
 
         [Theory]
@@ -695,7 +695,6 @@ namespace Chutzpah.Facts.Integration
             var callback = new Mock<ITestMethodRunnerCallback>();
 
             testRunner.RunTests(scriptPath, callback.Object);
-
 
             callback.Verify(x => x.FileError(It.Is<TestError>(e => !e.Message.Contains("Microsoft JScript runtime error") &&
                                                 !e.Message.Contains("Error Code") &&

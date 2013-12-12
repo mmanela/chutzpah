@@ -22,14 +22,61 @@ and limitations under the License.
 declare var NaN: number;
 declare var Infinity: number;
 
+/**
+  * Evaluates JavaScript code and executes it. 
+  * @param x A String value that contains valid JavaScript code.
+  */
 declare function eval(x: string): any;
+
+/**
+  * Converts A string to an integer.
+  * @param s A string to convert into a number.
+  * @param radix A value between 2 and 36 that specifies the base of the number in numString. 
+  * If this argument is not supplied, strings with a prefix of '0x' are considered hexadecimal.
+  * All other strings are considered decimal.
+  */
 declare function parseInt(s: string, radix?: number): number;
+
+/**
+  * Converts a string to a floating-point number. 
+  * @param string A string that contains a floating-point number. 
+  */
 declare function parseFloat(string: string): number;
+
+/**
+  * Returns a Boolean value that indicates whether a value is the reserved value NaN (not a number). 
+  * @param number A numeric value.
+  */
 declare function isNaN(number: number): boolean;
+
+/** 
+  * Determines whether a supplied number is finite.
+  * @param number Any numeric value.
+  */
 declare function isFinite(number: number): boolean;
+
+/**
+  * Gets the unencoded version of an encoded Uniform Resource Identifier (URI).
+  * @param encodedURI A value representing an encoded URI.
+  */
 declare function decodeURI(encodedURI: string): string;
+
+/**
+  * Gets the unencoded version of an encoded component of a Uniform Resource Identifier (URI).
+  * @param encodedURIComponent A value representing an encoded URI component.
+  */
 declare function decodeURIComponent(encodedURIComponent: string): string;
+
+/** 
+  * Encodes a text string as a valid Uniform Resource Identifier (URI)
+  * @param uri A value representing an encoded URI.
+  */ 
 declare function encodeURI(uri: string): string;
+
+/**
+  * Encodes a text string as a valid component of a Uniform Resource Identifier (URI).
+  * @param uriComponent A value representing an encoded URI component.
+  */
 declare function encodeURIComponent(uriComponent: string): string;
 
 interface PropertyDescriptor {
@@ -46,41 +93,155 @@ interface PropertyDescriptorMap {
 }
 
 interface Object {
+    /** Returns a string representation of an object. */
     toString(): string;
+    
+    /** Returns a date converted to a string using the current locale. */
     toLocaleString(): string;
-    valueOf(): Object;
-    hasOwnProperty(v: string): boolean;
-    isPrototypeOf(v: Object): boolean;
-    propertyIsEnumerable(v: string): boolean;
 
-    [s: string]: any;
+    /** Returns the primitive value of the specified object. */
+    valueOf(): Object;
+
+    /**
+      * Determines whether an object has a property with the specified name. 
+      * @param v A property name.
+      */
+    hasOwnProperty(v: string): boolean;
+
+    /**
+      * Determines whether an object exists in another object's prototype chain. 
+      * @param v Another object whose prototype chain is to be checked.
+      */
+    isPrototypeOf(v: Object): boolean;
+
+    /** 
+      * Determines whether a specified property is enumerable.
+      * @param v A property name.
+      */
+    propertyIsEnumerable(v: string): boolean;
 }
 
+/**
+  * Provides functionality common to all JavaScript objects.
+  */
 declare var Object: {
     new (value?: any): Object;
     (): any;
     (value: any): any;
 
+    /** A reference to the prototype for a class of objects. */
     prototype: Object;
 
+    /** 
+      * Returns the prototype of an object. 
+      * @param o The object that references the prototype.
+      */
     getPrototypeOf(o: any): any;
+
+    /**
+      * Gets the own property descriptor of the specified object. 
+      * An own property descriptor is one that is defined directly on the object and is not inherited from the object's prototype. 
+      * @param o Object that contains the property.
+      * @param p Name of the property.
+    */
     getOwnPropertyDescriptor(o: any, p: string): PropertyDescriptor;
+
+    /** 
+      * Returns the names of the own properties of an object. The own properties of an object are those that are defined directly 
+      * on that object, and are not inherited from the object's prototype. The properties of an object include both fields (objects) and functions.
+      * @param o Object that contains the own properties.
+      */
     getOwnPropertyNames(o: any): string[];
+
+    /** 
+      * Creates an object that has the specified prototype, and that optionally contains specified properties.
+      * @param o Object to use as a prototype. May be null
+      * @param properties JavaScript object that contains one or more property descriptors. 
+      */
     create(o: any, properties?: PropertyDescriptorMap): any;
+
+    /**
+      * Adds a property to an object, or modifies attributes of an existing property. 
+      * @param o Object on which to add or modify the property. This can be a native JavaScript object (that is, a user-defined object or a built in object) or a DOM object.
+      * @param p The property name.
+      * @param attributes Descriptor for the property. It can be for a data property or an accessor property.
+      */
     defineProperty(o: any, p: string, attributes: PropertyDescriptor): any;
+
+    /**
+      * Adds one or more properties to an object, and/or modifies attributes of existing properties. 
+      * @param o Object on which to add or modify the properties. This can be a native JavaScript object or a DOM object.
+      * @param properties JavaScript object that contains one or more descriptor objects. Each descriptor object describes a data property or an accessor property.
+      */
     defineProperties(o: any, properties: PropertyDescriptorMap): any;
+
+    /**
+      * Prevents the modification of attributes of existing properties, and prevents the addition of new properties.
+      * @param o Object on which to lock the attributes. 
+      */
     seal(o: any): any;
+
+    /**
+      * Prevents the modification of existing property attributes and values, and prevents the addition of new properties.
+      * @param o Object on which to lock the attributes.
+      */
     freeze(o: any): any;
+
+    /**
+      * Prevents the addition of new properties to an object.
+      * @param o Object to make non-extensible. 
+      */
     preventExtensions(o: any): any;
+
+    /**
+      * Returns true if existing property attributes cannot be modified in an object and new properties cannot be added to the object.
+      * @param o Object to test. 
+      */
     isSealed(o: any): boolean;
+
+    /**
+      * Returns true if existing property attributes and values cannot be modified in an object, and new properties cannot be added to the object.
+      * @param o Object to test.  
+      */
     isFrozen(o: any): boolean;
+
+    /**
+      * Returns a value that indicates whether new properties can be added to an object.
+      * @param o Object to test. 
+      */
     isExtensible(o: any): boolean;
+
+    /**
+      * Returns the names of the enumerable properties and methods of an object.
+      * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.
+      */
     keys(o: any): string[];
 }
 
+/**
+  * Creates a new function.
+  */
 interface Function {
+    /**
+      * Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
+      * @param thisArg The object to be used as the this object.
+      * @param argArray A set of arguments to be passed to the function.
+      */
     apply(thisArg: any, argArray?: any): any;
+
+    /**
+      * Calls a method of an object, substituting another object for the current object.
+      * @param thisArg The object to be used as the current object.
+      * @param argArray A list of arguments to be passed to the method.
+      */
     call(thisArg: any, ...argArray: any[]): any;
+
+    /**
+      * For a given function, creates a bound function that has the same body as the original function. 
+      * The this object of the bound function is associated with the specified object, and has the specified initial parameters.
+      * @param thisArg An object to which the this keyword can refer inside the new function.
+      * @param argArray A list of arguments to be passed to the new function.
+      */
     bind(thisArg: any, ...argArray: any[]): any;
 
     prototype: any;
@@ -92,6 +253,10 @@ interface Function {
 }
 
 declare var Function: {
+    /** 
+      * Creates a new function.
+      * @param args A list of arguments the function accepts.
+      */
     new (...args: string[]): Function;
     (...args: string[]): Function;
     prototype: Function;
@@ -104,36 +269,161 @@ interface IArguments {
 }
 
 interface String {
+    /** Returns a string representation of a string. */
     toString(): string;
+
+    /**
+      * Returns the character at the specified index.
+      * @param pos The zero-based index of the desired character.
+      */
     charAt(pos: number): string;
+
+    /** 
+      * Returns the Unicode value of the character at the specified location.
+      * @param index The zero-based index of the desired character. If there is no character at the specified index, NaN is returned.
+      */
     charCodeAt(index: number): number;
+
+    /**
+      * Returns a string that contains the concatenation of two or more strings.
+      * @param strings The strings to append to the end of the string.  
+      */
     concat(...strings: string[]): string;
+
+    /**
+      * Returns the position of the first occurrence of a substring. 
+      * @param searchString The substring to search for in the string
+      * @param position The index at which to begin searching the String object. If omitted, search starts at the beginning of the string.
+      */
     indexOf(searchString: string, position?: number): number;
+
+    /**
+      * Returns the last occurrence of a substring in the string.
+      * @param searchString The substring to search for.
+      * @param position The index at which to begin searching. If omitted, the search begins at the end of the string.
+      */
     lastIndexOf(searchString: string, position?: number): number;
+
+    /**
+      * Determines whether two strings are equivalent in the current locale.
+      * @param that String to compare to target string
+      */
     localeCompare(that: string): number;
+
+    /** 
+      * Matches a string with a regular expression, and returns an array containing the results of that search.
+      * @param regexp A variable name or string literal containing the regular expression pattern and flags.
+      */
     match(regexp: string): string[];
+
+    /** 
+      * Matches a string with a regular expression, and returns an array containing the results of that search.
+      * @param regexp A regular expression object that contains the regular expression pattern and applicable flags. 
+      */
     match(regexp: RegExp): string[];
+
+    /**
+      * Replaces text in a string, using a regular expression or search string.
+      * @param searchValue A String object or string literal that represents the regular expression
+      * @param replaceValue A String object or string literal containing the text to replace for every successful match of rgExp in stringObj.
+      */
     replace(searchValue: string, replaceValue: string): string;
+
+    /**
+      * Replaces text in a string, using a regular expression or search string.
+      * @param searchValue A String object or string literal that represents the regular expression
+      * @param replaceValue A function that returns the replacement text.
+      */
     replace(searchValue: string, replaceValue: (substring: string, ...args: any[]) => string): string;
+
+    /**
+      * Replaces text in a string, using a regular expression or search string.
+      * @param searchValue A Regular Expression object containing the regular expression pattern and applicable flags
+      * @param replaceValue A String object or string literal containing the text to replace for every successful match of rgExp in stringObj.
+      */
     replace(searchValue: RegExp, replaceValue: string): string;
+
+    /**
+      * Replaces text in a string, using a regular expression or search string.
+      * @param searchValue A Regular Expression object containing the regular expression pattern and applicable flags
+      * @param replaceValue A function that returns the replacement text.
+      */
     replace(searchValue: RegExp, replaceValue: (substring: string, ...args: any[]) => string): string;
+
+    /**
+      * Finds the first substring match in a regular expression search.
+      * @param regexp The regular expression pattern and applicable flags. 
+      */
     search(regexp: string): number;
+
+    /**
+      * Finds the first substring match in a regular expression search.
+      * @param regexp The regular expression pattern and applicable flags. 
+      */
     search(regexp: RegExp): number;
+
+    /**
+      * Returns a section of a string.
+      * @param start The index to the beginning of the specified portion of stringObj. 
+      * @param end The index to the end of the specified portion of stringObj. The substring includes the characters up to, but not including, the character indicated by end. 
+      * If this value is not specified, the substring continues to the end of stringObj.
+      */
     slice(start: number, end?: number): string;
+
+    /**
+      * Split a string into substrings using the specified separator and return them as an array.
+      * @param separator A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned. 
+      * @param limit A value used to limit the number of elements returned in the array.
+      */
     split(separator: string, limit?: number): string[];
+
+    /**
+      * Split a string into substrings using the specified separator and return them as an array.
+      * @param separator A Regular Express that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned. 
+      * @param limit A value used to limit the number of elements returned in the array.
+      */
     split(separator: RegExp, limit?: number): string[];
+
+    /**
+      * Returns the substring at the specified location within a String object. 
+      * @param start The zero-based index number indicating the beginning of the substring.
+      * @param end Zero-based index number indicating the end of the substring. The substring includes the characters up to, but not including, the character indicated by end.
+      * If end is omitted, the characters from start through the end of the original string are returned.
+      */
     substring(start: number, end?: number): string;
+
+    /** Converts all the alphabetic characters in a string to lowercase. */
     toLowerCase(): string;
+
+    /** Converts all alphabetic characters to lowercase, taking into account the host environment's current locale. */
     toLocaleLowerCase(): string;
+
+    /** Converts all the alphabetic characters in a string to uppercase. */
     toUpperCase(): string;
+
+    /** Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale. */
     toLocaleUpperCase(): string;
+
+    /** Removes the leading and trailing white space and line terminator characters from a string. */
     trim(): string;
 
+    /** Returns the length of a String object. */
     length: number;
 
+    // IE extensions
+    /**
+      * Gets a substring beginning at the specified location and having the specified length.
+      * @param from The starting position of the desired substring. The index of the first character in the string is zero.
+      * @param length The number of characters to include in the returned substring.
+      */
     substr(from: number, length?: number): string;
+
+    [index: number]: string;
 }
 
+/** 
+  * Allows manipulation and formatting of text strings and determination and location of substrings within strings. 
+  */
 declare var String: {
     new (value?: any): String;
     (value?: any): string;
@@ -150,97 +440,324 @@ declare var Boolean: {
 }
 
 interface Number {
+    /**
+      * Returns a string representation of an object.
+      * @param radix Specifies a radix for converting numeric values to strings. This value is only used for numbers.
+      */
     toString(radix?: number): string;
+
+    /** 
+      * Returns a string representing a number in fixed-point notation.
+      * @param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 20, inclusive.
+      */
     toFixed(fractionDigits?: number): string;
+
+    /**
+      * Returns a string containing a number represented in exponential notation.
+      * @param fractionDigits Number of digits after the decimal point. Must be in the range 0 - 20, inclusive.
+      */
     toExponential(fractionDigits?: number): string;
-    toPrecision(precision: number): string;
+
+    /**
+      * Returns a string containing a number represented either in exponential or fixed-point notation with a specified number of digits.
+      * @param precision Number of significant digits. Must be in the range 1 - 21, inclusive.
+      */ 
+    toPrecision(precision?: number): string;
 }
 
+/** An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers. */
 declare var Number: {
     new (value?: any): Number;
     (value?: any): number;
     prototype: Number;
+
+    /** The largest number that can be represented in JavaScript. Equal to approximately 1.79E+308. */
     MAX_VALUE: number;
+
+    /** The closest number to zero that can be represented in JavaScript. Equal to approximately 5.00E-324. */
     MIN_VALUE: number;
+
+    /** 
+      * A value that is not a number.
+      * In equality comparisons, NaN does not equal any value, including itself. To test whether a value is equivalent to NaN, use the isNaN function.
+      */
     NaN: number;
+
+    /** 
+      * A value that is less than the largest negative number that can be represented in JavaScript.
+      * JavaScript displays NEGATIVE_INFINITY values as -infinity. 
+      */
     NEGATIVE_INFINITY: number;
+
+    /**
+      * A value greater than the largest number that can be represented in JavaScript. 
+      * JavaScript displays POSITIVE_INFINITY values as infinity. 
+      */
     POSITIVE_INFINITY: number;
 }
 
 interface Math {
+    /** The mathematical constant e. This is Euler's number, the base of natural logarithms. */
     E: number;
+    /** The natural logarithm of 10. */
     LN10: number;
+    /** The natural logarithm of 2. */
     LN2: number;
+    /** The base-2 logarithm of e. */
     LOG2E: number;
+    /** The base-10 logarithm of e. */
     LOG10E: number;
+    /** Pi. This is the ratio of the circumference of a circle to its diameter. */
     PI: number;
+    /** The square root of 0.5, or, equivalently, one divided by the square root of 2. */
     SQRT1_2: number;
+    /** The square root of 2. */
     SQRT2: number;
+    /**
+      * Returns the absolute value of a number (the value without regard to whether it is positive or negative). 
+      * For example, the absolute value of -5 is the same as the absolute value of 5.
+      * @param x A numeric expression for which the absolute value is needed.
+      */
     abs(x: number): number;
+    /**
+      * Returns the arc cosine (or inverse cosine) of a number. 
+      * @param x A numeric expression.
+      */ 
     acos(x: number): number;
+    /** 
+      * Returns the arcsine of a number. 
+      * @param x A numeric expression.
+      */
     asin(x: number): number;
+    /**
+      * Returns the arctangent of a number. 
+      * @param x A numeric expression for which the arctangent is needed.
+      */
     atan(x: number): number;
+    /**
+      * Returns the angle (in radians) from the X axis to a point (y,x).
+      * @param y A numeric expression representing the cartesian y-coordinate.
+      * @param x A numeric expression representing the cartesian x-coordinate.
+      */
     atan2(y: number, x: number): number;
+    /**
+      * Returns the smallest number greater than or equal to its numeric argument. 
+      * @param x A numeric expression.
+      */
     ceil(x: number): number;
+    /**
+      * Returns the cosine of a number. 
+      * @param x A numeric expression that contains an angle measured in radians.
+      */ 
     cos(x: number): number;
+    /**
+      * Returns e (the base of natural logarithms) raised to a power. 
+      * @param x A numeric expression representing the power of e.
+      */
     exp(x: number): number;
+    /**
+      * Returns the greatest number less than or equal to its numeric argument. 
+      * @param x A numeric expression.
+      */
     floor(x: number): number;
+    /**
+      * Returns the natural logarithm (base e) of a number. 
+      * @param x A numeric expression.
+      */
     log(x: number): number;
+    /**
+      * Returns the larger of a set of supplied numeric expressions. 
+      * @param values Numeric expressions to be evaluated.
+      */
     max(...values: number[]): number;
+    /**
+      * Returns the smaller of a set of supplied numeric expressions. 
+      * @param values Numeric expressions to be evaluated.
+      */
     min(...values: number[]): number;
+    /**
+      * Returns the value of a base expression taken to a specified power. 
+      * @param x The base value of the expression.
+      * @param y The exponent value of the expression.
+      */
     pow(x: number, y: number): number;
+    /** Returns a pseudorandom number between 0 and 1. */ 
     random(): number;
+    /** 
+      * Returns a supplied numeric expression rounded to the nearest number.
+      * @param x The value to be rounded to the nearest number.
+      */
     round(x: number): number;
+    /**
+      * Returns the sine of a number.
+      * @param x A numeric expression that contains an angle measured in radians.
+      */
     sin(x: number): number;
+    /**
+      * Returns the square root of a number.
+      * @param x A numeric expression.
+      */
     sqrt(x: number): number;
+    /**
+      * Returns the tangent of a number.
+      * @param x A numeric expression that contains an angle measured in radians.
+      */
     tan(x: number): number;
 }
-
+/** An intrinsic object that provides basic mathematics functionality and constants. */
 declare var Math: Math;
 
+/** Enables basic storage and retrieval of dates and times. */
 interface Date {
+    /** Returns a string representation of a date. The format of the string depends on the locale. */
     toString(): string;
+    /** Returns a date as a string value. */
     toDateString(): string;
+    /** Returns a time as a string value. */
     toTimeString(): string;
+    /** Returns a value as a string value appropriate to the host environment's current locale. */
     toLocaleString(): string;
+    /** Returns a date as a string value appropriate to the host environment's current locale. */
     toLocaleDateString(): string;
+    /** Returns a time as a string value appropriate to the host environment's current locale. */
     toLocaleTimeString(): string;
+    /** Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC. */
     valueOf(): number;
+    /** Gets the time value in milliseconds. */
     getTime(): number;
+    /** Gets the year, using local time. */
     getFullYear(): number;
+    /** Gets the year using Universal Coordinated Time (UTC). */
     getUTCFullYear(): number;
+    /** Gets the month, using local time. */
     getMonth(): number;
+    /** Gets the month of a Date object using Universal Coordinated Time (UTC). */
     getUTCMonth(): number;
+    /** Gets the day-of-the-month, using local time. */
     getDate(): number;
+    /** Gets the day-of-the-month, using Universal Coordinated Time (UTC). */
     getUTCDate(): number;
+    /** Gets the day of the week, using local time. */
     getDay(): number;
+    /** Gets the day of the week using Universal Coordinated Time (UTC). */
     getUTCDay(): number;
+    /** Gets the hours in a date, using local time. */
     getHours(): number;
+    /** Gets the hours value in a Date object using Universal Coordinated Time (UTC). */
     getUTCHours(): number;
+    /** Gets the minutes of a Date object, using local time. */
     getMinutes(): number;
+    /** Gets the minutes of a Date object using Universal Coordinated Time (UTC). */
     getUTCMinutes(): number;
+    /** Gets the seconds of a Date object, using local time. */
     getSeconds(): number;
+    /** Gets the seconds of a Date object using Universal Coordinated Time (UTC). */
     getUTCSeconds(): number;
+    /** Gets the milliseconds of a Date, using local time. */
     getMilliseconds(): number;
+    /** Gets the milliseconds of a Date object using Universal Coordinated Time (UTC). */
     getUTCMilliseconds(): number;
+    /** Gets the difference in minutes between the time on the local computer and Universal Coordinated Time (UTC). */
     getTimezoneOffset(): number;
+    /** 
+      * Sets the date and time value in the Date object.
+      * @param time A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT. 
+      */
     setTime(time: number): void;
+    /**
+      * Sets the milliseconds value in the Date object using local time. 
+      * @param ms A numeric value equal to the millisecond value.
+      */
     setMilliseconds(ms: number): void;
+    /** 
+      * Sets the milliseconds value in the Date object using Universal Coordinated Time (UTC).
+      * @param ms A numeric value equal to the millisecond value. 
+      */
     setUTCMilliseconds(ms: number): void;
+
+    /**
+      * Sets the seconds value in the Date object using local time. 
+      * @param sec A numeric value equal to the seconds value.
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setSeconds(sec: number, ms?: number): void;
+    /**
+      * Sets the seconds value in the Date object using Universal Coordinated Time (UTC).
+      * @param sec A numeric value equal to the seconds value.
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setUTCSeconds(sec: number, ms?: number): void;
+    /**
+      * Sets the minutes value in the Date object using local time. 
+      * @param min A numeric value equal to the minutes value. 
+      * @param sec A numeric value equal to the seconds value. 
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setMinutes(min: number, sec?: number, ms?: number): void;
+    /**
+      * Sets the minutes value in the Date object using Universal Coordinated Time (UTC).
+      * @param min A numeric value equal to the minutes value. 
+      * @param sec A numeric value equal to the seconds value. 
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setUTCMinutes(min: number, sec?: number, ms?: number): void;
+    /**
+      * Sets the hour value in the Date object using local time.
+      * @param hours A numeric value equal to the hours value.
+      * @param min A numeric value equal to the minutes value.
+      * @param sec A numeric value equal to the seconds value. 
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setHours(hours: number, min?: number, sec?: number, ms?: number): void;
+    /**
+      * Sets the hours value in the Date object using Universal Coordinated Time (UTC).
+      * @param hours A numeric value equal to the hours value.
+      * @param min A numeric value equal to the minutes value.
+      * @param sec A numeric value equal to the seconds value. 
+      * @param ms A numeric value equal to the milliseconds value.
+      */
     setUTCHours(hours: number, min?: number, sec?: number, ms?: number): void;
+    /**
+      * Sets the numeric day-of-the-month value of the Date object using local time. 
+      * @param date A numeric value equal to the day of the month.
+      */
     setDate(date: number): void;
+    /** 
+      * Sets the numeric day of the month in the Date object using Universal Coordinated Time (UTC).
+      * @param date A numeric value equal to the day of the month. 
+      */
     setUTCDate(date: number): void;
+    /** 
+      * Sets the month value in the Date object using local time. 
+      * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. 
+      * @param date A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used.
+      */
     setMonth(month: number, date?: number): void;
+    /**
+      * Sets the month value in the Date object using Universal Coordinated Time (UTC).
+      * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.
+      * @param date A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.
+      */
     setUTCMonth(month: number, date?: number): void;
+    /**
+      * Sets the year of the Date object using local time.
+      * @param year A numeric value for the year.
+      * @param month A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified.
+      * @param date A numeric value equal for the day of the month.
+      */
     setFullYear(year: number, month?: number, date?: number): void;
+    /**
+      * Sets the year value in the Date object using Universal Coordinated Time (UTC).
+      * @param year A numeric value equal to the year.
+      * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied.
+      * @param date A numeric value equal to the day of the month.
+      */
     setUTCFullYear(year: number, month?: number, date?: number): void;
+    /** Returns a date converted to a string using Universal Coordinated Time (UTC). */
     toUTCString(): string;
+    /** Returns a date as a string value in ISO format. */
     toISOString(): string;
+    /** Used by the JSON.stringify method to enable the transformation of an object's data for JavaScript Object Notation (JSON) serialization. */
     toJSON(key?: any): string;
 }
 
@@ -251,7 +768,21 @@ declare var Date: {
     new (year: number, month: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
     (): string;
     prototype: Date;
+    /**
+      * Parses a string containing a date, and returns the number of milliseconds between that date and midnight, January 1, 1970.
+      * @param s A date string
+      */
     parse(s: string): number;
+    /**
+      * Returns the number of milliseconds between midnight, January 1, 1970 Universal Coordinated Time (UTC) (or GMT) and the specified date. 
+      * @param year The full year designation is required for cross-century date accuracy. If year is between 0 and 99 is used, then year is assumed to be 1900 + year.
+      * @param month The month as an number between 0 and 11 (January to December).
+      * @param date The date as an number between 1 and 31.
+      * @param hours Must be supplied if minutes is supplied. An number from 0 to 23 (midnight to 11pm) that specifies the hour.
+      * @param minutes Must be supplied if seconds is supplied. An number from 0 to 59 that specifies the minutes.
+      * @param seconds Must be supplied if milliseconds is supplied. An number from 0 to 59 that specifies the seconds.
+      * @param ms An number from 0 to 999 that specifies the milliseconds.
+      */
     UTC(year: number, month: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): number;
     now(): number;
 }
@@ -290,11 +821,28 @@ interface RegExpExecArray {
 
 
 interface RegExp {
+    /** 
+      * Executes a search on a string using a regular expression pattern, and returns an array containing the results of that search.
+      * @param string The String object or string literal on which to perform the search.
+      */
     exec(string: string): RegExpExecArray;
+    
+    /** 
+      * Returns a Boolean value that indicates whether or not a pattern exists in a searched string.
+      * @param string String on which to perform the search.
+      */
     test(string: string): boolean;
+
+    /** Returns a copy of the text of the regular expression pattern. Read-only. The rgExp argument is a Regular expression object. It can be a variable name or a literal. */
     source: string;
+    
+    /** Returns a Boolean value indicating the state of the global flag (g) used with a regular expression. Default is false. Read-only. */
     global: boolean;
+
+    /** Returns a Boolean value indicating the state of the ignoreCase flag (i) used with a regular expression. Default is false. Read-only. */
     ignoreCase: boolean;
+
+    /** Returns a Boolean value indicating the state of the multiline flag (m) used with a regular expression. Default is false. Read-only. */
     multiline: boolean;
 
     lastIndex: number;
@@ -378,54 +926,213 @@ declare var URIError: {
 }
 
 interface JSON {
+    /**
+      * Converts a JavaScript Object Notation (JSON) string into an object.
+      * @param text A valid JSON string.
+      * @param reviver A function that transforms the results. This function is called for each member of the object. 
+      * If a member contains nested objects, the nested objects are transformed before the parent object is. 
+      */
     parse(text: string, reviver?: (key: any, value: any) => any): any;
+    /**
+      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+      * @param value A JavaScript value, usually an object or array, to be converted.
+      */
     stringify(value: any): string;
+    /**
+      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+      * @param value A JavaScript value, usually an object or array, to be converted.
+      * @param replacer A function that transforms the results.
+      */
     stringify(value: any, replacer: (key: string, value: any) => any): string;
+    /**
+      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+      * @param value A JavaScript value, usually an object or array, to be converted.
+      * @param replacer Array that transforms the results.
+      */
     stringify(value: any, replacer: any[]): string;
+    /**
+      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+      * @param value A JavaScript value, usually an object or array, to be converted.
+      * @param replacer A function that transforms the results.
+      * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
+      */
     stringify(value: any, replacer: (key: string, value: any) => any, space: any): string;
+    /**
+      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+      * @param value A JavaScript value, usually an object or array, to be converted.
+      * @param replacer Array that transforms the results.
+      * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
+      */
     stringify(value: any, replacer: any[], space: any): string;
 }
+/**
+  * An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
+  */
 declare var JSON: JSON;
+
 
 /////////////////////////////
 /// ECMAScript Array API (specially handled by compiler)
 /////////////////////////////
 
 interface Array<T> {
+    /**
+      * Returns a string representation of an array.
+      */
     toString(): string;
     toLocaleString(): string;
+    /**
+      * Combines two or more arrays.
+      * @param items Additional items to add to the end of array1.
+      */
     concat<U extends T[]>(...items: U[]): T[];
+    /**
+      * Combines two or more arrays.
+      * @param items Additional items to add to the end of array1.
+      */
     concat(...items: T[]): T[];
+    /**
+      * Adds all the elements of an array separated by the specified separator string.
+      * @param separator A string used to separate one element of an array from the next in the resulting String. If omitted, the array elements are separated with a comma.
+      */
     join(separator?: string): string;
+    /**
+      * Removes the last element from an array and returns it.
+      */
     pop(): T;
+    /**
+      * Appends new elements to an array, and returns the new length of the array.
+      * @param items New elements of the Array.
+      */
     push(...items: T[]): number;
+    /**
+      * Reverses the elements in an Array. 
+      */
     reverse(): T[];
+    /**
+      * Removes the first element from an array and returns it.
+      */
     shift(): T;
+    /** 
+      * Returns a section of an array.
+      * @param start The beginning of the specified portion of the array.
+      * @param end The end of the specified portion of the array.
+      */
     slice(start: number, end?: number): T[];
+
+    /**
+      * Sorts an array.
+      * @param compareFn The name of the function used to determine the order of the elements. If omitted, the elements are sorted in ascending, ASCII character order.
+      */
     sort(compareFn?: (a: T, b: T) => number): T[];
+
+    /**
+      * Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+      * @param start The zero-based location in the array from which to start removing elements.
+      */
     splice(start: number): T[];
+
+    /**
+      * Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+      * @param start The zero-based location in the array from which to start removing elements.
+      * @param deleteCount The number of elements to remove.
+      * @param items Elements to insert into the array in place of the deleted elements.
+      */
     splice(start: number, deleteCount: number, ...items: T[]): T[];
+
+    /**
+      * Inserts new elements at the start of an array.
+      * @param items  Elements to insert at the start of the Array.
+      */
     unshift(...items: T[]): number;
 
+    /**
+      * Returns the index of the first occurrence of a value in an array.
+      * @param searchElement The value to locate in the array.
+      * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.
+      */
     indexOf(searchElement: T, fromIndex?: number): number;
+
+    /**
+      * Returns the index of the last occurrence of a specified value in an array.
+      * @param searchElement The value to locate in the array.
+      * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at the last index in the array.
+      */
     lastIndexOf(searchElement: T, fromIndex?: number): number;
+
+    /**
+      * Determines whether all the members of an array satisfy the specified test.
+      * @param callbackfn A function that accepts up to three arguments. The every method calls the callbackfn function for each element in array1 until the callbackfn returns false, or until the end of the array.
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+      */
     every(callbackfn: (value: T, index: number, array: T[]) => boolean, thisArg?: any): boolean;
+
+    /**
+      * Determines whether the specified callback function returns true for any element of an array.
+      * @param callbackfn A function that accepts up to three arguments. The some method calls the callbackfn function for each element in array1 until the callbackfn returns true, or until the end of the array.
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+      */
     some(callbackfn: (value: T, index: number, array: T[]) => boolean, thisArg?: any): boolean;
+
+    /**
+      * Performs the specified action for each element in an array.
+      * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array. 
+      * @param thisArg  An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+      */
     forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+
+    /**
+      * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+      * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array. 
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+      */
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+
+    /**
+      * Returns the elements of an array that meet the condition specified in a callback function. 
+      * @param callbackfn A function that accepts up to three arguments. The filter method calls the callbackfn function one time for each element in the array. 
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+      */
     filter(callbackfn: (value: T, index: number, array: T[]) => boolean, thisArg?: any): T[];
+
+    /**
+      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+      */
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: T): T;
+    /**
+      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
+
+    /** 
+      * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. 
+      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+      */
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: T): T;
+    /** 
+      * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. 
+      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+      */
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
 
+    /**
+      * Gets or sets the length of the array. This is a number one higher than the highest element defined in an array.
+      */
     length: number;
 
     [n: number]: T;
 }
 declare var Array: {
+    new(arrayLength?: number): any[];
     new <T>(arrayLength: number): T[];
     new <T>(...items: T[]): T[];
+    (arrayLength?: number): any[];
     <T>(arrayLength: number): T[];
     <T>(...items: T[]): T[];
     isArray(arg: any): boolean;
@@ -437,9 +1144,19 @@ declare var Array: {
 /// IE10 ECMAScript Extensions
 /////////////////////////////
 
+/**
+  * Represents a raw buffer of binary data, which is used to store data for the 
+  * different typed arrays. ArrayBuffers cannot be read from or written to directly, 
+  * but can be passed to a typed array or DataView Object to interpret the raw 
+  * buffer as needed. 
+  */
 interface ArrayBuffer {
+    /**
+      * Read-only. The length of the ArrayBuffer (in bytes).
+      */
     byteLength: number;
 }
+
 declare var ArrayBuffer: {
     prototype: ArrayBuffer;
     new (byteLength: number): ArrayBuffer;
@@ -451,14 +1168,54 @@ interface ArrayBufferView {
     byteLength: number;
 }
 
+/**
+  * A typed array of 8-bit integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Int8Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
+
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Int8Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Int8Array view of the ArrayBuffer store for this array, referencing the elements at begin, inclusive, up to end, exclusive. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Int8Array;
 }
 declare var Int8Array: {
@@ -470,14 +1227,53 @@ declare var Int8Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Uint8Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Uint8Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Uint8Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Uint8Array;
 }
 declare var Uint8Array: {
@@ -489,14 +1285,53 @@ declare var Uint8Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 16-bit integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Int16Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Int16Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Int16Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Int16Array;
 }
 declare var Int16Array: {
@@ -508,14 +1343,53 @@ declare var Int16Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 16-bit unsigned integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Uint16Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Uint16Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Uint16Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray.
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Uint16Array;
 }
 declare var Uint16Array: {
@@ -527,14 +1401,53 @@ declare var Uint16Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 32-bit integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Int32Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Int32Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Int32Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Int32Array;
 }
 declare var Int32Array: {
@@ -546,14 +1459,53 @@ declare var Int32Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 32-bit unsigned integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Uint32Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Uint32Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Int8Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Uint32Array;
 }
 declare var Uint32Array: {
@@ -565,14 +1517,53 @@ declare var Uint32Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 32-bit float values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Float32Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Float32Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Float32Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Float32Array;
 }
 declare var Float32Array: {
@@ -584,14 +1575,53 @@ declare var Float32Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * A typed array of 64-bit float values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised.
+  */
 interface Float64Array extends ArrayBufferView {
+    /**
+      * The size in bytes of each element in the array. 
+      */
     BYTES_PER_ELEMENT: number;
+
+    /**
+      * The length of the array.
+      */
     length: number;
     [index: number]: number;
+
+    /**
+      * Gets the element at the specified index.
+      * @param index The index at which to get the element of the array.
+      */
     get(index: number): number;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
     set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: Float64Array, offset?: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
     set(array: number[], offset?: number): void;
+
+    /**
+      * Gets a new Float64Array view of the ArrayBuffer Object store for this array, specifying the first and last members of the subarray. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
     subarray(begin: number, end?: number): Float64Array;
 }
 declare var Float64Array: {
@@ -603,23 +1633,118 @@ declare var Float64Array: {
     BYTES_PER_ELEMENT: number;
 }
 
+/**
+  * You can use a DataView object to read and write the different kinds of binary data to any location in the ArrayBuffer. 
+  */
 interface DataView extends ArrayBufferView {
+    /**
+      * Gets the Int8 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getInt8(byteOffset: number): number;
+
+    /**
+      * Gets the Uint8 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getUint8(byteOffset: number): number;
+
+    /**
+      * Gets the Int16 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getInt16(byteOffset: number, littleEndian?: boolean): number;
+
+    /**
+      * Gets the Uint16 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getUint16(byteOffset: number, littleEndian?: boolean): number;
+
+    /**
+      * Gets the Int32 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getInt32(byteOffset: number, littleEndian?: boolean): number;
+
+    /**
+      * Gets the Uint32 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getUint32(byteOffset: number, littleEndian?: boolean): number;
+
+    /**
+      * Gets the Float32 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getFloat32(byteOffset: number, littleEndian?: boolean): number;
+
+    /**
+      * Gets the Float64 value at the specified byte offset from the start of the view. There is no alignment constraint; multi-byte values may be fetched from any offset. 
+      * @param byteOffset The place in the buffer at which the value should be retrieved.
+      */
     getFloat64(byteOffset: number, littleEndian?: boolean): number;
 
+    /**
+      * Stores an Int8 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      */
     setInt8(byteOffset: number, value: number): void;
+
+    /**
+      * Stores an Uint8 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      */
     setUint8(byteOffset: number, value: number): void;
+
+    /**
+      * Stores an Int16 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setInt16(byteOffset: number, value: number, littleEndian?: boolean): void;
+
+    /**
+      * Stores an Uint16 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setUint16(byteOffset: number, value: number, littleEndian?: boolean): void;
+
+    /**
+      * Stores an Int32 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setInt32(byteOffset: number, value: number, littleEndian?: boolean): void;
+
+    /**
+      * Stores an Uint32 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setUint32(byteOffset: number, value: number, littleEndian?: boolean): void;
+
+    /**
+      * Stores an Float32 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setFloat32(byteOffset: number, value: number, littleEndian?: boolean): void;
+
+    /**
+      * Stores an Float64 value at the specified byte offset from the start of the view. 
+      * @param byteOffset The place in the buffer at which the value should be set.
+      * @param value The value to set.
+      * @param littleEndian If false or undefined, a big-endian value should be written, otherwise a little-endian value should be written.
+      */
     setFloat64(byteOffset: number, value: number, littleEndian?: boolean): void;
 }
 declare var DataView: {
@@ -787,7 +1912,7 @@ interface String {
     localeCompare(that: string, locale: string, options?: Intl.CollatorOptions): number;
 }
 
-interface Numer {
+interface Number {
     toLocaleString(locales: string[], options?: Intl.NumberFormatOptions): string;
     toLocaleString(locale: string, options?: Intl.NumberFormatOptions): string;
 }
@@ -816,34 +1941,125 @@ interface NavigatorID {
 }
 
 interface HTMLTableElement extends HTMLElement, MSDataBindingTableExtensions, MSDataBindingExtensions, DOML2DeprecatedBackgroundStyle, DOML2DeprecatedBackgroundColorStyle {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: string;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorLight: any;
+    /**
+      * Sets or retrieves the amount of space between cells in a table.
+      */
     cellSpacing: string;
+    /**
+      * Retrieves the tFoot object of the table.
+      */
     tFoot: HTMLTableSectionElement;
+    /**
+      * Sets or retrieves the way the border frame around the table is displayed.
+      */
     frame: string;
+    /**
+      * Sets or retrieves the border color of the object. 
+      */
     borderColor: any;
+    /**
+      * Sets or retrieves the number of horizontal rows contained in the object.
+      */
     rows: HTMLCollection;
+    /**
+      * Sets or retrieves which dividing lines (inner borders) are displayed.
+      */
     rules: string;
+    /**
+      * Sets or retrieves the number of columns in the table.
+      */
     cols: number;
+    /**
+      * Sets or retrieves a description and/or structure of the object.
+      */
     summary: string;
+    /**
+      * Retrieves the caption object of a table.
+      */
     caption: HTMLTableCaptionElement;
+    /**
+      * Retrieves a collection of all tBody objects in the table. Objects in this collection are in source order.
+      */
     tBodies: HTMLCollection;
+    /**
+      * Retrieves the tHead object of the table.
+      */
     tHead: HTMLTableSectionElement;
+    /**
+      * Sets or retrieves a value that indicates the table alignment.
+      */
     align: string;
+    /**
+      * Retrieves a collection of all cells in the table row or in the entire table.
+      */
     cells: HTMLCollection;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: any;
+    /**
+      * Sets or retrieves the amount of space between the border of the cell and the content of the cell.
+      */
     cellPadding: string;
+    /**
+      * Sets or retrieves the width of the border to draw around the object.
+      */
     border: string;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorDark: any;
+    /**
+      * Removes the specified row (tr) from the element and from the rows collection.
+      * @param index Number that specifies the zero-based position in the rows collection of the row to remove.
+      */
     deleteRow(index?: number): void;
+    /**
+      * Creates an empty tBody element in the table.
+      */
     createTBody(): HTMLElement;
+    /**
+      * Deletes the caption element and its contents from the table.
+      */
     deleteCaption(): void;
+    /**
+      * Creates a new row (tr) in the table, and adds the row to the rows collection.
+      * @param index Number that specifies where to insert the row in the rows collection. The default value is -1, which appends the new row to the end of the rows collection.
+      */
     insertRow(index?: number): HTMLElement;
+    /**
+      * Deletes the tFoot element and its contents from the table.
+      */
     deleteTFoot(): void;
+    /**
+      * Returns the tHead element object if successful, or null otherwise.
+      */
     createTHead(): HTMLElement;
+    /**
+      * Deletes the tHead element and its contents from the table.
+      */
     deleteTHead(): void;
+    /**
+      * Creates an empty caption element in the table.
+      */
     createCaption(): HTMLElement;
+    /**
+      * Moves a table row to a new position.
+      * @param indexFrom Number that specifies the index in the rows collection of the table row that is moved.
+      * @param indexTo Number that specifies where the row is moved within the rows collection.
+      */
     moveRow(indexFrom?: number, indexTo?: number): Object;
+    /**
+      * Creates an empty tFoot element in the table.
+      */
     createTFoot(): HTMLElement;
 }
 declare var HTMLTableElement: {
@@ -1199,7 +2415,13 @@ declare var HTMLTableDataCellElement: {
 }
 
 interface HTMLBaseElement extends HTMLElement {
+    /**
+      * Sets or retrieves the window or frame at which to target content.
+      */
     target: string;
+    /**
+      * Gets or sets the baseline URL on which relative links are based.
+      */
     href: string;
 }
 declare var HTMLBaseElement: {
@@ -1271,7 +2493,6 @@ interface Element extends Node, NodeSelector, ElementTraversal {
     setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
     getAttributeNode(name: string): Attr;
     fireEvent(eventName: string, eventObj?: any): boolean;
-    getElementsByTagName(name: string): NodeList;
     getElementsByTagName(name: "a"): NodeListOf<HTMLAnchorElement>;
     getElementsByTagName(name: "abbr"): NodeListOf<HTMLElement>;
     getElementsByTagName(name: "address"): NodeListOf<HTMLElement>;
@@ -1375,6 +2596,7 @@ interface Element extends Node, NodeSelector, ElementTraversal {
     getElementsByTagName(name: "var"): NodeListOf<HTMLElement>;
     getElementsByTagName(name: "video"): NodeListOf<HTMLVideoElement>;
     getElementsByTagName(name: "wbr"): NodeListOf<HTMLElement>;
+    getElementsByTagName(name: string): NodeList;
     getClientRects(): ClientRectList;
     setAttributeNode(newAttr: Attr): Attr;
     removeAttributeNode(oldAttr: Attr): Attr;
@@ -1415,6 +2637,9 @@ declare var SVGLineElement: {
 }
 
 interface HTMLParagraphElement extends HTMLElement, DOML2DeprecatedTextFlowControl {
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text. 
+      */
     align: string;
 }
 declare var HTMLParagraphElement: {
@@ -1423,7 +2648,13 @@ declare var HTMLParagraphElement: {
 }
 
 interface HTMLAreasCollection extends HTMLCollection {
+    /**
+      * Removes an element from the collection.
+      */
     remove(index?: number): void;
+    /**
+      * Adds an element to the areas, controlRange, or options collection.
+      */
     add(element: HTMLElement, before?: any): void;
 }
 declare var HTMLAreasCollection: {
@@ -1598,23 +2829,68 @@ declare var SVGTextPositioningElement: {
 
 interface HTMLAppletElement extends HTMLElement, DOML2DeprecatedMarginStyle, DOML2DeprecatedBorderStyle, DOML2DeprecatedAlignmentStyle, MSDataBindingExtensions, MSDataBindingRecordSetExtensions {
     width: number;
+    /**
+      * Sets or retrieves the Internet media type for the code associated with the object.
+      */
     codeType: string;
     object: string;
     form: HTMLFormElement;
     code: string;
+    /**
+      * Sets or retrieves a character string that can be used to implement your own archive functionality for the object.
+      */
     archive: string;
+    /**
+      * Sets or retrieves a text alternative to the graphic.
+      */
     alt: string;
+    /**
+      * Sets or retrieves a message to be displayed while an object is loading.
+      */
     standby: string;
+    /**
+      * Sets or retrieves the class identifier for the object.
+      */
     classid: string;
+    /**
+      * Sets or retrieves the shape of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the URL, often with a bookmark extension (#name), to use as a client-side image map.
+      */
     useMap: string;
+    /**
+      * Sets or retrieves the URL that references the data of the object.
+      */
     data: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: string;
+    /**
+      * Gets or sets the optional alternative HTML script to execute if the object fails to load.
+      */
     altHtml: string;
+    /**
+      * Address of a pointer to the document this page or frame contains. If there is no document, then null will be returned.
+      */
     contentDocument: Document;
+    /**
+      * Sets or retrieves the URL of the component.
+      */
     codeBase: string;
+    /**
+      * Sets or retrieves a character string that can be used to implement your own declare functionality for the object.
+      */
     declare: boolean;
+    /**
+      * Returns the content type of the object.
+      */
     type: string;
+    /**
+      * Retrieves a string of the URL where the object tag can be found. This is often the href of the document that the object is in, or the value set by a base element.
+      */
     BaseHref: string;
 }
 declare var HTMLAppletElement: {
@@ -1635,6 +2911,9 @@ interface DocumentEvent {
 }
 
 interface HTMLOListElement extends HTMLElement, DOML2DeprecatedListSpaceReduction, DOML2DeprecatedListNumberingAndBulletStyle {
+    /**
+      * The starting number.
+      */
     start: number;
 }
 declare var HTMLOListElement: {
@@ -1677,17 +2956,59 @@ declare var StyleMedia: {
 
 interface HTMLSelectElement extends HTMLElement, MSHTMLCollectionExtensions, MSDataBindingExtensions {
     options: HTMLSelectElement;
+    /**
+      * Sets or retrieves the value which is returned to the server when the form control is submitted.
+      */
     value: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in. 
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the number of rows in the list box. 
+      */
     size: number;
+    /**
+      * Sets or retrieves the number of objects in a collection.
+      */
     length: number;
+    /**
+      * Sets or retrieves the index of the selected option in a select object.
+      */
     selectedIndex: number;
+    /**
+      * Sets or retrieves the Boolean value indicating whether multiple items can be selected from a list.
+      */
     multiple: boolean;
+    /**
+      * Retrieves the type of select control based on the value of the MULTIPLE attribute.
+      */
     type: string;
+    /**
+      * Removes an element from the collection.
+      * @param index Number that specifies the zero-based index of the element to remove from the collection.
+      */
     remove(index?: number): void;
+    /**
+      * Adds an element to the areas, controlRange, or options collection.
+      * @param element Variant of type Number that specifies the index position in the collection where the element is placed. If no value is given, the method places the element at the end of the collection.
+      * @param before Variant of type Object that specifies an element to insert before, or null to append the object to the collection. 
+      */
     add(element: HTMLElement, before?: any): void;
+    /**
+      * Retrieves a select object or an object from an options collection.
+      * @param name Variant of type Number or String that specifies the object or collection to retrieve. If this parameter is an integer, it is the zero-based index of the object. If this parameter is a string, all objects with matching name or id properties are retrieved, and a collection is returned if more than one match is made.
+      * @param index Variant of type Number that specifies the zero-based index of the object to retrieve when a collection is returned.
+      */
     item(name?: any, index?: any): any;
+    /**
+      * Retrieves a select object or an object from an options collection.
+      * @param namedItem A String that specifies the name or id property of the object to retrieve. A collection is returned if more than one match is made.
+      */
     namedItem(name: string): any;
     [name: string]: any;
 }
@@ -1748,7 +3069,13 @@ interface SVGTests {
 }
 
 interface HTMLBlockElement extends HTMLElement, DOML2DeprecatedTextFlowControl {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: number;
+    /**
+      * Sets or retrieves reference information about the object.
+      */
     cite: string;
 }
 declare var HTMLBlockElement: {
@@ -1796,11 +3123,29 @@ declare var MSSelection: {
 }
 
 interface HTMLMetaElement extends HTMLElement {
+    /**
+      * Gets or sets information used to bind the value of a content attribute of a meta element to an HTTP response header.
+      */
     httpEquiv: string;
+    /**
+      * Sets or retrieves the value specified in the content attribute of the meta object.
+      */
     name: string;
+    /**
+      * Gets or sets meta-information to associate with httpEquiv or name.
+      */
     content: string;
+    /**
+      * Sets or retrieves the URL property that will be loaded after the specified time has elapsed. 
+      */
     url: string;
+    /**
+      * Sets or retrieves a scheme to be used in interpreting the value of a property specified for the object.
+      */
     scheme: string;
+    /**
+      * Sets or retrieves the character set used to encode the object.
+      */
     charset: string;
 }
 declare var HTMLMetaElement: {
@@ -1863,6 +3208,9 @@ declare var SVGScriptElement: {
 }
 
 interface HTMLDDElement extends HTMLElement {
+    /**
+      * Sets or retrieves whether the browser automatically performs wordwrap.
+      */
     noWrap: boolean;
 }
 declare var HTMLDDElement: {
@@ -1908,13 +3256,37 @@ declare var SVGViewElement: {
 }
 
 interface HTMLLinkElement extends HTMLElement, LinkStyle {
+    /**
+      * Sets or retrieves the relationship between the object and the destination of the link.
+      */
     rel: string;
+    /**
+      * Sets or retrieves the window or frame at which to target content.
+      */
     target: string;
+    /**
+      * Sets or retrieves a destination URL or an anchor point.
+      */
     href: string;
+    /**
+      * Sets or retrieves the media type.
+      */
     media: string;
+    /**
+      * Sets or retrieves the relationship between the object and the destination of the link.
+      */
     rev: string;
+    /**
+      * Sets or retrieves the MIME type of the object.
+      */
     type: string;
+    /**
+      * Sets or retrieves the character set used to encode the object.
+      */
     charset: string;
+    /**
+      * Sets or retrieves the language code of the object.
+      */
     hreflang: string;
 }
 declare var HTMLLinkElement: {
@@ -1932,6 +3304,9 @@ interface SVGLocatable {
 }
 
 interface HTMLFontElement extends HTMLElement, DOML2DeprecatedColorProperty, DOML2DeprecatedSizeProperty {
+    /**
+      * Sets or retrieves the current typeface family.
+      */
     face: string;
 }
 declare var HTMLFontElement: {
@@ -1996,7 +3371,13 @@ declare var SVGAnimatedTransformList: {
 }
 
 interface HTMLTableCaptionElement extends HTMLElement {
+    /**
+      * Sets or retrieves the alignment of the caption or legend.
+      */
     align: string;
+    /**
+      * Sets or retrieves whether the caption appears at the top or bottom of the table.
+      */
     vAlign: string;
 }
 declare var HTMLTableCaptionElement: {
@@ -2005,12 +3386,33 @@ declare var HTMLTableCaptionElement: {
 }
 
 interface HTMLOptionElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the ordinal position of an option in a list box.
+      */
     index: number;
+    /**
+      * Sets or retrieves the status of an option.
+      */
     defaultSelected: boolean;
+    /**
+      * Sets or retrieves the value which is returned to the server when the form control is submitted.
+      */
     value: string;
+    /**
+      * Sets or retrieves the text string specified by the option tag.
+      */
     text: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves a value that you can use to implement your own label functionality for the object.
+      */
     label: string;
+    /**
+      * Sets or retrieves whether the option in the list box is the default item.
+      */
     selected: boolean;
     create(): HTMLOptionElement;
 }
@@ -2020,7 +3422,13 @@ declare var HTMLOptionElement: {
 }
 
 interface HTMLMapElement extends HTMLElement {
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Retrieves a collection of the area objects defined for the given map object.
+      */
     areas: HTMLAreasCollection;
 }
 declare var HTMLMapElement: {
@@ -2220,7 +3628,7 @@ interface Window extends EventTarget, MSEventAttachmentTarget, WindowLocalStorag
     oninput: (ev: Event) => any;
     addEventListener(type: "input", listener: (ev: Event) => any, useCapture?: boolean): void;
     performance: Performance;
-    alert(message?: string): void;
+    alert(message?: any): void;
     scroll(x?: number, y?: number): void;
     focus(): void;
     scrollTo(x?: number, y?: number): void;
@@ -2316,8 +3724,17 @@ declare var MSCSSProperties: {
 }
 
 interface HTMLCollection extends MSHTMLCollectionExtensions {
+    /**
+      * Sets or retrieves the number of objects in a collection.
+      */
     length: number;
+    /**
+      * Retrieves an object from various collections.
+      */
     item(nameOrIndex?: any, optionalIndex?: any): Element;
+    /**
+      * Retrieves a select object or an object from an options collection.
+      */
     namedItem(name: string): Element;
     [name: number]: Element;
 }
@@ -2331,21 +3748,69 @@ interface SVGExternalResourcesRequired {
 }
 
 interface HTMLImageElement extends HTMLElement, MSImageResourceExtensions, MSDataBindingExtensions, MSResourceMetadata {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: number;
+    /**
+      * Sets or retrieves the vertical margin for the object.
+      */
     vspace: number;
+    /**
+      * The original height of the image resource before sizing.
+      */
     naturalHeight: number;
+    /**
+      * Sets or retrieves a text alternative to the graphic.
+      */
     alt: string;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * The address or URL of the a media resource that is to be considered.
+      */
     src: string;
+    /**
+      * Sets or retrieves the URL, often with a bookmark extension (#name), to use as a client-side image map.
+      */
     useMap: string;
+    /**
+      * The original width of the image resource before sizing.
+      */
     naturalWidth: number;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: number;
+    /**
+      * Specifies the properties of a border drawn around an object.
+      */
     border: string;
+    /**
+      * Sets or retrieves the width of the border to draw around the object.
+      */
     hspace: number;
+    /**
+      * Sets or retrieves a Uniform Resource Identifier (URI) to a long description of the object.
+      */
     longDesc: string;
+    /**
+      * Contains the hypertext reference (HREF) of the URL.
+      */
     href: string;
+    /**
+      * Sets or retrieves whether the image is a server-side image map.
+      */
     isMap: boolean;
+    /**
+      * Retrieves whether the object is fully loaded.
+      */
     complete: boolean;
     create(): HTMLImageElement;
 }
@@ -2355,19 +3820,61 @@ declare var HTMLImageElement: {
 }
 
 interface HTMLAreaElement extends HTMLElement {
+    /**
+      * Sets or retrieves the protocol portion of a URL.
+      */
     protocol: string;
+    /**
+      * Sets or retrieves the substring of the href property that follows the question mark.
+      */
     search: string;
+    /**
+      * Sets or retrieves a text alternative to the graphic.
+      */
     alt: string;
+    /**
+      * Sets or retrieves the coordinates of the object.
+      */
     coords: string;
+    /**
+      * Sets or retrieves the host name part of the location or URL. 
+      */
     hostname: string;
+    /**
+      * Sets or retrieves the port number associated with a URL.
+      */
     port: string;
+    /**
+      * Sets or retrieves the file name or path specified by the object.
+      */
     pathname: string;
+    /**
+      * Sets or retrieves the hostname and port number of the location or URL.
+      */
     host: string;
+    /**
+      * Sets or retrieves the subsection of the href property that follows the number sign (#).
+      */
     hash: string;
+    /**
+      * Sets or retrieves the window or frame at which to target content.
+      */
     target: string;
+    /**
+      * Sets or retrieves a destination URL or an anchor point.
+      */
     href: string;
+    /**
+      * Sets or gets whether clicks in this region cause action.
+      */
     noHref: boolean;
+    /**
+      * Sets or retrieves the shape of the object.
+      */
     shape: string;
+    /** 
+      * Returns a string representation of an object.
+      */
     toString(): string;
 }
 declare var HTMLAreaElement: {
@@ -2405,11 +3912,26 @@ declare var SVGAngle: {
 }
 
 interface HTMLButtonElement extends HTMLElement, MSDataBindingExtensions {
+    /** 
+      * Sets or retrieves the default or selected value of the control.
+      */
     value: string;
     status: any;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
+    /** 
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Gets the classification and default behavior of the button.
+      */
     type: string;
+    /**
+      * Creates a TextRange object for the element.
+      */
     createTextRange(): TextRange;
 }
 declare var HTMLButtonElement: {
@@ -2418,8 +3940,17 @@ declare var HTMLButtonElement: {
 }
 
 interface HTMLSourceElement extends HTMLElement {
+    /**
+      * The address or URL of the a media resource that is to be considered.
+      */
     src: string;
+    /**
+      * Gets or sets the intended media type of the media source.
+     */
     media: string;
+    /**
+     * Gets or sets the MIME type of a media resource.
+     */
     type: string;
 }
 declare var HTMLSourceElement: {
@@ -2469,464 +4000,2854 @@ declare var KeyboardEvent: {
 }
 
 interface Document extends Node, NodeSelector, MSEventAttachmentTarget, DocumentEvent, MSResourceMetadata, MSNodeExtensions {
+    /**
+      * Retrieves the collection of user agents and versions declared in the X-UA-Compatible
+      */
     compatible: MSCompatibleInfoCollection;
+    /**
+      * Fires when the user presses a key.
+      * @param ev The keyboard event
+      */
     onkeydown: (ev: KeyboardEvent) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "keydown", listener: (ev: KeyboardEvent) => any, useCapture?: boolean): void;
+    /**
+      * Fires when the user releases a key.
+      * @param ev The keyboard event
+      */
     onkeyup: (ev: KeyboardEvent) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "keyup", listener: (ev: KeyboardEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets the implementation object of the current document. 
+      */
     implementation: DOMImplementation;
+    /**
+      * Fires when the user resets a form. 
+      * @param ev The event.
+      */
     onreset: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "reset", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Retrieves a collection of all script objects in the document.
+      */
     scripts: HTMLCollection;
+
+    /**
+      * Fires when the user presses the F1 key while the browser is the active window. 
+      * @param ev The event.
+      */
     onhelp: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "help", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /** 
+      * Fires on the target object when the user moves the mouse out of a valid drop target during a drag operation.
+      * @param ev The drag event.
+      */
     ondragleave: (ev: DragEvent) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dragleave", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets or sets the character set used to encode the object.
+      */
     charset: string;
+
+    /**
+      * Fires for an element just prior to setting focus on that element.
+      * @param ev The focus event
+      */
     onfocusin: (ev: FocusEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "focusin", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
+
+    /** 
+      * Sets or gets the color of the links that the user has visited.
+      */
     vlinkColor: string;
+
+    /**
+      * Occurs when the seek operation ends. 
+      * @param ev The event.
+      */
     onseeked: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "seeked", listener: (ev: Event) => any, useCapture?: boolean): void;
     security: string;
+
+    /**
+      * Contains the title of the document.
+      */
     title: string;
+
+    /**
+      * Retrieves a collection of namespace objects.
+      */
     namespaces: MSNamespaceInfoCollection;
+
+    /**
+      * Gets the default character set from the current regional language settings.
+      */
     defaultCharset: string;
+
+    /**
+      * Retrieves a collection of all embed objects in the document.
+      */
     embeds: HTMLCollection;
+
+    /**
+      * Retrieves a collection of styleSheet objects representing the style sheets that correspond to each instance of a link or style object in the document.
+      */
     styleSheets: StyleSheetList;
+
+    /**
+      * Retrieves a collection of all window objects defined by the given document or defined by the document associated with the given window.
+      */
     frames: Window;
+
+    /**
+      * Occurs when the duration attribute is updated. 
+      * @param ev The event.
+      */
     ondurationchange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "durationchange", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Returns a reference to the collection of elements contained by the object.
+      */
     all: HTMLCollection;
+
+    /**
+      * Retrieves a collection, in source order, of all form objects in the document.
+      */
     forms: HTMLCollection;
+
+    /** 
+      * Fires when the object loses the input focus. 
+      * @param ev The focus event.
+      */
     onblur: (ev: FocusEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "blur", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Sets or retrieves a value that indicates the reading order of the object. 
+      */
     dir: string;
+
+    /**
+      * Occurs when the media element is reset to its initial state. 
+      * @param ev The event.
+      */
     onemptied: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "emptied", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Sets or gets a value that indicates whether the document can be edited.
+      */
     designMode: string;
+
+    /**
+      * Occurs when the current playback position is moved. 
+      * @param ev The event.
+      */
     onseeking: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "seeking", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the activeElement is changed from the current object to another object in the parent document.
+      * @param ev The UI Event
+      */
     ondeactivate: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "deactivate", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when playback is possible, but would require further buffering. 
+      * @param ev The event.
+      */
     oncanplay: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "canplay", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the data set exposed by a data source object changes. 
+      * @param ev The event.
+      */
     ondatasetchanged: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "datasetchanged", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when rows are about to be deleted from the recordset.
+      * @param ev The event 
+      */
     onrowsdelete: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "rowsdelete", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
     Script: MSScriptHost;
+
+    /**
+      * Occurs when Internet Explorer begins looking for media data. 
+      * @param ev The event.
+      */
     onloadstart: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "loadstart", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets the URL for the document, stripped of any character encoding.
+      */
     URLUnencoded: string;
+
     defaultView: Window;
+
+    /**
+      * Fires when the user is about to make a control selection of the object.
+      * @param ev The event.
+      */
     oncontrolselect: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "controlselect", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /** 
+      * Fires on the target element when the user drags the object to a valid drop target.
+      * @param ev The drag event.
+      */
     ondragenter: (ev: DragEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dragenter", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
     onsubmit: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "submit", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Returns the character encoding used to create the webpage that is loaded into the document object.
+      */
     inputEncoding: string;
+
+    /**
+      * Gets the object that has the focus when the parent document has focus.
+      */
     activeElement: Element;
+
+    /**
+      * Fires when the contents of the object or selection have changed. 
+      * @param ev The event.
+      */
     onchange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "change", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Retrieves a collection of all a objects that specify the href property and all area objects in the document.
+      */
     links: HTMLCollection;
+
+    /**
+      * Retrieves an autogenerated, unique identifier for the object. 
+      */
     uniqueID: string;
+
+    /**
+      * Sets or gets the URL for the current document. 
+      */
     URL: string;
+
+    /**
+      * Fires immediately before the object is set as the active element.
+      * @param ev The event.
+      */
     onbeforeactivate: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "beforeactivate", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
     head: HTMLHeadElement;
     cookie: string;
     xmlEncoding: string;
     oncanplaythrough: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "canplaythrough", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /** 
+      * Retrieves the document compatibility mode of the document.
+      */
     documentMode: number;
+
     characterSet: string;
+
+    /**
+      * Retrieves a collection of all a objects that have a name and/or id property. Objects in this collection are in HTML source order.
+      */
     anchors: HTMLCollection;
+
     onbeforeupdate: (ev: MSEventObj) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "beforeupdate", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /** 
+      * Fires to indicate that all data is available from the data source object. 
+      * @param ev The event.
+      */
     ondatasetcomplete: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "datasetcomplete", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
     plugins: HTMLCollection;
+
+    /**
+      * Occurs if the load operation has been intentionally halted. 
+      * @param ev The event.
+      */
     onsuspend: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "suspend", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets the root svg element in the document hierarchy.
+      */
     rootElement: SVGSVGElement;
+
+    /**
+      * Retrieves a value that indicates the current state of the object.
+      */
     readyState: string;
+
+    /**
+      * Gets the URL of the location that referred the user to the current page.
+      */
     referrer: string;
+
+    /**
+      * Sets or gets the color of all active links in the document.
+      */
     alinkColor: string;
+
+    /**
+      * Fires on a databound object when an error occurs while updating the associated data in the data source object. 
+      * @param ev The event.
+      */
     onerrorupdate: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "errorupdate", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets a reference to the container object of the window.
+      */
     parentWindow: Window;
+
+    /**
+      * Fires when the user moves the mouse pointer outside the boundaries of the object. 
+      * @param ev The mouse event.
+      */
     onmouseout: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mouseout", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when a user clicks a button in a Thumbnail Toolbar of a webpage running in Site Mode.
+      * @param ev The event.
+      */
     onmsthumbnailclick: (ev: MSSiteModeEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "msthumbnailclick", listener: (ev: MSSiteModeEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the wheel button is rotated. 
+      * @param ev The mouse event
+      */
     onmousewheel: (ev: MouseWheelEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mousewheel", listener: (ev: MouseWheelEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the volume is changed, or playback is muted or unmuted.
+      * @param ev The event.
+      */
     onvolumechange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "volumechange", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /** 
+      * Fires when data changes in the data provider.
+      * @param ev The event.
+      */
     oncellchange: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "cellchange", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires just before the data source control changes the current row in the object. 
+      * @param ev The event.
+      */
     onrowexit: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "rowexit", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires just after new rows are inserted in the current recordset.
+      * @param ev The event.
+      */
     onrowsinserted: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "rowsinserted", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets or sets the version attribute specified in the declaration of an XML document.
+      */
     xmlVersion: string;
+
     msCapsLockWarningOff: boolean;
+
+    /**
+      * Fires when a property changes on the object.
+      * @param ev The event.
+      */
     onpropertychange: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "propertychange", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires on the source object when the user releases the mouse at the close of a drag operation.
+      * @param ev The event.
+      */
     ondragend: (ev: DragEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dragend", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets an object representing the document type declaration associated with the current document. 
+      */
     doctype: DocumentType;
+
+    /**
+      * Fires on the target element continuously while the user drags the object over a valid drop target.
+      * @param ev The event.
+      */
     ondragover: (ev: DragEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dragover", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Deprecated. Sets or retrieves a value that indicates the background color behind the object. 
+      */
     bgColor: string;
+
+    /**
+      * Fires on the source object when the user starts to drag a text selection or selected object. 
+      * @param ev The event.
+      */
     ondragstart: (ev: DragEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dragstart", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user releases a mouse button while the mouse is over the object. 
+      * @param ev The mouse event.
+      */
     onmouseup: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mouseup", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires on the source object continuously during a drag operation.
+      * @param ev The event.
+      */
     ondrag: (ev: DragEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "drag", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user moves the mouse pointer into the object.
+      * @param ev The mouse event.
+      */
     onmouseover: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mouseover", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Sets or gets the color of the document links. 
+      */
     linkColor: string;
+
+    /**
+      * Occurs when playback is paused.
+      * @param ev The event.
+      */
     onpause: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "pause", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user clicks the object with either mouse button. 
+      * @param ev The mouse event.
+      */
     onmousedown: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mousedown", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user clicks the left mouse button on the object
+      * @param ev The mouse event.
+      */
     onclick: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "click", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when playback stops because the next frame of a video resource is not available. 
+      * @param ev The event.
+      */
     onwaiting: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "waiting", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user clicks the Stop button or leaves the Web page.
+      * @param ev The event.
+      */
     onstop: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)[rolls
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "stop", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when an item is removed from a Jump List of a webpage running in Site Mode. 
+      * @param ev The event.
+      */
     onmssitemodejumplistitemremoved: (ev: MSSiteModeEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mssitemodejumplistitemremoved", listener: (ev: MSSiteModeEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Retrieves a collection of all applet objects in the document.
+      */
     applets: HTMLCollection;
+
+    /**
+      * Specifies the beginning and end of the document body.
+      */
     body: HTMLElement;
+
+    /**
+      * Sets or gets the security domain of the document. 
+      */
     domain: string;
+
     xmlStandalone: boolean;
+
+    /**
+      * Represents the active selection, which is a highlighted block of text or other elements in the document that a user or a script can carry out some action on.
+      */
     selection: MSSelection;
+
+    /**
+      * Occurs when the download has stopped. 
+      * @param ev The event.
+      */
     onstalled: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "stalled", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user moves the mouse over the object. 
+      * @param ev The mouse event.
+      */
     onmousemove: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "mousemove", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
-    documentElement: Element;
+
+    /**
+      * Gets a reference to the root node of the document. 
+      */
+    documentElement: HTMLElement;
+
+    /**
+      * Fires before an object contained in an editable element enters a UI-activated state or when an editable container object is control selected.
+      * @param ev The event.
+      */
     onbeforeeditfocus: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "beforeeditfocus", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the playback rate is increased or decreased. 
+      * @param ev The event.
+      */
     onratechange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "ratechange", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs to indicate progress while downloading media data. 
+      * @param ev The event.
+      */
     onprogress: (ev: any) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "progress", listener: (ev: any) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user double-clicks the object.
+      * @param ev The mouse event.
+      */
     ondblclick: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dblclick", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the user clicks the right mouse button in the client area, opening the context menu. 
+      * @param ev The mouse event.
+      */
     oncontextmenu: (ev: MouseEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "contextmenu", listener: (ev: MouseEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the duration and dimensions of the media have been determined.
+      * @param ev The event.
+      */
     onloadedmetadata: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "loadedmetadata", listener: (ev: Event) => any, useCapture?: boolean): void;
     media: string;
+
+    /**
+      * Fires when an error occurs during object loading.
+      * @param ev The event.
+      */
     onerror: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "error", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the play method is requested. 
+      * @param ev The event.
+      */
     onplay: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "play", listener: (ev: Event) => any, useCapture?: boolean): void;
     onafterupdate: (ev: MSEventObj) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "afterupdate", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the audio or video has started playing. 
+      * @param ev The event.
+      */
     onplaying: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "playing", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Retrieves a collection, in source order, of img objects in the document.
+      */
     images: HTMLCollection;
+
+    /**
+      * Contains information about the current URL. 
+      */
     location: Location;
+
+    /**
+      * Fires when the user aborts the download.
+      * @param ev The event.
+      */
     onabort: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires for the current element with focus immediately after moving focus to another element. 
+      * @param ev The event.
+      */
     onfocusout: (ev: FocusEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "focusout", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the selection state of a document changes.
+      * @param ev The event.
+      */
     onselectionchange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "selectionchange", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when a local DOM Storage area is written to disk.
+      * @param ev The event.
+      */
     onstoragecommit: (ev: StorageEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "storagecommit", listener: (ev: StorageEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires periodically as data arrives from data source objects that asynchronously transmit their data. 
+      * @param ev The event.
+      */
     ondataavailable: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "dataavailable", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the state of the object has changed.
+      * @param ev The event
+      */
     onreadystatechange: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "readystatechange", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets the date that the page was last modified, if the page supplies one. 
+      */
     lastModified: string;
+
+    /**
+      * Fires when the user presses an alphanumeric key.
+      * @param ev The event.
+      */
     onkeypress: (ev: KeyboardEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "keypress", listener: (ev: KeyboardEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when media data is loaded at the current playback position. 
+      * @param ev The event.
+      */
     onloadeddata: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "loadeddata", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires immediately before the activeElement is changed from the current object to another object in the parent document.
+      * @param ev The event.
+      */
     onbeforedeactivate: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "beforedeactivate", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the object is set as the active element.
+      * @param ev The event.
+      */
     onactivate: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "activate", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+
     onselectstart: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "selectstart", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the object receives focus. 
+      * @param ev The event.
+      */
     onfocus: (ev: FocusEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "focus", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Sets or gets the foreground (text) color of the document.
+      */
     fgColor: string;
+
+    /**
+      * Occurs to indicate the current playback position.
+      * @param ev The event.
+      */
     ontimeupdate: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "timeupdate", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires when the current selection changes.
+      * @param ev The event.
+      */
     onselect: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "select", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
     ondrop: (ev: DragEvent) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "drop", listener: (ev: DragEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Occurs when the end of playback is reached. 
+      * @param ev The event
+      */
     onended: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "ended", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Gets a value that indicates whether standards-compliant mode is switched on for the object.
+      */
     compatMode: string;
+
+    /**
+      * Fires when the user repositions the scroll box in the scroll bar on the object. 
+      * @param ev The event.
+      */
     onscroll: (ev: UIEvent) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "scroll", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires to indicate that the current row has changed in the data source and new data values are available on the object. 
+      * @param ev The event.
+      */
     onrowenter: (ev: MSEventObj) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "rowenter", listener: (ev: MSEventObj) => any, useCapture?: boolean): void;
+
+    /**
+      * Fires immediately after the browser loads the object. 
+      * @param ev The event.
+      */
     onload: (ev: Event) => any;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
     oninput: (ev: Event) => any;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event to register
+      * @param listener The event handler function to associate with the event. 
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for: 
+      * true (true)
+      *   Register the event handler for the capturing phase. 
+      * false (false)
+      *   Register the event handler for the bubbling phase.
+      */
     addEventListener(type: "input", listener: (ev: Event) => any, useCapture?: boolean): void;
+
+    /**
+      * Returns the current value of the document, range, or current selection for the given command.
+      * @param commandId String that specifies a command identifier.
+      */
     queryCommandValue(commandId: string): string;
+
     adoptNode(source: Node): Node;
+
+    /**
+      * Returns a Boolean value that indicates whether the specified command is in the indeterminate state.
+      * @param commandId String that specifies a command identifier.
+      */
     queryCommandIndeterm(commandId: string): boolean;
+
     getElementsByTagNameNS(namespaceURI: string, localName: string): NodeList;
     createProcessingInstruction(target: string, data: string): ProcessingInstruction;
+
+    /**
+      * Executes a command on the current document, current selection, or the given range.
+      * @param commandId String that specifies the command to execute. This command can be any of the command identifiers that can be executed in script.
+      * @param showUI Display the user interface, defaults to false.
+      * @param value Value to assign.
+      */
     execCommand(commandId: string, showUI?: boolean, value?: any): boolean;
+
+    /**
+      * Returns the element for the specified x coordinate and the specified y coordinate. 
+      * @param x The x-offset
+      * @param y The y-offset
+      */
     elementFromPoint(x: number, y: number): Element;
     createCDATASection(data: string): CDATASection;
+
+    /**
+      * Retrieves the string associated with a command.
+      * @param commandId String that contains the identifier of a command. This can be any command identifier given in the list of Command Identifiers. 
+      */
     queryCommandText(commandId: string): string;
+
+    /**
+      * Writes one or more HTML expressions to a document in the specified window. 
+      * @param content Specifies the text and HTML tags to write.
+      */
     write(...content: string[]): void;
+
+    /**
+      * Allows updating the print settings for the page.
+      */
     updateSettings(): void;
-    createElement(tagName: string): HTMLElement;
+
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "a"): HTMLAnchorElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "abbr"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "address"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "area"): HTMLAreaElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "article"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "aside"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "audio"): HTMLAudioElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "b"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "base"): HTMLBaseElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "bdi"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "bdo"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "blockquote"): HTMLQuoteElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "body"): HTMLBodyElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "br"): HTMLBRElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "button"): HTMLButtonElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "canvas"): HTMLCanvasElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "caption"): HTMLTableCaptionElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "cite"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "code"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "col"): HTMLTableColElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "colgroup"): HTMLTableColElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "datalist"): HTMLDataListElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "dd"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "del"): HTMLModElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "dfn"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "div"): HTMLDivElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "dl"): HTMLDListElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "dt"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "em"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "embed"): HTMLEmbedElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "fieldset"): HTMLFieldSetElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "figcaption"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "figure"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "footer"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "form"): HTMLFormElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h1"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h2"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h3"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h4"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h5"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "h6"): HTMLHeadingElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "head"): HTMLHeadElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "header"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "hgroup"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "hr"): HTMLHRElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "html"): HTMLHtmlElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "i"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "iframe"): HTMLIFrameElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "img"): HTMLImageElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "input"): HTMLInputElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "ins"): HTMLModElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "kbd"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "label"): HTMLLabelElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "legend"): HTMLLegendElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "li"): HTMLLIElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "link"): HTMLLinkElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "main"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "map"): HTMLMapElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "mark"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "menu"): HTMLMenuElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "meta"): HTMLMetaElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "nav"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "noscript"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "object"): HTMLObjectElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "ol"): HTMLOListElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "optgroup"): HTMLOptGroupElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "option"): HTMLOptionElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "p"): HTMLParagraphElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "param"): HTMLParamElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "pre"): HTMLPreElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "progress"): HTMLProgressElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "q"): HTMLQuoteElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "rp"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "rt"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "ruby"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "s"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "samp"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "script"): HTMLScriptElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "section"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "select"): HTMLSelectElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "small"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "source"): HTMLSourceElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "span"): HTMLSpanElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "strong"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "style"): HTMLStyleElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "sub"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "summary"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "sup"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "table"): HTMLTableElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "tbody"): HTMLTableSectionElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "td"): HTMLTableDataCellElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "textarea"): HTMLTextAreaElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "tfoot"): HTMLTableSectionElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "th"): HTMLTableHeaderCellElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "thead"): HTMLTableSectionElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "title"): HTMLTitleElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "tr"): HTMLTableRowElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "track"): HTMLTrackElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "u"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "ul"): HTMLUListElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "var"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "video"): HTMLVideoElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
     createElement(tagName: "wbr"): HTMLElement;
+    /**
+      * Creates an instance of the element for the specified tag.
+      * @param tagName The name of an element.
+      */
+    createElement(tagName: string): HTMLElement;
+    
+    /**
+      * Removes mouse capture from the object in the current document.
+      */
     releaseCapture(): void;
+
+    /**
+      * Writes one or more HTML expressions, followed by a carriage return, to a document in the specified window. 
+      * @param content The text and HTML tags to write.
+      */
     writeln(...content: string[]): void;
     createElementNS(namespaceURI: string, qualifiedName: string): Element;
+
+    /**
+      * Opens a new window and loads a document specified by a given URL. Also, opens a new window that uses the url parameter and the name parameter to collect the output of the write method and the writeln method.
+      * @param url Specifies a MIME type for the document.
+      * @param name Specifies the name of the window. This name is used as the value for the TARGET attribute on a form or an anchor element.
+      * @param features Contains a list of items separated by commas. Each item consists of an option and a value, separated by an equals sign (for example, "fullscreen=yes, toolbar=yes"). The following values are supported.
+      * @param replace Specifies whether the existing entry for the document is replaced in the history list.
+      */
     open(url?: string, name?: string, features?: string, replace?: boolean): any;
+
+    /**
+      * Returns a Boolean value that indicates whether the current command is supported on the current range.
+      * @param commandId Specifies a command identifier.
+      */
     queryCommandSupported(commandId: string): boolean;
+
+    /**
+      * Creates a TreeWalker object that you can use to traverse filtered lists of nodes or elements in a document.
+      * @param root The root element or node to start traversing on.
+      * @param whatToShow The type of nodes or elements to appear in the node list. For more information, see whatToShow.
+      * @param filter A custom NodeFilter function to use.
+      * @param entityReferenceExpansion A flag that specifies whether entity reference nodes are expanded.
+      */
     createTreeWalker(root: Node, whatToShow: number, filter: NodeFilter, entityReferenceExpansion: boolean): TreeWalker;
     createAttributeNS(namespaceURI: string, qualifiedName: string): Attr;
+
+    /** 
+      * Returns a Boolean value that indicates whether a specified command can be successfully executed using execCommand, given the current state of the document.
+      * @param commandId Specifies a command identifier.
+      */
     queryCommandEnabled(commandId: string): boolean;
+
+    /**
+      * Causes the element to receive the focus and executes the code specified by the onfocus event.
+      */
     focus(): void;
+
+    /**
+      * Closes an output stream and forces the sent data to display.
+      */
     close(): void;
+
     getElementsByClassName(classNames: string): NodeList;
     importNode(importedNode: Node, deep: boolean): Node;
+
+    /**
+      *  Returns an empty range object that has both of its boundary points positioned at the beginning of the document. 
+      */
     createRange(): Range;
+
+    /**
+      * Fires a specified event on the object.
+      * @param eventName Specifies the name of the event to fire.
+      * @param eventObj Object that specifies the event object from which to obtain event object properties.
+      */
     fireEvent(eventName: string, eventObj?: any): boolean;
+
+    /**
+      * Creates a comment object with the specified data.
+      * @param data Sets the comment object's data.
+      */
     createComment(data: string): Comment;
-    getElementsByTagName(tagname: string): NodeList;
+
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "a"): NodeListOf<HTMLAnchorElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "abbr"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "address"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "area"): NodeListOf<HTMLAreaElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "article"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "aside"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "audio"): NodeListOf<HTMLAudioElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "b"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "base"): NodeListOf<HTMLBaseElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "bdi"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "bdo"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "blockquote"): NodeListOf<HTMLQuoteElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "body"): NodeListOf<HTMLBodyElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "br"): NodeListOf<HTMLBRElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "button"): NodeListOf<HTMLButtonElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "canvas"): NodeListOf<HTMLCanvasElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "caption"): NodeListOf<HTMLTableCaptionElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "cite"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "code"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "col"): NodeListOf<HTMLTableColElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "colgroup"): NodeListOf<HTMLTableColElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "datalist"): NodeListOf<HTMLDataListElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "dd"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "del"): NodeListOf<HTMLModElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "dfn"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "div"): NodeListOf<HTMLDivElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "dl"): NodeListOf<HTMLDListElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "dt"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "em"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "embed"): NodeListOf<HTMLEmbedElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "fieldset"): NodeListOf<HTMLFieldSetElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "figcaption"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "figure"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "footer"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "form"): NodeListOf<HTMLFormElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h1"): NodeListOf<HTMLHeadingElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h2"): NodeListOf<HTMLHeadingElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h3"): NodeListOf<HTMLHeadingElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h4"): NodeListOf<HTMLHeadingElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h5"): NodeListOf<HTMLHeadingElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "h6"): NodeListOf<HTMLHeadingElement>;
+    /**
+     * Retrieves a collection of objects based on the specified element name.
+     * @param name Specifies the name of an element.
+     */
     getElementsByTagName(name: "head"): NodeListOf<HTMLHeadElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "header"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "hgroup"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "hr"): NodeListOf<HTMLHRElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "html"): NodeListOf<HTMLHtmlElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "i"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "iframe"): NodeListOf<HTMLIFrameElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "img"): NodeListOf<HTMLImageElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "input"): NodeListOf<HTMLInputElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "ins"): NodeListOf<HTMLModElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "kbd"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "label"): NodeListOf<HTMLLabelElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "legend"): NodeListOf<HTMLLegendElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "li"): NodeListOf<HTMLLIElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "link"): NodeListOf<HTMLLinkElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "main"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "map"): NodeListOf<HTMLMapElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "mark"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "menu"): NodeListOf<HTMLMenuElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "meta"): NodeListOf<HTMLMetaElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "nav"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "noscript"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "object"): NodeListOf<HTMLObjectElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "ol"): NodeListOf<HTMLOListElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "optgroup"): NodeListOf<HTMLOptGroupElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "option"): NodeListOf<HTMLOptionElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "p"): NodeListOf<HTMLParagraphElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "param"): NodeListOf<HTMLParamElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "pre"): NodeListOf<HTMLPreElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "progress"): NodeListOf<HTMLProgressElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "q"): NodeListOf<HTMLQuoteElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "rp"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "rt"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "ruby"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "s"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "samp"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "script"): NodeListOf<HTMLScriptElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "section"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "select"): NodeListOf<HTMLSelectElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "small"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "source"): NodeListOf<HTMLSourceElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "span"): NodeListOf<HTMLSpanElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "strong"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "style"): NodeListOf<HTMLStyleElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "sub"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "summary"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "sup"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "table"): NodeListOf<HTMLTableElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "tbody"): NodeListOf<HTMLTableSectionElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "td"): NodeListOf<HTMLTableDataCellElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "textarea"): NodeListOf<HTMLTextAreaElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "tfoot"): NodeListOf<HTMLTableSectionElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "th"): NodeListOf<HTMLTableHeaderCellElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "thead"): NodeListOf<HTMLTableSectionElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "title"): NodeListOf<HTMLTitleElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "tr"): NodeListOf<HTMLTableRowElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "track"): NodeListOf<HTMLTrackElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "u"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "ul"): NodeListOf<HTMLUListElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "var"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "video"): NodeListOf<HTMLVideoElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
     getElementsByTagName(name: "wbr"): NodeListOf<HTMLElement>;
+    /**
+      * Retrieves a collection of objects based on the specified element name.
+      * @param name Specifies the name of an element.
+      */
+    getElementsByTagName(name: string): NodeList;
+    
+    /**
+      * Creates a new document.
+      */
     createDocumentFragment(): DocumentFragment;
+
+    /**
+      * Creates a style sheet for the document. 
+      * @param href Specifies how to add the style sheet to the document. If a file name is specified for the URL, the style information is added as a link object. If the URL contains style information, it is added to the style object.
+      * @param index Specifies the index that indicates where the new style sheet is inserted in the styleSheets collection. The default is to insert the new style sheet at the end of the collection.
+      */
     createStyleSheet(href?: string, index?: number): CSSStyleSheet;
+
+    /**
+      * Gets a collection of objects based on the value of the NAME or ID attribute.
+      * @param elementName Gets a collection of objects based on the value of the NAME or ID attribute.
+      */
     getElementsByName(elementName: string): NodeList;
+
+    /**
+      * Returns a Boolean value that indicates the current state of the command.
+      * @param commandId String that specifies a command identifier.
+      */
     queryCommandState(commandId: string): boolean;
+
+    /**
+      * Gets a value indicating whether the object currently has focus.
+      */
     hasFocus(): boolean;
+
+    /**
+      * Displays help information for the given command identifier.
+      * @param commandId Displays help information for the given command identifier.
+      */
     execCommandShowHelp(commandId: string): boolean;
+
+    /**
+      * Creates an attribute object with a specified name.
+      * @param name String that sets the attribute object's name.
+      */
     createAttribute(name: string): Attr;
+
+    /**
+      * Creates a text string from the specified value. 
+      * @param data String that specifies the nodeValue property of the text node.
+      */
     createTextNode(data: string): Text;
+
+    /**
+      * Creates a NodeIterator object that you can use to traverse filtered lists of nodes or elements in a document. 
+      * @param root The root element or node to start traversing on.
+      * @param whatToShow The type of nodes or elements to appear in the node list
+      * @param filter A custom NodeFilter function to use. For more information, see filter. Use null for no filter.
+      * @param entityReferenceExpansion A flag that specifies whether entity reference nodes are expanded.
+      */
     createNodeIterator(root: Node, whatToShow: number, filter: NodeFilter, entityReferenceExpansion: boolean): NodeIterator;
+
+    /**
+      * Generates an event object to pass event context information when you use the fireEvent method.
+      * @param eventObj An object that specifies an existing event object on which to base the new object.
+      */
     createEventObject(eventObj?: any): MSEventObj;
+
+    /**
+      * Returns an object representing the current selection of the document that is loaded into the object displaying a webpage.
+      */
     getSelection(): Selection;
+
+    /**
+      * Returns a reference to the first object with the specified value of the ID or NAME attribute.
+      * @param elementId String that specifies the ID value. Case-insensitive.
+      */
     getElementById(elementId: string): HTMLElement;
-    addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
+
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event type to register. 
+      * @param listener The event handler function to associate with the event.
+      * @param useCapture Boolean value that specifies the event phase to add the event handler for: 
+      *        true (true)
+      *           Register the event handler for the capturing phase. 
+      *        false (false)
+      *           Register the event handler for the bubbling phase. 
+      */
     addEventListener(type: "DOMContentLoaded", listener: (ev: Event) => any, useCapture?: boolean): void;
+    /**
+      * Registers an event handler for the specified event type. 
+      * @param type The type of event type to register. 
+      * @param listener The event handler function to associate with the event.
+      * @param useCapture Boolean value that specifies the event phase to add the event handler for: 
+      *        true (true)
+      *           Register the event handler for the capturing phase. 
+      *        false (false)
+      *           Register the event handler for the bubbling phase. 
+      */
+    addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
 }
+
 declare var Document: {
     prototype: Document;
     new (): Document;
@@ -2976,12 +6897,33 @@ declare var SVGElement: {
 }
 
 interface HTMLScriptElement extends HTMLElement {
+    /**
+      * Sets or retrieves the status of the script.
+      */
     defer: boolean;
+    /**
+      * Retrieves or sets the text of the object as a string. 
+      */
     text: string;
+    /**
+      * Retrieves the URL to an external file that contains the source code or data.
+      */
     src: string;
+    /** 
+      * Sets or retrieves the object that is bound to the event script.
+      */
     htmlFor: string;
+    /**
+      * Sets or retrieves the character set used to encode the object.
+      */
     charset: string;
+    /**
+      * Sets or retrieves the MIME type for the associated scripting engine.
+      */
     type: string;
+    /**
+      * Sets or retrieves the event for which the script is written. 
+      */
     event: string;
 }
 declare var HTMLScriptElement: {
@@ -2990,15 +6932,47 @@ declare var HTMLScriptElement: {
 }
 
 interface HTMLTableRowElement extends HTMLElement, HTMLTableAlignment, DOML2DeprecatedBackgroundColorStyle {
+    /**
+      * Retrieves the position of the object in the rows collection for the table.
+      */
     rowIndex: number;
+    /**
+      * Retrieves a collection of all cells in the table row.
+      */
     cells: HTMLCollection;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorLight: any;
+    /**
+      * Retrieves the position of the object in the collection.
+      */
     sectionRowIndex: number;
+    /**
+      * Sets or retrieves the border color of the object.
+      */
     borderColor: any;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: any;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorDark: any;
+    /**
+      * Removes the specified cell from the table row, as well as from the cells collection.
+      * @param index Number that specifies the zero-based position of the cell to remove from the table row. If no value is provided, the last cell in the cells collection is deleted.
+      */
     deleteCell(index?: number): void;
+    /**
+      * Creates a new cell in the table row, and adds the cell to the cells collection.
+      * @param index Number that specifies where to insert the cell in the tr. The default value is -1, which appends the new cell to the end of the cells collection.
+      */
     insertCell(index?: number): HTMLElement;
 }
 declare var HTMLTableRowElement: {
@@ -3117,6 +7091,9 @@ declare var SVGTransformList: {
 }
 
 interface HTMLHtmlElement extends HTMLElement {
+    /**
+      * Sets or retrieves the DTD version that governs the current document.
+      */
     version: string;
 }
 declare var HTMLHtmlElement: {
@@ -3132,24 +7109,81 @@ declare var SVGPathSegClosePath: {
 }
 
 interface HTMLFrameElement extends HTMLElement, GetSVGDocument, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: any;
+    /**
+      * Sets or retrieves whether the frame can be scrolled.
+      */
     scrolling: string;
+    /**
+      * Sets or retrieves the top and bottom margin heights before displaying the text in a frame.
+      */
     marginHeight: string;
+    /**
+      * Sets or retrieves the left and right margin widths before displaying the text in a frame.
+      */
     marginWidth: string;
+    /**
+      * Sets or retrieves the border color of the object.
+      */
     borderColor: any;
+    /**
+      * Sets or retrieves the amount of additional space between the frames.
+      */
     frameSpacing: any;
+    /**
+      * Sets or retrieves whether to display a border for the frame.
+      */
     frameBorder: string;
+    /**
+      * Sets or retrieves whether the user can resize the frame.
+      */
     noResize: boolean;
+    /**
+      * Retrieves the object of the specified.
+      */
     contentWindow: Window;
+    /**
+      * Sets or retrieves a URL to be loaded by the object.
+      */
     src: string;
+    /**
+      * Sets or retrieves the frame name.
+      */
     name: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: any;
+    /**
+      * Retrieves the document object of the page or frame.
+      */
     contentDocument: Document;
+    /**
+      * Specifies the properties of a border drawn around an object.
+      */
     border: string;
+    /**
+      * Sets or retrieves a URI to a long description of the object.
+      */
     longDesc: string;
+    /**
+      * Raised when the object has been completely received from the server.
+      */
     onload: (ev: Event) => any;
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
+    /**
+      * Sets the value indicating whether the source file of a frame or iframe has specific security restrictions applied.
+      */
     security: any;
+    /**
+      * Registers an event handler for the specified event type.
+      * @param type The type of event type to register.
+      * @param listener The event handler function to associate with the event.
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for. If true, register the event handler for the capturing phase. If false, Register the event handler for the bubbling phase. 
+      */
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
 }
 declare var HTMLFrameElement: {
@@ -3179,7 +7213,13 @@ declare var SVGDefsElement: {
 }
 
 interface HTMLQuoteElement extends HTMLElement {
+    /**
+      * Sets or retrieves the date and time of a modification to the object.
+      */
     dateTime: string;
+    /**
+      * Sets or retrieves reference information about the object.
+      */
     cite: string;
 }
 declare var HTMLQuoteElement: {
@@ -3242,6 +7282,9 @@ declare var XMLHttpRequest: {
 }
 
 interface HTMLTableHeaderCellElement extends HTMLTableCellElement {
+    /**
+      * Sets or retrieves the group of cells in a table to which the object's information applies.
+      */
     scope: string;
 }
 declare var HTMLTableHeaderCellElement: {
@@ -3301,18 +7344,39 @@ interface SVGTransformable extends SVGLocatable {
 interface HTMLFrameSetElement extends HTMLElement {
     ononline: (ev: Event) => any;
     addEventListener(type: "online", listener: (ev: Event) => any, useCapture?: boolean): void;
+    /**
+      * Sets or retrieves the border color of the object.
+      */
     borderColor: any;
+    /**
+      * Sets or retrieves the frame heights of the object.
+      */
     rows: string;
+    /**
+      * Sets or retrieves the frame widths of the object.
+      */
     cols: string;
+    /**
+      * Fires when the object loses the input focus.
+      */
     onblur: (ev: FocusEvent) => any;
     addEventListener(type: "blur", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
+    /**
+      * Sets or retrieves the amount of additional space between the frames.
+      */
     frameSpacing: any;
+    /**
+      * Fires when the object receives focus.
+      */
     onfocus: (ev: FocusEvent) => any;
     addEventListener(type: "focus", listener: (ev: FocusEvent) => any, useCapture?: boolean): void;
     onmessage: (ev: MessageEvent) => any;
     addEventListener(type: "message", listener: (ev: MessageEvent) => any, useCapture?: boolean): void;
     onerror: (ev: Event) => any;
     addEventListener(type: "error", listener: (ev: Event) => any, useCapture?: boolean): void;
+    /**
+      * Sets or retrieves whether to display a border for the frame.
+      */
     frameBorder: string;
     onresize: (ev: UIEvent) => any;
     addEventListener(type: "resize", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
@@ -3540,7 +7604,13 @@ declare var SVGSVGElement: {
 }
 
 interface HTMLLabelElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the object to which the given label object is assigned.
+      */
     htmlFor: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
 }
 declare var HTMLLabelElement: {
@@ -3559,7 +7629,13 @@ interface MSResourceMetadata {
 }
 
 interface HTMLLegendElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     align: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
 }
 declare var HTMLLegendElement: {
@@ -3598,6 +7674,9 @@ declare var SVGTSpanElement: {
 }
 
 interface HTMLLIElement extends HTMLElement, DOML2DeprecatedListNumberingAndBulletStyle {
+    /**
+      * Sets or retrieves the value of a list item.
+      */
     value: number;
 }
 declare var HTMLLIElement: {
@@ -3661,26 +7740,89 @@ declare var Storage: {
 }
 
 interface HTMLIFrameElement extends HTMLElement, GetSVGDocument, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: string;
+    /**
+      * Sets or retrieves whether the frame can be scrolled.
+      */
     scrolling: string;
+    /**
+      * Sets or retrieves the top and bottom margin heights before displaying the text in a frame.
+      */
     marginHeight: string;
+    /**
+      * Sets or retrieves the left and right margin widths before displaying the text in a frame.
+      */
     marginWidth: string;
+    /**
+      * Sets or retrieves the amount of additional space between the frames.
+      */
     frameSpacing: any;
+    /**
+      * Sets or retrieves whether to display a border for the frame.
+      */
     frameBorder: string;
+    /**
+      * Sets or retrieves whether the user can resize the frame.
+      */
     noResize: boolean;
+    /**
+      * Sets or retrieves the vertical margin for the object.
+      */
     vspace: number;
+    /**
+      * Retrieves the object of the specified.
+      */
     contentWindow: Window;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Sets or retrieves a URL to be loaded by the object.
+      */
     src: string;
+    /**
+      * Sets or retrieves the frame name.
+      */
     name: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: string;
+    /**
+      * Specifies the properties of a border drawn around an object.
+      */
     border: string;
+    /**
+      * Retrieves the document object of the page or frame.
+      */
     contentDocument: Document;
+    /**
+      * Sets or retrieves the horizontal margin for the object.
+      */
     hspace: number;
+    /**
+      * Sets or retrieves a URI to a long description of the object.
+      */
     longDesc: string;
+    /**
+      * Sets the value indicating whether the source file of a frame or iframe has specific security restrictions applied.
+      */
     security: any;
+    /**
+      * Raised when the object has been completely received from the server.
+      */
     onload: (ev: Event) => any;
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
+    /**
+      * Registers an event handler for the specified event type.
+      * @param type The type of event type to register.
+      * @param listener The event handler function to associate with the event.
+      * @param useCapture A Boolean value that specifies the event phase to add the event handler for. If true, register the event handler for the capturing phase. If false, Register the event handler for the bubbling phase. 
+      */
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
 }
 declare var HTMLIFrameElement: {
@@ -3800,10 +7942,29 @@ declare var DragEvent: {
 }
 
 interface HTMLTableSectionElement extends HTMLElement, HTMLTableAlignment, DOML2DeprecatedBackgroundColorStyle {
+    /**
+      * Sets or retrieves a value that indicates the table alignment.
+      */
     align: string;
+    /**
+      * Sets or retrieves the number of horizontal rows contained in the object.
+      */
     rows: HTMLCollection;
+    /**
+      * Removes the specified row (tr) from the element and from the rows collection.
+      * @param index Number that specifies the zero-based position in the rows collection of the row to remove.
+      */
     deleteRow(index?: number): void;
+    /**
+      * Moves a table row to a new position.
+      * @param indexFrom Number that specifies the index in the rows collection of the table row that is moved.
+      * @param indexTo Number that specifies where the row is moved within the rows collection.
+      */
     moveRow(indexFrom?: number, indexTo?: number): Object;
+    /**
+      * Creates a new row (tr) in the table, and adds the row to the rows collection.
+      * @param index Number that specifies where to insert the row in the rows collection. The default value is -1, which appends the new row to the end of the rows collection.
+      */
     insertRow(index?: number): HTMLElement;
 }
 declare var HTMLTableSectionElement: {
@@ -3816,38 +7977,118 @@ interface DOML2DeprecatedListNumberingAndBulletStyle {
 }
 
 interface HTMLInputElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: string;
     status: boolean;
+    /**
+      * Retrieves a reference to the form that the object is embedded in. 
+      */
     form: HTMLFormElement;
+    /**
+      * Gets or sets the starting position or offset of a text selection.
+      */
     selectionStart: number;
     indeterminate: boolean;
     readOnly: boolean;
     size: number;
     loop: number;
+    /**
+      * Gets or sets the end position or offset of a text selection.
+      */
     selectionEnd: number;
+    /**
+      * Sets or retrieves the URL of the virtual reality modeling language (VRML) world to be displayed in the window.
+      */
     vrml: string;
+    /**
+      * Sets or retrieves a lower resolution image to display.
+      */
     lowsrc: string;
+    /**
+      * Sets or retrieves the vertical margin for the object.
+      */
     vspace: number;
+    /**
+      * Sets or retrieves a comma-separated list of content types.
+      */
     accept: string;
+    /**
+      * Sets or retrieves a text alternative to the graphic.
+      */
     alt: string;
+    /**
+      * Sets or retrieves the state of the check box or radio button.
+      */
     defaultChecked: boolean;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Returns the value of the data at the cursor's current position.
+      */
     value: string;
+    /**
+      * The address or URL of the a media resource that is to be considered.
+      */
     src: string;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the URL, often with a bookmark extension (#name), to use as a client-side image map.
+      */
     useMap: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: string;
+    /**
+      * Sets or retrieves the width of the border to draw around the object.
+      */
     border: string;
     dynsrc: string;
+    /**
+      * Sets or retrieves the state of the check box or radio button.
+      */
     checked: boolean;
+    /**
+      * Sets or retrieves the width of the border to draw around the object.
+      */
     hspace: number;
+    /**
+      * Sets or retrieves the maximum number of characters that the user can enter in a text control.
+      */
     maxLength: number;
+    /**
+      * Returns the content type of the object.
+      */
     type: string;
+    /**
+      * Sets or retrieves the initial contents of the object.
+      */
     defaultValue: string;
+    /**
+      * Retrieves whether the object is fully loaded.
+      */
     complete: boolean;
     start: string;
+    /**
+      * Creates a TextRange object for the element.
+      */
     createTextRange(): TextRange;
+    /**
+      * Sets the start and end positions of a selection in a text field.
+      * @param start The offset into the text field for the start of the selection.
+      * @param end The offset into the text field for the end of the selection.
+      */
     setSelectionRange(start: number, end: number): void;
+    /**
+      * Makes the selection equal to the current object.
+      */
     select(): void;
 }
 declare var HTMLInputElement: {
@@ -3856,28 +8097,79 @@ declare var HTMLInputElement: {
 }
 
 interface HTMLAnchorElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the relationship between the object and the destination of the link.
+      */
     rel: string;
+    /**
+      * Contains the protocol of the URL.
+      */
     protocol: string;
+    /**
+      * Sets or retrieves the substring of the href property that follows the question mark.
+      */
     search: string;
+    /**
+      * Sets or retrieves the coordinates of the object.
+      */
     coords: string;
+    /**
+      * Contains the hostname of a URL.
+      */
     hostname: string;
+    /**
+      * Contains the pathname of the URL.
+      */
     pathname: string;
     Methods: string;
+    /**
+      * Sets or retrieves the window or frame at which to target content.
+      */
     target: string;
     protocolLong: string;
+    /**
+      * Sets or retrieves a destination URL or an anchor point.
+      */
     href: string;
+    /**
+      * Sets or retrieves the shape of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the character set used to encode the object.
+      */
     charset: string;
+    /**
+      * Sets or retrieves the language code of the object.
+      */
     hreflang: string;
+    /**
+      * Sets or retrieves the port number associated with a URL.
+      */
     port: string;
+    /**
+      * Contains the hostname and port values of the URL.
+      */
     host: string;
+    /**
+      * Contains the anchor portion of the URL including the hash sign (#).
+      */
     hash: string;
     nameProp: string;
     urn: string;
+    /**
+      * Sets or retrieves the relationship between the object and the destination of the link.
+      */
     rev: string;
+    /**
+      * Sets or retrieves the shape of the object.
+      */
     shape: string;
     type: string;
     mimeType: string;
+    /** 
+      * Returns a string representation of an object.
+      */
     toString(): string;
 }
 declare var HTMLAnchorElement: {
@@ -3886,9 +8178,21 @@ declare var HTMLAnchorElement: {
 }
 
 interface HTMLParamElement extends HTMLElement {
+    /**
+      * Sets or retrieves the value of an input parameter for an element.
+      */
     value: string;
+    /**
+      * Sets or retrieves the name of an input parameter for an element.
+      */
     name: string;
+    /**
+      * Sets or retrieves the content type of the resource designated by the value attribute.
+      */
     type: string;
+    /**
+      * Sets or retrieves the data type of the value attribute.
+      */
     valueType: string;
 }
 declare var HTMLParamElement: {
@@ -3947,7 +8251,13 @@ declare var PerformanceTiming: {
 }
 
 interface HTMLPreElement extends HTMLElement, DOML2DeprecatedTextFlowControl {
+    /**
+      * Sets or gets a value that you can use to implement your own width functionality for the object.
+      */
     width: number;
+    /**
+      * Indicates a citation by rendering text in italic type.
+      */
     cite: string;
 }
 declare var HTMLPreElement: {
@@ -4104,7 +8414,13 @@ declare var SVGPolygonElement: {
 }
 
 interface HTMLPhraseElement extends HTMLElement {
+    /**
+      * Sets or retrieves the date and time of a modification to the object.
+      */
     dateTime: string;
+    /**
+      * Sets or retrieves reference information about the object.
+      */
     cite: string;
 }
 declare var HTMLPhraseElement: {
@@ -4211,11 +8527,25 @@ interface DOML2DeprecatedColorProperty {
 }
 
 interface HTMLCanvasElement extends HTMLElement {
+    /**
+      * Gets or sets the width of a canvas element on a document.
+      */
     width: number;
+    /**
+      * Gets or sets the height of a canvas element on a document.
+      */
     height: number;
+    /**
+      * Returns the content of the current canvas as an image that you can use as a source for another canvas or an HTML element.
+      * @param type The standard MIME type for the image format to return. If you do not specify this parameter, the default value is a PNG format image.
+      */
     toDataURL(type?: string, ...args: any[]): string;
-    getContext(contextId: string, ...args: any[]): any;
+    /**
+      * Returns an object that provides methods and properties for drawing and manipulating images and graphics on a canvas element in a document. A context object includes information about colors, line widths, fonts, and other graphic parameters that can be drawn on a canvas.
+      * @param contextId The identifier (ID) of the type of canvas to create. Internet Explorer 9 and Internet Explorer 10 support only a 2-D context using canvas.getContext("2d"); IE11 Preview also supports 3-D or WebGL context using canvas.getContext("experimental-webgl");
+      */
     getContext(contextId: "2d"): CanvasRenderingContext2D;
+    getContext(contextId: string, ...args: any[]): any;
 }
 declare var HTMLCanvasElement: {
     prototype: HTMLCanvasElement;
@@ -4242,6 +8572,9 @@ declare var Location: {
 }
 
 interface HTMLTitleElement extends HTMLElement {
+    /**
+      * Retrieves or sets the text of the object as a string. 
+      */
     text: string;
 }
 declare var HTMLTitleElement: {
@@ -4250,7 +8583,13 @@ declare var HTMLTitleElement: {
 }
 
 interface HTMLStyleElement extends HTMLElement, LinkStyle {
+    /**
+      * Sets or retrieves the media type.
+      */
     media: string;
+    /**
+      * Retrieves the CSS language in which the style sheet is written.
+      */
     type: string;
 }
 declare var HTMLStyleElement: {
@@ -4513,19 +8852,61 @@ declare var PositionError: {
 }
 
 interface HTMLTableCellElement extends HTMLElement, HTMLTableAlignment, DOML2DeprecatedBackgroundStyle, DOML2DeprecatedBackgroundColorStyle {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: number;
+    /**
+      * Sets or retrieves a list of header cells that provide information for the object.
+      */
     headers: string;
+    /**
+      * Retrieves the position of the object in the cells collection of a row.
+      */
     cellIndex: number;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorLight: any;
+    /**
+      * Sets or retrieves the number columns in the table that the object should span.
+      */
     colSpan: number;
+    /**
+      * Sets or retrieves the border color of the object. 
+      */
     borderColor: any;
+    /**
+      * Sets or retrieves a comma-delimited list of conceptual categories associated with the object.
+      */
     axis: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: any;
+    /**
+      * Sets or retrieves whether the browser automatically performs wordwrap.
+      */
     noWrap: boolean;
+    /**
+      * Sets or retrieves abbreviated text for the object.
+      */
     abbr: string;
+    /**
+      * Sets or retrieves how many rows in a table the cell should span.
+      */
     rowSpan: number;
+    /**
+      * Sets or retrieves the group of cells in a table to which the object's information applies.
+      */
     scope: string;
+    /**
+      * Sets or retrieves the color for one of the two colors used to draw the 3-D border of the object.
+      */
     borderColorDark: any;
 }
 declare var HTMLTableCellElement: {
@@ -4599,7 +8980,13 @@ declare var CustomEvent: {
 }
 
 interface HTMLBaseFontElement extends HTMLElement, DOML2DeprecatedColorProperty {
+    /**
+      * Sets or retrieves the current typeface family.
+      */
     face: string;
+    /**
+      * Sets or retrieves the font size of the object.
+      */
     size: number;
 }
 declare var HTMLBaseFontElement: {
@@ -4608,20 +8995,67 @@ declare var HTMLBaseFontElement: {
 }
 
 interface HTMLTextAreaElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Retrieves or sets the text in the entry field of the textArea element.
+      */
     value: string;
+    /**
+      * Sets or retrieves the value indicating whether the control is selected.
+      */
     status: any;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Gets or sets the starting position or offset of a text selection.
+      */
     selectionStart: number;
+    /**
+      * Sets or retrieves the number of horizontal rows contained in the object.
+      */
     rows: number;
+    /**
+      * Sets or retrieves the width of the object.
+      */
     cols: number;
+    /**
+      * Sets or retrieves the value indicated whether the content of the object is read-only.
+      */
     readOnly: boolean;
+    /**
+      * Sets or retrieves how to handle wordwrapping in the object.
+      */
     wrap: string;
+    /**
+      * Gets or sets the end position or offset of a text selection.
+      */
     selectionEnd: number;
+    /**
+      * Retrieves the type of control.
+      */
     type: string;
+    /**
+      * Sets or retrieves the initial contents of the object.
+      */
     defaultValue: string;
+    /**
+      * Creates a TextRange object for the element.
+      */
     createTextRange(): TextRange;
+    /**
+      * Sets the start and end positions of a selection in a text field.
+      * @param start The offset into the text field for the start of the selection.
+      * @param end The offset into the text field for the end of the selection.
+      */
     setSelectionRange(start: number, end: number): void;
+    /**
+      * Highlights the input area of a form element.
+      */
     select(): void;
 }
 declare var HTMLTextAreaElement: {
@@ -4781,7 +9215,13 @@ declare var SVGPathSegLinetoAbs: {
 }
 
 interface HTMLModElement extends HTMLElement {
+    /**
+      * Sets or retrieves the date and time of a modification to the object.
+      */
     dateTime: string;
+    /**
+      * Sets or retrieves reference information about the object.
+      */
     cite: string;
 }
 declare var HTMLModElement: {
@@ -4875,7 +9315,7 @@ declare var Event: {
 
 interface ImageData {
     width: number;
-    data: number[];
+    data: Uint8Array;
     height: number;
 }
 declare var ImageData: {
@@ -4884,8 +9324,17 @@ declare var ImageData: {
 }
 
 interface HTMLTableColElement extends HTMLElement, HTMLTableAlignment {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: any;
+    /**
+      * Sets or retrieves the alignment of the object relative to the display or table.
+      */
     align: string;
+    /**
+      * Sets or retrieves the number of columns in the group.
+      */
     span: number;
 }
 declare var HTMLTableColElement: {
@@ -4921,8 +9370,17 @@ declare var SVGLinearGradientElement: {
 }
 
 interface HTMLTableAlignment {
+    /**
+      * Sets or retrieves a value that you can use to implement your own ch functionality for the object.
+      */
     ch: string;
+    /**
+      * Sets or retrieves how text and other content are vertically aligned within the object that contains them.
+      */
     vAlign: string;
+    /**
+      * Sets or retrieves a value that you can use to implement your own chOff functionality for the object.
+      */
     chOff: string;
 }
 
@@ -4961,10 +9419,17 @@ declare var SVGRectElement: {
 
 interface ErrorEventHandler {
     (event: Event, source: string, fileno: number, columnNumber: number): void;
+    (message: any, uri: string, lineNumber: number, columnNumber?: number): boolean;
 }
 
 interface HTMLDivElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text. 
+      */
     align: string;
+    /**
+      * Sets or retrieves whether the browser automatically performs wordwrap.
+      */
     noWrap: boolean;
 }
 declare var HTMLDivElement: {
@@ -5195,6 +9660,9 @@ declare var CSSPageRule: {
 }
 
 interface HTMLBRElement extends HTMLElement {
+    /**
+      * Sets or retrieves the side on which floating objects are not to be positioned when any IHTMLBlockElement is inserted into the document.
+      */
     clear: string;
 }
 declare var HTMLBRElement: {
@@ -5233,6 +9701,9 @@ declare var HTMLHeadElement: {
 }
 
 interface HTMLHeadingElement extends HTMLElement, DOML2DeprecatedTextFlowControl {
+    /**
+      * Sets or retrieves a value that indicates the table alignment.
+      */
     align: string;
 }
 declare var HTMLHeadingElement: {
@@ -5241,18 +9712,59 @@ declare var HTMLHeadingElement: {
 }
 
 interface HTMLFormElement extends HTMLElement, MSHTMLCollectionExtensions {
+    /**
+      * Sets or retrieves the number of objects in a collection.
+      */
     length: number;
+    /**
+      * Sets or retrieves the window or frame at which to target content.
+      */
     target: string;
+    /**
+      * Sets or retrieves a list of character encodings for input data that must be accepted by the server processing the form.
+      */
     acceptCharset: string;
+    /**
+      * Sets or retrieves the encoding type for the form.
+      */
     enctype: string;
+    /**
+      * Retrieves a collection, in source order, of all controls in a given form.
+      */
     elements: HTMLCollection;
+    /**
+      * Sets or retrieves the URL to which the form content is sent for processing.
+      */
     action: string;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves how to send the form data to the server.
+      */
     method: string;
+    /**
+      * Sets or retrieves the MIME encoding for the form.
+      */
     encoding: string;
+    /**
+      * Fires when the user resets a form.
+      */
     reset(): void;
+    /**
+      * Retrieves a form object or an object from an elements collection.
+      * @param name Variant of type Number or String that specifies the object or collection to retrieve. If this parameter is a Number, it is the zero-based index of the object. If this parameter is a string, all objects with matching name or id properties are retrieved, and a collection is returned if more than one match is made.
+      * @param index Variant of type Number that specifies the zero-based index of the object to retrieve when a collection is returned.
+      */
     item(name?: any, index?: any): any;
+    /**
+      * Fires when a FORM is about to be submitted.
+      */
     submit(): void;
+    /**
+      * Retrieves a form object or an object from an elements collection.
+      */
     namedItem(name: string): any;
     [name: string]: any;
 }
@@ -5276,32 +9788,110 @@ declare var SVGZoomAndPan: {
 }
 
 interface HTMLMediaElement extends HTMLElement {
+    /**
+      * Gets the earliest possible position, in seconds, that the playback can begin.
+      */
     initialTime: number;
+    /**
+      * Gets TimeRanges for the current media resource that has been played.
+      */
     played: TimeRanges;
+    /**
+      * Gets the address or URL of the current media resource that is selected by IHTMLMediaElement.
+      */
     currentSrc: string;
     readyState: any;
+    /**
+      * The autobuffer element is not supported by Internet Explorer 9. Use the preload element instead.
+      */
     autobuffer: boolean;
+    /**
+      * Gets or sets a flag to specify whether playback should restart after it completes.
+      */
     loop: boolean;
+    /**
+      * Gets information about whether the playback has ended or not.
+      */
     ended: boolean;
+    /**
+      * Gets a collection of buffered time ranges.
+      */
     buffered: TimeRanges;
+    /**
+      * Returns an object representing the current error state of the audio or video element.
+      */
     error: MediaError;
+    /**
+      * Returns a TimeRanges object that represents the ranges of the current media resource that can be seeked.
+      */
     seekable: TimeRanges;
+    /**
+      * Gets or sets a value that indicates whether to start playing the media automatically.
+      */
     autoplay: boolean;
+    /**
+      * Gets or sets a flag that indicates whether the client provides a set of controls for the media (in case the developer does not include controls for the player).
+      */
     controls: boolean;
+    /**
+      * Gets or sets the volume level for audio portions of the media element.
+      */
     volume: number;
+    /**
+      * The address or URL of the a media resource that is to be considered.
+      */
     src: string;
+    /**
+      * Gets or sets the current rate of speed for the media resource to play. This speed is expressed as a multiple of the normal speed of the media resource.
+      */
     playbackRate: number;
+    /**
+      * Returns the duration in seconds of the current media resource. A NaN value is returned if duration is not available, or Infinity if the media resource is streaming.
+      */
     duration: number;
+    /**
+      * Gets or sets a flag that indicates whether the audio (either audio or the audio track on video media) is muted.
+      */
     muted: boolean;
+    /**
+      * Gets or sets the default playback rate when the user is not using fast forward or reverse for a video or audio resource.
+      */
     defaultPlaybackRate: number;
+    /**
+      * Gets a flag that specifies whether playback is paused.
+      */
     paused: boolean;
+    /**
+      * Gets a flag that indicates whether the the client is currently moving to a new playback position in the media resource.
+      */
     seeking: boolean;
+    /**
+      * Gets or sets the current playback position, in seconds.
+      */
     currentTime: number;
+    /**
+      * Gets or sets the current playback position, in seconds.
+      */
     preload: string;
+    /**
+      * Gets the current network activity for the element.
+      */
     networkState: number;
+    /**
+      * Pauses the current playback and sets paused to TRUE. This can be used to test whether the media is playing or paused. You can also use the pause or play events to tell whether the media is playing or not.
+      */
     pause(): void;
+    /**
+      * Loads and starts playback of a media resource.
+      */
     play(): void;
+    /**
+      * Fires immediately after the client loads the object.
+      */
     load(): void;
+    /**
+      * Returns a string that specifies whether the client can play a given media resource type.
+      */
     canPlayType(type: string): string;
     HAVE_METADATA: number;
     HAVE_CURRENT_DATA: number;
@@ -5387,6 +9977,9 @@ declare var SVGTextPathElement: {
 }
 
 interface HTMLDTElement extends HTMLElement {
+    /**
+      * Sets or retrieves whether the browser automatically performs wordwrap.
+      */
     noWrap: boolean;
 }
 declare var HTMLDTElement: {
@@ -5515,7 +10108,13 @@ declare var MediaError: {
 }
 
 interface HTMLFieldSetElement extends HTMLElement {
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
 }
 declare var HTMLFieldSetElement: {
@@ -5524,9 +10123,21 @@ declare var HTMLFieldSetElement: {
 }
 
 interface HTMLBGSoundElement extends HTMLElement {
+    /**
+      * Sets or gets the value indicating how the volume of the background sound is divided between the left speaker and the right speaker.
+      */
     balance: any;
+    /**
+      * Sets or gets the volume setting for the sound. 
+      */
     volume: any;
+    /**
+      * Sets or gets the URL of a sound to play.
+      */
     src: string;
+    /**
+      * Sets or retrieves the number of times a sound or video clip will loop when activated.
+      */
     loop: number;
 }
 declare var HTMLBGSoundElement: {
@@ -5820,8 +10431,17 @@ declare var CanvasPattern: {
 }
 
 interface HTMLHRElement extends HTMLElement, DOML2DeprecatedColorProperty, DOML2DeprecatedSizeProperty {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: number;
+    /**
+      * Sets or retrieves how the object is aligned with adjacent text.
+      */
     align: string;
+    /**
+      * Sets or retrieves whether the horizontal rule is drawn with 3-D shading.
+      */
     noShade: boolean;
 }
 declare var HTMLHRElement: {
@@ -5830,24 +10450,78 @@ declare var HTMLHRElement: {
 }
 
 interface HTMLObjectElement extends HTMLElement, GetSVGDocument, DOML2DeprecatedMarginStyle, DOML2DeprecatedBorderStyle, DOML2DeprecatedAlignmentStyle, MSDataBindingExtensions, MSDataBindingRecordSetExtensions {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: string;
+    /**
+      * Sets or retrieves the Internet media type for the code associated with the object.
+      */
     codeType: string;
+    /**
+      * Retrieves the contained object.
+      */
     object: Object;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves the URL of the file containing the compiled Java class.
+      */
     code: string;
+    /**
+      * Sets or retrieves a character string that can be used to implement your own archive functionality for the object.
+      */
     archive: string;
+    /**
+      * Sets or retrieves a message to be displayed while an object is loading.
+      */
     standby: string;
+    /**
+      * Sets or retrieves a text alternative to the graphic.
+      */
     alt: string;
+    /**
+      * Sets or retrieves the class identifier for the object.
+      */
     classid: string;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Sets or retrieves the URL, often with a bookmark extension (#name), to use as a client-side image map.
+      */
     useMap: string;
+    /**
+      * Sets or retrieves the URL that references the data of the object.
+      */
     data: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: string;
+    /**
+      * Retrieves the document object of the page or frame.
+      */
     contentDocument: Document;
+    /**
+      * Gets or sets the optional alternative HTML script to execute if the object fails to load.
+      */
     altHtml: string;
+    /**
+      * Sets or retrieves the URL of the component.
+      */
     codeBase: string;
     declare: boolean;
+    /**
+      * Sets or retrieves the MIME type of the object.
+      */
     type: string;
+    /**
+      * Retrieves a string of the URL where the object tag can be found. This is often the href of the document that the object is in, or the value set by a base element.
+      */
     BaseHref: string;
 }
 declare var HTMLObjectElement: {
@@ -5856,12 +10530,33 @@ declare var HTMLObjectElement: {
 }
 
 interface HTMLEmbedElement extends HTMLElement, GetSVGDocument {
+    /**
+      * Sets or retrieves the width of the object.
+      */
     width: string;
+    /**
+      * Retrieves the palette used for the embedded document.
+      */
     palette: string;
+    /**
+      * Sets or retrieves a URL to be loaded by the object.
+      */
     src: string;
+    /**
+      * Sets or retrieves the name of the object.
+      */
     name: string;
+    /**
+      * Retrieves the URL of the plug-in used to view an embedded document.
+      */
     pluginspage: string;
+    /**
+      * Sets or retrieves the height of the object.
+      */
     height: string;
+    /**
+      * Sets or retrieves the height and width units of the embed object.
+      */
     units: string;
 }
 declare var HTMLEmbedElement: {
@@ -5897,12 +10592,33 @@ declare var CharacterData: {
 }
 
 interface HTMLOptGroupElement extends HTMLElement, MSDataBindingExtensions {
+    /**
+      * Sets or retrieves the ordinal position of an option in a list box.
+      */
     index: number;
+    /**
+      * Sets or retrieves the status of an option.
+      */
     defaultSelected: boolean;
+    /**
+      * Sets or retrieves the text string specified by the option tag.
+      */
     text: string;
+    /**
+      * Sets or retrieves the value which is returned to the server when the form control is submitted.
+      */
     value: string;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves a value that you can use to implement your own label functionality for the object.
+      */
     label: string;
+    /**
+      * Sets or retrieves whether the option in the list box is the default item.
+      */
     selected: boolean;
 }
 declare var HTMLOptGroupElement: {
@@ -5911,7 +10627,13 @@ declare var HTMLOptGroupElement: {
 }
 
 interface HTMLIsIndexElement extends HTMLElement {
+    /**
+      * Retrieves a reference to the form that the object is embedded in. 
+      */
     form: HTMLFormElement;
+    /**
+      * Sets or retrieves the URL to which the form content is sent for processing.
+      */
     action: string;
     prompt: string;
 }
@@ -6128,10 +10850,25 @@ interface LinkStyle {
 }
 
 interface HTMLVideoElement extends HTMLMediaElement {
+    /**
+      * Gets or sets the width of the video element.
+      */
     width: number;
+    /**
+      * Gets the intrinsic width of a video in CSS pixels, or zero if the dimensions are not known.
+      */
     videoWidth: number;
+    /**
+      * Gets the intrinsic height of a video in CSS pixels, or zero if the dimensions are not known.
+      */
     videoHeight: number;
+    /**
+      * Gets or sets the height of the video element.
+      */
     height: number;
+    /**
+      * Gets or sets a URL of an image to display, for example, like a movie poster. This can be a still frame from the video, or another image if no video data is available.
+      */
     poster: string;
 }
 declare var HTMLVideoElement: {
@@ -6318,7 +11055,7 @@ declare function addEventListener(type: "volumechange", listener: (ev: Event) =>
 declare var oninput: (ev: Event) => any;
 declare function addEventListener(type: "input", listener: (ev: Event) => any, useCapture?: boolean): void;
 declare var performance: Performance;
-declare function alert(message?: string): void;
+declare function alert(message?: any): void;
 declare function scroll(x?: number, y?: number): void;
 declare function focus(): void;
 declare function scrollTo(x?: number, y?: number): void;
@@ -6431,33 +11168,111 @@ declare var MSGestureEvent: {
 }
 
 interface HTMLAnchorElement {
+    /**
+      * Retrieves or sets the text of the object as a string. 
+      */
     text: string;
 }
 
 interface HTMLInputElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Returns a FileList object on a file type input object.
+      */
     files: FileList;
+    /**
+      * Defines the maximum acceptable value for an input element with type="number".When used with the min and step attributes, lets you control the range and increment (such as only even numbers) that the user can enter into an input field.
+      */
     max: string;
+    /**
+      * Overrides the target attribute on a form element.
+      */
     formTarget: string;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Defines an increment or jump between values that you want to allow the user to enter. When used with the max and min attributes, lets you control the range and increment (for example, allow only even numbers) that the user can enter into an input field.
+      */
     step: string;
+    /**
+      * Provides a way to direct a user to a specific field when a document loads. This can provide both direction and convenience for a user, reducing the need to click or tab to a field when a page opens. This attribute is true when present on an element, and false when missing.
+      */
     autofocus: boolean;
+    /**
+      * When present, marks an element that can't be submitted without a value.
+      */
     required: boolean;
+    /**
+      * Used to override the encoding (formEnctype attribute) specified on the form element.
+      */
     formEnctype: string;
+    /**
+      * Returns the input field value as a number.
+      */
     valueAsNumber: number;
+    /**
+      * Gets or sets a text string that is displayed in an input field as a hint or prompt to users as the format or type of information they need to enter.The text appears in an input field until the user puts focus on the field.
+      */
     placeholder: string;
+    /**
+      * Overrides the submit method attribute previously specified on a form element.
+      */
     formMethod: string;
+    /**
+      * Specifies the ID of a pre-defined datalist of options for an input element.
+      */
     list: HTMLElement;
+    /**
+      * Specifies whether autocomplete is applied to an editable text field.
+      */
     autocomplete: string;
+    /**
+      * Defines the minimum acceptable value for an input element with type="number". When used with the max and step attributes, lets you control the range and increment (such as even numbers only) that the user can enter into an input field.
+      */
     min: string;
+    /**
+      * Overrides the action attribute (where the data on a form is sent) on the parent form element.
+      */
     formAction: string;
+    /**
+      * Gets or sets a string containing a regular expression that the user's input must match.
+      */
     pattern: string;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * Overrides any validation or required attributes on a form or form elements to allow it to be submitted without validation. This can be used to create a "save draft"-type submit option.
+      */
     formNoValidate: string;
+    /**
+      * Sets or retrieves the Boolean value indicating whether multiple items can be selected from a list.
+      */
     multiple: boolean;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Decrements a range input control's value by the value given by the Step attribute. If the optional parameter is used, it will decrement the input control's step value multiplied by the parameter's value.
+      * @param n Value to decrement the value by.
+      */
     stepDown(n?: number): void;
+    /**
+      * Increments a range input control's value by the value given by the Step attribute. If the optional parameter is used, will increment the input control's value by that value.
+      * @param n Value to increment the value by.
+      */
     stepUp(n?: number): void;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -6879,6 +11694,9 @@ declare var IDBObjectStore: {
 }
 
 interface HTMLCanvasElement {
+    /**
+      * Returns a blob object encoded as a Portable Network Graphics (PNG) format from a canvas image or drawing.
+      */
     msToBlob(): Blob;
 }
 
@@ -7045,14 +11863,42 @@ declare var IDBCursorWithValue: {
 }
 
 interface HTMLTextAreaElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Provides a way to direct a user to a specific field when a document loads. This can provide both direction and convenience for a user, reducing the need to click or tab to a field when a page opens. This attribute is true when present on an element, and false when missing.
+      */
     autofocus: boolean;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * When present, marks an element that can't be submitted without a value.
+      */
     required: boolean;
+    /**
+      * Sets or retrieves the maximum number of characters that the user can enter in a text control.
+      */
     maxLength: number;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Gets or sets a text string that is displayed in an input field as a hint or prompt to users as the format or type of information they need to enter.The text appears in an input field until the user puts focus on the field.
+      */
     placeholder: string;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -7145,12 +11991,34 @@ declare var SVGFEMorphologyElement: {
 }
 
 interface HTMLSelectElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Provides a way to direct a user to a specific field when a document loads. This can provide both direction and convenience for a user, reducing the need to click or tab to a field when a page opens. This attribute is true when present on an element, and false when missing.
+      */
     autofocus: boolean;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * When present, marks an element that can't be submitted without a value.
+      */
     required: boolean;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -7512,8 +12380,17 @@ declare var SVGFESpotLightElement: {
 }
 
 interface HTMLImageElement {
+    /**
+      * Gets or sets the primary DLNA PlayTo device.
+      */
     msPlayToPrimary: boolean;
+    /**
+      * Gets or sets whether the DLNA PlayTo device is available.
+      */
     msPlayToDisabled: boolean;
+    /**
+      * Gets the source associated with the media element for use by the PlayToManager.
+      */
     msPlayToSource: any;
 }
 
@@ -7553,16 +12430,50 @@ declare var DOMStringList: {
 }
 
 interface HTMLButtonElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Overrides the target attribute on a form element.
+      */
     formTarget: string;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Overrides the action attribute (where the data on a form is sent) on the parent form element.
+      */
     formAction: string;
+    /**
+      * Provides a way to direct a user to a specific field when a document loads. This can provide both direction and convenience for a user, reducing the need to click or tab to a field when a page opens. This attribute is true when present on an element, and false when missing.
+      */
     autofocus: boolean;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * Overrides any validation or required attributes on a form or form elements to allow it to be submitted without validation. This can be used to create a "save draft"-type submit option.
+      */
     formNoValidate: string;
+    /**
+      * Used to override the encoding (formEnctype attribute) specified on the form element.
+      */
     formEnctype: string;
+    /**
+      * Overrides the submit method attribute previously specified on a form element.
+      */
     formMethod: string;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -7579,9 +12490,21 @@ declare var IDBOpenDBRequest: {
 }
 
 interface HTMLProgressElement extends HTMLElement {
+    /**
+      * Sets or gets the current value of a progress element. The value must be a non-negative number between 0 and the max value.
+      */
     value: number;
+    /**
+      * Defines the maximum, or "done" value for a progress element.
+      */
     max: number;
+    /**
+      * Returns the quotient of value/max when the value attribute is set (determinate progress bar), or -1 when the value attribute is missing (indeterminate progress bar).
+      */
     position: number;
+    /**
+      * Retrieves a reference to the form that the object is embedded in.
+      */
     form: HTMLFormElement;
 }
 declare var HTMLProgressElement: {
@@ -7604,8 +12527,17 @@ declare var SVGFEOffsetElement: {
 }
 
 interface HTMLFormElement {
+    /**
+      * Specifies whether autocomplete is applied to an editable text field.
+      */
     autocomplete: string;
+    /**
+      * Designates a form that is not validated when submitted.
+      */
     noValidate: boolean;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
 }
 
@@ -7665,16 +12597,46 @@ interface HTMLScriptElement {
 }
 
 interface HTMLMediaElement {
+    /**
+      * Specifies the purpose of the audio or video media, such as background audio or alerts.
+      */
     msAudioCategory: string;
+    /**
+      * Specifies whether or not to enable low-latency playback on the media element.
+      */
     msRealTime: boolean;
+    /**
+      * Gets or sets the primary DLNA PlayTo device.
+      */
     msPlayToPrimary: boolean;
     textTracks: TextTrackList;
+    /**
+      * Gets or sets whether the DLNA PlayTo device is available.
+      */
     msPlayToDisabled: boolean;
+    /**
+      * Returns an AudioTrackList object with the audio tracks for a given video element.
+      */
     audioTracks: AudioTrackList;
+    /**
+      * Gets the source associated with the media element for use by the PlayToManager.
+      */
     msPlayToSource: any;
+    /**
+      * Specifies the output device id that the audio will be sent to.
+      */
     msAudioDeviceType: string;
+    /**
+      * Clears all effects from the media pipeline.
+      */
     msClearEffects(): void;
+    /**
+      * Specifies the media protection manager for a given media pipeline.
+      */
     msSetMediaProtectionManager(mediaProtectionManager?: any): void;
+    /**
+      * Inserts the specified audio effect into media pipeline.
+      */
     msInsertAudioEffect(activatableClassId: string, effectRequired: boolean, config?: any): void;
 }
 
@@ -7875,10 +12837,26 @@ interface MediaError {
 }
 
 interface HTMLFieldSetElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -7931,10 +12909,26 @@ interface Range {
 }
 
 interface HTMLObjectElement {
+    /**
+      * Returns the error message that would be displayed if the user submits the form, or an empty string if no error message. It also triggers the standard error message, such as "this is a required field". The result is that the user sees validation messages without actually submitting.
+      */
     validationMessage: string;
+    /**
+      * Returns a  ValidityState object that represents the validity states of an element.
+      */
     validity: ValidityState;
+    /**
+      * Returns whether an element will successfully validate based on forms validation rules and constraints.
+      */
     willValidate: boolean;
+    /**
+      * Returns whether a form will validate when it is submitted, without having to submit it.
+      */
     checkValidity(): boolean;
+    /**
+      * Sets a custom error message that is displayed when a form is submitted.
+      * @param error Sets a custom error message that is displayed when a form is submitted.
+      */
     setCustomValidity(error: string): void;
 }
 
@@ -8557,9 +13551,15 @@ declare var MimeTypeArray: {
 }
 
 interface HTMLMediaElement {
+    /**
+      * Gets or sets the path to the preferred media source. This enables the Play To target device to stream the media content, which can be DRM protected, from a different location, such as a cloud media server.
+      */
     msPlayToPreferredSourceUri: string;
     onmsneedkey: (ev: MSMediaKeyNeededEvent) => any;
     addEventListener(type: "msneedkey", listener: (ev: MSMediaKeyNeededEvent) => any, useCapture?: boolean): void;
+    /**
+      * Gets the MSMediaKeys object, which is used for decrypting media data, that is associated with this media element.
+      */
     msKeys: MSMediaKeys;
     msGraphicsTrustStatus: MSGraphicsTrust;
     msSetMediaKeys(mediaKeys: MSMediaKeys): void;
@@ -8869,7 +13869,7 @@ interface MutationObserver {
 }
 declare var MutationObserver: {
     prototype: MutationObserver;
-    new (): MutationObserver;
+    new (callback: (arr: MutationRecord[], observer: MutationObserver)=>any): MutationObserver;
 }
 
 interface AudioTrackList {
@@ -8878,16 +13878,40 @@ interface AudioTrackList {
 }
 
 interface HTMLObjectElement {
+    /**
+      * Gets or sets the path to the preferred media source. This enables the Play To target device to stream the media content, which can be DRM protected, from a different location, such as a cloud media server.
+      */
     msPlayToPreferredSourceUri: string;
+    /**
+      * Gets or sets the primary DLNA PlayTo device.
+      */
     msPlayToPrimary: boolean;
+    /**
+      * Gets or sets whether the DLNA PlayTo device is available.
+      */
     msPlayToDisabled: boolean;
+    /**
+      * Gets the source associated with the media element for use by the PlayToManager.
+      */
     msPlayToSource: any;
 }
 
 interface HTMLEmbedElement {
+    /**
+      * Gets or sets the path to the preferred media source. This enables the Play To target device to stream the media content, which can be DRM protected, from a different location, such as a cloud media server.
+      */
     msPlayToPreferredSourceUri: string;
+    /**
+      * Gets or sets the primary DLNA PlayTo device.
+      */
     msPlayToPrimary: boolean;
+    /**
+      * Gets or sets whether the DLNA PlayTo device is available.
+      */
     msPlayToDisabled: boolean;
+    /**
+      * Gets the source associated with the media element for use by the PlayToManager.
+      */
     msPlayToSource: any;
 }
 

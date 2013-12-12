@@ -24,15 +24,24 @@ Buffer.prototype = {
 
 function ErrorReporter() {
     this.errorMessages = [];
-    this.currentFile = "";
+    this.hasErrors = false;
 }
 
 ErrorReporter.prototype = {
     addDiagnostic: function (diagnostic) {
-        this.errorMessages.push(this.currentFile + ": " + diagnostic.message());
-    },
-    setCurrentFile: function (fileName) {
-        this.currentFile = fileName;
+        var message = "";
+        var diagnosticInfo = diagnostic.info();
+        if (diagnosticInfo.category === 1 /* Error */) {
+            this.hasErrors = true;
+        }
+
+        if (diagnostic.fileName()) {
+            message += diagnostic.fileName() + "(" + (diagnostic.line() + 1) + "," + (diagnostic.character() + 1) + "): ";
+        }
+
+        message += diagnostic.message();
+
+        this.errorMessages.push(message);
     },
     doThrow: function () {
         throw new Error(this.errorMessages.join("\r\n"));
@@ -54,14 +63,13 @@ function compilify_ts(fileMapStr, codeGenTarget, moduleKind) {
         compilationSettings.moduleGenTarget = 2;
     }
 
+    compilationSettings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
+    
     var fileMap = JSON.parse(fileMapStr);
     var convertedFileMap = {};
 
     var logger = new Buffer();
     var compiler = new TypeScript.TypeScriptCompiler(logger, compilationSettings);
-
-    var anySyntacticErrors = false;
-    var anySemanticErrors = false;
 
     var errorReporter = new ErrorReporter();
     
@@ -71,64 +79,27 @@ function compilify_ts(fileMapStr, codeGenTarget, moduleKind) {
             var fileText = fileMap[fileName];
             var snapshot = TypeScript.ScriptSnapshot.fromString(fileText);
             var referencedFiles = TypeScript.getReferencedFiles(fileName, snapshot);
-            compiler.addSourceUnit(fileName, snapshot, "None", 0, true, referencedFiles);
-
-            var syntacticDiagnostics = compiler.getSyntacticDiagnostics(fileName);
-            errorReporter.setCurrentFile(fileName);
-            compiler.reportDiagnostics(syntacticDiagnostics, errorReporter);
-
-            if (syntacticDiagnostics.length > 0) {
-                anySyntacticErrors = true;
-            }
+            compiler.addFile(fileName, snapshot, "None", 0, true, referencedFiles);
         }
     }
 
-    if (anySyntacticErrors) {
+    for (var it = compiler.compile() ; it.moveNext() ;) {
+        var result = it.current();
+
+        result.diagnostics.forEach(function (d) {
+            return errorReporter.addDiagnostic(d);
+        });
+
+        result.outputFiles.forEach(function (outputFile) {
+            convertedFileMap[outputFile.name] = outputFile.text;
+        });
+    }
+
+
+    if (errorReporter.hasErrors) {
         errorReporter.doThrow();
     }
 
-    compiler.pullTypeCheck();
-    var fileNames = compiler.fileNameToDocument.getAllKeys();
-    for (var i = 0, n = fileNames.length; i < n; i++) {
-        var fileName = fileNames[i];
-        var semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
-        if (semanticDiagnostics.length > 0) {
-            anySemanticErrors = true;
-            errorReporter.setCurrentFile(fileName);
-            compiler.reportDiagnostics(semanticDiagnostics, errorReporter);
-        }
-    }
-
-    var emitterIOHost = {
-        writeFile: function(fileName, contents, writeByteOrderMark) {
-            var buffer = new Buffer();
-            buffer.Write(contents);
-            convertedFileMap[fileName] = buffer;
-        },
-        fileExists: function(path) {
-            return false;
-        },
-        directoryExists: function(path) {
-            return false;
-        },
-        resolvePath: function(path) {
-            return path;
-        }
-    };
-
-    var emitDiagnostics = compiler.emitAll(emitterIOHost);
-    errorReporter.setCurrentFile("");
-    compiler.reportDiagnostics(emitDiagnostics, errorReporter);
-    if (emitDiagnostics.length > 0 || anySemanticErrors) {
-        errorReporter.doThrow();
-    }
-
-    var emitDeclarationsDiagnostics = compiler.emitAllDeclarations();
-    errorReporter.setCurrentFile("");
-    compiler.reportDiagnostics(emitDeclarationsDiagnostics, errorReporter);
-    if (emitDeclarationsDiagnostics.length > 0) {
-        errorReporter.doThrow();
-    }
 
     function changeExtension(fname, ext) {
         var splitFname = fname.split(".");
