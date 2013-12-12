@@ -14,11 +14,14 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Support for HTML template imports (item 144)	
-* Code Coverage issue with jquery.jstepper.min.js (item 120)
-* Code coverage timeout issue (item 114)
-* How can I update to make it work with TypeScript Generics? (item 141)
-* Upgrade TypeScript to 0.9.0 (item 138)
+* Improved RequireJS support 
+* Mocha Test Framework support 
+* Customizable HTML harness generation 
+* Command line failure report flag 
+* Chutzpah.json additions
+* Upgrading to TypeScript 0.9.5.0
+* Improved logging integrated into VS Plugins 
+* Fix VS 2013 compatibility issues
         </releaseNotes>
     </metadata>
 </package>
