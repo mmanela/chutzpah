@@ -26,7 +26,8 @@ task Set-Version {
 }
 
 task Update-AssemblyInfoFiles {
-	$commit = hg log --template '{rev}:{node}\n' -l 1
+	$v = git describe --abbrev=0 --tags
+  $commit = git log -1 $($v + '..') --pretty=format:%H
 	Update-AssemblyInfoFiles $global:version $commit
 }
 
