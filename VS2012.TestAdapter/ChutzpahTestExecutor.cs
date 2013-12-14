@@ -27,6 +27,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+            ChutzpahTracer.TraceInformation("Begin Test Adapter Run Tests");
+
 
             var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
@@ -44,6 +46,9 @@ namespace Chutzpah.VS2012.TestAdapter
 
             var callback = new ParallelRunnerCallbackAdapter(new ExecutionCallback(frameworkHandle, runContext));
             testRunner.RunTests(sources, testOptions, callback);
+
+            ChutzpahTracer.TraceInformation("End Test Adapter Run Tests");
+
         }
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)

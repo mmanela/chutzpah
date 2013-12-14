@@ -172,16 +172,14 @@ namespace Chutzpah
                     {
                         if (options.OpenInBrowser)
                         {
-                            ChutzpahTracer.TraceInformation(
-                                "Launching test harness '{0}' for file '{1}' in a browser",
+                            ChutzpahTracer.TraceInformation("Launching test harness '{0}' for file '{1}' in a browser",
                                 testContext.TestHarnessPath,
                                 testContext.InputTestFile);
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
                         else
                         {
-                            ChutzpahTracer.TraceInformation(
-                                "Invoking test runner on  test harness '{0}' for file '{1}'",
+                            ChutzpahTracer.TraceInformation("Invoking headless browser on test harness '{0}' for file '{1}'",
                                 testContext.TestHarnessPath,
                                 testContext.InputTestFile);
                             var testSummary = InvokeTestRunner(
@@ -190,6 +188,10 @@ namespace Chutzpah
                                 testContext,
                                 testRunnerMode,
                                 callback);
+
+                            ChutzpahTracer.TraceInformation("Finished running headless browser on test harness '{0}' for file '{1}'",
+                                testContext.TestHarnessPath,
+                                testContext.InputTestFile);
                             testFileSummaries.Enqueue(testSummary);
                         }
 
@@ -246,7 +248,7 @@ namespace Chutzpah
             ChutzpahTestSettingsFile.ClearCache();
 
 
-            ChutzpahTracer.TraceInformation("Chutzpah run finsihed ");
+            ChutzpahTracer.TraceInformation("Chutzpah run finished ");
 
             return overallSummary;
         }

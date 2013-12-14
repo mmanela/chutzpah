@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Chutzpah;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -26,6 +27,7 @@ namespace VS11.Plugin
 				}
 			}
 		}
+
 		public static IEnumerable<string> GetProjectItems(IVsProject project)
 		{
 			// Each item in VS OM is IVSHierarchy. 
@@ -35,6 +37,7 @@ namespace VS11.Plugin
 
 		public static IEnumerable<string> GetProjectItems(IVsHierarchy project, uint itemId)
 		{
+
 			object pVar = GetPropertyValue((int)__VSHPROPID.VSHPROPID_FirstChild, itemId, project);
 
 			uint childId = GetItemId(pVar);

@@ -26,6 +26,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
+            ChutzpahTracer.TraceInformation("Begin Test Adapter Discover Tests");
+
             var settingsProvider = discoveryContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
 
@@ -40,6 +42,9 @@ namespace Chutzpah.VS2012.TestAdapter
 
             IList<TestError> errors;
             var testCases = testRunner.DiscoverTests(sources, testOptions, out errors);
+
+            ChutzpahTracer.TraceInformation("Sending discovered tests to test case discovery sink");
+
             foreach (var testCase in testCases)
             {
                 var vsTestCase = testCase.ToVsTestCase();
@@ -50,6 +55,9 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 logger.SendMessage(TestMessageLevel.Error, RunnerCallback.FormatFileErrorMessage(error));
             }
+
+            ChutzpahTracer.TraceInformation("End Test Adapter Discover Tests");
+
         }
     }
 }
