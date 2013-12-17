@@ -147,6 +147,8 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         private void UpdateTestContainersAndFileWatchers(IEnumerable<string> files, bool isAdd)
         {
+
+            ChutzpahTracer.TraceInformation("Begin UpdateTestContainersAndFileWatchers");
             foreach (var file in files)
             {
                 if (isAdd)
@@ -160,6 +162,8 @@ namespace Chutzpah.VS2012.TestAdapter
                     RemoveTestContainer(file);
                 }
             }
+
+            ChutzpahTracer.TraceInformation("End UpdateTestContainersAndFileWatchers");
         }
 
 
@@ -209,6 +213,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
             if (isTestFile)
             {
+
+                ChutzpahTracer.TraceInformation("Added test container for '{0}'", file);
                 var container = new JsTestContainer(this, file.ToLowerInvariant(), Constants.ExecutorUri);
                 cachedContainers.Add(container);
             }
@@ -223,12 +229,15 @@ namespace Chutzpah.VS2012.TestAdapter
             var index = cachedContainers.FindIndex(x => x.Source.Equals(file, StringComparison.OrdinalIgnoreCase));
             if (index >= 0)
             {
+
+                ChutzpahTracer.TraceInformation("Removed test container for '{0}'", file);
                 cachedContainers.RemoveAt(index);
             }
         }
 
         private IEnumerable<ITestContainer> GetTestContainers()
         {
+            ChutzpahTracer.TraceInformation("Begin GetTestContainers");
             logger.Log("GetTestContainers() are called", "ChutzpahTestContainerDiscoverer", LogType.Information);
 
 
@@ -236,15 +245,21 @@ namespace Chutzpah.VS2012.TestAdapter
 
             if (initialContainerSearch)
             {
+
+                ChutzpahTracer.TraceInformation("Begin Initial test container search");
                 logger.Log("Initial test container search", "ChutzpahTestContainerDiscoverer", LogType.Information);
 
                 cachedContainers.Clear();
                 var jsFiles = FindPotentialTestFiles();
                 UpdateTestContainersAndFileWatchers(jsFiles, true);
                 initialContainerSearch = false;
+
+                ChutzpahTracer.TraceInformation("End Initial test container search");
             }
 
             var containers = FilterContainers(cachedContainers);
+
+            ChutzpahTracer.TraceInformation("End GetTestContainers");
             return containers;
         }
 
@@ -256,17 +271,33 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private IEnumerable<string> FindPotentialTestFiles()
         {
-            var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
-            var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
+            try
+            {
+                ChutzpahTracer.TraceInformation("Begin enumerating loaded projects for test files");
+                var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
+                var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
-            return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
+                return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
+            }
+            finally
+            {
+                ChutzpahTracer.TraceInformation("End enumerating loaded projects for test files");
+            }
         }
 
         private IEnumerable<string> FindPotentialTestFiles(IVsProject project)
         {
-            return from item in VsSolutionHelper.GetProjectItems(project)
-                   where HasTestFileExtension(item) && !fileProbe.IsTemporaryChutzpahFile(item)
-                   select item;
+            try
+            {
+                ChutzpahTracer.TraceInformation("Begin selecting potential test files from project");
+                return (from item in VsSolutionHelper.GetProjectItems(project)
+                    where HasTestFileExtension(item) && !fileProbe.IsTemporaryChutzpahFile(item)
+                    select item).ToList();
+            }
+            finally
+            {
+                ChutzpahTracer.TraceInformation("End selecting potential test files from project");
+            }
         }
 
 

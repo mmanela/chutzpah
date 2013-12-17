@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chutzpah;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using Microsoft.VisualStudio.TestWindow.Extensibility.Model;
@@ -106,6 +107,8 @@ namespace VS11.Plugin
             {
                 return result;
             }
+
+            ChutzpahTracer.TraceInformation("Test container comparision {0} vs {1} for {2}", this.timeStamp, testContainer.timeStamp, this.Source);
 
             return this.timeStamp.CompareTo(testContainer.timeStamp);
         }
