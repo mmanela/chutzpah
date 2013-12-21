@@ -189,5 +189,12 @@ namespace Chutzpah
                 .Replace("%5c", "/")
                 .Replace("%2f", "/");
         }
+
+        public static string NormalizeFilePath(string path)
+        {
+            if (path == null) return null;
+
+            return path.ToLowerInvariant().Replace(@"/", @"\");
+        }
     }
 }

@@ -38,6 +38,7 @@ namespace Chutzpah.Models
             CodeCoverageIncludes = new List<string>();
             CodeCoverageExcludes = new List<string>();
             References = new List<SettingsFileReference>();
+            Tests = new List<SettingsFilePath>();
             CoffeeScriptBareMode = true;
         }
 
@@ -126,7 +127,14 @@ namespace Chutzpah.Models
         public ICollection<string> CodeCoverageExcludes { get; set; }
 
         /// <summary>
-        /// The collection code coverage file patterns to exclude in coverage. These are in glob format. If you specify none no files are excluded.
+        /// The collection of test files. These can list individual tests or folders scanned recursively. This setting can work in two ways:
+        /// 1. If you run tests normally by specifying folders/files then this settings will filter the sets of those files.
+        /// 2. If you run tests by running a specific chutzpah.json file then this settings will select the test files you choose.
+        /// </summary>
+        public ICollection<SettingsFilePath> Tests { get; set; }
+
+        /// <summary>
+        /// The collection of reference settings. These can list individual reference files or folders scanned recursively.
         /// </summary>
         public ICollection<SettingsFileReference> References { get; set; }
 

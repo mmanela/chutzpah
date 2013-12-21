@@ -12,17 +12,6 @@ namespace Chutzpah.Coverage
         /// <param name="definition">The test framework used.</param>
         IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition);
 
-        /// <summary>
-        /// File name pattern that, if set, a file must match to be instrumented. Pattern matching
-        /// is done with the <c>PathMatchSpec</c> Windows function.
-        /// </summary>
-        ICollection<string> IncludePatterns { get; set; }
-
-        /// <summary>
-        /// File name pattern that, if set, a file must NOT match to be instrumented. Pattern matching 
-        /// is done with the <c>PathMatchSpec</c> Windows function.
-        /// </summary>
-        ICollection<string> ExcludePatterns { get; set; }
 
         /// <summary>
         /// Modifies the test harness for coverage instrumentation and collection. This method is
@@ -42,5 +31,16 @@ namespace Chutzpah.Coverage
         /// <param name="testContext">The current test context.</param>
         /// <returns>A coverage object.</returns>
         CoverageData DeserializeCoverageObject(string json, TestContext testContext);
+
+        /// <summary>
+        /// Add file name pattern that, if set, a file must match to be instrumented. Pattern matching
+        /// is done with the <c>PathMatchSpec</c> Windows function.
+        /// </summary>
+        void AddIncludePatterns(IEnumerable<string> includePatterns);
+
+        
+        /// Add file name pattern that, if set, a file must NOT match to be instrumented. Pattern matching 
+        /// is done with the <c>PathMatchSpec</c> Windows function.
+        void AddExcludePatterns(IEnumerable<string> excludePatterns);
     }
 }

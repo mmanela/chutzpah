@@ -20,13 +20,16 @@ namespace Chutzpah.Coverage
         private readonly IFileSystemWrapper fileSystem;
         private readonly IJsonSerializer jsonSerializer;
 
+        private List<string> includePatterns { get; set; }
+        private List<string> excludePatterns { get; set; }
+
         public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem)
         {
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
 
-            IncludePatterns = new List<string>();
-            ExcludePatterns = new List<string>();
+            includePatterns = new List<string>();
+            excludePatterns = new List<string>();
         }
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
@@ -35,9 +38,6 @@ namespace Chutzpah.Coverage
             yield return "Coverage\\" + info.BlanketScriptName;
         }
 
-        public ICollection<string> IncludePatterns { get; set; }
-
-        public ICollection<string> ExcludePatterns { get; set; }
 
         public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
         {
@@ -132,16 +132,33 @@ namespace Chutzpah.Coverage
             return coverageData;
         }
 
+        public void AddIncludePatterns(IEnumerable<string> patterns)
+        {
+            foreach (var pattern in patterns)
+            {
+                includePatterns.Add(FileProbe.NormalizeFilePath(pattern));
+            }
+        }
+
+        public void AddExcludePatterns(IEnumerable<string> patterns)
+        {
+            foreach (var pattern in patterns)
+            {
+                includePatterns.Add(FileProbe.NormalizeFilePath(pattern));
+            }
+        }
+
+
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
-            if (IncludePatterns.Any() && !IncludePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, includePattern)))
+            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, includePattern)))
             {
                 return false;
             }
 
             // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
-            if (ExcludePatterns.Any() && ExcludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, excludePattern)))
+            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, excludePattern)))
             {
                 return false;
             }
