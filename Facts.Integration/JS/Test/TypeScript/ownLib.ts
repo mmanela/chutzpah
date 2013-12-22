@@ -1,4 +1,4 @@
-﻿/// <reference path="C:\Dev\chutzpah\Chutzpah\Compilers\TypeScript\lib.d.ts" />
+﻿/// <reference path="..\..\..\..\Chutzpah\Compilers\TypeScript\lib.d.ts" />
 /// <reference path="qunit.d.ts" />
 
 test("Providing own lib.d.ts", function () {

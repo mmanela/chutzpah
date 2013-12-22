@@ -1,29 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-    <Metadata>
-        <Identity Id="VS11.Plugin.Chutzpah.67f38ef0-909a-40b5-b183-9477ad8c266a" Version="3.0.0" Language="en-US" Publisher="Matthew Manela" />
-        <DisplayName>Chutzpah Test Adapter for the Test Explorer</DisplayName>
-        <Description xml:space="preserve">Chutzpah adapter for the Visual Studio Unit Test Explorer. Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
-        <MoreInfo>http://chutzpah.codeplex.com/</MoreInfo>
-        <License>EULA.rtf</License>
-        <GettingStartedGuide>http://chutzpah.codeplex.com/</GettingStartedGuide>
-        <Icon>chetTimes.png</Icon>
-        <PreviewImage>chetTimes.png</PreviewImage>
-        <Tags>Javascript, Unit Testing, HTML, Visual Studio 2012, TDD, qunit, jasmine, testing, CoffeeScript, TypeScript</Tags>
-    </Metadata>
-    <Installation InstalledByMsi="false">
-        <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Pro" />
-        <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.IntegratedShell" />
-        <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Premium" />
-        <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Ultimate" />
-    </Installation>
-    <Dependencies>
-        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
-        <Dependency Id="Microsoft.VisualStudio.MPF.11.0" DisplayName="Visual Studio MPF 11.0" d:Source="Installed" Version="11.0" />
-    </Dependencies>
-    <Assets>
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-        <Asset d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2012.TestAdapter|" />
-        <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|VS2012.TestAdapter|" />
-    </Assets>
+  <Metadata>
+    <Identity Id="VS11.Plugin.Chutzpah.67f38ef0-909a-40b5-b183-9477ad8c266a" Version="3.0.1" Language="en-US" Publisher="Matthew Manela" />
+    <DisplayName>Chutzpah Test Adapter for the Test Explorer</DisplayName>
+    <Description xml:space="preserve">Chutzpah adapter for the Visual Studio Unit Test Explorer. Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
+    <MoreInfo>http://chutzpah.codeplex.com/</MoreInfo>
+    <License>EULA.rtf</License>
+    <GettingStartedGuide>http://chutzpah.codeplex.com/</GettingStartedGuide>
+    <Icon>chetTimes.png</Icon>
+    <PreviewImage>chetTimes.png</PreviewImage>
+    <Tags>Javascript, Unit Testing, HTML, Visual Studio 2012, TDD, qunit, jasmine, testing, CoffeeScript, TypeScript</Tags>
+  </Metadata>
+  <Installation InstalledByMsi="false">
+    <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Pro" />
+    <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.IntegratedShell" />
+    <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Premium" />
+    <InstallationTarget Version="[11.0,13.0)" Id="Microsoft.VisualStudio.Ultimate" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
+    <Dependency Id="Microsoft.VisualStudio.MPF.11.0" DisplayName="Visual Studio MPF 11.0" d:Source="Installed" Version="11.0" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2012.TestAdapter|" />
+    <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|VS2012.TestAdapter|" />
+  </Assets>
 </PackageManifest>

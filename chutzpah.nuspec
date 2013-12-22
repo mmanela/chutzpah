@@ -14,14 +14,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Improved RequireJS support 
-* Mocha Test Framework support 
-* Customizable HTML harness generation 
-* Command line failure report flag 
-* Chutzpah.json additions
-* Upgrading to TypeScript 0.9.5.0
-* Improved logging integrated into VS Plugins 
-* Fix VS 2013 compatibility issues
+* Fix VS Test Adapter issue
+* Fixed TypeScript compiler issue
+* Added more tracing
         </releaseNotes>
     </metadata>
 </package>

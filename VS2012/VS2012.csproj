@@ -176,12 +176,19 @@
       <Project>{5E8EE6D2-52A1-46EE-BD2B-449B0B8FDA6F}</Project>
       <Name>Chutzpah</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VS.Common\VS.Common.csproj">
+      <Project>{1689355D-3366-460C-8CF3-5F035EE21B05}</Project>
+      <Name>VS.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VS2012.TestAdapter\VS2012.TestAdapter.csproj">
       <Project>{BD1F2D08-D667-4B0D-8775-B14DCD582D7E}</Project>
       <Name>VS2012.TestAdapter</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>

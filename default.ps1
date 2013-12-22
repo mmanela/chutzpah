@@ -5,7 +5,7 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "3.0.0"
+  $mainVersion = "3.0.1"
 }
 
 # Aliases
@@ -17,7 +17,7 @@ task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-Unit
 # Build Tasks
 task Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
 task Build-2010 -depends  Clean-Solution-2010, Build-Solution-2010, Run-UnitTests, Run-IntegrationTests
-task Build-2012 -depends  Clean-Solution-2012, Build-Solution-2012, Run-UnitTests, Run-IntegrationTests
+task Build-2013 -depends  Clean-Solution-2013, Build-Solution-2013, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
 
@@ -48,10 +48,10 @@ task Clean-TeamCitySolution {
 
 }
 
-task Clean-Solution -depends Clean-Solution-2010, Clean-Solution-2012
+task Clean-Solution -depends Clean-Solution-2010, Clean-Solution-2013
 
-task Clean-Solution-2012 {
-    exec { msbuild Chutzpah.VS2012.sln /t:Clean /v:quiet }
+task Clean-Solution-2013 {
+    exec { msbuild Chutzpah.VS2013.sln /t:Clean /v:quiet }
 }
 
 task Clean-Solution-2010 {
@@ -64,10 +64,10 @@ task Build-TeamCitySolution {
     exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
-task Build-Solution -depends Build-Solution-2010, Build-Solution-2012
+task Build-Solution -depends Build-Solution-2010, Build-Solution-2013
 
-task Build-Solution-2012 {
-    exec { msbuild Chutzpah.VS2012.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+task Build-Solution-2013 {
+    exec { msbuild Chutzpah.VS2013.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Build-Solution-2010 {
