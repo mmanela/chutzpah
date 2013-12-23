@@ -59,6 +59,9 @@ namespace Chutzpah
 
         public TestContext BuildContext(PathInfo file, TestOptions options)
         {
+
+            ChutzpahTracer.TraceInformation("Building test context for '{0}'", file);
+
             if (file == null)
             {
                 throw new ArgumentNullException("testFilePathInfo");
@@ -328,6 +331,7 @@ namespace Chutzpah
 
         public bool IsTestFile(string file)
         {
+            ChutzpahTracer.TraceInformation("Determining if '{0}' might be a test file", file);
             if (string.IsNullOrWhiteSpace(file))
             {
                 return false;
@@ -339,6 +343,8 @@ namespace Chutzpah
 
             if (testFilePath == null || (IsValidTestPathType(testFileKind)))
             {
+
+                ChutzpahTracer.TraceInformation("Rejecting '{0}' since either it doesnt exist or does not have test extension", file);
                 return false;
             }
 
@@ -354,7 +360,14 @@ namespace Chutzpah
             string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;
-            return TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition);
+            var frameworkDetetected = TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition);
+
+            if (frameworkDetetected)
+            {
+                ChutzpahTracer.TraceInformation("Assuming '{0}' is a test file", file);
+            }
+
+            return frameworkDetetected;
         }
 
         public void CleanupContext(TestContext context)
