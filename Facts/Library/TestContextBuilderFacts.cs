@@ -177,7 +177,9 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Include = "*test.js"} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type =  PathType.JavaScript, FullPath = @"path\test.js"});
+                creator.ChutzpahTestSettingsFile.SettingsFileDirectory = @"C:\settingsPath";
+                creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPath\path\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -189,11 +191,13 @@ namespace Chutzpah.Facts
             public void Will_return_false_if_settings_include_path_matches_but_exclude_doesnt()
             {
                 var creator = new TestableTestContextBuilder();
+                creator.ChutzpahTestSettingsFile.SettingsFileDirectory = @"C:\settingsPath";
+                creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
                     new SettingsFileTestPath{ Include = "*test.js", Exclude = "*path/test.js"} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPath\path\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -205,11 +209,13 @@ namespace Chutzpah.Facts
             public void Will_return_true_if_settings_exclude_doesnt_match()
             {
                 var creator = new TestableTestContextBuilder();
+                creator.ChutzpahTestSettingsFile.SettingsFileDirectory = @"C:\settingsPath";
+                creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
                     new SettingsFileTestPath{ Exclude = "*path2/test.js"} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPathpath\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");

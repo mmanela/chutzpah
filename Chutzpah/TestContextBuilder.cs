@@ -187,34 +187,10 @@ namespace Chutzpah
             {
                 var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
                 var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
-                var testPath = FileProbe.NormalizeFilePath(pathSettings.Path);
+
+                var testPath = string.IsNullOrEmpty(pathSettings.Path) ? chutzpahTestSettings.SettingsFileDirectory : pathSettings.Path;
+                testPath = FileProbe.NormalizeFilePath(testPath);
                 testPath = testPath != null ? Path.Combine(chutzpahTestSettings.SettingsFileDirectory, testPath) : null;
-
-                // If the settings path is empty but include or exclude then just use the Include/Exclude patterns
-                if (string.IsNullOrEmpty(testPath)
-                    && (includePattern != null || excludePattern != null))
-                {
-                    var shouldIncludeFile = (includePattern == null || NativeImports.PathMatchSpec(testFilePath, includePattern))
-                                            && (excludePattern == null || !NativeImports.PathMatchSpec(testFilePath, excludePattern));
-
-                    if (shouldIncludeFile)
-                    {
-                        ChutzpahTracer.TraceInformation(
-                            "Test file {0} matched test file path to settings file using include path {1} and exclude path {2}",
-                            testFilePath,
-                            includePattern,
-                            excludePattern);
-                        return true;
-                    }
-                    else
-                    {
-                        ChutzpahTracer.TraceInformation(
-                            "Test file {0} did not match test file path to settings file using include path {1} and exclude path {2}",
-                            testFilePath,
-                            includePattern,
-                            excludePattern);
-                    }
-                }
 
                 // If a file path is given just match the test file against it to see if we should urn
                 var filePath = fileProbe.FindFilePath(testPath);
