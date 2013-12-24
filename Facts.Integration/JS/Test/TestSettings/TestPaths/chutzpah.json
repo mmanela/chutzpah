@@ -1,0 +1,8 @@
+﻿{
+	"Tests": [
+		{ "Include": "*test1*" },
+	    { "Path": "Dir3/test.js"},
+	    { "Path": "Dir1", "Include": "*.js", "Exclude": "*test4.js" },
+	    { "Path": "Dir2" }
+	]
+}

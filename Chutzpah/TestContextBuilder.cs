@@ -19,29 +19,29 @@ namespace Chutzpah
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IEnumerable<IFileGenerator> fileGenerators;
+        private readonly IChutzpahTestSettingsService settingsService;
         private readonly IHasher hasher;
         private readonly ICoverageEngine mainCoverageEngine;
-        private readonly IJsonSerializer serializer;
 
         public TestContextBuilder(
-            IReferenceProcessor referenceProcessor,
             IFileSystemWrapper fileSystem,
+            IReferenceProcessor referenceProcessor,
             IHttpWrapper httpWrapper,
             IFileProbe fileProbe,
             IHasher hasher,
             ICoverageEngine coverageEngine,
-            IJsonSerializer serializer,
             IEnumerable<IFrameworkDefinition> frameworkDefinitions,
-            IEnumerable<IFileGenerator> fileGenerators)
+            IEnumerable<IFileGenerator> fileGenerators,
+            IChutzpahTestSettingsService settingsService)
         {
             this.referenceProcessor = referenceProcessor;
             this.httpClient = httpWrapper;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
-            this.serializer = serializer;
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
+            this.settingsService = settingsService;
             mainCoverageEngine = coverageEngine;
         }
 
@@ -59,7 +59,6 @@ namespace Chutzpah
 
         public TestContext BuildContext(PathInfo file, TestOptions options)
         {
-
             ChutzpahTracer.TraceInformation("Building test context for '{0}'", file);
 
             if (file == null)
@@ -81,7 +80,7 @@ namespace Chutzpah
             }
 
             var testFileDirectory = Path.GetDirectoryName(testFilePath);
-            var chutzpahTestSettings = ChutzpahTestSettingsFile.Read(testFileDirectory, fileProbe, serializer);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
 
             if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
             {
@@ -189,17 +188,17 @@ namespace Chutzpah
                 var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
                 var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
                 var testPath = FileProbe.NormalizeFilePath(pathSettings.Path);
+                testPath = testPath != null ? Path.Combine(chutzpahTestSettings.SettingsFileDirectory, testPath) : null;
 
                 // If the settings path is empty but include or exclude then just use the Include/Exclude patterns
-                if (string.IsNullOrEmpty(pathSettings.Path)
+                if (string.IsNullOrEmpty(testPath)
                     && (includePattern != null || excludePattern != null))
                 {
                     var shouldIncludeFile = (includePattern == null || NativeImports.PathMatchSpec(testFilePath, includePattern))
-                                                && (excludePattern == null || !NativeImports.PathMatchSpec(testFilePath, excludePattern));
+                                            && (excludePattern == null || !NativeImports.PathMatchSpec(testFilePath, excludePattern));
 
                     if (shouldIncludeFile)
                     {
-
                         ChutzpahTracer.TraceInformation(
                             "Test file {0} matched test file path to settings file using include path {1} and exclude path {2}",
                             testFilePath,
@@ -209,7 +208,11 @@ namespace Chutzpah
                     }
                     else
                     {
-                        ChutzpahTracer.TraceInformation("Test file {0} did not match test file path to settings file using include path {1} and exclude path {2}", testFilePath, includePattern, excludePattern);
+                        ChutzpahTracer.TraceInformation(
+                            "Test file {0} did not match test file path to settings file using include path {1} and exclude path {2}",
+                            testFilePath,
+                            includePattern,
+                            excludePattern);
                     }
                 }
 
@@ -223,13 +226,9 @@ namespace Chutzpah
                         return true;
                     }
                 }
-                else
-                {
-                    ChutzpahTracer.TraceWarning("Test file path '{0}' from settings file does not exist", testPath);
-                }
 
                 // If a folder path is given then match the test file path that is in that folder with the optional include/exclude paths
-                var folderPath = fileProbe.FindFolderPath(testPath);
+                var folderPath = FileProbe.NormalizeFilePath(fileProbe.FindFolderPath(testPath));
                 if (folderPath != null)
                 {
                     if (testFilePath.Contains(folderPath))
@@ -255,14 +254,8 @@ namespace Chutzpah
                                 folderPath,
                                 includePattern,
                                 excludePattern);
-
                         }
                     }
-
-                }
-                else
-                {
-                    ChutzpahTracer.TraceWarning("Test folder path '{0}' from settings file does not exist", testPath);
                 }
             }
 
@@ -283,7 +276,7 @@ namespace Chutzpah
             {
                 string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
                 ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
-                referencedFiles.Insert(0, new ReferencedFile { IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true });
+                referencedFiles.Insert(0, new ReferencedFile {IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true});
             }
         }
 
@@ -341,22 +334,21 @@ namespace Chutzpah
             PathType testFileKind = pathInfo.Type;
             string testFilePath = pathInfo.FullPath;
 
-            if (testFilePath == null || (IsValidTestPathType(testFileKind)))
+            if (testFilePath == null || !IsValidTestPathType(testFileKind))
             {
-
                 ChutzpahTracer.TraceInformation("Rejecting '{0}' since either it doesnt exist or does not have test extension", file);
                 return false;
             }
 
             var testFileDirectory = Path.GetDirectoryName(testFilePath);
-            var chutzpahTestSettings = ChutzpahTestSettingsFile.Read(testFileDirectory, fileProbe, serializer);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
 
             if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
             {
                 ChutzpahTracer.TraceInformation("Excluded test file '{0}' given chutzpah.json settings", testFilePath);
                 return false;
             }
-            
+
             string testFileText = fileSystem.GetText(testFilePath);
 
             IFrameworkDefinition definition;

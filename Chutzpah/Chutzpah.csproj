@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
+    <Compile Include="ChutzpahTestSettingsService.cs" />
     <Compile Include="CoverageOptions.cs" />
     <EmbeddedResource Include="Compilers\CoffeeScript\compile-cs.js" />
     <Content Include="Compilers\README.txt" />
@@ -100,6 +101,7 @@
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
+    <Compile Include="Models\SettingsFileTestPath.cs" />
     <Compile Include="NativeImports.cs" />
     <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />

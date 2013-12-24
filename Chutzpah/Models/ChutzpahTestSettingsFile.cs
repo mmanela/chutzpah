@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using Chutzpah.Compilers.TypeScript;
-using Chutzpah.Wrappers;
-
 namespace Chutzpah.Models
 {
     public enum TestHarnessReferenceMode
@@ -38,7 +34,7 @@ namespace Chutzpah.Models
             CodeCoverageIncludes = new List<string>();
             CodeCoverageExcludes = new List<string>();
             References = new List<SettingsFileReference>();
-            Tests = new List<SettingsFilePath>();
+            Tests = new List<SettingsFileTestPath>();
             CoffeeScriptBareMode = true;
         }
 
@@ -131,7 +127,7 @@ namespace Chutzpah.Models
         /// 1. If you run tests normally by specifying folders/files then this settings will filter the sets of those files.
         /// 2. If you run tests by running a specific chutzpah.json file then this settings will select the test files you choose.
         /// </summary>
-        public ICollection<SettingsFilePath> Tests { get; set; }
+        public ICollection<SettingsFileTestPath> Tests { get; set; }
 
         /// <summary>
         /// The collection of reference settings. These can list individual reference files or folders scanned recursively.
@@ -148,77 +144,6 @@ namespace Chutzpah.Models
         /// </summary>
         public bool CoffeeScriptBareMode { get; set; }
 
-        /// <summary>
-        /// Cache settings file
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, ChutzpahTestSettingsFile> ChutzpahSettingsFileCache =
-            new ConcurrentDictionary<string, ChutzpahTestSettingsFile>(StringComparer.OrdinalIgnoreCase);
-        
-        /// <summary>
-        /// Find and reads a chutzpah test settings file given a direcotry. If none is found a default settings object is created
-        /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="fileProbe"></param>
-        /// <param name="serializer"></param>
-        /// <returns></returns>
-        public static ChutzpahTestSettingsFile Read(string directory, IFileProbe fileProbe, IJsonSerializer serializer)
-        {
-            if (string.IsNullOrEmpty(directory)) return new ChutzpahTestSettingsFile();
-
-            directory = directory.TrimEnd('/', '\\');
-
-            ChutzpahTestSettingsFile settings;
-            if (!ChutzpahSettingsFileCache.TryGetValue(directory, out settings))
-            {
-                var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
-                if(string.IsNullOrEmpty(testSettingsFilePath))
-                {
-                    ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directoy {0}", directory);
-                    settings = new ChutzpahTestSettingsFile();
-                }
-                else if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
-                {
-                    ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
-                    settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
-                    settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
-
-                    ValidateTestHarnessLocationMode(settings, fileProbe);
-
-                    // Add a mapping in the cache for the directory that contains the test settings file
-                    ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
-                }
-
-                // Add mapping in the cache for the original directory tried to skip needing to traverse the tree again
-                ChutzpahSettingsFileCache.TryAdd(directory, settings);
-            }
-
-            return settings;
-        }
-
-        public static void ClearCache()
-        {
-            ChutzpahTracer.TraceInformation("Chutzpah.json file cache cleared");
-            ChutzpahSettingsFileCache.Clear();
-        }
-
-        private static void ValidateTestHarnessLocationMode(ChutzpahTestSettingsFile settings, IFileProbe fileProbe)
-        {
-            if (settings.TestHarnessLocationMode == TestHarnessLocationMode.Custom)
-            {
-                if (settings.TestHarnessDirectory != null)
-                {
-                    string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, settings.TestHarnessDirectory);
-                    string absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
-                    settings.TestHarnessDirectory = absoluteFilePath;
-                }
-
-                if (settings.TestHarnessDirectory == null)
-                {
-                    settings.TestHarnessLocationMode = TestHarnessLocationMode.TestFileAdjacent;
-                    ChutzpahTracer.TraceWarning("Unable to find custom test harness directory at {0}", settings.TestHarnessDirectory);
-                }
-            }
-        }
     }
 
 }

@@ -1080,7 +1080,6 @@ namespace Chutzpah.Facts.Integration
             public void Will_include_reference_from_settings_file()
             {
                 var testRunner = TestRunner.Create();
-                testRunner.EnableDebugMode();
                 var result = testRunner.RunTests(@"JS\Test\TestSettings\ReferencePaths\ReferencesTests.js", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.FailedCount);
@@ -1088,6 +1087,16 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(2, result.TotalCount);
             }
 
+            [Fact]
+            public void will_use_tests_setting_to_filter_tests()
+            {
+                var testRunner = TestRunner.Create();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\TestPaths", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(4, result.PassedCount);
+                Assert.Equal(4, result.TotalCount);
+            }
         }
     }
 }

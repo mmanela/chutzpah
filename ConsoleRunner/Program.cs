@@ -14,7 +14,8 @@ namespace Chutzpah
         [STAThread]
         public static int Main(string[] args)
         {
-            Console.WriteLine("Chutzpah console test runner ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
+            Console.WriteLine("Chutzpah console test runner  ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
+            Console.WriteLine("Version {0}", Assembly.GetEntryAssembly().GetName().Version);
             Console.WriteLine("Copyright (C) 2013 Matthew Manela (http://matthewmanela.com).");
 
             if (args.Length == 0 || args[0] == "/?")

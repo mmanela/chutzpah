@@ -19,10 +19,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facts.Integration", "Facts.Integration\Facts.Integration.csproj", "{AB67F695-E391-4932-9B48-DD1EDFEACFB8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2012.TestAdapter", "VS2012.TestAdapter\VS2012.TestAdapter.csproj", "{BD1F2D08-D667-4B0D-8775-B14DCD582D7E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1689355D-3366-460C-8CF3-5F035EE21B05} = {1689355D-3366-460C-8CF3-5F035EE21B05}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfTester", "PerfTester\PerfTester.csproj", "{26C0C606-CE4B-49F0-B1DF-1ECC43F5C7B5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2012", "VS2012\VS2012.csproj", "{F118797D-F9D5-440E-83BA-E7354DB9A75F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1689355D-3366-460C-8CF3-5F035EE21B05} = {1689355D-3366-460C-8CF3-5F035EE21B05}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS.Common", "VS.Common\VS.Common.csproj", "{1689355D-3366-460C-8CF3-5F035EE21B05}"
 EndProject

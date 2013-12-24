@@ -21,6 +21,7 @@ namespace Chutzpah
         private readonly IFileProbe fileProbe;
         private readonly ITestContextBuilder testContextBuilder;
         private readonly ICompilerCache compilerCache;
+        private readonly IChutzpahTestSettingsService testSettingsService;
         private bool m_debugEnabled;
 
         public static ITestRunner Create(bool debugEnabled = false)
@@ -38,7 +39,8 @@ namespace Chutzpah
                           ITestCaseStreamReaderFactory testCaseStreamReaderFactory,
                           IFileProbe fileProbe,
                           ITestContextBuilder htmlTestFileCreator,
-                          ICompilerCache compilerCache)
+                          ICompilerCache compilerCache,
+                          IChutzpahTestSettingsService testSettingsService)
         {
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
@@ -46,6 +48,7 @@ namespace Chutzpah
             stopWatch = new Stopwatch();
             testContextBuilder = htmlTestFileCreator;
             this.compilerCache = compilerCache;
+            this.testSettingsService = testSettingsService;
         }
 
 
@@ -245,7 +248,7 @@ namespace Chutzpah
 
             // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
             // If we don't clear then the user can never update the file.
-            ChutzpahTestSettingsFile.ClearCache();
+            testSettingsService.ClearCache();
 
 
             ChutzpahTracer.TraceInformation("Chutzpah run finished ");

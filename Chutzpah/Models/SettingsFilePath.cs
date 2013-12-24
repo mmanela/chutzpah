@@ -1,6 +1,6 @@
 namespace Chutzpah.Models
 {
-    public class SettingsFilePath
+    public abstract class SettingsFilePath
     {
         /// <summary>
         /// The path of file/folder to include. This could be the path to one file or a folder.

@@ -144,7 +144,7 @@ namespace Chutzpah.Coverage
         {
             foreach (var pattern in patterns)
             {
-                includePatterns.Add(FileProbe.NormalizeFilePath(pattern));
+                excludePatterns.Add(FileProbe.NormalizeFilePath(pattern));
             }
         }
 
