@@ -57,10 +57,12 @@ namespace Chutzpah.Wrappers
             }
         }
 
-        static ConcurrentQueue<JSWorkItem> workQueue = new ConcurrentQueue<JSWorkItem>();
-        static readonly Thread DispatcherThread;
-        static bool shouldQuit;
-        static ConcurrentDictionary<Type, JavaScriptCompilerBase> compilers = new ConcurrentDictionary<Type, JavaScriptCompilerBase>();
+        private static object syncObject = new object();
+        private static ConcurrentQueue<JSWorkItem> workQueue = new ConcurrentQueue<JSWorkItem>();
+        private static readonly Thread DispatcherThread;
+        private static bool threadStarted;
+        private static bool shouldQuit;
+        private static ConcurrentDictionary<Type, JavaScriptCompilerBase> compilers = new ConcurrentDictionary<Type, JavaScriptCompilerBase>();
 
         static SingleThreadedJavaScriptHostedCompiler()
         {
@@ -103,10 +105,24 @@ namespace Chutzpah.Wrappers
                                                   }
                                               });
             DispatcherThread.IsBackground = true;
-            DispatcherThread.Start();
         }
 
-        internal static void shutdownJSThread()
+        internal static void EnsureJSThreadStarted()
+        {
+            if (!threadStarted)
+            {
+                lock (syncObject)
+                {
+                    if (!threadStarted)
+                    {
+                        threadStarted = true;
+                        DispatcherThread.Start();
+                    }
+                }
+            }
+        }
+
+        internal static void ShutdownJSThread()
         {
             shouldQuit = true;
             DispatcherThread.Join(TimeSpan.FromSeconds(10));
@@ -120,6 +136,7 @@ namespace Chutzpah.Wrappers
 
         public string Compile(string sourceCode, Type compilerType, object[] args)
         {
+            EnsureJSThreadStarted();
             var ret = new JSWorkItem(sourceCode, compilerType, args);
             workQueue.Enqueue(ret);
             return ret.GetValueSync();

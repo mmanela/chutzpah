@@ -59,12 +59,13 @@ namespace Chutzpah
 
         public TestContext BuildContext(PathInfo file, TestOptions options)
         {
-            ChutzpahTracer.TraceInformation("Building test context for '{0}'", file);
-
             if (file == null)
             {
                 throw new ArgumentNullException("testFilePathInfo");
             }
+
+
+            ChutzpahTracer.TraceInformation("Building test context for '{0}'", file.FullPath);
 
             PathType testFileKind = file.Type;
             string testFilePath = file.FullPath;
@@ -188,6 +189,7 @@ namespace Chutzpah
                 var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
                 var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
 
+                // The path we assume default to the chuzpah.json directory if the Path property is not set
                 var testPath = string.IsNullOrEmpty(pathSettings.Path) ? chutzpahTestSettings.SettingsFileDirectory : pathSettings.Path;
                 testPath = FileProbe.NormalizeFilePath(testPath);
                 testPath = testPath != null ? Path.Combine(chutzpahTestSettings.SettingsFileDirectory, testPath) : null;

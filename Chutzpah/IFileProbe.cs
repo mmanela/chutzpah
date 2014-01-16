@@ -54,5 +54,14 @@ namespace Chutzpah
         /// <param name="currentDirectory">the directory to start searching from</param>
         /// <returns>Eithe the found setting file path or null</returns>
         string FindTestSettingsFile(string currentDirectory);
+
+
+
+        /// <summary>
+        /// Given a chutzpah test settings file find the test files it specifies
+        /// </summary>
+        /// <param name="chutzpahTestSettings">The chutzpah test settings file.</param>
+        /// <returns>A list of files to test</returns>
+        IEnumerable<PathInfo> FindScriptFiles(ChutzpahTestSettingsFile chutzpahTestSettings);
     }
 }

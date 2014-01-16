@@ -123,6 +123,11 @@ namespace Chutzpah
                         }
 
                         break;
+                    
+                    default:
+                        ChutzpahTracer.TraceWarning("Ignoring unsupported test path '{0}'", path);
+                        break;
+
                 }
             }
         }
@@ -135,6 +140,50 @@ namespace Chutzpah
             fullPath = FindFilePath(path);
             var pathType = GetFilePathType(path);
             return new PathInfo { Path = path, FullPath = fullPath, Type = pathType };
+        }
+
+        public IEnumerable<PathInfo> FindScriptFiles(ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            if (chutzpahTestSettings == null) yield break;
+
+            foreach (var pathSettings in chutzpahTestSettings.Tests)
+            {
+                var includePattern = NormalizeFilePath(pathSettings.Include);
+                var excludePattern = NormalizeFilePath(pathSettings.Exclude);
+
+
+                // The path we assume default to the chuzpah.json directory if the Path property is not set
+                var testPath = string.IsNullOrEmpty(pathSettings.Path) ? chutzpahTestSettings.SettingsFileDirectory : pathSettings.Path;
+                testPath = NormalizeFilePath(testPath);
+                testPath = testPath != null ? Path.Combine(chutzpahTestSettings.SettingsFileDirectory, testPath) : null;
+
+                // If a file path is given just return that file
+                var filePath = FindFilePath(testPath);
+                if (filePath != null)
+                {
+                    ChutzpahTracer.TraceInformation("Found file  {0} from chutzpah.json", filePath);
+                    yield return GetPathInfo(filePath);
+                }
+
+                // If a folder path is given enumerate that folder (recursively) with the optional include/exclude paths
+                var folderPath = NormalizeFilePath(FindFolderPath(testPath));
+                if (folderPath != null)
+                {
+
+                    var childFiles = fileSystem.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+                    var validFiles = from file in childFiles
+                        where !IsTemporaryChutzpahFile(file)
+                                && (includePattern == null || NativeImports.PathMatchSpec(file, includePattern))
+                                && (excludePattern == null || !NativeImports.PathMatchSpec(file, excludePattern))
+                        select file;
+
+
+                    foreach (var item in validFiles)
+                    {
+                        yield return GetPathInfo(item);
+                    }
+                }
+            }
         }
 
         public static PathType GetFilePathType(string fileName)

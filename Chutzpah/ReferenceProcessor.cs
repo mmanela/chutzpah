@@ -241,17 +241,21 @@ namespace Chutzpah
                 string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
                 if (absoluteFolderPath != null)
                 {
+
+                    var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
+                    var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
+
                     // Find all files in this folder including sub-folders. This can be ALOT of files.
                     // Only a subset of these files Chutzpah might understand so many of these will be ignored.
                     var childFiles = fileSystem.GetFiles(absoluteFolderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
+                        let normalizedFile = FileProbe.NormalizeFilePath(file)
                         where !fileProbe.IsTemporaryChutzpahFile(file)
-                                && (pathSettings.Include == null || NativeImports.PathMatchSpec(file, pathSettings.Include))
-                                && (pathSettings.Exclude == null || !NativeImports.PathMatchSpec(file, pathSettings.Exclude))
+                                && (includePattern == null || NativeImports.PathMatchSpec(normalizedFile, includePattern))
+                                && (excludePattern == null || !NativeImports.PathMatchSpec(normalizedFile, excludePattern))
                         select file;
 
-                    validFiles
-                        .ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings));
+                    validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings));
 
                     return;
                 }

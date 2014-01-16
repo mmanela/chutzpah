@@ -476,7 +476,34 @@ namespace Chutzpah.Facts
                 Assert.False(referenceFiles.Any(x => x.Path == @"other\newFile.js"));
             }
 
+            [Fact]
+            public void Will_normlize_paths_for_case_and_slashes_for_path_include_exclude()
+            {
+                var processor = new TestableReferenceProcessor();
+                var referenceFiles = new List<ReferencedFile>();
+                var settings = new ChutzpahTestSettingsFile { };
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"c:\dir\here")).Returns<string>(null);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\dir\here")).Returns(@"c:\dir\here");
+                processor.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles(@"c:\dir\here", "*.*", SearchOption.AllDirectories))
+                    .Returns(new[] { @"pAth/parentFile.js", @"Other/newFile.js", @"path\sub\childFile.js" });
+                settings.SettingsFileDirectory = @"c:\dir";
+                settings.References.Add(
+                    new SettingsFileReference
+                    {
+                        Path = "here",
+                        Include = @"PATH/*",
+                        Exclude = @"*paTh/pAre*"
+                    });
+                var text = (@"some javascript code");
 
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, text, @"path\test.js", settings);
+
+                Assert.True(referenceFiles.Any(x => x.Path == @"path\sub\childFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"path\parentFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"other\newFile.js"));
+            }
         }
     }
 }

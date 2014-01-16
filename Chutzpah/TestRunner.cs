@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Chutzpah.Exceptions;
@@ -161,7 +162,10 @@ namespace Chutzpah
             var resultCount = 0;
             var cancellationSource = new CancellationTokenSource();
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token };
-            Parallel.ForEach(fileProbe.FindScriptFiles(testPaths, options.TestingMode), parallelOptions, testFile =>
+
+            var scriptPaths = FindTestFiles(testPaths, options);
+
+            Parallel.ForEach(scriptPaths, parallelOptions, testFile =>
             {
                 ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testFile.FullPath, testRunnerMode);
 
@@ -254,6 +258,37 @@ namespace Chutzpah
             ChutzpahTracer.TraceInformation("Chutzpah run finished ");
 
             return overallSummary;
+        }
+
+        private IEnumerable<PathInfo> FindTestFiles(IEnumerable<string> testPaths, TestOptions options)
+        {
+            IEnumerable<PathInfo> scriptPaths = Enumerable.Empty<PathInfo>();
+
+            // If the path list contains only chutzpah.json files then use those files for getting the list of test paths
+            var testPathList = testPaths.ToList();
+            if (testPathList.All(testPath => Path.GetFileName(testPath).Equals(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                ChutzpahTracer.TraceInformation("Using Chutzpah.json files to find tests");
+                foreach (var path in testPathList)
+                {
+                    var chutzpahJsonPath = fileProbe.FindFilePath(path);
+                    if (chutzpahJsonPath == null)
+                    {
+                        ChutzpahTracer.TraceWarning("Supplied chutzpah.json path {0} does not exist", path);
+                    }
+
+                    // The FindSettingsFile api takes the directory of the file since it caches this for use in later test runs
+                    // this could be cleaned up to have two APIS one which lets you give the direct file
+                    var settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(chutzpahJsonPath));
+                    var pathInfos = fileProbe.FindScriptFiles(settingsFile);
+                    scriptPaths = scriptPaths.Concat(pathInfos);
+                }
+            }
+            else
+            {
+                scriptPaths = fileProbe.FindScriptFiles(testPathList, options.TestingMode);
+            }
+            return scriptPaths;
         }
 
         private TestFileSummary InvokeTestRunner(string headlessBrowserPath,
