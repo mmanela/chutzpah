@@ -1097,6 +1097,17 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(4, result.PassedCount);
                 Assert.Equal(4, result.TotalCount);
             }
+
+            [Fact]
+            public void will_use_tests_setting_to_discover_tests()
+            {
+                var testRunner = TestRunner.Create();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\TestPaths\chutzpah.json", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(4, result.PassedCount);
+                Assert.Equal(4, result.TotalCount);
+            }
         }
     }
 }

@@ -123,7 +123,7 @@ namespace Chutzpah
                         }
 
                         break;
-                    
+
                     default:
                         ChutzpahTracer.TraceWarning("Ignoring unsupported test path '{0}'", path);
                         break;
@@ -172,10 +172,11 @@ namespace Chutzpah
 
                     var childFiles = fileSystem.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
-                        where !IsTemporaryChutzpahFile(file)
-                                && (includePattern == null || NativeImports.PathMatchSpec(file, includePattern))
-                                && (excludePattern == null || !NativeImports.PathMatchSpec(file, excludePattern))
-                        select file;
+                                     let normlizedFile = NormalizeFilePath(file)
+                                     where !IsTemporaryChutzpahFile(normlizedFile)
+                                             && (includePattern == null || NativeImports.PathMatchSpec(normlizedFile, includePattern))
+                                             && (excludePattern == null || !NativeImports.PathMatchSpec(normlizedFile, excludePattern))
+                                     select file;
 
 
                     foreach (var item in validFiles)

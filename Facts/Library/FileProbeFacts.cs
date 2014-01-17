@@ -182,7 +182,7 @@ namespace Chutzpah.Facts
                 Assert.Equal(PathType.Folder, info.Type);
                 Assert.Equal(@"C:\someFolder", info.FullPath);
             }
-            
+
             [Fact]
             public void Will_put_input_path_into_path_property()
             {
@@ -296,13 +296,13 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + string.Format(Constants.ChutzpahTemporaryFileFormat,Thread.CurrentThread.ManagedThreadId,"a.js"));
+                var res = probe.ClassUnderTest.IsTemporaryChutzpahFile("path\\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "a.js"));
 
                 Assert.True(res);
             }
         }
 
-        public class FindScriptFiles
+        public class FindScriptFiles_Paths
         {
             [Fact]
             public void Will_return_empty_list_if_paths_is_null()
@@ -389,7 +389,7 @@ namespace Chutzpah.Facts
             public void Will_return_urls_when_testing_mode_is_HTML()
             {
                 var probe = new TestableFileProbe();
-                var paths = new List<string> {"http://someurl.com/path"};
+                var paths = new List<string> { "http://someurl.com/path" };
 
                 var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.HTML);
 
@@ -443,6 +443,85 @@ namespace Chutzpah.Facts
                 var fullPaths = res.Select(x => x.FullPath);
                 Assert.Contains("subFile1.js", fullPaths);
             }
+
+        }
+
+
+        public class FindScriptFiles_SettingsFile
+        {
+            [Fact]
+            public void Will_return_empty_list_if_paths_is_null()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.FindScriptFiles((ChutzpahTestSettingsFile)null);
+
+                Assert.Empty(res);
+            }
+
+
+            [Fact]
+            public void Will_return_explicity_path_from_tests_setting_if_exists()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Returns<string>(x => x);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+                var setting = new ChutzpahTestSettingsFile
+                {
+                    SettingsFileDirectory = "dir",
+                    Tests = new List<SettingsFileTestPath>
+                    {
+                        new SettingsFileTestPath
+                        {
+                            Path = "file.js"
+                        }
+                    }
+                };
+                var res = probe.ClassUnderTest.FindScriptFiles(setting);
+
+                Assert.Equal(1, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains(@"dir\file.js", fullPaths);
+            }
+
+
+            [Fact]
+            public void Will_return_paths_from_folder_which_match_include_exclude_patterns()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Returns<string>(x => x);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFiles(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SearchOption>()))
+                    .Returns(new[]
+                    {
+                        "somefolder/src/a.js",
+                        "somefolder/src/B.JS",
+                        "somefolder/src/c.ts",
+                        "somefolder\\src\\d.ts",
+                        "somefolder/e.ts"
+                    });
+                var setting = new ChutzpahTestSettingsFile
+                {
+                    SettingsFileDirectory = "dir",
+                    Tests = new List<SettingsFileTestPath>
+                    {
+                        new SettingsFileTestPath
+                        {
+                            Path = "someFolder",
+                            Include = "*src/*",
+                            Exclude = "*.js",
+                        }
+                    }
+                };
+                var res = probe.ClassUnderTest.FindScriptFiles(setting);
+
+                Assert.Equal(2, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains(@"somefolder/src/c.ts", fullPaths);
+                Assert.Contains(@"somefolder\src\d.ts", fullPaths);
+            }
+
 
         }
     }
