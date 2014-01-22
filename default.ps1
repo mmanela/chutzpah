@@ -10,7 +10,7 @@ properties {
 
 # Aliases
 task Default -depends Build
-task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-AssemblyInfoFiles, Build-Solution, Package-Files, Package-NuGet
+task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution, Package-Files, Package-NuGet
 task Clean -depends Clean-Solution
 task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
 
@@ -20,15 +20,33 @@ task Build-2010 -depends  Clean-Solution-2010, Build-Solution-2010, Run-UnitTest
 task Build-2013 -depends  Clean-Solution-2013, Build-Solution-2013, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
+  
+  if($arg1) {
+    $v = $arg1
+    $global:version = $v + ".0"
+  }
+  else {
+    $v = git describe --abbrev=0 --tags
+	  $global:version = $v.substring(1) + '.' + (git log $($v + '..') --pretty=oneline | measure-object).Count
+  }
+  
 
-	$version = git describe --abbrev=0 --tags
-	$global:version = $version.substring(1) + '.' + (git log $($version + '..') --pretty=oneline | measure-object).Count
+  $global:versionPart = $v
 }
 
-task Update-AssemblyInfoFiles {
-	$v = git describe --abbrev=0 --tags
-  $commit = git log -1 $($v + '..') --pretty=format:%H
+task Update-VersionInFiles {
+  if($arg1) {
+    $v = $arg1
+    $commit = git log -1 --pretty=format:%H
+  }
+  else {
+    $v = git describe --abbrev=0 --tags
+    $commit = git log -1 $($v + '..') --pretty=format:%H
+  }
+  
+    
 	Update-AssemblyInfoFiles $global:version $commit
+	Update-OtherFiles $global:versionPart
 }
 
 task Run-Chutzpah -depends  Build-Solution {
@@ -180,19 +198,34 @@ function Update-AssemblyInfoFiles ([string] $version, [string] $commit) {
     $fileVersion = 'AssemblyFileVersion("' + $version + '")';
     $commitVersion = 'AssemblyTrademark("' + $commit + '")';
 
+    echo "Setting version: $version and commit:$commit"
     Get-ChildItem -path $baseDir -r -filter AssemblyInfo.cs | ForEach-Object {
         $filename = $_.Directory.ToString() + '\' + $_.Name
-        $filename + ' -> ' + $version
-        
-        # If you are using a source control that requires to check-out files before 
-        # modifying them, make sure to check-out the file here.
-        # For example, TFS will require the following command:
-        # tf checkout $filename
-    
+       
         (Get-Content $filename) | ForEach-Object {
             % {$_ -replace $assemblyVersionPattern, $assemblyVersion } |
             % {$_ -replace $fileVersionPattern, $fileVersion } |
             % {$_ -replace $fileCommitPattern, $commitVersion }
         } | Set-Content $filename
     }
+}
+
+
+function Update-OtherFiles ([string] $version) {
+
+    $chutzpahVersionPattern = 'public const string ChutzpahVersion = "([0-9]*?)"'
+    $chutzpahVersion = 'public const string ChutzpahVersion = "'+$version+'"'
+    
+    $contantsFile = Join-Path $baseDir "Chutzpah\Constants.cs"
+    (Get-Content $contantsFile) | ForEach-Object { $_ -replace $chutzpahVersionPattern, $chutzpahVersion } | Set-Content $contantsFile
+    
+     $manifestFile = Join-Path $baseDir "VS2012\source.extension.vsixmanifest"
+     $manifest = [xml](Get-Content $manifestFile)
+     $manifest.PackageManifest.Metadata.Identity.Version = $version
+     $manifest.Save($manifestFile)
+     
+     $manifestFile = Join-Path $baseDir "VisualStudio\source.extension.vsixmanifest"
+     $manifest = [xml](Get-Content $manifestFile)
+     $manifest.Vsix.Identifier.Version = $version
+     $manifest.Save($manifestFile)
 }
