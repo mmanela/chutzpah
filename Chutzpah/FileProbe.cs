@@ -82,6 +82,14 @@ namespace Chutzpah
             return !string.IsNullOrEmpty(fileName) && fileName.StartsWith(Constants.ChutzpahTemporaryFilePrefix, StringComparison.OrdinalIgnoreCase);
         }
 
+
+        public bool IsChutzpahSettingsFile(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            var fileName = Path.GetFileName(path);
+            return !string.IsNullOrEmpty(fileName) && fileName.Equals(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase);
+        }
+
         public IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode)
         {
             if (string.IsNullOrEmpty(path)) return Enumerable.Empty<PathInfo>();

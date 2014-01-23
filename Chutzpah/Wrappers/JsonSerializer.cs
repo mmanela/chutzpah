@@ -8,7 +8,10 @@ namespace Chutzpah.Wrappers
     {
         public T DeserializeFromFile<T>(string path)
         {
-            return ServiceStack.Text.JsonSerializer.DeserializeFromReader<T>(new StreamReader(path));
+            using (var streamReader = new StreamReader(path))
+            {
+                return ServiceStack.Text.JsonSerializer.DeserializeFromReader<T>(streamReader);
+            }
         }
 
         public T Deserialize<T>(string response)

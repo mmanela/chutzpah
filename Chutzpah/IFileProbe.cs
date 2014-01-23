@@ -63,5 +63,12 @@ namespace Chutzpah
         /// <param name="chutzpahTestSettings">The chutzpah test settings file.</param>
         /// <returns>A list of files to test</returns>
         IEnumerable<PathInfo> FindScriptFiles(ChutzpahTestSettingsFile chutzpahTestSettings);
+
+        /// <summary>
+        /// Is this a chutzpah settings file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        bool IsChutzpahSettingsFile(string path);
     }
 }

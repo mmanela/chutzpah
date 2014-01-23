@@ -302,6 +302,39 @@ namespace Chutzpah.Facts
             }
         }
 
+        public class IsChutzpahSettingsFile
+        {
+            [Fact]
+            public void Will_return_false_if_path_is_empty()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsChutzpahSettingsFile(null);
+
+                Assert.False(res);
+            }
+
+            [Fact]
+            public void Will_return_false_if_not_settings_file()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsChutzpahSettingsFile("path\\" + "something.js");
+
+                Assert.False(res);
+            }
+
+            [Fact]
+            public void Will_return_true_if_settings_file()
+            {
+                var probe = new TestableFileProbe();
+
+                var res = probe.ClassUnderTest.IsChutzpahSettingsFile("path\\" + Constants.SettingsFileName);
+
+                Assert.True(res);
+            }
+        }
+
         public class FindScriptFiles_Paths
         {
             [Fact]
