@@ -69,8 +69,7 @@ namespace Chutzpah.VisualStudio.Callback
 
         public override void FileLog(TestLog log)
         {
-            // This seems too noisy
-            //testPane.OutputString(GetFileLogMessage(log));
+            testPane.OutputString(GetFileLogMessage(log));
         }
 
         public override void ExceptionThrown(Exception exception, string fileName)

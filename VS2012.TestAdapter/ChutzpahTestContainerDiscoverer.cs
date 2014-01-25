@@ -16,7 +16,23 @@ using ILogger = Chutzpah.VS.Common.ILogger;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-    [Export(typeof (ITestContainerDiscoverer))]
+    public class TestFileCandidate
+    {
+        public TestFileCandidate()
+        {
+
+        }
+
+        public TestFileCandidate(string path)
+        {
+            Path = path;
+        }
+
+        public string Path { get; set; }
+        public bool IsChutzpahSettingsFile { get; set; }
+    }
+
+    [Export(typeof(ITestContainerDiscoverer))]
     public class ChutzpahTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
@@ -24,10 +40,24 @@ namespace Chutzpah.VS2012.TestAdapter
         private readonly ILogger logger;
         private readonly ITestRunner testRunner;
         private readonly IFileProbe fileProbe;
+        private readonly IChutzpahTestSettingsService chutzpahTestSettingsService;
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
+
+        /// <summary>
+        /// This is set to true one initial plugin load and then reset to false when a 
+        /// solution is unloaded.  This will imply a full container refresh as well as
+        /// supress asking the containers to refresh until the initial search finishedd
+        /// </summary>
         private bool initialContainerSearch;
+
+        /// <summary>
+        /// This is set to true when a chutzpah.json file changes. This will set a flag that
+        /// will cause a full container refresh
+        /// </summary>
+        private bool forceFullContainerRefresh;
+
         private readonly List<ITestContainer> cachedContainers;
 
         public event EventHandler TestContainersUpdated;
@@ -58,7 +88,8 @@ namespace Chutzpah.VS2012.TestAdapter
                 testFilesUpdateWatcher,
                 testFilesAddRemoveListener,
                 TestRunner.Create(),
-                ChutzpahContainer.Get<IFileProbe>())
+                ChutzpahContainer.Get<IFileProbe>(),
+                ChutzpahContainer.Get<IChutzpahTestSettingsService>())
         {
         }
 
@@ -69,7 +100,8 @@ namespace Chutzpah.VS2012.TestAdapter
                                                ITestFilesUpdateWatcher testFilesUpdateWatcher,
                                                ITestFileAddRemoveListener testFilesAddRemoveListener,
                                                ITestRunner testRunner,
-                                               IFileProbe fileProbe)
+                                               IFileProbe fileProbe,
+                                               IChutzpahTestSettingsService chutzpahTestSettingsService)
         {
             initialContainerSearch = true;
             cachedContainers = new List<ITestContainer>();
@@ -78,6 +110,7 @@ namespace Chutzpah.VS2012.TestAdapter
             this.logger = logger;
             this.testRunner = testRunner;
             this.fileProbe = fileProbe;
+            this.chutzpahTestSettingsService = chutzpahTestSettingsService;
             this.solutionListener = solutionListener;
             this.testFilesUpdateWatcher = testFilesUpdateWatcher;
             this.testFilesAddRemoveListener = testFilesAddRemoveListener;
@@ -145,7 +178,7 @@ namespace Chutzpah.VS2012.TestAdapter
         /// After a project is loaded or unloaded either add or remove from the file watcher
         /// all test potential items inside that project
         /// </summary>
-        private void UpdateTestContainersAndFileWatchers(IEnumerable<string> files, bool isAdd)
+        private void UpdateTestContainersAndFileWatchers(IEnumerable<TestFileCandidate> files, bool isAdd)
         {
 
             ChutzpahTracer.TraceInformation("Begin UpdateTestContainersAndFileWatchers");
@@ -153,12 +186,12 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 if (isAdd)
                 {
-                    testFilesUpdateWatcher.AddWatch(file);
+                    testFilesUpdateWatcher.AddWatch(file.Path);
                     AddTestContainerIfTestFile(file);
                 }
                 else
                 {
-                    testFilesUpdateWatcher.RemoveWatch(file);
+                    testFilesUpdateWatcher.RemoveWatch(file.Path);
                     RemoveTestContainer(file);
                 }
             }
@@ -174,8 +207,18 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             if (e != null)
             {
+
+                // If a chutzpah.json file changed then we set the flag to 
+                // ensure next time get
+                if (fileProbe.IsChutzpahSettingsFile(e.File.Path))
+                {
+                    forceFullContainerRefresh = true;
+                    return;
+                }
+
                 // Don't do anything for files we are sure can't be test files
-                if (!HasTestFileExtension(e.File)) return;
+                if (!HasTestFileExtension(e.File.Path)) return;
+
                 logger.Log(string.Format("Changed detected for {0} with change type of {1}", e.File, e.ChangedReason),
                            "ChutzpahTestContainerDiscoverer",
                            LogType.Information);
@@ -183,12 +226,12 @@ namespace Chutzpah.VS2012.TestAdapter
                 switch (e.ChangedReason)
                 {
                     case TestFileChangedReason.Added:
-                        testFilesUpdateWatcher.AddWatch(e.File);
+                        testFilesUpdateWatcher.AddWatch(e.File.Path);
                         AddTestContainerIfTestFile(e.File);
 
                         break;
                     case TestFileChangedReason.Removed:
-                        testFilesUpdateWatcher.RemoveWatch(e.File);
+                        testFilesUpdateWatcher.RemoveWatch(e.File.Path);
                         RemoveTestContainer(e.File);
 
                         break;
@@ -206,16 +249,22 @@ namespace Chutzpah.VS2012.TestAdapter
         /// This will first remove any existing container for that file
         /// </summary>
         /// <param name="file"></param>
-        private void AddTestContainerIfTestFile(string file)
+        private void AddTestContainerIfTestFile(TestFileCandidate file)
         {
-            var isTestFile = IsTestFile(file);
+            // If a settings file don't add a container
+            if (file.IsChutzpahSettingsFile)
+            {
+                return;
+            }
+
+            var isTestFile = IsTestFile(file.Path);
             RemoveTestContainer(file); // Remove if there is an existing container
 
             if (isTestFile)
             {
 
                 ChutzpahTracer.TraceInformation("Added test container for '{0}'", file);
-                var container = new JsTestContainer(this, file.ToLowerInvariant(), Constants.ExecutorUri);
+                var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), Constants.ExecutorUri);
                 cachedContainers.Add(container);
             }
         }
@@ -224,9 +273,15 @@ namespace Chutzpah.VS2012.TestAdapter
         /// Will remove a test container for a given file path
         /// </summary>
         /// <param name="file"></param>
-        private void RemoveTestContainer(string file)
+        private void RemoveTestContainer(TestFileCandidate file)
         {
-            var index = cachedContainers.FindIndex(x => x.Source.Equals(file, StringComparison.OrdinalIgnoreCase));
+            // If a settings file don't add a container
+            if (file.IsChutzpahSettingsFile)
+            {
+                return;
+            }
+
+            var index = cachedContainers.FindIndex(x => x.Source.Equals(file.Path, StringComparison.OrdinalIgnoreCase));
             if (index >= 0)
             {
 
@@ -243,16 +298,22 @@ namespace Chutzpah.VS2012.TestAdapter
 
             ChutzpahTracingHelper.Toggle(settingsMapper.Settings.EnabledTracing);
 
-            if (initialContainerSearch)
+            if (initialContainerSearch || forceFullContainerRefresh)
             {
 
                 ChutzpahTracer.TraceInformation("Begin Initial test container search");
                 logger.Log("Initial test container search", "ChutzpahTestContainerDiscoverer", LogType.Information);
 
+                // Before the full container search we clear the settings cache to make sure 
+                // we are getting the latest version of the settings
+                // If the user changes the settings file after this it will cause a full search again
+                chutzpahTestSettingsService.ClearCache();
+
                 cachedContainers.Clear();
                 var jsFiles = FindPotentialTestFiles();
                 UpdateTestContainersAndFileWatchers(jsFiles, true);
                 initialContainerSearch = false;
+                forceFullContainerRefresh = false;
 
                 ChutzpahTracer.TraceInformation("End Initial test container search");
             }
@@ -269,12 +330,12 @@ namespace Chutzpah.VS2012.TestAdapter
             return containers.Where(x => mode.FileBelongsToTestingMode(x.Source));
         }
 
-        private IEnumerable<string> FindPotentialTestFiles()
+        private IEnumerable<TestFileCandidate> FindPotentialTestFiles()
         {
             try
             {
                 ChutzpahTracer.TraceInformation("Begin enumerating loaded projects for test files");
-                var solution = (IVsSolution) serviceProvider.GetService(typeof (SVsSolution));
+                var solution = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
                 var loadedProjects = solution.EnumerateLoadedProjects(__VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION).OfType<IVsProject>();
 
                 return loadedProjects.SelectMany(FindPotentialTestFiles).ToList();
@@ -285,14 +346,20 @@ namespace Chutzpah.VS2012.TestAdapter
             }
         }
 
-        private IEnumerable<string> FindPotentialTestFiles(IVsProject project)
+        private IEnumerable<TestFileCandidate> FindPotentialTestFiles(IVsProject project)
         {
             try
             {
                 ChutzpahTracer.TraceInformation("Begin selecting potential test files from project");
                 return (from item in VsSolutionHelper.GetProjectItems(project)
-                    where HasTestFileExtension(item) && !fileProbe.IsTemporaryChutzpahFile(item)
-                    select item).ToList();
+                        let hasTestExtension = HasTestFileExtension(item)
+                        let isChutzpahSettingsFile = fileProbe.IsChutzpahSettingsFile(item)
+                        where !fileProbe.IsTemporaryChutzpahFile(item) && (hasTestExtension || isChutzpahSettingsFile)
+                        select new TestFileCandidate
+                        {
+                            Path = item,
+                            IsChutzpahSettingsFile = isChutzpahSettingsFile
+                        }).ToList();
             }
             finally
             {
@@ -335,7 +402,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 if (testFilesUpdateWatcher != null)
                 {
                     testFilesUpdateWatcher.FileChangedEvent -= OnProjectItemChanged;
-                    ((IDisposable) testFilesUpdateWatcher).Dispose();
+                    ((IDisposable)testFilesUpdateWatcher).Dispose();
                     testFilesUpdateWatcher = null;
                 }
 

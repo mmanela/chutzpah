@@ -1,3 +1,5 @@
+using Chutzpah.VS2012.TestAdapter;
+
 namespace Chutzpah.VS11.EventWatchers.EventArgs
 {
     public enum TestFileChangedReason
@@ -10,12 +12,12 @@ namespace Chutzpah.VS11.EventWatchers.EventArgs
 
     public class TestFileChangedEventArgs : System.EventArgs
     {
-        public string File { get; private set; }
+        public TestFileCandidate File { get; private set; }
         public TestFileChangedReason ChangedReason { get; private set; }
 
         public TestFileChangedEventArgs(string file, TestFileChangedReason reason)
         {
-            File = file;
+            File = new TestFileCandidate(file);
             ChangedReason = reason;
         }
     }
