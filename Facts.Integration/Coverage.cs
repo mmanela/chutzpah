@@ -239,13 +239,13 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_create_empty_coverage_object_if_coverage_is_disabled()
+        public void Will_create_null_coverage_object_if_coverage_is_disabled()
         {
             var testRunner = TestRunner.Create(true);
 
             var result = testRunner.RunTests(ABasicTestScript, new ExceptionThrowingRunnerCallback());
 
-            Assert.Empty(result.TestFileSummaries.Single().CoverageObject);
+            Assert.Null(result.TestFileSummaries.Single().CoverageObject);
         }
 
         [Fact]
