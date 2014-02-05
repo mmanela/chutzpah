@@ -8,7 +8,7 @@ namespace Chutzpah.Models
         {
             ReferencedJavaScriptFiles = new List<ReferencedFile>();
             TemporaryFiles = new List<string>();
-            TestFileSettings = new ChutzpahTestSettingsFile();    
+            TestFileSettings = ChutzpahTestSettingsFile.Default;    
         }
         
         /// <summary>

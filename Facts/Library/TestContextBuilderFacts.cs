@@ -41,9 +41,9 @@ namespace Chutzpah.Facts
                 var frameworkMock = Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
                 frameworkMock.Setup(x => x.FrameworkKey).Returns("qunit");
-                frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
-                frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
-                frameworkMock.Setup(x => x.FileDependencies).Returns(new[] { "qunit.js", "qunit.css" });
+                frameworkMock.Setup(x => x.GetTestRunner(It.IsAny<ChutzpahTestSettingsFile>())).Returns("qunitRunner.js");
+                frameworkMock.Setup(x => x.GetTestHarness(It.IsAny<ChutzpahTestSettingsFile>())).Returns("qunit.html");
+                frameworkMock.Setup(x => x.GetFileDependencies(It.IsAny<ChutzpahTestSettingsFile>())).Returns(new[] { "qunit.js", "qunit.css" });
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
                 Mock<IFileProbe>().Setup(x => x.GetPathInfo(It.IsAny<string>())).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.JavaScript });
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder(It.IsAny<string>())).Returns(@"C:\temp\");
@@ -475,6 +475,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo("http://someUrl.com"))
                     .Returns(new PathInfo { Type = PathType.Url, FullPath = @"http://someUrl.com" });
+            
 
                 var context = creator.ClassUnderTest.BuildContext("http://someUrl.com", new TestOptions());
 

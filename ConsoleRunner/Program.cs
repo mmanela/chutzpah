@@ -169,7 +169,7 @@ namespace Chutzpah
 
                     foreach (var test in tests)
                     {
-                        Console.WriteLine("Test '{0}' from '{1}'", test.TestName, test.InputTestFile);
+                        Console.WriteLine("Test '{0}:{1}' from '{2}'", test.ModuleName, test.TestName, test.InputTestFile);
                     }
                     return 0;
                 }

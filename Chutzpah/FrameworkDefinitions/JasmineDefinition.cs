@@ -1,9 +1,10 @@
-﻿namespace Chutzpah.FrameworkDefinitions
+﻿using Chutzpah.Models;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Chutzpah.FileProcessors;
+
+namespace Chutzpah.FrameworkDefinitions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Chutzpah.FileProcessors;
 
     /// <summary>
     /// Definition that describes the Jasmine framework.
@@ -11,7 +12,9 @@
     public class JasmineDefinition : BaseFrameworkDefinition
     {
         private IEnumerable<IJasmineReferencedFileProcessor> fileProcessors;
-        private IEnumerable<string> fileDependencies;
+        private IDictionary<string, IEnumerable<string>> fileDependencies = new Dictionary<string, IEnumerable<string>>();
+        private IDictionary<string, string> testHarness = new Dictionary<string, string>();
+        private IDictionary<string, string> testRunner = new Dictionary<string, string>();
 
         /// <summary>
         /// Initializes a new instance of the JasmineDefinition class.
@@ -19,30 +22,48 @@
         public JasmineDefinition(IEnumerable<IJasmineReferencedFileProcessor> fileProcessors)
         {
             this.fileProcessors = fileProcessors;
-            this.fileDependencies = new []
+            fileDependencies["1"] = new[]
                 {
-                    "jasmine\\jasmine.css", 
-                    "jasmine\\jasmine.js", 
-                    "jasmine\\jasmine-html.js", 
-                    "jasmine\\jasmine_favicon.png",
-                    "jasmine\\jasmine-ddescribe-iit.js"
+                    @"jasmine\v1\jasmine.css", 
+                    @"jasmine\v1\jasmine.js", 
+                    @"jasmine\v1\jasmine-html.js", 
+                    @"jasmine\v1\jasmine_favicon.png",
+                    @"jasmine\v1\jasmine-ddescribe-iit.js"
                 };
+
+            fileDependencies["2"] = new[]
+                {
+                    @"jasmine\v2\jasmine.css", 
+                    @"jasmine\v2\jasmine.js", 
+                    @"jasmine\v2\jasmine-html.js", 
+                    @"jasmine\v2\boot.js", 
+                    @"jasmine\v2\jasmine_favicon.png"
+                };
+
+            testHarness["1"] = @"jasmine\v1\jasmine.html";
+            testHarness["2"] = @"jasmine\v2\jasmine.html";
+
+            testRunner["1"] = @"JSRunners\jasmineRunnerV1.js";
+            testRunner["2"] = @"JSRunners\jasmineRunnerV2.js";
         }
 
         /// <summary>
         /// Gets a list of file dependencies to bundle with the Jasmine test harness.
         /// </summary>
-        public override IEnumerable<string> FileDependencies
+        /// <param name="chutzpahTestSettings"></param>
+        public override IEnumerable<string> GetFileDependencies(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get
-            {
-                return this.fileDependencies;
-            }
+            return fileDependencies[GetVersion(chutzpahTestSettings)];
         }
 
-        public override string TestHarness
+        public override string GetTestHarness(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get { return @"Jasmine\jasmine.html"; }
+            return testHarness[GetVersion(chutzpahTestSettings)];
+        }
+
+        public override string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            return testRunner[GetVersion(chutzpahTestSettings)];
         }
 
         /// <summary>
@@ -87,6 +108,17 @@
             {
                 return this.fileProcessors;
             }
+        }
+
+        private string GetVersion(ChutzpahTestSettingsFile testSettingsFile)
+        {
+            if (!string.IsNullOrEmpty(testSettingsFile.FrameworkVersion) 
+                && (testSettingsFile.FrameworkVersion == "1" || testSettingsFile.FrameworkVersion.StartsWith("1.")))
+            {
+                return "1";
+            }
+
+            return "2";
         }
     }
 }

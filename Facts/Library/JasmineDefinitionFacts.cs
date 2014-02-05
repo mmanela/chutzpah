@@ -88,12 +88,24 @@
         public class ReferenceIsDependency
         {
             [Fact]
-            public void ReturnsTrue_GivenJasmineFile()
+            public void ReturnsTrue_GivenJasmineFile_version2()
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js"));
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine-html.js"));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js", new ChutzpahTestSettingsFile()));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine-html.js", new ChutzpahTestSettingsFile()));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("boot.js", new ChutzpahTestSettingsFile()));
+            }
+
+            [Fact]
+            public void ReturnsTrue_GivenJasmineFile_version1()
+            {
+                var settings = new ChutzpahTestSettingsFile {FrameworkVersion = "1"};
+                var creator = new JasmineDefinitionCreator();
+
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js", settings));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("jasmine-html.js", settings));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("boot.js", settings));
             }
 
             [Fact]
@@ -101,7 +113,7 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("qunit.js"));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("qunit.js", new ChutzpahTestSettingsFile()));
             }
 
             [Fact]
@@ -109,8 +121,8 @@
             {
                 var creator = new JasmineDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty));
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty, new ChutzpahTestSettingsFile()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null, new ChutzpahTestSettingsFile()));
             }
         }
 

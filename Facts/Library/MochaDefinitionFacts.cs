@@ -92,8 +92,8 @@
             {
                 var creator = new MochaDefinitionCreator();
 
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("mocha.js"));
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("mocha.css"));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("mocha.js", new ChutzpahTestSettingsFile()));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("mocha.css", new ChutzpahTestSettingsFile()));
             }
 
             [Fact]
@@ -101,7 +101,7 @@
             {
                 var creator = new MochaDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("qunit.js"));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("qunit.js", new ChutzpahTestSettingsFile()));
             }
 
             [Fact]
@@ -109,8 +109,8 @@
             {
                 var creator = new MochaDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty));
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty, new ChutzpahTestSettingsFile()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null, new ChutzpahTestSettingsFile()));
             }
         }
 

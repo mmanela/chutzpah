@@ -21,9 +21,9 @@ namespace Chutzpah.Facts
                 var frameworkMock = Mock<IFrameworkDefinition>();
                 frameworkMock.Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
                 frameworkMock.Setup(x => x.FrameworkKey).Returns("qunit");
-                frameworkMock.Setup(x => x.TestRunner).Returns("qunitRunner.js");
-                frameworkMock.Setup(x => x.TestHarness).Returns("qunit.html");
-                frameworkMock.Setup(x => x.FileDependencies).Returns(new[] { "qunit.js", "qunit.css" });
+                frameworkMock.Setup(x => x.GetTestRunner(It.IsAny<ChutzpahTestSettingsFile>())).Returns("qunitRunner.js");
+                frameworkMock.Setup(x => x.GetTestHarness(It.IsAny<ChutzpahTestSettingsFile>())).Returns("qunit.html");
+                frameworkMock.Setup(x => x.GetFileDependencies(It.IsAny<ChutzpahTestSettingsFile>())).Returns(new[] { "qunit.js", "qunit.css" });
                 FrameworkDefinition = frameworkMock.Object;
 
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns<string>(x => x);
@@ -45,6 +45,20 @@ namespace Chutzpah.Facts
                 processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles,testHarnessDirectory);
 
                 Assert.Equal("code/test",referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+            [Fact]
+            public void Will_set_amd_path_ignoring_the_case()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"Some\Path";
+                var referencedFile = new ReferencedFile { Path = @"some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory);
+
+                Assert.Equal("code/test", referencedFile.AmdFilePath);
                 Assert.Null(referencedFile.AmdGeneratedFilePath);
             }
 

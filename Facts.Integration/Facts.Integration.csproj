@@ -395,9 +395,6 @@
     <Content Include="JS\Code\TypeScriptRequireJS\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\chutzpah.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="JS\Test\TestSettings\CustomTestHarness\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

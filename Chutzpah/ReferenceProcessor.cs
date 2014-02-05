@@ -134,15 +134,16 @@ namespace Chutzpah
 
             }
         }
-
+        
         private static string GetAmdPath(string testHarnessDirectory, string filePath)
         {
             string amdModulePath = "";
-            if (filePath.Contains(testHarnessDirectory))
+            var harnessDirIndex = filePath.IndexOf(testHarnessDirectory, StringComparison.OrdinalIgnoreCase);
+            if (harnessDirIndex >= 0)
             {
                 amdModulePath = filePath
+                    .Substring(harnessDirIndex + testHarnessDirectory.Length)
                     .Replace(Path.GetExtension(filePath), "")
-                    .Replace(testHarnessDirectory, "")
                     .Replace("\\", "/")
                     .Trim('/', '\\');
             }
@@ -210,7 +211,7 @@ namespace Chutzpah
             string referenceFileName = Path.GetFileName(referencePath);
 
             //  Ignore test runner, since we use our own.
-            if (definition.ReferenceIsDependency(referenceFileName))
+            if (definition.ReferenceIsDependency(referenceFileName, chutzpahTestSettings))
             {
                 ChutzpahTracer.TraceInformation(
                     "Ignoring reference file '{0}' as a duplicate reference to {1}",

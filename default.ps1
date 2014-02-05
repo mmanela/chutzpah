@@ -114,10 +114,14 @@ task Run-Phantom {
   if(-not $type){
     $type = "qunit";
   }
+  if($type -eq "jasmine") {
+    $suffix = "V2"
+  }
+  
   $phantom = "3rdParty\Phantom\phantomjs.exe";
   $testFilePath = $testFilePath.Path.Replace("\","/");
   
-  exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner.js" "file:///$testFilePath" $mode }
+  exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner$suffix.js" "file:///$testFilePath" $mode }
 }
 
 task Package-Files -depends Clean-PackageFiles {

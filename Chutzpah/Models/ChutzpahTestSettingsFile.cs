@@ -29,6 +29,8 @@ namespace Chutzpah.Models
     /// </summary>
     public class ChutzpahTestSettingsFile
     {
+        public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile();
+
         public ChutzpahTestSettingsFile()
         {
             CodeCoverageIncludes = new List<string>();
@@ -48,6 +50,15 @@ namespace Chutzpah.Models
         /// If not null tells Chutzpah which framework to use instead of detecting automatically
         /// </summary>
         public string Framework { get; set; }
+
+
+        /// <summary>
+        /// Indicates which version of a framework Chutzah should use. 
+        /// This is only useful when Chutzpah supports more than one version which is usually a temporary situation.
+        /// If this is null chutzpah will use its default version of a framework.
+        /// If an unknown version is set Chutzpah will use its default version
+        /// </summary>
+        public string FrameworkVersion { get; set; }
 
         /// <summary>
         /// The name of the Mocha interface the tests use

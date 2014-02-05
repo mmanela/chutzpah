@@ -43,7 +43,7 @@ namespace Chutzpah
         /// <returns></returns>
         public ChutzpahTestSettingsFile FindSettingsFile(string directory)
         {
-            if (string.IsNullOrEmpty(directory)) return new ChutzpahTestSettingsFile();
+            if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
             directory = directory.TrimEnd('/', '\\');
 
@@ -54,7 +54,7 @@ namespace Chutzpah
                 if (string.IsNullOrEmpty(testSettingsFilePath))
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directoy {0}", directory);
-                    settings = new ChutzpahTestSettingsFile();
+                    settings = ChutzpahTestSettingsFile.Default;
                 }
                 else if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
                 {

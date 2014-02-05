@@ -39,17 +39,15 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Gets a list of file dependencies to bundle with the Mocha test harness.
         /// </summary>
-        public override IEnumerable<string> FileDependencies
+        /// <param name="chutzpahTestSettings"></param>
+        public override IEnumerable<string> GetFileDependencies(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get
-            {
-                return this.fileDependencies;
-            }
+            return this.fileDependencies;
         }
 
-        public override string TestHarness
+        public override string GetTestHarness(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get { return @"mocha\mocha.html"; }
+            return @"mocha\mocha.html";
         }
 
         /// <summary>

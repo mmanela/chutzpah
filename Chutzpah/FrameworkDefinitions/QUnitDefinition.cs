@@ -1,4 +1,6 @@
-﻿namespace Chutzpah.FrameworkDefinitions
+﻿using Chutzpah.Models;
+
+namespace Chutzpah.FrameworkDefinitions
 {
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
@@ -25,14 +27,14 @@
                 };
         }
 
-        public override IEnumerable<string> FileDependencies
+        public override IEnumerable<string> GetFileDependencies(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get { return fileDependencies; }
+            return fileDependencies;
         }
 
-        public override string TestHarness
+        public override string GetTestHarness(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get { return @"QUnit\qunit.html"; }
+            return @"QUnit\qunit.html";
         }
 
         /// <summary>

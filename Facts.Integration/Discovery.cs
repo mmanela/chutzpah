@@ -14,9 +14,12 @@ namespace Chutzpah.Facts.Integration
             {
                 return new object[][]
                 {
-                    new object[] { @"JS\Test\basic-qunit.js" },
-                    new object[] { @"JS\Test\basic-jasmine.js" },
-                    new object[] { @"JS\Test\basic-mocha-bdd.js" }, 
+                        new object[] { @"JS\Test\basic-qunit.js", null },
+                        new object[] { @"JS\Test\basic-jasmine.js", "1" },
+                        new object[] { @"JS\Test\basic-jasmine.js", "2" },
+                        new object[] {@"JS\Test\basic-mocha-bdd.js", null},
+                        new object[] {@"JS\Test\basic-mocha-tdd.js", null},
+                        new object[] {@"JS\Test\basic-mocha-qunit.js", null},
                 };
             }
         }
@@ -104,9 +107,10 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("BasicTestScripts")]
-        public void Will_discover_tests_from_a_js_file(string scriptPath)
+        public void Will_discover_tests_from_a_js_file(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             var result = testRunner.DiscoverTests(scriptPath);
 

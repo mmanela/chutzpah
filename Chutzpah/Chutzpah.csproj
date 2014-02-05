@@ -204,6 +204,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Compilers\TypeScript\lib.d.ts" />
     <EmbeddedResource Include="Compilers\TypeScript\polyfill.js" />
+    <Content Include="JSRunners\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="JSRunners\mochaRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -221,22 +224,40 @@
     <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
     <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
     <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
-    <Content Include="TestFiles\Jasmine\jasmine-ddescribe-iit.js">
+    <Content Include="TestFiles\Jasmine\v1\jasmine-ddescribe-iit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\jasmine-html.js">
+    <Content Include="TestFiles\Jasmine\v1\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\jasmine.css">
+    <Content Include="TestFiles\Jasmine\v1\jasmine.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\jasmine.js">
+    <Content Include="TestFiles\Jasmine\v1\jasmine.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\jasmine_favicon.png">
+    <Content Include="TestFiles\Jasmine\v1\jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\jasmine.html">
+    <Content Include="TestFiles\Jasmine\v1\jasmine_favicon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\boot.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\jasmine-html.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\jasmine.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\jasmine.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\jasmine.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Jasmine\v2\jasmine_favicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\Mocha\mocha.css">
@@ -264,7 +285,7 @@
     <Content Include="JSRunners\chutzpahRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="JSRunners\jasmineRunner.js">
+    <Content Include="JSRunners\jasmineRunnerV1.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="JSRunners\qunitRunner.js">

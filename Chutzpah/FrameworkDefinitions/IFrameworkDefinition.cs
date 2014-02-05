@@ -14,17 +14,20 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
-        IEnumerable<string> FileDependencies { get; }
+        /// <param name="chutzpahTestSettings"></param>
+        IEnumerable<string> GetFileDependencies(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
         /// Gets the file name of the HTML test harness to use with the framework.
         /// </summary>
-        string TestHarness { get; }
+        /// <param name="chutzpahTestSettings"></param>
+        string GetTestHarness(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
         /// Gets the file name of the JavaScript test runner to use with the framework.
         /// </summary>
-        string TestRunner { get; }
+        /// <param name="chutzpahTestSettings"></param>
+        string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
         /// Gets a short, file system friendly key for the framework library.
@@ -44,8 +47,9 @@ namespace Chutzpah.FrameworkDefinitions
         /// Tests whether the given file is the framework itself or one of its core dependencies.
         /// </summary>
         /// <param name="referenceFileName">File name of a reference to test.</param>
+        /// <param name="testSettingsFile"></param>
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
-        bool ReferenceIsDependency(string referenceFileName);
+        bool ReferenceIsDependency(string referenceFileName, ChutzpahTestSettingsFile testSettingsFile);
 
         /// <summary>
         /// Processes a referenced file according to the framework's needs.

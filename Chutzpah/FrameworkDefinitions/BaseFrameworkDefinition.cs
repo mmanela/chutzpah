@@ -40,19 +40,22 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
-        public abstract IEnumerable<string> FileDependencies { get; }
+        /// <param name="chutzpahTestSettings"></param>
+        public abstract IEnumerable<string> GetFileDependencies(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
         /// Gets the file name of the test harness to use with the framework.
         /// </summary>
-        public abstract string TestHarness { get; }
+        /// <param name="chutzpahTestSettings"></param>
+        public abstract string GetTestHarness(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
         /// Gets the file name of the JavaScript test runner to use with the framework.
         /// </summary>
-        public virtual string TestRunner
+        /// <param name="chutzpahTestSettings"></param>
+        public virtual string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            get { return @"JSRunners\" + FrameworkKey + "Runner.js"; }
+            return @"JSRunners\" + FrameworkKey + "Runner.js";
         }
 
         /// <summary>
@@ -79,13 +82,14 @@ namespace Chutzpah.FrameworkDefinitions
         /// Tests whether the given file is the framework itself or one of its core dependencies.
         /// </summary>
         /// <param name="referenceFileName">File name of a reference to test.</param>
+        /// <param name="testSettingsFile"></param>
         /// <returns>True if the file is a framework dependency, otherwise false.</returns>
-        public virtual bool ReferenceIsDependency(string referenceFileName)
+        public virtual bool ReferenceIsDependency(string referenceFileName, ChutzpahTestSettingsFile testSettingsFile)
         {
             string fileName = Path.GetFileName(referenceFileName);
             if (!string.IsNullOrEmpty(fileName))
             {
-                return FileDependencies.Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
+                return GetFileDependencies(testSettingsFile).Any(x => fileName.Equals(Path.GetFileName(x), StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;

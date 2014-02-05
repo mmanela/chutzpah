@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Jasmine Spec Runner</title>
+    @@TestFrameworkDependencies@@
+    @@CodeCoverageDependencies@@
+    @@ReferencedCSSFiles@@
+    @@TestHtmlTemplateFiles@@
+    @@ReferencedJSFiles@@
+    @@TestJSFile@@
+    <script type="text/javascript">      
+        (function () {
+            var amdTestPath = "@@AMDTestPath@@";
+            if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+                if (window.chutzpah) {
+                    window.chutzpah.usingModuleLoader = true;
+                }
+                
+                requirejs.config({
+                    map: {
+                        '*': {
+                            @@AMDModuleMap@@
+                        }
+                    }
+                });
+
+                window.require([amdTestPath], function () {
+
+                    console.log("!!_!! Stating Jasmine from AMD callback...");
+                    window.initializeJasmine();
+                });
+            }
+            else {
+                var currentWindowOnload = window.onload;
+
+                window.onload = function() {
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
+                    window.initializeJasmine();
+                };
+            }
+
+        })();
+    </script>
+</head>
+<body>
+</body>
+</html>

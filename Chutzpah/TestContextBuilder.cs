@@ -113,7 +113,7 @@ namespace Chutzpah
                         InputTestFile = testFilePath,
                         TestHarnessPath = testFilePath,
                         IsRemoteHarness = testFileKind == PathType.Url,
-                        TestRunner = definition.TestRunner,
+                        TestRunner = definition.GetTestRunner(chutzpahTestSettings),
                     };
                 }
 
@@ -134,7 +134,7 @@ namespace Chutzpah
 
                 SetupAmdPathsIfNeeded(chutzpahTestSettings, referencedFiles, testHarnessDirectory);
 
-                IEnumerable<string> deps = definition.FileDependencies;
+                IEnumerable<string> deps = definition.GetFileDependencies(chutzpahTestSettings);
 
                 var coverageEngine = SetupCodeCoverageEngine(options, chutzpahTestSettings, definition, referencedFiles);
 
@@ -155,7 +155,7 @@ namespace Chutzpah
                     InputTestFile = testFilePath,
                     TestHarnessPath = testHtmlFilePath,
                     ReferencedJavaScriptFiles = referencedFiles,
-                    TestRunner = definition.TestRunner,
+                    TestRunner = definition.GetTestRunner(chutzpahTestSettings),
                     TemporaryFiles = temporaryFiles,
                     TestFileSettings = chutzpahTestSettings
                 };
@@ -472,7 +472,7 @@ namespace Chutzpah
 
             if (templatePath == null)
             {
-                templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.TestHarness)).FullPath;
+                templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.GetTestHarness(chutzpahTestSettings))).FullPath;
 
                 ChutzpahTracer.TraceInformation("Using builtin Test Harness from {0}", templatePath);
             }

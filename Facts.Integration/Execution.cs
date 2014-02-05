@@ -65,11 +65,12 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                     {
-                        new object[] {@"JS\Test\basic-qunit.js"},
-                        new object[] {@"JS\Test\basic-jasmine.js"},
-                        new object[] {@"JS\Test\basic-mocha-bdd.js"},
-                        new object[] {@"JS\Test\basic-mocha-tdd.js"},
-                        new object[] {@"JS\Test\basic-mocha-qunit.js"},
+                        new object[] { @"JS\Test\basic-qunit.js", null },
+                        new object[] { @"JS\Test\basic-jasmine.js", "1" },
+                        new object[] { @"JS\Test\basic-jasmine.js", "2" },
+                        new object[] {@"JS\Test\basic-mocha-bdd.js", null }, 
+                        new object[] {@"JS\Test\basic-mocha-tdd.js", null},
+                        new object[] {@"JS\Test\basic-mocha-qunit.js", null},
                         
                         // Exports does not work. Not sure how it is supposed to get the 
                         // exports variable in the browser
@@ -99,25 +100,16 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("BasicTestScripts")]
-        public void Will_run_tests_from_a_js_file(string scriptPath)
+        public void Will_run_tests_from_a_js_file(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             TestCaseSummary result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
-        }
-
-        [Fact]
-        public void Will_not_record_stack_trace_for_failed_jasmine_expectations()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\failing-expectation-jasmine.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Null(result.Tests.Single().TestResults.Single().StackTrace);
         }
 
         [Fact]
@@ -564,6 +556,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_test_which_logs_object_to_jasmine_log()
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
 
@@ -586,6 +579,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_capture_message_logged_via_jasmine_log()
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
 
@@ -708,6 +702,7 @@ namespace Chutzpah.Facts.Integration
             public JasmineDdescribeIit()
             {
                 ChutzpahTracer.Enabled = false;
+                ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
             }
 
             [Fact]
@@ -963,6 +958,7 @@ namespace Chutzpah.Facts.Integration
             public void Will_run_jasmine_require_html_test_where_test_file_uses_requirejs_command()
             {
                 var testRunner = TestRunner.Create();
+                ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
 
                 TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html", new ExceptionThrowingRunnerCallback());
 

@@ -86,14 +86,14 @@
             public void ReturnsTrue_GivenQUnitFile()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("qunit.js"));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("qunit.js", new ChutzpahTestSettingsFile()));
             }
 
             [Fact]
             public void ReturnsFalse_GivenJasmineFile()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js"));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js", new ChutzpahTestSettingsFile()));
             }
 
             [Fact]
@@ -101,8 +101,8 @@
             {
                 var creator = new QUnitDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty));
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty, new ChutzpahTestSettingsFile()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null, new ChutzpahTestSettingsFile()));
             }
         }
 

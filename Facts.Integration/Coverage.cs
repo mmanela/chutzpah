@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chutzpah.Models;
 using Xunit;
 using Xunit.Extensions;
 
@@ -22,9 +23,12 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                 {
-                   new object[] { @"JS\Test\basic-qunit.js" },
-                   new object[] { @"JS\Test\basic-mocha-bdd.js" },
-                   new object[] { ABasicTestScript }
+                    new object[] { @"JS\Test\basic-qunit.js", null },
+                    new object[] { @"JS\Test\basic-jasmine.js", "1" },
+                    new object[] { @"JS\Test\basic-jasmine.js", "2" },
+                    new object[] {@"JS\Test\basic-mocha-bdd.js", null }, 
+                    new object[] {@"JS\Test\basic-mocha-tdd.js", null},
+                    new object[] {@"JS\Test\basic-mocha-qunit.js", null},
                 };
             }
         }
@@ -104,9 +108,10 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("BasicTestScripts")]
-        public void Will_create_a_coverage_object(string scriptPath)
+        public void Will_create_a_coverage_object(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -115,20 +120,22 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("BasicTestScripts")]
-        public void Will_cover_the_correct_scripts(string scriptPath)
+        public void Will_cover_the_correct_scripts(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
-            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] {scriptPath, "JS\\Code\\code.js"});
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { scriptPath, "JS\\Code\\code.js" });
         }
 
         [Theory]
         [PropertyData("BasicTestScripts")]
-        public void Will_get_test_results_with_coverage_enabled(string scriptPath)
+        public void Will_get_test_results_with_coverage_enabled(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -174,7 +181,7 @@ namespace Chutzpah.Facts.Integration
 
             var result = testRunner.RunTests(@"JS\Test\Coverage\IncludePath\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
 
-            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] {  "JS\\Code\\code.js" });
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { "JS\\Code\\code.js" });
         }
 
         [Fact]
@@ -246,17 +253,17 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.IncludePatterns = new []{"**\\code.js"}),
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.IncludePatterns = new[] { "**\\code.js" }),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
-            ExpectKeysMatching(dict, new[] {"\\code.js"});
+            ExpectKeysMatching(dict, new[] { "\\code.js" });
         }
 
         [Fact]
         public void Will_exclude_specified_files_from_the_coverage_report()
         {
             var testRunner = TestRunner.Create();
-            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePatterns = new[]{"**\\" + ABasicTestScript}),
+            var result = testRunner.RunTests(ABasicTestScript, WithCoverage(co => co.ExcludePatterns = new[] { "**\\" + ABasicTestScript }),
                 new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
             ExpectKeysMatching(dict, new[] { "\\code.js" });
@@ -319,7 +326,7 @@ namespace Chutzpah.Facts.Integration
 
             Assert.False(HasKeyWithSubstring(dict, "file://"));
         }
-        
+
         [Theory]
         [PropertyData("AmdTestScriptWithForcedRequire")]
         [PropertyData("AmdTestScriptWithAMDMode")]
@@ -340,6 +347,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_cover_where_test_file_uses_amd_mode_with_base_scripts(string scriptPath)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -429,7 +437,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[]{"*\\require.js"}), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => co.ExcludePatterns = new[] { "*\\require.js" }), new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(2, result.TotalCount);
         }
