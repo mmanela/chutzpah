@@ -267,7 +267,7 @@ namespace Chutzpah
             ICoverageEngine coverageEngine = GetConfiguredCoverageEngine(options, chutzpahTestSettings);
             if (coverageEngine != null)
             {
-                var deps = coverageEngine.GetFileDependencies(definition);
+                var deps = coverageEngine.GetFileDependencies(definition, chutzpahTestSettings);
 
                 foreach (string item in deps)
                 {
@@ -370,10 +370,13 @@ namespace Chutzpah
         /// </summary>
         private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
+            ChutzpahTracer.TraceInformation("Starting test file compilation/generation");
             foreach (var fileGenerator in fileGenerators)
             {
                 fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
             }
+
+            ChutzpahTracer.TraceInformation("Finished test file compilation/generation");
         }
 
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
@@ -438,7 +441,7 @@ namespace Chutzpah
 
             if (coverageEngine != null)
             {
-                coverageEngine.PrepareTestHarnessForCoverage(harness, definition);
+                coverageEngine.PrepareTestHarnessForCoverage(harness, definition, chutzpahTestSettings);
             }
 
             string testFileContents = fileSystem.GetText(inputTestFilePath);

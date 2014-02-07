@@ -10,7 +10,8 @@ namespace Chutzpah.Coverage
         /// Gets a list of file dependencies to bundle with the framework test harness.
         /// </summary>
         /// <param name="definition">The test framework used.</param>
-        IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition);
+        /// <param name="testSettings"></param>
+        IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettings);
 
 
         /// <summary>
@@ -21,7 +22,8 @@ namespace Chutzpah.Coverage
         /// </summary>
         /// <param name="harness">The test harness to modify.</param>
         /// <param name="definition">The test framework used.</param>
-        void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition);
+        /// <param name="testSettings"></param>
+        void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettings);
 
         /// <summary>
         /// Deserializes the JSON representation of the coverage object and adapts it to Chutzpah's

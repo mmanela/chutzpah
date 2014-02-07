@@ -86,7 +86,7 @@ namespace Chutzpah
             string currentFilePath,
             ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            var referencePathSet = new HashSet<string>(referencedFiles.Select(x => x.Path));
+            var referencePathSet = new HashSet<string>(referencedFiles.Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
 
             // Process the references that the user specifies in the chutzpah settings file
             foreach (var reference in chutzpahTestSettings.References.Where(reference => reference != null))
@@ -309,7 +309,7 @@ namespace Chutzpah
             ReferencePathSettings pathSettings)
         {
             // If the file doesn't exit exist or we have seen it already then return
-            if (discoveredPaths.Any(x => x.Equals(absoluteFilePath, StringComparison.OrdinalIgnoreCase))) return null;
+            if (discoveredPaths.Contains(absoluteFilePath)) return null;
 
             var referencedFile = new ReferencedFile
             {

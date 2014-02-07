@@ -30,6 +30,13 @@ namespace Chutzpah.FrameworkDefinitions
         string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings);
 
         /// <summary>
+        /// Gets the name of the blanket script to use for code coverage
+        /// </summary>
+        /// <param name="chutzpahTestSettings"></param>
+        /// <returns></returns>
+        string GetBlanketScriptName(ChutzpahTestSettingsFile chutzpahTestSettings);
+
+        /// <summary>
         /// Gets a short, file system friendly key for the framework library.
         /// </summary>
         string FrameworkKey { get; }

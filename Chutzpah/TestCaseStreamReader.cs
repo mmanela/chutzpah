@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.Models.JS;
+using Chutzpah.Transformers;
 using Chutzpah.Wrappers;
 using JsonSerializer = Chutzpah.Wrappers.JsonSerializer;
 
@@ -44,7 +45,7 @@ namespace Chutzpah
             
             lastTestEvent = DateTime.Now;
             var timeout = (testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500; // Add buffer to timeout to account for serialization
-            var readerTask = Task<TestFileSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, callback, debugEnabled));
+            var readerTask = Task<TestFileSummary>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, testOptions, callback, debugEnabled));
             while (readerTask.Status == TaskStatus.WaitingToRun
                || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))
             {
@@ -67,11 +68,16 @@ namespace Chutzpah
             }
         }
 
-        private TestFileSummary ReadFromStream(StreamReader stream, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        private TestFileSummary ReadFromStream(StreamReader stream, TestContext testContext, TestOptions testOptions, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
             var referencedFile = testContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testIndex = 0;
             var summary = new TestFileSummary(testContext.InputTestFile);
+            if (testOptions.CoverageOptions.Enabled)
+            {
+                summary.CoverageObject = new CoverageData();
+            }
+
             string line;
             while ((line = stream.ReadLine()) != null)
             {

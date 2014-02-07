@@ -1104,6 +1104,28 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(4, result.PassedCount);
                 Assert.Equal(4, result.TotalCount);
             }
+
+            [Fact]
+            public void will_use_settings_for_jasmine_version_one()
+            {
+                var testRunner = TestRunner.Create();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\FrameworkVersion\Jasmine_V1\versionTest.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
+
+            [Fact]
+            public void will_use_settings_for_jasmine_version_two()
+            {
+                var testRunner = TestRunner.Create();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\FrameworkVersion\Jasmine_V2\versionTest.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
         }
     }
 }

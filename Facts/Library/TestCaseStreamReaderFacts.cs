@@ -278,6 +278,38 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_not_set_empty_coverage_object_when_coverage_is_disabled()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var json = @"";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { CoverageOptions = new CoverageOptions { Enabled = false } }, context, callback.Object, false);
+
+                Assert.Null(summary.CoverageObject);
+            }
+
+            [Fact]
+            public void Will_set_empty_coverage_object_when_coverage_is_enabled()
+            {
+                var reader = new TestableTestCaseStreamReader();
+
+                var json = @"";
+                var context = new TestContext { InputTestFile = "file" };
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { CoverageOptions = new CoverageOptions { Enabled = true } }, context, callback.Object, false);
+
+                Assert.NotNull(summary.CoverageObject);
+            }
+
+            [Fact]
             public void Will_put_coverage_object_in_summary()
             {
                 var reader = new TestableTestCaseStreamReader();

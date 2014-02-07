@@ -66,6 +66,12 @@ namespace Chutzpah.FrameworkDefinitions
             return testRunner[GetVersion(chutzpahTestSettings)];
         }
 
+        public override string GetBlanketScriptName(ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            var version = GetVersion(chutzpahTestSettings);
+            return "blanket_jasmine_v" + version + ".js";
+        }
+
         /// <summary>
         /// Gets a short, file system friendly key for the Jasmine library.
         /// </summary>

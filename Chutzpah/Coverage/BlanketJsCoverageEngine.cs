@@ -32,16 +32,16 @@ namespace Chutzpah.Coverage
             excludePatterns = new List<string>();
         }
 
-        public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition)
+        public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettingsFile)
         {
-            BlanketJsCoverageEngine.FrameworkSpecificInfo info = GetInfo(definition);
-            yield return "Coverage\\" + info.BlanketScriptName;
+            var blanketScriptName = GetBlanketScriptName(definition, testSettingsFile);
+            yield return "Coverage\\" + blanketScriptName;
         }
 
 
-        public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition)
+        public void PrepareTestHarnessForCoverage(TestHarness harness, IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettingsFile)
         {
-            BlanketJsCoverageEngine.FrameworkSpecificInfo info = GetInfo(definition);
+            string blanketScriptName = GetBlanketScriptName(definition, testSettingsFile);
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
             IList<string> filesToExcludeFromCoverage =
@@ -68,7 +68,7 @@ namespace Chutzpah.Coverage
 
             // Configure Blanket.
             TestHarnessItem blanketMain = harness.CodeCoverageDependencies.Single(
-                                            d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(info.BlanketScriptName));
+                                            d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(blanketScriptName));
 
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
 
@@ -85,7 +85,7 @@ namespace Chutzpah.Coverage
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
-            BlanketJsCoverageEngine.BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketJsCoverageEngine.BlanketCoverageObject>(json);
+            BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
                 testContext.ReferencedJavaScriptFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
 
@@ -170,42 +170,10 @@ namespace Chutzpah.Coverage
         {
         }
 
-        private BlanketJsCoverageEngine.FrameworkSpecificInfo GetInfo(IFrameworkDefinition def)
+        private string GetBlanketScriptName(IFrameworkDefinition def, ChutzpahTestSettingsFile settingsFile)
         {
-            BlanketJsCoverageEngine.FrameworkSpecificInfo info;
-            if (!FrameworkInfoMap.TryGetValue(def.GetType(), out info))
-            {
-                throw new ArgumentException("Unknown framework: " + def.GetType().Name);
-            }
-            return info;
+            return def.GetBlanketScriptName(settingsFile);
         }
 
-        private static readonly IDictionary<Type, FrameworkSpecificInfo> FrameworkInfoMap =
-            new Dictionary<Type, BlanketJsCoverageEngine.FrameworkSpecificInfo>
-                {
-                    {
-                        typeof (JasmineDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
-                                                        {
-                                                            BlanketScriptName = "blanket_jasmine.js"
-                                                        }
-                        },
-                    {
-                        typeof (QUnitDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
-                                                      {
-                                                          BlanketScriptName = "blanket_qunit.js"
-                                                      }
-                        },
-                    {
-                        typeof (MochaDefinition), new BlanketJsCoverageEngine.FrameworkSpecificInfo
-                                                      {
-                                                          BlanketScriptName = "blanket_mocha.js"
-                                                      }
-                        }
-                };
-
-        private class FrameworkSpecificInfo
-        {
-            internal string BlanketScriptName { get; set; }
-        }
     }
 }

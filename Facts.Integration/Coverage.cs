@@ -334,7 +334,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -347,7 +346,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_cover_where_test_file_uses_amd_mode_with_base_scripts(string scriptPath)
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
@@ -448,7 +446,8 @@ namespace Chutzpah.Facts.Integration
                            {
                                CoverageOptions = new CoverageOptions
                                                      {
-                                                         Enabled = true
+                                                         Enabled = true,
+                                                         ExcludePatterns = new []{"*chai.js*"},
                                                      }
                            };
             mods.ToList().ForEach(a => a(opts.CoverageOptions));

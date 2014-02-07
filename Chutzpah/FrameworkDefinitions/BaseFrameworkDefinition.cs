@@ -17,6 +17,11 @@ namespace Chutzpah.FrameworkDefinitions
             new Regex(@"\<(?:script|reference|chutzpah_reference).*?(?:src|path)\s*=\s*[""'].*?(?<framework>(qunit|jasmine|mocha)).*?\.js[""']",
                       RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        public virtual string GetBlanketScriptName(ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            return "blanket_" + FrameworkKey + ".js";
+        }
+
         /// <summary>
         /// Gets a short, file system friendly key for the framework library.
         /// </summary>
