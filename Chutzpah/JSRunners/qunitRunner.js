@@ -84,7 +84,10 @@
         };
 
         callback.log = function (info) {
-            if (!isGlobalError && info.result !== undefined) {
+            if (isGlobalError) {
+                log({ type: 'Error', error: { message: (info.message || "") + "" } });
+            }
+            else if (info.result !== undefined) {
                 var testResult = {};
 
                 testResult.passed = info.result;
