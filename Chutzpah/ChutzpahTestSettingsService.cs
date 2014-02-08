@@ -60,6 +60,12 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
+
+                    if (settings == null)
+                    {
+                        settings = ChutzpahTestSettingsFile.Default;
+                    }
+
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
                     ValidateTestHarnessLocationMode(settings);
