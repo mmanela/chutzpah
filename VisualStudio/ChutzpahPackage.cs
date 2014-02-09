@@ -46,6 +46,7 @@ namespace Chutzpah.VisualStudio
     {
         private DTE2 dte;
         private ITestRunner testRunner;
+        private IChutzpahTestSettingsService chutzpahSettingsService;
         internal ILogger Logger { get; private set; }
         private ITestMethodRunnerCallback runnerCallback;
         private IVsStatusbar statusBar;
@@ -85,6 +86,7 @@ namespace Chutzpah.VisualStudio
             }
 
             testRunner = TestRunner.Create();
+            chutzpahSettingsService = ChutzpahContainer.Get<IChutzpahTestSettingsService>();
 
             processHelper = new ProcessHelper();
             Logger = new Logger(this);
@@ -184,6 +186,11 @@ namespace Chutzpah.VisualStudio
                     Logger.Log("Unable to find file to open in browser", "ChutzpahPackage", ex);
                 }
             }
+        
+            // Clear the Chutzpah.json cache in the end. This is only
+            // needed in this case since when letting chutzpah do a test run this happens for you
+            chutzpahSettingsService.ClearCache();
+        
         }
 
         private void RunJSTestCmdCallback(object sender, EventArgs e)
