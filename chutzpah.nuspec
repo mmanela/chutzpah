@@ -14,9 +14,12 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine coffeescript typescript</tags>
         <releaseNotes>
-* Fix VS Test Adapter issue
-* Fixed TypeScript compiler issue
-* Added more tracing
+* 185	Specify which tests to run using Chutzpah.json file
+* 207	Upgrade to Jasmine 2.0
+* 199	Show output of console.log in VS test adapter as well as context menu runner
+* 198	Visual Studio test discovery engine locks chutzpah.json file
+* 193	Chutzpah.json Caching issues
+* 204	QUnit global failure is ignored by chutzpah at console	
         </releaseNotes>
     </metadata>
 </package>

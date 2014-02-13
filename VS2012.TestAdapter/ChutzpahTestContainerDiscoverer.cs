@@ -29,7 +29,6 @@ namespace Chutzpah.VS2012.TestAdapter
         }
 
         public string Path { get; set; }
-        public bool IsChutzpahSettingsFile { get; set; }
     }
 
     [Export(typeof(ITestContainerDiscoverer))]
@@ -252,7 +251,7 @@ namespace Chutzpah.VS2012.TestAdapter
         private void AddTestContainerIfTestFile(TestFileCandidate file)
         {
             // If a settings file don't add a container
-            if (file.IsChutzpahSettingsFile)
+            if (fileProbe.IsChutzpahSettingsFile(file.Path))
             {
                 return;
             }
@@ -276,7 +275,7 @@ namespace Chutzpah.VS2012.TestAdapter
         private void RemoveTestContainer(TestFileCandidate file)
         {
             // If a settings file don't add a container
-            if (file.IsChutzpahSettingsFile)
+            if (fileProbe.IsChutzpahSettingsFile(file.Path))
             {
                 return;
             }
@@ -357,8 +356,7 @@ namespace Chutzpah.VS2012.TestAdapter
                         where !fileProbe.IsTemporaryChutzpahFile(item) && (hasTestExtension || isChutzpahSettingsFile)
                         select new TestFileCandidate
                         {
-                            Path = item,
-                            IsChutzpahSettingsFile = isChutzpahSettingsFile
+                            Path = item
                         }).ToList();
             }
             finally
