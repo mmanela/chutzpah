@@ -5,7 +5,6 @@ properties {
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $packageDir = "$baseDir\_package"
-  $mainVersion = "3.0.1"
 }
 
 # Aliases
@@ -132,7 +131,7 @@ task Package-Files -depends Clean-PackageFiles {
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
     
     cd $filesDir
-    exec { &"$baseDir\3rdParty\Zip\zip.exe" -r -9 "$packageDir\Chutzpah.$mainVersion.zip" *.* }
+    exec { &"$baseDir\3rdParty\Zip\zip.exe" -r -9 "$packageDir\Chutzpah.$($global:version).zip" *.* }
     cd $baseDir
     
     # Copy over Vsix Files
