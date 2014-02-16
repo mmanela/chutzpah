@@ -4,6 +4,7 @@ properties {
   $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
+  $chocolateyDir = "$baseDir\_chocolatey"
   $packageDir = "$baseDir\_package"
 }
 
@@ -139,7 +140,7 @@ task Package-Files -depends Clean-PackageFiles {
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.vsix" -destination $packageDir
 }
 
-task Package-NuGet -depends Clean-PackageFiles {
+task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     $nugetTools = "$nugetDir\tools"
     $nuspec = "$baseDir\Chutzpah.nuspec"
     
@@ -153,11 +154,30 @@ task Package-NuGet -depends Clean-PackageFiles {
     exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
 }
 
+task Package-Chocolatey -depends Clean-PackageFiles, Set-Version {
+    $nuspec = "$baseDir\Chutzpah.nuspec"
+    $chocolateyInstall = "$baseDir\chocolateyInstall.ps1"
+    
+    create $chocolateyDir, $packageDir
+    copy-item $chocolateyInstall, $nuspec -destination $chocolateyDir
+    
+    push-location $chocolateyDir
+    $v = new-object -TypeName System.Version -ArgumentList $global:version
+    regex-replace "$chocolateyDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)
+    exec { cpack "$chocolateyDir\Chutzpah.nuspec" }
+    pop-location
+}
+
 task Push-Nuget -depends Set-Version {
   $v = new-object -TypeName System.Version -ArgumentList $global:version
 	exec { .\Tools\nuget.exe push $packageDir\Chutzpah.$($v.ToString(3)).nupkg }
 }
 
+
+task Push-Chocolatey -depends Set-Version {
+  $v = new-object -TypeName System.Version -ArgumentList $global:version
+	exec { chocolatey push $chocolateyDir\Chutzpah.$($v.ToString(3)).nupkg }
+}
 
 # Help 
 task ? -Description "Help information" {
