@@ -65,16 +65,39 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             base.TestSuiteFinished(testResultsSummary);
 
-            if (!runContext.IsDataCollectionEnabled || testResultsSummary.CoverageObject == null)
+            if(!runContext.IsDataCollectionEnabled || testResultsSummary.CoverageObject == null)
             {
                 return;
             }
 
-            var directory = runContext.SolutionDirectory;
-            var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
-            var processHelper = new ProcessHelper();
+            try
+            {
+                // If we do not have a solutiondirectory, we assume that we are running in tfs build
+                // In that case we only write to the testrundirectory and do not open a browser
+                if(string.IsNullOrEmpty(runContext.SolutionDirectory))
+                {
+                    ChutzpahTracer.TraceInformation("Chutzpah runs in TFSBuild, writing coverage file to {0}", runContext.TestRunDirectory);
 
-            processHelper.LaunchFileInBrowser(coverageHtmlFile);
+                    var directory = runContext.TestRunDirectory;
+                    CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
+                    CoverageOutputGenerator.WriteJsonFile(directory, testResultsSummary.CoverageObject);
+
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("Chutzpah runs not in TFSBuild opening coverage file in browser");
+
+                    var directory = runContext.SolutionDirectory;
+                    var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
+                    var processHelper = new ProcessHelper();
+
+                    processHelper.LaunchFileInBrowser(coverageHtmlFile);
+                }
+            }
+            catch(Exception e)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Error, string.Format("Error while writing coverage output: {0}", e));
+            }
         }
 
     }
