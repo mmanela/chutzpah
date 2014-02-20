@@ -48,6 +48,7 @@ namespace Chutzpah.Coverage
                 harness.TestFrameworkDependencies.Concat(harness.CodeCoverageDependencies)
                 .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
                 .Select(dep => dep.Attributes["src"])
+                .Concat(excludePatterns.Select(ToRegex))
                 .ToList();
 
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
@@ -72,9 +73,27 @@ namespace Chutzpah.Coverage
 
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
 
+
+            ChutzpahTracer.TraceInformation("Adding data-cover-never attribute to blanket: {0}", dataCoverNever);
+
             blanketMain.Attributes.Add("data-cover-flags", "ignoreError autoStart");
             blanketMain.Attributes.Add("data-cover-only", "//.*/");
             blanketMain.Attributes.Add("data-cover-never", dataCoverNever);
+        }
+
+        /// <summary>
+        /// Chutzpah uses glob formats ( http://en.wikipedia.org/wiki/Glob_(programming) ) for its paths.
+        /// Blanketjs expects regexes, so we need to convert them
+        /// </summary>
+        /// <param name="globPath">A filepath in the glob format</param>
+        /// <returns>Regular expression</returns>
+        private string ToRegex(string globPath)
+        {
+            // 1) Change all backslashes to forward slashes first
+            // 2) Replace ** with the regex part "\/(.|\/)*\/" (multiple directories)
+            // 3) Replace ** with the regex part "\/.*\/" (no subdirectories)
+            // 4) Surround the regex with // and /, and add the modifier i (case insensitive)
+            return string.Format("//{0}/i", globPath.Replace("\\", "\\/").Replace("**", "\\/(.|\\/)*\\/").Replace("*", "\\/.*\\/"));
         }
 
         private bool IsScriptFile(ReferencedFile file)
@@ -132,11 +151,17 @@ namespace Chutzpah.Coverage
             return coverageData;
         }
 
+        public void ClearPatterns()
+        {
+            includePatterns.Clear();
+            excludePatterns.Clear();
+        }
+
         public void AddIncludePatterns(IEnumerable<string> patterns)
         {
             foreach (var pattern in patterns)
             {
-                includePatterns.Add(FileProbe.NormalizeFilePath(pattern));
+                includePatterns.Add(pattern);
             }
         }
 
@@ -144,21 +169,20 @@ namespace Chutzpah.Coverage
         {
             foreach (var pattern in patterns)
             {
-                excludePatterns.Add(FileProbe.NormalizeFilePath(pattern));
+                excludePatterns.Add(pattern);
             }
         }
-
 
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
-            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, includePattern)))
+            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(includePattern))))
             {
                 return false;
             }
 
             // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
-            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, excludePattern)))
+            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(excludePattern))))
             {
                 return false;
             }
