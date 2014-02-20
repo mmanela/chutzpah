@@ -1,20 +1,22 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
+    <title>QUnit Tests</title>
     @@TestFrameworkDependencies@@
     @@CodeCoverageDependencies@@
     @@ReferencedCSSFiles@@
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
-    
+
     <script>
         var amdTestPath = "@@AMDTestPath@@";
         if (window.require && typeof window.require === "function" && amdTestPath !== "") {
             if (window.chutzpah) {
                 window.chutzpah.usingModuleLoader = true;
             }
-            
+
             requirejs.config({
                 map: {
                     '*': {

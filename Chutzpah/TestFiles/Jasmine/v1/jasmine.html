@@ -1,7 +1,7 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
     <title>Jasmine Spec Runner</title>
     @@TestFrameworkDependencies@@
     @@CodeCoverageDependencies@@
@@ -9,7 +9,8 @@
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
     @@TestJSFile@@
-    <script type="text/javascript">      
+    <script type="text/javascript">
+
         (function () {
             var jasmineEnv = jasmine.getEnv();
             jasmineEnv.updateInterval = 1000;
@@ -31,12 +32,12 @@
                 if (window.chutzpah) {
                     window.chutzpah.usingModuleLoader = true;
                 }
-                
+
                 requirejs.config({
                     map: {
                         '*': {
                             @@AMDModuleMap@@
-                        }
+                            }
                     }
                 });
 
@@ -47,7 +48,7 @@
                 });
             }
             else {
-            // If we are not running in chutzpah then run the tests onload
+                // If we are not running in chutzpah then run the tests onload
                 if (!window.chutzpah) {
                     var currentWindowOnload = window.onload;
 

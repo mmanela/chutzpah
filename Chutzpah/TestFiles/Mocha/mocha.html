@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Mocha Tests</title>
     @@TestFrameworkDependencies@@
     @@CodeCoverageDependencies@@
@@ -24,7 +24,7 @@
                 console.log("!!_!! Test file is using module loader.");
                 window.chutzpah.usingModuleLoader = true;
             }
-            
+
             requirejs.config({
                 map: {
                     '*': {
@@ -32,7 +32,7 @@
                         }
                 }
             });
-            
+
             window.require([amdTestPath], function () {
                 mocha.run();
             });
@@ -40,8 +40,8 @@
         } else {
             if (window._Chutzpah_covobj_name) {
                 blanket.options("existingRequireJS", false);
-           }
-            
+            }
+
             var currentWindowOnload = window.onload;
             window.onload = function() {
                 if (currentWindowOnload) {

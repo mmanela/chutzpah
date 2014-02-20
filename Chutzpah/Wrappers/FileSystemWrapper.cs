@@ -76,7 +76,7 @@ namespace Chutzpah.Wrappers
 
         public void WriteAllText(string path, string text)
         {
-            File.WriteAllText(path, text, Encoding.Default);
+            File.WriteAllText(path, text);
         }
 
         public void DeleteDirectory(string path, bool recursive)
