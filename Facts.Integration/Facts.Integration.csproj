@@ -200,6 +200,9 @@
     <Content Include="JS\Test\basic-mocha-exports.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\Coverage\ExcludePathWithRequireJS\test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\references-mocha.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -419,6 +422,9 @@
     <Content Include="JS\Test\TestSettings\FrameworkVersion\Jasmine_V1\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="JS\Test\Coverage\ExcludePathWithRequireJS\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="JS\Test\TypeScript\basic-mocha-bdd.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
