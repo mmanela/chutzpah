@@ -8,6 +8,7 @@ using Chutzpah.Models;
 using Chutzpah.VS.Common;
 using Chutzpah.VS11.EventWatchers;
 using Chutzpah.VS11.EventWatchers.EventArgs;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
@@ -133,10 +134,13 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         private void OnTestContainersChanged()
         {
+
+            ChutzpahTracer.TraceInformation("Begin OnTestContainersChanged");
             if (TestContainersUpdated != null && !initialContainerSearch)
             {
                 TestContainersUpdated(this, EventArgs.Empty);
             }
+            ChutzpahTracer.TraceInformation("End OnTestContainersChanged");
         }
 
 
@@ -145,6 +149,8 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         private void SolutionListenerOnSolutionUnloaded(object sender, EventArgs eventArgs)
         {
+
+            ChutzpahTracer.TraceInformation("Solution Unloaded...");
             initialContainerSearch = true;
         }
 
@@ -156,14 +162,19 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             if (e != null)
             {
+                string projectPath = VsSolutionHelper.GetProjectPath(e.Project);
+
                 var files = FindPotentialTestFiles(e.Project);
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
+                    ChutzpahTracer.TraceInformation("Project Loaded: '{0}'", projectPath);
                     UpdateTestContainersAndFileWatchers(files, true);
                 }
                 else if (e.ChangedReason == SolutionChangedReason.Unload)
                 {
+                    ChutzpahTracer.TraceInformation("Project Unloaded: '{0}'", projectPath);
                     UpdateTestContainersAndFileWatchers(files, false);
+
                 }
             }
 
@@ -185,11 +196,14 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 if (isAdd)
                 {
+
+                    ChutzpahTracer.TraceInformation("Adding watch on {0}", file.Path);
                     testFilesUpdateWatcher.AddWatch(file.Path);
                     AddTestContainerIfTestFile(file);
                 }
                 else
                 {
+                    ChutzpahTracer.TraceInformation("Removing watch on {0}", file.Path);
                     testFilesUpdateWatcher.RemoveWatch(file.Path);
                     RemoveTestContainer(file);
                 }
@@ -204,6 +218,8 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         private void OnProjectItemChanged(object sender, TestFileChangedEventArgs e)
         {
+
+            ChutzpahTracer.TraceInformation("Begin OnProjectItemChanged");
             if (e != null)
             {
 
@@ -225,11 +241,13 @@ namespace Chutzpah.VS2012.TestAdapter
                 switch (e.ChangedReason)
                 {
                     case TestFileChangedReason.Added:
+                        ChutzpahTracer.TraceInformation("Adding watch on {0}", e.File.Path);
                         testFilesUpdateWatcher.AddWatch(e.File.Path);
                         AddTestContainerIfTestFile(e.File);
 
                         break;
                     case TestFileChangedReason.Removed:
+                        ChutzpahTracer.TraceInformation("Removing watch on {0}", e.File.Path);
                         testFilesUpdateWatcher.RemoveWatch(e.File.Path);
                         RemoveTestContainer(e.File);
 
@@ -241,6 +259,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
                 OnTestContainersChanged();
             }
+
+            ChutzpahTracer.TraceInformation("End OnProjectItemChanged");
         }
 
         /// <summary>
@@ -262,7 +282,7 @@ namespace Chutzpah.VS2012.TestAdapter
             if (isTestFile)
             {
 
-                ChutzpahTracer.TraceInformation("Added test container for '{0}'", file);
+                ChutzpahTracer.TraceInformation("Added test container for '{0}'", file.Path);
                 var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), Constants.ExecutorUri);
                 cachedContainers.Add(container);
             }
@@ -284,7 +304,7 @@ namespace Chutzpah.VS2012.TestAdapter
             if (index >= 0)
             {
 
-                ChutzpahTracer.TraceInformation("Removed test container for '{0}'", file);
+                ChutzpahTracer.TraceInformation("Removed test container for '{0}'", file.Path);
                 cachedContainers.RemoveAt(index);
             }
         }
@@ -347,9 +367,12 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private IEnumerable<TestFileCandidate> FindPotentialTestFiles(IVsProject project)
         {
+            string projectPath = VsSolutionHelper.GetProjectPath(project);
+
             try
             {
-                ChutzpahTracer.TraceInformation("Begin selecting potential test files from project");
+                
+                ChutzpahTracer.TraceInformation("Begin selecting potential test files from project '{0}'", projectPath);
                 return (from item in VsSolutionHelper.GetProjectItems(project)
                         let hasTestExtension = HasTestFileExtension(item)
                         let isChutzpahSettingsFile = fileProbe.IsChutzpahSettingsFile(item)
@@ -361,7 +384,7 @@ namespace Chutzpah.VS2012.TestAdapter
             }
             finally
             {
-                ChutzpahTracer.TraceInformation("End selecting potential test files from project");
+                ChutzpahTracer.TraceInformation("End selecting potential test files from project '{0}'", projectPath);
             }
         }
 

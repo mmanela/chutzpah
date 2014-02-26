@@ -28,6 +28,13 @@ namespace VS11.Plugin
 			}
 		}
 
+        public static string GetProjectPath(IVsProject project)
+        {
+            string projectPath;
+            project.GetMkDocument(VSConstants.VSITEMID_ROOT, out projectPath);
+            return projectPath;
+        }
+
 		public static IEnumerable<string> GetProjectItems(IVsProject project)
 		{
 			// Each item in VS OM is IVSHierarchy. 
