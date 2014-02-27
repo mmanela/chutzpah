@@ -90,10 +90,12 @@ namespace Chutzpah.Coverage
         private string ToRegex(string globPath)
         {
             // 1) Change all backslashes to forward slashes first
-            // 2) Replace ** with the regex part "\\/.*\\/" (multiple directories)
-            // 3) Replace * with the regex part "\\/[^\\/]*\\/" (no subdirectories)
-            // 4) Surround the regex with // and /, and add the modifier i (case insensitive)
-            return string.Format("//{0}/i", globPath.Replace("\\", "\\/").Replace("**", "\\/.*\\/").Replace("*", "\\/[^\\/]*\\/"));
+            // 2) Escape . (by \\)
+            // 3) Replace * with the regex part ".*" (multiple characters)
+            // 4) Replace ? with the regex part "." (single character)
+            // 5) Replace [!] with the regex part "[^]" (negative character class)
+            // 6) Surround the regex with // and /, and add the modifier i (case insensitive)
+            return string.Format("//{0}/i", globPath.Replace("\\", "\\/").Replace(".", "\\.").Replace("*", ".*").Replace("*", ".").Replace("[!", "[^"));
         }
 
         private bool IsScriptFile(ReferencedFile file)
