@@ -44,11 +44,11 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                     {
-                        new object[] {@"JS\Test\basic-qunit.coffee"},
-                        new object[] {@"JS\Test\basic-jasmine.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-bdd.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-tdd.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-qunit.coffee"},
+                        new object[] {@"JS\Test\basic-qunit-coffee.coffee"},
+                        new object[] {@"JS\Test\basic-jasmine-coffee.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-bdd-coffee.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-tdd-coffee.coffee"},
+                        new object[] {@"JS\Test\basic-mocha-qunit-coffee.coffee"},
 
                         
                         // Exports does not work. Not sure how it is supposed to get the 
@@ -85,8 +85,8 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                            {
-                               new object[] {@"JS\Test\syntaxError.coffee", @"JS\Test\syntaxError.coffee", "unexpected ->"},
-                               new object[] {@"JS\Test\syntaxError.ts", @"JS/Test/syntaxError.ts", "'=' expected"}
+                               new object[] {@"JS\Test\syntaxError-coffee.coffee", @"JS\Test\syntaxError-coffee.coffee", "unexpected ->"},
+                               new object[] {@"JS\Test\syntaxError-ts.ts", @"JS/Test/syntaxError-ts.ts", "'=' expected"}
                            };
             }
         }
@@ -883,7 +883,7 @@ namespace Chutzpah.Facts.Integration
                 var testRunner = TestRunner.Create();
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError.ts", callback.Object);
+                TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError-ts.ts", callback.Object);
 
                 callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains("'=' expected"))));
             }

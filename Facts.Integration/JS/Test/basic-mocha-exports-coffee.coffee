@@ -1,6 +1,6 @@
 ## <reference path="mocha.js" />
 ## <reference path="chai.js" />
-## <reference path="../code/code.coffee" />
+## <reference path="../code/code-coffee.coffee" />
 
 expect = chai.expect
 

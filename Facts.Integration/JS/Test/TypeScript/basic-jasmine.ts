@@ -1,5 +1,5 @@
 ﻿/// <reference path="jasmine.d.ts" />
-/// <reference path="../../code/code.ts" />
+/// <reference path="../../code/code-ts.ts" />
 /// <chutzpah_reference path="jasmine.js" />
 
 describe("general", function () {

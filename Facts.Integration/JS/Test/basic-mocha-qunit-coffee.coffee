@@ -1,4 +1,4 @@
-﻿## <reference path="../code/code.coffee" />
+﻿## <reference path="../code/code-coffee.coffee" />
 ## <reference path="mocha.js" />
 ## <reference path="chai.js" />
 

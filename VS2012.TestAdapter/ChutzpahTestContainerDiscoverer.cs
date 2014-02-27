@@ -262,7 +262,7 @@ namespace Chutzpah.VS2012.TestAdapter
             if (isTestFile)
             {
 
-                ChutzpahTracer.TraceInformation("Added test container for '{0}'", file);
+                ChutzpahTracer.TraceInformation("Added test container for '{0}'", file.Path);
                 var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), Constants.ExecutorUri);
                 cachedContainers.Add(container);
             }

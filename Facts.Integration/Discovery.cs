@@ -31,9 +31,9 @@ namespace Chutzpah.Facts.Integration
             {
                 return new[]
                 {
-                    new object[] { @"JS\Test\basic-qunit.coffee" },
-                    new object[] { @"JS\Test\basic-jasmine.coffee" },
-                    new object[] { @"JS\Test\basic-mocha-bdd.coffee" }
+                    new object[] { @"JS\Test\basic-qunit-coffee.coffee" },
+                    new object[] { @"JS\Test\basic-jasmine-coffee.coffee" },
+                    new object[] { @"JS\Test\basic-mocha-bdd-coffee.coffee" }
                 };
             }
         }
@@ -44,14 +44,13 @@ namespace Chutzpah.Facts.Integration
             get
             {
                 return new[]
-                {
-                    new object[] { @"JS\Test\basic-qunit.ts" },
-                    new object[] { @"JS\Test\basic-jasmine.ts" },
-                    new object[] {@"JS\Test\TypeScript\basic-mocha-bdd.ts"},
-                };
+                        {
+                            new object[] {@"JS\Test\TypeScript\basic-qunit.ts"},
+                            new object[] {@"JS\Test\TypeScript\basic-jasmine.ts"},
+                            new object[] {@"JS\Test\TypeScript\basic-mocha-bdd.ts"},
+                        };
             }
         }
-
 
         public static IEnumerable<object[]> AmdTestScriptWithForcedRequire
         {

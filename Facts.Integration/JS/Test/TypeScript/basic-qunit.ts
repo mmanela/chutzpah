@@ -1,5 +1,5 @@
 ﻿/// <reference path="qunit.d.ts" />
-/// <reference path="../../code/code.ts" />
+/// <reference path="../../code/code-ts.ts" />
 
  test("A basic test", function () {
       ok(true, "this test is fine");

@@ -2,7 +2,7 @@
 
 /// <reference path="mocha.js" />
 /// <reference path="chai.js" />
-/// <reference path="../code/code.coffee" />
+/// <reference path="../code/code-coffee.coffee" />
 
 var expect = chai.expect;
 exports.basic = {

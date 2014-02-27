@@ -15,7 +15,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
-        private const string ACoffeeTestScript = @"JS\Test\basic-jasmine.coffee";
+        private const string ACoffeeTestScript = @"JS\Test\basic-jasmine-coffee.coffee";
 
         public static IEnumerable<object[]> BasicTestScripts
         {
@@ -277,7 +277,7 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            Assert.True(HasKeyWithSubstring(dict, "code.coffee"));
+            Assert.True(HasKeyWithSubstring(dict, "code-coffee.coffee"));
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code.coffee"));
+            var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code-coffee.coffee"));
             Assert.True(codeCoffeeEntry.Value.SourceLines.Any(l => l.Contains("function")));
         }
 
@@ -312,8 +312,8 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            var filePath = dict.Single(kvp => kvp.Key.Contains("code.coffee")).Value.FilePath;
-            Assert.Contains("\\code.coffee", filePath);
+            var filePath = dict.Single(kvp => kvp.Key.Contains("code-coffee.coffee")).Value.FilePath;
+            Assert.Contains("\\code-coffee.coffee", filePath);
         }
 
         [Fact]

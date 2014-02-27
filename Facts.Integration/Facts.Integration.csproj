@@ -182,7 +182,7 @@
     <Content Include="JS\Test\basic-unicode.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\basic-mocha-bdd.coffee">
+    <Content Include="JS\Test\basic-mocha-bdd-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\basic-mocha-tdd.js">
@@ -239,13 +239,13 @@
     <Content Include="JS\Test\jasmine-ddescribe-include-after.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\includeFileWithSyntaxError.ts">
+    <Content Include="JS\Test\includeFileWithSyntaxError-ts.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\PathEncoding\With Space+\pathEncoding.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\syntaxError.ts">
+    <Content Include="JS\Test\syntaxError-ts.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\jasmine-ddescribe.js">
@@ -257,10 +257,10 @@
     <Content Include="JS\Test\failing-expectation-jasmine.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\includeFileWithSyntaxError.coffee">
+    <Content Include="JS\Test\includeFileWithSyntaxError-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\syntaxError.coffee">
+    <Content Include="JS\Test\syntaxError-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\jasmineLog.js">
@@ -380,7 +380,7 @@
     <Content Include="JS\Test\TimeoutSetting\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JS\Test\basic-mocha-tdd.coffee">
+    <Content Include="JS\Test\basic-mocha-tdd-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\TestSettings\ReferencePaths\chutzpah.json">
@@ -389,10 +389,10 @@
     <Content Include="JS\Code\TypeScriptRequireJS\mocha-qunit.d.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="JS\Test\basic-mocha-qunit.coffee">
+    <None Include="JS\Test\basic-mocha-qunit-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="JS\Test\basic-mocha-exports.coffee">
+    <Content Include="JS\Test\basic-mocha-exports-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\TypeScriptRequireJS\base\core.ts">
@@ -446,10 +446,10 @@
     <Content Include="JS\Code\Calculator.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="JS\Code\code.coffee">
+    <None Include="JS\Code\code-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="JS\Code\code.ts">
+    <Content Include="JS\Code\code-ts.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\references.js">
@@ -500,10 +500,10 @@
     <Content Include="JS\Test\ajaxCall.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="JS\Test\basic-jasmine.coffee">
+    <None Include="JS\Test\basic-jasmine-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="JS\Test\basic-qunit.coffee">
+    <None Include="JS\Test\basic-qunit-coffee.coffee">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="JS\Test\TypeScript\basic-qunit.ts">

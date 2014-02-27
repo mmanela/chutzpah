@@ -2,7 +2,7 @@
 /// <chutzpah_reference path="../chai.js" />
 /// <reference path="mocha.d.ts" />
 /// <reference path="chai.d.ts" />
-/// <reference path="../../code/code.ts" />
+/// <reference path="../../code/code-ts.ts" />
 
 var expect = chai.expect;
 
