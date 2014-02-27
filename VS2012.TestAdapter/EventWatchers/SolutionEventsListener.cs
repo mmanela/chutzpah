@@ -64,7 +64,13 @@ namespace Chutzpah.VS11.EventWatchers
                 SolutionUnloaded(this, new System.EventArgs());
             }
         }
+        private bool IsSolutionFullyLoaded()
+        {
+            object var;
 
+            ErrorHandler.ThrowOnFailure(this.solution.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out var));
+            return (bool)var;
+        }
 
         /// <summary>
         /// This event is called when a project has been reloaded. This happens when you choose to unload a project 
@@ -72,8 +78,23 @@ namespace Chutzpah.VS11.EventWatchers
         /// </summary>
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
-            var project = pRealHierarchy as IVsProject;
-            OnSolutionProjectUpdated(project, SolutionChangedReason.Load);
+            return VSConstants.S_OK;
+        }
+
+        /// <summary>
+        /// This gets called when a project is opened
+        /// </summary>
+        /// <param name="pHierarchy"></param>
+        /// <param name="fAdded">1 if alreay part of solution, 0 if it is being added to the solution</param>
+        /// <returns></returns>
+        public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
+        {
+
+            if (IsSolutionFullyLoaded())
+            {
+                var project = pHierarchy as IVsProject;
+                OnSolutionProjectUpdated(project, SolutionChangedReason.Load);
+            }
             return VSConstants.S_OK;
         }
 
@@ -95,16 +116,7 @@ namespace Chutzpah.VS11.EventWatchers
 
         // Unused events...
 
-        /// <summary>
-        /// This gets called when a project is opened
-        /// </summary>
-        /// <param name="pHierarchy"></param>
-        /// <param name="fAdded">0 if alreay part of solution, 1 if it is being added to the solution</param>
-        /// <returns></returns>
-        public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
-        {
-            return VSConstants.S_OK;
-        }
+
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
