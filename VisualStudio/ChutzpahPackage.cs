@@ -173,24 +173,7 @@ namespace Chutzpah.VisualStudio
                 selectedFiles = new List<string> { CurrentDocumentPath };
             }
 
-            foreach (var selectedFile in selectedFiles)
-            {
-                try
-                {
-                    var testContext = testRunner.GetTestContext(selectedFile);
-                    if (testContext == null) continue;
-                    LaunchFileInBrowser(testContext.TestHarnessPath);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    Logger.Log("Unable to find file to open in browser", "ChutzpahPackage", ex);
-                }
-            }
-        
-            // Clear the Chutzpah.json cache in the end. This is only
-            // needed in this case since when letting chutzpah do a test run this happens for you
-            chutzpahSettingsService.ClearCache();
-        
+            RunTests(selectedFiles, false, true);
         }
 
         private void RunJSTestCmdCallback(object sender, EventArgs e)
@@ -292,7 +275,7 @@ namespace Chutzpah.VisualStudio
         private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e, bool withCodeCoverage)
         {
             var filePaths = GetSelectedFilesAndFolders(TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
-            RunTests(filePaths, withCodeCoverage);
+            RunTests(filePaths, withCodeCoverage, false);
         }
 
         private void RunTestsFromEditorCallback(object sender, EventArgs e, bool withCodeCoverage)
@@ -305,11 +288,11 @@ namespace Chutzpah.VisualStudio
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                RunTests(new[] { filePath }, withCodeCoverage);
+                RunTests(new[] { filePath }, withCodeCoverage, false);
             }
         }
 
-        private void RunTests(IEnumerable<string> filePaths, bool withCodeCoverage)
+        private void RunTests(IEnumerable<string> filePaths, bool withCodeCoverage, bool openInBrowser)
         {
             if (!testingInProgress)
             {
@@ -332,7 +315,8 @@ namespace Chutzpah.VisualStudio
                                                           CoverageOptions = new CoverageOptions
                                                           {
                                                               Enabled = withCodeCoverage
-                                                          }
+                                                          },
+                                                          OpenInBrowser = openInBrowser
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);
                                     if (withCodeCoverage && result.CoverageObject != null)
@@ -353,11 +337,6 @@ namespace Chutzpah.VisualStudio
                     }
                 }
             }
-        }
-
-        private void LaunchFileInBrowser(string file)
-        {
-            processHelper.LaunchFileInBrowser(file);
         }
 
 
