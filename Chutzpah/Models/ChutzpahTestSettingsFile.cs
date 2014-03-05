@@ -155,6 +155,34 @@ namespace Chutzpah.Models
         /// </summary>
         public bool CoffeeScriptBareMode { get; set; }
 
-    }
+        public BatchCompileConfiguration Compile { get; set; }
 
+
+        public override int GetHashCode()
+        {
+            if (SettingsFileDirectory == null)
+            {
+                return "".GetHashCode();
+            }
+
+            return SettingsFileDirectory.ToLowerInvariant().GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            var settings = obj as ChutzpahTestSettingsFile;
+            if (settings == null)
+            {
+                return false;
+            }
+
+            if (SettingsFileDirectory == null && settings.SettingsFileDirectory == null)
+            {
+                return true;
+            }
+
+            return SettingsFileDirectory != null && SettingsFileDirectory.Equals(settings.SettingsFileDirectory, StringComparison.OrdinalIgnoreCase);
+
+        }
+    }
 }

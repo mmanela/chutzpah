@@ -87,7 +87,7 @@ namespace Chutzpah.Coverage
         {
             BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
-                testContext.ReferencedJavaScriptFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
+                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
 
             CoverageData coverageData = new CoverageData();
 

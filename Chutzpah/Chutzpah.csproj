@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BatchCompiler\BatchCompiler.cs" />
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="ChutzpahTestSettingsService.cs" />
@@ -100,6 +101,8 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="Models\BatchCompileConfiguration.cs" />
+    <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
     <Compile Include="NativeImports.cs" />
@@ -165,6 +168,7 @@
     <Compile Include="Models\TestContext.cs" />
     <Compile Include="Models\TestResult.cs" />
     <Compile Include="TestHarness.cs" />
+    <Compile Include="TestHarnessBuilder.cs" />
     <Compile Include="TestOptions.cs" />
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />

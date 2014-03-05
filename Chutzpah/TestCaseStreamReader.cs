@@ -70,7 +70,7 @@ namespace Chutzpah
 
         private TestFileSummary ReadFromStream(StreamReader stream, TestContext testContext, TestOptions testOptions, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
-            var referencedFile = testContext.ReferencedJavaScriptFiles.SingleOrDefault(x => x.IsFileUnderTest);
+            var referencedFile = testContext.ReferencedFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testIndex = 0;
             var summary = new TestFileSummary(testContext.InputTestFile);
             if (testOptions.CoverageOptions.Enabled)

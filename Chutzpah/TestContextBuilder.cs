@@ -20,7 +20,6 @@ namespace Chutzpah
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IChutzpahTestSettingsService settingsService;
-        private readonly IHasher hasher;
         private readonly ICoverageEngine mainCoverageEngine;
 
         public TestContextBuilder(
@@ -28,7 +27,6 @@ namespace Chutzpah
             IReferenceProcessor referenceProcessor,
             IHttpWrapper httpWrapper,
             IFileProbe fileProbe,
-            IHasher hasher,
             ICoverageEngine coverageEngine,
             IEnumerable<IFrameworkDefinition> frameworkDefinitions,
             IEnumerable<IFileGenerator> fileGenerators,
@@ -38,7 +36,6 @@ namespace Chutzpah
             this.httpClient = httpWrapper;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
-            this.hasher = hasher;
             this.frameworkDefinitions = frameworkDefinitions;
             this.fileGenerators = fileGenerators;
             this.settingsService = settingsService;
@@ -140,21 +137,14 @@ namespace Chutzpah
 
                 AddTestFrameworkDependencies(deps, referencedFiles);
 
-                string testHtmlFilePath = CreateTestHarness(
-                    definition,
-                    chutzpahTestSettings,
-                    options,
-                    testFilePath,
-                    testHarnessDirectory,
-                    referencedFiles,
-                    coverageEngine,
-                    temporaryFiles);
 
                 return new TestContext
                 {
+                    FrameworkDefinition = definition,
+                    CoverageEngine = coverageEngine,
                     InputTestFile = testFilePath,
-                    TestHarnessPath = testHtmlFilePath,
-                    ReferencedJavaScriptFiles = referencedFiles,
+                    TestHarnessDirectory = testHarnessDirectory,
+                    ReferencedFiles = referencedFiles,
                     TestRunner = definition.GetTestRunner(chutzpahTestSettings),
                     TemporaryFiles = temporaryFiles,
                     TestFileSettings = chutzpahTestSettings
@@ -370,7 +360,15 @@ namespace Chutzpah
         /// </summary>
         private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
+
+            if (chutzpahTestSettings.Compile != null)
+            {
+                ChutzpahTracer.TraceInformation("Skipping old style file compilation since we detected the new batch compile setting");
+                return;
+            }
+
             ChutzpahTracer.TraceInformation("Starting test file compilation/generation");
+
             foreach (var fileGenerator in fileGenerators)
             {
                 fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
@@ -418,69 +416,6 @@ namespace Chutzpah
             return definition != null;
         }
 
-        private string CreateTestHarness(
-            IFrameworkDefinition definition,
-            ChutzpahTestSettingsFile chutzpahTestSettings,
-            TestOptions options,
-            string inputTestFilePath,
-            string testHarnessDirectory,
-            IEnumerable<ReferencedFile> referencedFiles,
-            ICoverageEngine coverageEngine,
-            IList<string> temporaryFiles)
-        {
-            string testFilePathHash = hasher.Hash(inputTestFilePath);
-
-            string testHtmlFilePath = Path.Combine(testHarnessDirectory, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
-            temporaryFiles.Add(testHtmlFilePath);
-
-            var templatePath = GetTestHarnessTemplatePath(definition, chutzpahTestSettings);
-
-            string testHtmlTemplate = fileSystem.GetText(templatePath);
-
-            var harness = new TestHarness(chutzpahTestSettings, options, referencedFiles, fileSystem);
-
-            if (coverageEngine != null)
-            {
-                coverageEngine.PrepareTestHarnessForCoverage(harness, definition, chutzpahTestSettings);
-            }
-
-            string testFileContents = fileSystem.GetText(inputTestFilePath);
-            var frameworkReplacements = definition.GetFrameworkReplacements(chutzpahTestSettings, inputTestFilePath, testFileContents)
-                                        ?? new Dictionary<string, string>();
-
-            string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);
-            fileSystem.Save(testHtmlFilePath, testHtmlText);
-            return testHtmlFilePath;
-        }
-
-        private string GetTestHarnessTemplatePath(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings)
-        {
-            string templatePath = null;
-
-            if (!string.IsNullOrEmpty(chutzpahTestSettings.CustomTestHarnessPath))
-            {
-                // If CustomTestHarnessPath is absolute path then Path.Combine just returns it
-                var harnessPath = Path.Combine(chutzpahTestSettings.SettingsFileDirectory, chutzpahTestSettings.CustomTestHarnessPath);
-                var fullPath = fileProbe.FindFilePath(harnessPath);
-                if (fullPath != null)
-                {
-                    ChutzpahTracer.TraceInformation("Using Custom Test Harness from {0}", fullPath);
-                    templatePath = fullPath;
-                }
-                else
-                {
-                    ChutzpahTracer.TraceError("Cannot find Custom Test Harness at {0}", chutzpahTestSettings.CustomTestHarnessPath);
-                }
-            }
-
-            if (templatePath == null)
-            {
-                templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.GetTestHarness(chutzpahTestSettings))).FullPath;
-
-                ChutzpahTracer.TraceInformation("Using builtin Test Harness from {0}", templatePath);
-            }
-            return templatePath;
-        }
 
         private static string GetTestHarnessDirectory(ChutzpahTestSettingsFile chutzpahTestSettings, string inputTestFileDir)
         {

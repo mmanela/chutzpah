@@ -33,6 +33,27 @@ namespace Chutzpah
             return new ProcessResult<T>(processStream.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
         }
 
+        public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)
+        {
+            var p = new Process();
+            // Append path to where .net drop is so you can use things like msbuild
+            p.StartInfo.EnvironmentVariables["Path"] += System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.FileName = compileConfiguration.Executable;
+            p.StartInfo.Arguments = compileConfiguration.Arguments;
+            p.StartInfo.WorkingDirectory = compileConfiguration.WorkingDirectory;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            p.Start();
+            p.WaitForExit(compileConfiguration.Timeout.Value);
+            var stdOut = p.StandardOutput.ReadToEnd();
+            var stdErr = p.StandardError.ReadToEnd();
+
+            return new BatchCompileResult {StandardError = stdErr, StandardOutput = stdOut, ExitCode = p.ExitCode};
+        }
+
         public void LaunchFileInBrowser(string file)
         {
             var startInfo = new ProcessStartInfo();

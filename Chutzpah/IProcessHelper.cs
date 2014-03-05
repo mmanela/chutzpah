@@ -7,5 +7,6 @@ namespace Chutzpah
     {
         void LaunchFileInBrowser(string file);
         ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<ProcessStream, T> streamProcessor) where T : class;
+        BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration);
     }
 }

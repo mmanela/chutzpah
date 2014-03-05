@@ -157,6 +157,9 @@ namespace Chutzpah
 
             var overallSummary = new TestCaseSummary();
 
+            // Concurrent list to collect test contexts
+            var testContexts = new ConcurrentBag<TestContext>();
+
             // Concurrent collection used to gather the parallel results from
             var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
             var resultCount = 0;
@@ -165,9 +168,11 @@ namespace Chutzpah
 
             var scriptPaths = FindTestFiles(testPaths, options);
 
+
+            // Build test contexts in parallel
             Parallel.ForEach(scriptPaths, parallelOptions, testFile =>
             {
-                ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testFile.FullPath, testRunnerMode);
+                ChutzpahTracer.TraceInformation("Building  test context for {0} in {1} mode", testFile.FullPath);
 
                 try
                 {
@@ -177,39 +182,11 @@ namespace Chutzpah
                     resultCount++;
                     if (testContextBuilder.TryBuildContext(testFile, options, out testContext))
                     {
-                        if (options.OpenInBrowser)
-                        {
-                            ChutzpahTracer.TraceInformation("Launching test harness '{0}' for file '{1}' in a browser",
-                                testContext.TestHarnessPath,
-                                testContext.InputTestFile);
-                            process.LaunchFileInBrowser(testContext.TestHarnessPath);
-                        }
-                        else
-                        {
-                            ChutzpahTracer.TraceInformation("Invoking headless browser on test harness '{0}' for file '{1}'",
-                                testContext.TestHarnessPath,
-                                testContext.InputTestFile);
-                            var testSummary = InvokeTestRunner(
-                                headlessBrowserPath,
-                                options,
-                                testContext,
-                                testRunnerMode,
-                                callback);
-
-                            ChutzpahTracer.TraceInformation("Finished running headless browser on test harness '{0}' for file '{1}'",
-                                testContext.TestHarnessPath,
-                                testContext.InputTestFile);
-                            testFileSummaries.Enqueue(testSummary);
-                        }
-
-
-                        if (!m_debugEnabled && !options.OpenInBrowser)
-                        {
-                            ChutzpahTracer.TraceInformation("Cleaning up test context artifacts");
-                            // Don't clean up context if in debug mode
-                            testContextBuilder.CleanupContext(testContext);
-                        }
-
+                        testContexts.Add(testContext);
+                    }
+                    else
+                    {
+                        ChutzpahTracer.TraceWarning("Unable to build test context for {0}", testFile.FullPath);
                     }
 
                     // Limit the number of files we can scan to attempt to build a context for
@@ -222,21 +199,75 @@ namespace Chutzpah
                 }
                 catch (Exception e)
                 {
+                    ChutzpahTracer.TraceError(e, "Error during building test context for {0}", testFile.FullPath);
+                }
+                finally
+                {
+                    ChutzpahTracer.TraceInformation("Finished building test context for {0}", testFile.FullPath);
+                }
+            });
+
+
+
+
+
+            // Run the test context in parallel
+            Parallel.ForEach(testContexts, parallelOptions, testContext =>
+            {
+                ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.InputTestFile, testRunnerMode);
+
+                try
+                {
+                    if (options.OpenInBrowser)
+                    {
+                        ChutzpahTracer.TraceInformation("Launching test harness '{0}' for file '{1}' in a browser",
+                            testContext.TestHarnessPath,
+                            testContext.InputTestFile);
+                        process.LaunchFileInBrowser(testContext.TestHarnessPath);
+                    }
+                    else
+                    {
+                        ChutzpahTracer.TraceInformation("Invoking headless browser on test harness '{0}' for file '{1}'",
+                            testContext.TestHarnessPath,
+                            testContext.InputTestFile);
+                        var testSummary = InvokeTestRunner(
+                            headlessBrowserPath,
+                            options,
+                            testContext,
+                            testRunnerMode,
+                            callback);
+
+                        ChutzpahTracer.TraceInformation("Finished running headless browser on test harness '{0}' for file '{1}'",
+                            testContext.TestHarnessPath,
+                            testContext.InputTestFile);
+                        testFileSummaries.Enqueue(testSummary);
+                    }
+
+
+                    if (!m_debugEnabled && !options.OpenInBrowser)
+                    {
+                        ChutzpahTracer.TraceInformation("Cleaning up test context artifacts");
+                        // Don't clean up context if in debug mode
+                        testContextBuilder.CleanupContext(testContext);
+                    }
+                }
+                catch (Exception e)
+                {
                     var error = new TestError
                     {
-                        InputTestFile = testFile.FullPath,
+                        InputTestFile = testContext.InputTestFile,
                         Message = e.ToString()
                     };
 
                     overallSummary.Errors.Add(error);
                     callback.FileError(error);
 
-                    ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testFile.FullPath);
+                    ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testContext.InputTestFile);
                 }
                 finally
                 {
 
-                    ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testFile.FullPath, testRunnerMode);
+                    ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFile, testRunnerMode);
                 }
             });
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Chutzpah.Models
 {
@@ -53,5 +54,21 @@ namespace Chutzpah.Models
         /// The path a AMD loader would use to find the generated file
         /// </summary>
         public string AmdGeneratedFilePath { get; set; }
+
+        public override int GetHashCode()
+        {
+            return Path.ToLowerInvariant().GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            var referencedFile = obj as ReferencedFile;
+            if (referencedFile == null)
+            {
+                return false;
+            }
+
+            return Path != null && Path.Equals(referencedFile.Path, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

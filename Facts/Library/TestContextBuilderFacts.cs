@@ -465,7 +465,7 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"C:\testThing.html", context.TestHarnessPath);
                 Assert.Equal(@"C:\testThing.html", context.InputTestFile);
                 Assert.False(context.IsRemoteHarness);
-                Assert.Empty(context.ReferencedJavaScriptFiles);
+                Assert.Empty(context.ReferencedFiles);
             }
 
             [Fact]
@@ -483,7 +483,7 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"http://someUrl.com", context.TestHarnessPath);
                 Assert.Equal(@"http://someUrl.com", context.InputTestFile);
                 Assert.True(context.IsRemoteHarness);
-                Assert.Empty(context.ReferencedJavaScriptFiles);
+                Assert.Empty(context.ReferencedFiles);
             }
 
             [Fact]
@@ -548,7 +548,7 @@ namespace Chutzpah.Facts
 
                 var context = creator.ClassUnderTest.BuildContext(@"C:\test.js", new TestOptions());
 
-                Assert.True(context.ReferencedJavaScriptFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
+                Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
             }
 
             [Fact]
@@ -591,7 +591,7 @@ namespace Chutzpah.Facts
                 var pos3 = text.IndexOf(scriptStatement3);
                 Assert.True(pos1 < pos2);
                 Assert.True(pos2 < pos3);
-                Assert.Equal(1, context.ReferencedJavaScriptFiles.Count(x => x.IsFileUnderTest));
+                Assert.Equal(1, context.ReferencedFiles.Count(x => x.IsFileUnderTest));
             }
 
             [Fact]

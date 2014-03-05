@@ -365,7 +365,7 @@ namespace Chutzpah.Facts
                 {
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
-                    ReferencedJavaScriptFiles = new[] { referencedFile }
+                    ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -397,7 +397,7 @@ namespace Chutzpah.Facts
                 {
                     TestHarnessPath = "htmlTestFile",
                     InputTestFile = "inputTestFile",
-                    ReferencedJavaScriptFiles = new[] { referencedFile }
+                    ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);

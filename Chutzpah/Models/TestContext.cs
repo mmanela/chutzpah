@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Chutzpah.Coverage;
+using Chutzpah.FrameworkDefinitions;
 
 namespace Chutzpah.Models
 {
@@ -6,7 +8,7 @@ namespace Chutzpah.Models
     {
         public TestContext()
         {
-            ReferencedJavaScriptFiles = new List<ReferencedFile>();
+            ReferencedFiles = new List<ReferencedFile>();
             TemporaryFiles = new List<string>();
             TestFileSettings = ChutzpahTestSettingsFile.Default;    
         }
@@ -28,6 +30,11 @@ namespace Chutzpah.Models
         public string TestHarnessPath { get; set; }
 
         /// <summary>
+        /// The directory of the test harness
+        /// </summary>
+        public string TestHarnessDirectory { get; set; }
+
+        /// <summary>
         /// Is the harness on a remote server
         /// </summary>
         public bool IsRemoteHarness { get; set; }
@@ -35,16 +42,27 @@ namespace Chutzpah.Models
         /// <summary>
         /// The list of referenced JavaScript files
         /// </summary>
-        public IEnumerable<ReferencedFile> ReferencedJavaScriptFiles { get; set; }
+        public IEnumerable<ReferencedFile> ReferencedFiles { get; set; }
 
         /// <summary>
         /// A list of temporary files that should be cleaned up after the test run is finished
         /// </summary>
-        public IEnumerable<string> TemporaryFiles { get; set; }
+        public ICollection<string> TemporaryFiles { get; set; }
 
         /// <summary>
         /// The chutzpah test settings found when building the context for this test
         /// </summary>
         public ChutzpahTestSettingsFile TestFileSettings { get; set; }
+
+        /// <summary>
+        /// Instance of the framework definition for this test context
+        /// </summary>
+        public IFrameworkDefinition FrameworkDefinition { get; set; }
+
+        /// <summary>
+        /// Instance of the code coverage engine for the context
+        /// </summary>
+        public ICoverageEngine CoverageEngine { get; set; }
+
     }
 }
