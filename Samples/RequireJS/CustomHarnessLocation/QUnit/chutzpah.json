@@ -1,7 +1,8 @@
 ﻿{
     "Framework": "qunit",
     "TestHarnessReferenceMode": "AMD",
-    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "src",
     "References" : [
         {"Path" : "require-2.1.8.js" }, 
         {"Path" : "config.js" }

@@ -9,5 +9,8 @@
 	    { "Path": "qunit.d.ts", "IncludeInTestHarness": "false" },
 	    { "Path": "base", "IncludeInTestHarness": "false" },
 	    { "Path": "ui", "IncludeInTestHarness": "false" }
+    ],
+    "Tests" : [
+      {"Path": "tests"}
     ]
 }

@@ -99,9 +99,41 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> AMDChutzpahSamples
+        {
+            get
+            {
+                return new[]
+                {
+                        new object[] {@"Samples\RequireJS\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Mocha\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Jasmine\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\TypeScript\chutzpah.json"},
+
+                        new object[] {@"Samples\RequireJS\CustomBaseUrl\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json"},
+
+                };
+            }
+        }
+
+
         public Discovery()
         {
             ChutzpahTracer.Enabled = false;
+        }
+
+
+        [Theory]
+        [PropertyData("AMDChutzpahSamples")]
+        public void Will_discover_amd_tests_from_chutzpah_samples(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(scriptPath);
+
+            Assert.Equal(2, result.Count());
         }
 
         [Theory]

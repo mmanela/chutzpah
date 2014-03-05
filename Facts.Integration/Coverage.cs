@@ -106,6 +106,37 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> AMDChutzpahSamples
+        {
+            get
+            {
+                return new[]
+                {
+                        new object[] {@"Samples\RequireJS\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Mocha\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Jasmine\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\TypeScript\chutzpah.json"},
+
+                        new object[] {@"Samples\RequireJS\CustomBaseUrl\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json"},
+
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("AMDChutzpahSamples")]
+        public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(2, result.TotalCount);
+        }
+
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_create_a_coverage_object(string scriptPath, string frameworkVersion)

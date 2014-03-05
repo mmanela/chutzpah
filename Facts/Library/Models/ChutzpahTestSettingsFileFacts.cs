@@ -44,6 +44,20 @@ namespace Chutzpah.Facts.Library.Models
         }
 
         [Fact]
+        public void Will_set_amdbasepath_based_relative_to_settings_file_directory()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            var settings = new ChutzpahTestSettingsFile { AMDBasePath = "custom" };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir6\settingsFile.json");
+            service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir6\custom")).Returns(@"customPath");
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFile("dir6");
+
+            Assert.Equal(@"customPath", settings.AMDBasePath);
+        }
+
+        [Fact]
         public void Will_get_cached_settings_given_same_starting_directory()
         {
             var service = new TestableChutzpahTestSettingsService();

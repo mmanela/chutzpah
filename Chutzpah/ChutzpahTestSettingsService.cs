@@ -60,7 +60,7 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
-
+                    
                     if (settings == null)
                     {
                         settings = ChutzpahTestSettingsFile.Default;
@@ -68,7 +68,9 @@ namespace Chutzpah
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
-                    ValidateTestHarnessLocationMode(settings);
+                    ResolveTestHarnessDirectory(settings);
+
+                    ResolveAMDBaseUrl(settings);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
                     ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
@@ -88,7 +90,7 @@ namespace Chutzpah
             ChutzpahSettingsFileCache.Clear();
         }
 
-        private void ValidateTestHarnessLocationMode(ChutzpahTestSettingsFile settings)
+        private void ResolveTestHarnessDirectory(ChutzpahTestSettingsFile settings)
         {
             if (settings.TestHarnessLocationMode == TestHarnessLocationMode.Custom)
             {
@@ -106,5 +108,22 @@ namespace Chutzpah
                 }
             }
         }
+
+        private void ResolveAMDBaseUrl(ChutzpahTestSettingsFile settings)
+        {
+            if (!string.IsNullOrEmpty(settings.AMDBasePath))
+            {
+
+                string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, settings.AMDBasePath);
+                string absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
+                settings.AMDBasePath = absoluteFilePath;
+
+                if (string.IsNullOrEmpty(settings.AMDBasePath))
+                {
+                    ChutzpahTracer.TraceWarning("Unable to find AMDBasePath at {0}", settings.AMDBasePath);
+                }
+            }
+        }
+
     }
 }
