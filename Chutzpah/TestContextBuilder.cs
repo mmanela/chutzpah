@@ -384,6 +384,7 @@ namespace Chutzpah
             if (!options.CoverageOptions.Enabled && !chutzpahTestSettings.EnableCodeCoverage) return null;
 
             ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
+            mainCoverageEngine.ClearPatterns();
             mainCoverageEngine.AddIncludePatterns(chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns));
             mainCoverageEngine.AddExcludePatterns(chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns));
             return mainCoverageEngine;

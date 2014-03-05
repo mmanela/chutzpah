@@ -44,5 +44,10 @@ namespace Chutzpah.Coverage
         /// Add file name pattern that, if set, a file must NOT match to be instrumented. Pattern matching 
         /// is done with the <c>PathMatchSpec</c> Windows function.
         void AddExcludePatterns(IEnumerable<string> excludePatterns);
+
+        /// <summary>
+        /// Reset patterns between runs, this is to prevent caching old configurations
+        /// </summary>
+        void ClearPatterns();
     }
 }
