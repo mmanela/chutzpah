@@ -1,7 +1,7 @@
 Chutzpah Samples 
 
 * RequireJS
-  - This folder contains samples for how to setup requirejs tests that use QUnit, Mocha, Jasmine and TypeScript
+  - This folder contains samples for how to setup requirejs tests that use QUnit, Mocha, Jasmine and TypeScript. In addition it contains sample of using RequireJS with custom baseUrl and test harness locations.
 
 * Basic
  - This folder contains basic examples of running tests in QUnit, Jasmine, Mocha (with each support interface) and written in JavsScript, CoffeeScript and TypeScript

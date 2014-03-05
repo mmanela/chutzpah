@@ -687,7 +687,15 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>robocopy $(SolutionDir)Samples $(TargetDir)Samples /MIR /MT /purge</PreBuildEvent>
+    <PreBuildEvent>robocopy $(SolutionDir)Samples $(TargetDir)Samples /MIR /MT /purge /NP /NJH
+if errorlevel 4 goto BuildEventFailed
+if errorlevel 0 goto end
+
+:BuildEventEnd echo FILECOPY for $(ProjectName) FAILED
+exit 1
+
+:end
+exit 0</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

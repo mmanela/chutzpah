@@ -1,5 +1,6 @@
 ﻿{
     "Framework": "qunit",
+    "CodeCoverageExcludes": ["*/config.js"],
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "AMDBasePath": "../src",
