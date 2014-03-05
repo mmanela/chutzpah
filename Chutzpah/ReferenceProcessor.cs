@@ -49,15 +49,11 @@ namespace Chutzpah
         /// <param name="definition">Test framework defintition</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
         /// <param name="currentFilePath">Path to the file under test</param>
+        /// <param name="chutzpahTestSettings"></param>
         /// <returns></returns>
-        void GetReferencedFiles(
-            List<ReferencedFile> referencedFiles,
-            IFrameworkDefinition definition,
-            string textToParse,
-            string currentFilePath,
-            ChutzpahTestSettingsFile chutzpahTestSettings);
+        void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string textToParse, string currentFilePath, ChutzpahTestSettingsFile chutzpahTestSettings);
 
-        void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory);
+        void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings);
     }
 
     public class ReferenceProcessor : IReferenceProcessor
@@ -78,13 +74,9 @@ namespace Chutzpah
         /// <param name="definition">Test framework defintition</param>
         /// <param name="textToParse">The content of the file to parse and extract from</param>
         /// <param name="currentFilePath">Path to the file under test</param>
+        /// <param name="chutzpahTestSettings"></param>
         /// <returns></returns>
-        public void GetReferencedFiles(
-            List<ReferencedFile> referencedFiles,
-            IFrameworkDefinition definition,
-            string textToParse,
-            string currentFilePath,
-            ChutzpahTestSettingsFile chutzpahTestSettings)
+        public void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string textToParse, string currentFilePath, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             var referencePathSet = new HashSet<string>(referencedFiles.Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
 
@@ -121,32 +113,37 @@ namespace Chutzpah
         /// </summary>
         /// <param name="referencedFiles"></param>
         /// <param name="testHarnessDirectory"></param>
-        public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory)
+        /// <param name="testSettings"></param>
+        public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings)
         {
+            // If the user set a AMD base path then we must relativize the amd path's using the path from the base path to the test harness directory
+            string relativeAmdRootPath = "";
+            if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
+            {
+                relativeAmdRootPath = FileProbe.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
+            }
+
             foreach (var referencedFile in referencedFiles)
             {
-                referencedFile.AmdFilePath = GetAmdPath(testHarnessDirectory, referencedFile.Path);
+                referencedFile.AmdFilePath = GetAmdPath(testHarnessDirectory, referencedFile.Path, relativeAmdRootPath);
 
                 if (!string.IsNullOrEmpty(referencedFile.GeneratedFilePath))
                 {
-                    referencedFile.AmdGeneratedFilePath = GetAmdPath(testHarnessDirectory, referencedFile.GeneratedFilePath);
+                    referencedFile.AmdGeneratedFilePath = GetAmdPath(testHarnessDirectory, referencedFile.GeneratedFilePath, relativeAmdRootPath);
                 }
-
             }
         }
-        
-        private static string GetAmdPath(string testHarnessDirectory, string filePath)
+
+        private static string GetAmdPath(string testHarnessDirectory, string filePath, string relativeAmdRootPath)
         {
-            string amdModulePath = "";
-            var harnessDirIndex = filePath.IndexOf(testHarnessDirectory, StringComparison.OrdinalIgnoreCase);
-            if (harnessDirIndex >= 0)
-            {
-                amdModulePath = filePath
-                    .Substring(harnessDirIndex + testHarnessDirectory.Length)
-                    .Replace(Path.GetExtension(filePath), "")
-                    .Replace("\\", "/")
-                    .Trim('/', '\\');
-            }
+            string amdModulePath = FileProbe.GetRelativePath(testHarnessDirectory, filePath);
+
+            amdModulePath = Path.Combine(relativeAmdRootPath, amdModulePath)
+                .Replace(Path.GetExtension(filePath), "")
+                .Replace("\\", "/")
+                .Trim('/', '\\');
+
+
             return amdModulePath;
         }
 
@@ -186,7 +183,7 @@ namespace Chutzpah
                 if (referencedFiles.All(r => r.Path != absoluteFilePath))
                 {
                     ChutzpahTracer.TraceInformation("Added html template '{0}' to referenced files", absoluteFilePath);
-                    referencedFiles.Add(new ReferencedFile { Path = absoluteFilePath, IsLocal = false, IncludeInTestHarness = true });
+                    referencedFiles.Add(new ReferencedFile {Path = absoluteFilePath, IsLocal = false, IncludeInTestHarness = true});
                 }
             }
 
@@ -237,12 +234,11 @@ namespace Chutzpah
                     VisitReferencedFile(absoluteFilePath, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings);
                     return;
                 }
-                
+
                 // Check if reference is a folder
                 string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
                 if (absoluteFolderPath != null)
                 {
-
                     var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
                     var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
 
@@ -252,8 +248,8 @@ namespace Chutzpah
                     var validFiles = from file in childFiles
                         let normalizedFile = FileProbe.NormalizeFilePath(file)
                         where !fileProbe.IsTemporaryChutzpahFile(file)
-                                && (includePattern == null || NativeImports.PathMatchSpec(normalizedFile, includePattern))
-                                && (excludePattern == null || !NativeImports.PathMatchSpec(normalizedFile, excludePattern))
+                              && (includePattern == null || NativeImports.PathMatchSpec(normalizedFile, includePattern))
+                              && (excludePattern == null || !NativeImports.PathMatchSpec(normalizedFile, excludePattern))
                         select file;
 
                     validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings));
@@ -263,7 +259,6 @@ namespace Chutzpah
 
                 // At this point we know that this file/folder does not exist!
                 ChutzpahTracer.TraceWarning("Referenced file '{0}' which was resolved to '{1}' does not exist", referencePath, relativeProcessingPathFolder);
-                
             }
             else if (referenceUri.IsAbsoluteUri)
             {
@@ -275,7 +270,11 @@ namespace Chutzpah
                     IsTestFrameworkFile = pathSettings.IsTestFrameworkFile,
                 };
 
-                ChutzpahTracer.TraceInformation("Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}", referencedFile.Path, referencedFile.IsLocal, referencedFile.IncludeInTestHarness);
+                ChutzpahTracer.TraceInformation(
+                    "Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}",
+                    referencedFile.Path,
+                    referencedFile.IsLocal,
+                    referencedFile.IncludeInTestHarness);
                 referencedFiles.Add(referencedFile);
             }
         }
@@ -319,7 +318,11 @@ namespace Chutzpah
                 IncludeInTestHarness = pathSettings.IncludeInTestHarness || chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
             };
 
-            ChutzpahTracer.TraceInformation("Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}", referencedFile.Path, referencedFile.IsLocal, referencedFile.IncludeInTestHarness);
+            ChutzpahTracer.TraceInformation(
+                "Added file '{0}' to referenced files. Local: {1}, IncludeInTestHarness: {2}",
+                referencedFile.Path,
+                referencedFile.IsLocal,
+                referencedFile.IncludeInTestHarness);
 
             referencedFiles.Add(referencedFile);
             discoveredPaths.Add(referencedFile.Path); // Remmember this path to detect reference loops

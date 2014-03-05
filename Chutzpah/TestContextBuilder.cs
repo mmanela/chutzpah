@@ -174,7 +174,7 @@ namespace Chutzpah
 
             testFilePath = FileProbe.NormalizeFilePath(testFilePath);
 
-            foreach (var pathSettings in chutzpahTestSettings.Tests)
+            foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
                 var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
                 var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
@@ -234,7 +234,7 @@ namespace Chutzpah
         {
             if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
             {
-                referenceProcessor.SetupAmdFilePaths(referencedFiles, testHarnessDirectory);
+                referenceProcessor.SetupAmdFilePaths(referencedFiles, testHarnessDirectory, chutzpahTestSettings);
             }
         }
 
@@ -244,7 +244,7 @@ namespace Chutzpah
             {
                 string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
                 ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
-                referencedFiles.Insert(0, new ReferencedFile {IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true});
+                referencedFiles.Insert(0, new ReferencedFile { IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true });
             }
         }
 
@@ -382,6 +382,7 @@ namespace Chutzpah
             if (!options.CoverageOptions.Enabled && !chutzpahTestSettings.EnableCodeCoverage) return null;
 
             ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
+            mainCoverageEngine.ClearPatterns();
             mainCoverageEngine.AddIncludePatterns(chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns));
             mainCoverageEngine.AddExcludePatterns(chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns));
             return mainCoverageEngine;

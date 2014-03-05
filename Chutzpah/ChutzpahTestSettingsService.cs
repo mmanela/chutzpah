@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -63,17 +60,18 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
-
+                    
                     if (settings == null)
                     {
-                        ChutzpahTracer.TraceError("Could not deserialize settings file at {0}", testSettingsFilePath);
                         settings = ChutzpahTestSettingsFile.Default;
                     }
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
-                    ValidateTestHarnessLocationMode(settings);
+                    ResolveTestHarnessDirectory(settings);
 
+                    ResolveAMDBaseUrl(settings);
+					
                     ResolveBatchCompileConfiguration(settings);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
@@ -94,7 +92,7 @@ namespace Chutzpah
             ChutzpahSettingsFileCache.Clear();
         }
 
-        private void ValidateTestHarnessLocationMode(ChutzpahTestSettingsFile settings)
+        private void ResolveTestHarnessDirectory(ChutzpahTestSettingsFile settings)
         {
             if (settings.TestHarnessLocationMode == TestHarnessLocationMode.Custom)
             {
@@ -112,7 +110,22 @@ namespace Chutzpah
             }
         }
 
-        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
+        private void ResolveAMDBaseUrl(ChutzpahTestSettingsFile settings)
+        {
+            if (!string.IsNullOrEmpty(settings.AMDBasePath))
+            {
+
+                string absoluteFilePath = ResolvePath(settings, settings.AMDBasePath);
+                settings.AMDBasePath = absoluteFilePath;
+
+                if (string.IsNullOrEmpty(settings.AMDBasePath))
+                {
+                    ChutzpahTracer.TraceWarning("Unable to find AMDBasePath at {0}", settings.AMDBasePath);
+                }
+            }
+        }
+
+   private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
         {
             if (settings.Compile != null)
             {
@@ -132,6 +145,7 @@ namespace Chutzpah
                 settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000*60*5;
             }
         }
+
 
         /// <summary>
         /// Resolved a path relative to the settings file if it is not absolute

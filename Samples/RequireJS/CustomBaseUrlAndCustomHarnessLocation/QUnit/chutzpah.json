@@ -1,0 +1,15 @@
+﻿{
+    "Framework": "qunit",
+    "CodeCoverageExcludes": ["*/config.js"],
+    "TestHarnessReferenceMode": "AMD",
+    "AMDBasePath": "../src",
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "tests",
+    "References" : [
+        {"Path" : "require-2.1.8.js" }, 
+        {"Path" : "config.js" }
+    ],
+    "Tests" : [
+      {"Path": "tests"}
+    ]
+}

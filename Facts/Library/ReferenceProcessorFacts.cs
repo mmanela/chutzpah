@@ -38,25 +38,73 @@ namespace Chutzpah.Facts
             public void Will_set_amd_path_for_reference_path()
             {
                 var processor = new TestableReferenceProcessor();
-                var testHarnessDirectory = @"some\path";
-                var referencedFile = new ReferencedFile {Path = @"some\path\code\test.js"};
+                var testHarnessDirectory = @"c:\some\path";
+                var referencedFile = new ReferencedFile {Path = @"C:\some\path\code\test.js"};
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
     
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles,testHarnessDirectory);
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles,testHarnessDirectory, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("code/test",referencedFile.AmdFilePath);
                 Assert.Null(referencedFile.AmdGeneratedFilePath);
             }
 
             [Fact]
+            public void Will_make_amd_path_relative_to_amdbaseurl()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\path";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile {AMDBasePath = @"C:\some\other"};
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../path/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
+            public void Will_make_amd_path_relative_to_testHarnessLocation()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\src\folder";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../../path/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
+            public void Will_make_amd_path_relative_to_testHarnessLocation_and_amdbasepath()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\path\subFolder";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { AMDBasePath = @"C:\some\other" };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../path/subFolder/../code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
             public void Will_set_amd_path_ignoring_the_case()
             {
                 var processor = new TestableReferenceProcessor();
-                var testHarnessDirectory = @"Some\Path";
-                var referencedFile = new ReferencedFile { Path = @"some\path\code\test.js" };
+                var testHarnessDirectory = @"C:\Some\Path";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
 
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory);
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("code/test", referencedFile.AmdFilePath);
                 Assert.Null(referencedFile.AmdGeneratedFilePath);
@@ -66,11 +114,11 @@ namespace Chutzpah.Facts
             public void Will_set_amd_path_for_reference_path_and_generated_path()
             {
                 var processor = new TestableReferenceProcessor();
-                var testHarnessDirectory = @"some\path";
-                var referencedFile = new ReferencedFile { Path = @"some\path\code\test.ts", GeneratedFilePath = @"some\path\code\_Chutzpah.1.test.js" };
+                var testHarnessDirectory = @"C:\some\path";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.ts", GeneratedFilePath = @"C:\some\path\code\_Chutzpah.1.test.js" };
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
 
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory);
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile());
 
                 Assert.Equal("code/test", referencedFile.AmdFilePath);
                 Assert.Equal("code/_Chutzpah.1.test", referencedFile.AmdGeneratedFilePath);

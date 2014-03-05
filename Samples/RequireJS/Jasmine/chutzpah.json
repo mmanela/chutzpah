@@ -5,5 +5,8 @@
     "References" : [
         {"Path" : "require-2.1.8.js" }, 
         {"Path" : "config.js" }
+    ],
+    "Tests" : [
+      {"Path": "tests"}
     ]
 }

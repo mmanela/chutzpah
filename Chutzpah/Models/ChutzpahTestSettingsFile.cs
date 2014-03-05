@@ -97,6 +97,12 @@ namespace Chutzpah.Models
         public string CustomTestHarnessPath { get; set; }
 
         /// <summary>
+        /// This is the base url for use in resolving what path Chutzpah should use when it invokes your AMD test file.
+        /// You only need this if you configure the baseUrl in your Require.js config.
+        /// </summary>
+        public string AMDBasePath { get; set; }
+
+        /// <summary>
         /// Determines what a reference path that starts with / or \  (.e.g <reference path="/" />) is relative to
         /// DriveRoot - Make it relative to the root of the drive (e.g. C:\). This is default.
         /// SettingsFileDirectory - Makes root path relative to the directory of the settings file

@@ -106,6 +106,46 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> AMDChutzpahSamples
+        {
+            get
+            {
+                return new[]
+                {
+                        new object[] {@"Samples\RequireJS\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Mocha\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\Jasmine\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\TypeScript\chutzpah.json"},
+
+                        new object[] {@"Samples\RequireJS\CustomBaseUrl\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json"},
+                        new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json"},
+
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("AMDChutzpahSamples")]
+        public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(2, result.TotalCount);
+        }
+
+[Fact]
+        public void Will_exclude_files_from_settings_file_using_requirejs()
+        {
+          var testRunner = TestRunner.Create();
+
+          var result = testRunner.RunTests(@"JS\Test\Coverage\ExcludePathWithRequireJS\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+          ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\Coverage\ExcludePathWithRequireJS\test.js" });
+        }
+
         [Theory]
         [PropertyData("BasicTestScripts")]
         public void Will_create_a_coverage_object(string scriptPath, string frameworkVersion)
@@ -142,7 +182,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
-
+      
         public void Will_turn_on_code_coverage_given_setting_in_json_file()
         {
             var scriptPath = @"JS\Test\TestSettings\CodeCoverage\cc.js";
@@ -439,7 +479,7 @@ namespace Chutzpah.Facts.Integration
 
             Assert.Equal(2, result.TotalCount);
         }
-
+      
         private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
         {
             var opts = new TestOptions

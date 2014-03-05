@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -154,7 +155,7 @@ namespace Chutzpah
         {
             if (chutzpahTestSettings == null) yield break;
 
-            foreach (var pathSettings in chutzpahTestSettings.Tests)
+            foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
                 var includePattern = NormalizeFilePath(pathSettings.Include);
                 var excludePattern = NormalizeFilePath(pathSettings.Exclude);
@@ -253,6 +254,26 @@ namespace Chutzpah
             if (path == null) return null;
 
             return path.ToLowerInvariant().Replace(@"/", @"\");
+        }
+
+        /// <summary>
+        /// This get a relative path from one path to another. 
+        /// </summary>
+        /// <param name="pathToStartFrom"></param>
+        /// <param name="pathToGetTo"></param>
+        /// <returns></returns>
+        public static string GetRelativePath(string pathToStartFrom, string pathToGetTo)
+        {
+            var pathToGetToUri = new Uri(pathToGetTo);
+            
+            // Folders must end in a slash
+            if (!pathToStartFrom.EndsWith(Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)))
+            {
+                pathToStartFrom += Path.DirectorySeparatorChar;
+            }
+            
+            var pathToStartFromUri = new Uri(pathToStartFrom);
+            return Uri.UnescapeDataString(pathToStartFromUri.MakeRelativeUri(pathToGetToUri).ToString().Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }
