@@ -81,6 +81,7 @@
     <Compile Include="Library\ReferenceProcessorFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
+    <Compile Include="Library\TestHarnessBuilderFacts.cs" />
     <Compile Include="Library\TestHarnessFacts.cs" />
     <Compile Include="Library\TestingModeExtensionsFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />

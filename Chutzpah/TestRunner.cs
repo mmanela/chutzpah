@@ -177,7 +177,7 @@ namespace Chutzpah
 
 
             // Build test contexts in parallel
-            BuildTestContexts(options, scriptPaths, parallelOptions, cancellationSource, resultCount, testContexts);
+            BuildTestContexts(options, scriptPaths, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
 
 
             // Compile the test contexts
@@ -309,9 +309,11 @@ namespace Chutzpah
             ParallelOptions parallelOptions,
             CancellationTokenSource cancellationSource,
             int resultCount,
-            ConcurrentBag<TestContext> testContexts)
+            ConcurrentBag<TestContext> testContexts,
+            ITestMethodRunnerCallback callback, 
+            TestCaseSummary overallSummary)
         {
-            Parallel.ForEach(scriptPaths,parallelOptions,testFile =>
+                Parallel.ForEach(scriptPaths,parallelOptions,testFile =>
                 {
                     ChutzpahTracer.TraceInformation("Building  test context for {0}", testFile.FullPath);
 
@@ -335,11 +337,21 @@ namespace Chutzpah
                         // test files.
                         if (resultCount >= options.FileSearchLimit)
                         {
+                            ChutzpahTracer.TraceError("File search limit hit!!!");
                             cancellationSource.Cancel();
                         }
                     }
                     catch (Exception e)
                     {
+                        var error = new TestError
+                        {
+                            InputTestFile = testFile.FullPath,
+                            Message = e.ToString()
+                        };
+
+                        overallSummary.Errors.Add(error);
+                        callback.FileError(error);
+
                         ChutzpahTracer.TraceError(e, "Error during building test context for {0}", testFile.FullPath);
                     }
                     finally

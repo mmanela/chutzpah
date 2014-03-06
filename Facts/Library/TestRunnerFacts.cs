@@ -301,7 +301,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(1, res.TotalCount);
             }
 
-
             [Fact]
             public void Will_run_test_files_found_from_chutzpah_json_files()
             {

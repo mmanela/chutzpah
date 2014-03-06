@@ -156,7 +156,7 @@ namespace Chutzpah
                 settings.Compile.Arguments = ExpandVariable(settings.Compile.Arguments ?? "");
                 settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
-                settings.Compile.OutDirectory = ResolveFolderPath(settings, settings.Compile.OutDirectory);
+                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(settings.Compile.OutDirectory));
 
                 // Default timeout to 5 minutes if missing
                 settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;

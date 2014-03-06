@@ -42,7 +42,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// The list of referenced JavaScript files
         /// </summary>
-        public IEnumerable<ReferencedFile> ReferencedFiles { get; set; }
+        public ICollection<ReferencedFile> ReferencedFiles { get; set; }
 
         /// <summary>
         /// A list of temporary files that should be cleaned up after the test run is finished
