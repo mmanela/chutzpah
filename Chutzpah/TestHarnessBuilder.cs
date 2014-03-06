@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Chutzpah.Coverage;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
@@ -10,20 +11,23 @@ namespace Chutzpah
 {
     public interface ITestHarnessBuilder
     {
-        void CreateTestHarness(TestContext testContext, TestOptions options)
+        void CreateTestHarness(TestContext testContext, TestOptions options);
     }
 
     public class TestHarnessBuilder : ITestHarnessBuilder
     {
         private readonly IFileProbe fileProbe;
+        private readonly IReferenceProcessor referenceProcessor;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IHasher hasher;
-
+    
         public TestHarnessBuilder(
+            IReferenceProcessor referenceProcessor,
             IFileSystemWrapper fileSystem,
             IFileProbe fileProbe,
             IHasher hasher)
         {
+            this.referenceProcessor = referenceProcessor;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.hasher = hasher;
@@ -37,6 +41,9 @@ namespace Chutzpah
                 // So we dont need to generate the harness
                 return;
             }
+
+
+            SetupAmdPathsIfNeeded(testContext.TestFileSettings, testContext.ReferencedFiles.ToList(), testContext.TestHarnessDirectory);
 
             string testFilePathHash = hasher.Hash(testContext.InputTestFile);
 
@@ -63,6 +70,13 @@ namespace Chutzpah
             testContext.TestHarnessPath = testHtmlFilePath;
         }
 
+        private void SetupAmdPathsIfNeeded(ChutzpahTestSettingsFile chutzpahTestSettings, List<ReferencedFile> referencedFiles, string testHarnessDirectory)
+        {
+            if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
+            {
+                referenceProcessor.SetupAmdFilePaths(referencedFiles, testHarnessDirectory, chutzpahTestSettings);
+            }
+        }
 
         private string GetTestHarnessTemplatePath(IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings)
         {

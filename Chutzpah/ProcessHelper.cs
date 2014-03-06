@@ -23,7 +23,7 @@ namespace Chutzpah
 
             // Output will be null if the stream reading times out
             var processStream = new ProcessStream(new ProcessWrapper(p), p.StandardOutput);
-            var output = streamProcessor(processStream); 
+            var output = streamProcessor(processStream);
             p.WaitForExit(5000);
 
 
@@ -35,6 +35,7 @@ namespace Chutzpah
 
         public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)
         {
+            ChutzpahTracer.TraceInformation("Started batch compile using {0} with args {1}", compileConfiguration.Executable, compileConfiguration.Arguments);
             var p = new Process();
             // Append path to where .net drop is so you can use things like msbuild
             p.StartInfo.EnvironmentVariables["Path"] += System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
@@ -51,7 +52,9 @@ namespace Chutzpah
             var stdOut = p.StandardOutput.ReadToEnd();
             var stdErr = p.StandardError.ReadToEnd();
 
-            return new BatchCompileResult {StandardError = stdErr, StandardOutput = stdOut, ExitCode = p.ExitCode};
+            ChutzpahTracer.TraceInformation("Finished batch compile with exit code {0} using {1} with args {2}", p.ExitCode, compileConfiguration.Executable, compileConfiguration.Arguments);
+
+            return new BatchCompileResult { StandardError = stdErr, StandardOutput = stdOut, ExitCode = p.ExitCode };
         }
 
         public void LaunchFileInBrowser(string file)

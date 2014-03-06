@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -25,7 +27,10 @@ namespace Chutzpah
         /// </summary>
         private static readonly ConcurrentDictionary<string, ChutzpahTestSettingsFile> ChutzpahSettingsFileCache =
             new ConcurrentDictionary<string, ChutzpahTestSettingsFile>(StringComparer.OrdinalIgnoreCase);
-        
+
+
+        private readonly IDictionary<string,string> chutzpahCompileVariables = new  Dictionary<string, string>();
+           
 
         private readonly IFileProbe fileProbe;
         private readonly IJsonSerializer serializer;
@@ -34,6 +39,17 @@ namespace Chutzpah
         {
             this.fileProbe = fileProbe;
             this.serializer = serializer;
+
+            var clrDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+            var msbuildExe = Path.Combine(clrDir, "msbuild.exe");
+            var powershellExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"windowspowershell\v1.0\powershell.exe");
+
+            chutzpahCompileVariables["%clrdir%"] = clrDir;
+            chutzpahCompileVariables["%msbuildexe%"] = msbuildExe;
+            chutzpahCompileVariables["%powershellexe%"] = powershellExe;
+
+            // This is not needed but it is a nice alias
+            chutzpahCompileVariables["%cmdexe%"] = Environment.ExpandEnvironmentVariables("%comspec%");
         }
 
         /// <summary>
@@ -60,7 +76,7 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
-                    
+
                     if (settings == null)
                     {
                         settings = ChutzpahTestSettingsFile.Default;
@@ -71,7 +87,7 @@ namespace Chutzpah
                     ResolveTestHarnessDirectory(settings);
 
                     ResolveAMDBaseUrl(settings);
-					
+
                     ResolveBatchCompileConfiguration(settings);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
@@ -98,7 +114,7 @@ namespace Chutzpah
             {
                 if (settings.TestHarnessDirectory != null)
                 {
-                    string absoluteFilePath = ResolvePath(settings, settings.TestHarnessDirectory);
+                    string absoluteFilePath = ResolveFolderPath(settings, settings.TestHarnessDirectory);
                     settings.TestHarnessDirectory = absoluteFilePath;
                 }
 
@@ -115,7 +131,7 @@ namespace Chutzpah
             if (!string.IsNullOrEmpty(settings.AMDBasePath))
             {
 
-                string absoluteFilePath = ResolvePath(settings, settings.AMDBasePath);
+                string absoluteFilePath = ResolveFolderPath(settings, settings.AMDBasePath);
                 settings.AMDBasePath = absoluteFilePath;
 
                 if (string.IsNullOrEmpty(settings.AMDBasePath))
@@ -125,24 +141,25 @@ namespace Chutzpah
             }
         }
 
-   private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
+        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
         {
             if (settings.Compile != null)
             {
+                settings.Compile.Extensions = settings.Compile.Extensions ?? new List<string>();
+
                 if (string.IsNullOrEmpty(settings.Compile.Executable))
                 {
                     throw new ArgumentException("Executable path must be passed for compile setting");
                 }
                 
-                settings.Compile.Extensions = settings.Compile.Extensions ?? new List<string>();
-                settings.Compile.Executable = ResolvePath(settings, Environment.ExpandEnvironmentVariables(settings.Compile.Executable));
-                settings.Compile.Arguments = Environment.ExpandEnvironmentVariables(settings.Compile.Arguments ?? "");
-                settings.Compile.WorkingDirectory = ResolvePath(settings, settings.Compile.WorkingDirectory);
-                settings.Compile.SourceDirectory = ResolvePath(settings, settings.Compile.SourceDirectory);
-                settings.Compile.OutDirectory = ResolvePath(settings, settings.Compile.OutDirectory);
+                settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(settings.Compile.Executable ?? ""));
+                settings.Compile.Arguments = ExpandVariable(settings.Compile.Arguments ?? "");
+                settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
+                settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
+                settings.Compile.OutDirectory = ResolveFolderPath(settings, settings.Compile.OutDirectory);
 
                 // Default timeout to 5 minutes if missing
-                settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000*60*5;
+                settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
             }
         }
 
@@ -150,11 +167,33 @@ namespace Chutzpah
         /// <summary>
         /// Resolved a path relative to the settings file if it is not absolute
         /// </summary>
-        private string ResolvePath(ChutzpahTestSettingsFile settings, string path)
+        private string ResolveFolderPath(ChutzpahTestSettingsFile settings, string path)
         {
             string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, path ?? "");
             string absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
             return absoluteFilePath;
+        }
+
+        private string ResolveFilePath(ChutzpahTestSettingsFile settings, string path)
+        {
+            string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, path ?? "");
+            string absoluteFilePath = fileProbe.FindFilePath(relativeLocationPath);
+            return absoluteFilePath;
+        }
+
+        private string ExpandVariable(string str)
+        {
+            return ExpandChutzpahVariables(Environment.ExpandEnvironmentVariables(str));
+        }
+
+        private string ExpandChutzpahVariables(string str)
+        {
+            if (str == null)
+            {
+                return null;
+            }
+
+            return chutzpahCompileVariables.Aggregate(str, (current, pair) => current.Replace(pair.Key, pair.Value));
         }
     }
 }

@@ -8,9 +8,17 @@ namespace Chutzpah.Exceptions
         {
         }
 
-        public ChutzpahException(string message) : base(message)
+        public ChutzpahException(string message)
+            : base(message)
         {
-            
+
+        }
+
+
+        public ChutzpahException(string message, Exception e)
+            : base(message, e)
+        {
+
         }
     }
 }

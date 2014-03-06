@@ -1,0 +1,8 @@
+{
+  "Compile": {
+    "Extensions": [".ts"],
+    "ExtensionsWithNoOutput": [".d.ts"],
+    "Executable": "compile.bat",
+    "SkipIfUnchanged": true
+  }
+}

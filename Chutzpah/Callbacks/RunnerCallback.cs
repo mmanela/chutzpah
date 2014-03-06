@@ -59,7 +59,7 @@ namespace Chutzpah
 
         protected virtual string GetExceptionThrownMessage(Exception exception, string fileName)
         {
-            return string.Format("Chutzpah Error: {0}\n While Running:{1}\n\n", exception, fileName);
+            return string.Format("Chutzpah Error: {0} - {1}\n While Running:{2}\n\n", exception.GetType().Name, exception, fileName);
         }
 
         public static string FormatFileErrorMessage(TestError error)

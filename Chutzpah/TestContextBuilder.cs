@@ -127,9 +127,10 @@ namespace Chutzpah
 
                 referenceProcessor.GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
 
+                // This is the legacy way Chutzpah compiled files that are TypeScript or CoffeeScript
+                // Remaining but will eventually be deprecated and removed
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
-                SetupAmdPathsIfNeeded(chutzpahTestSettings, referencedFiles, testHarnessDirectory);
 
                 IEnumerable<string> deps = definition.GetFileDependencies(chutzpahTestSettings);
 
@@ -228,14 +229,6 @@ namespace Chutzpah
             }
 
             return false;
-        }
-
-        private void SetupAmdPathsIfNeeded(ChutzpahTestSettingsFile chutzpahTestSettings, List<ReferencedFile> referencedFiles, string testHarnessDirectory)
-        {
-            if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
-            {
-                referenceProcessor.SetupAmdFilePaths(referencedFiles, testHarnessDirectory, chutzpahTestSettings);
-            }
         }
 
         private void AddTestFrameworkDependencies(IEnumerable<string> deps, List<ReferencedFile> referencedFiles)
@@ -367,14 +360,14 @@ namespace Chutzpah
                 return;
             }
 
-            ChutzpahTracer.TraceInformation("Starting test file compilation/generation");
+            ChutzpahTracer.TraceInformation("Starting legacy file compilation/generation");
 
             foreach (var fileGenerator in fileGenerators)
             {
                 fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
             }
 
-            ChutzpahTracer.TraceInformation("Finished test file compilation/generation");
+            ChutzpahTracer.TraceInformation("Finished legacy file compilation/generation");
         }
 
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
