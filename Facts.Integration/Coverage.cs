@@ -136,14 +136,14 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
-[Fact]
+        [Fact]
         public void Will_exclude_files_from_settings_file_using_requirejs()
         {
-          var testRunner = TestRunner.Create();
+            var testRunner = TestRunner.Create();
 
-          var result = testRunner.RunTests(@"JS\Test\Coverage\ExcludePathWithRequireJS\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(@"JS\Test\Coverage\ExcludePathWithRequireJS\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
 
-          ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\Coverage\ExcludePathWithRequireJS\test.js" });
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { @"JS\Test\Coverage\ExcludePathWithRequireJS\test.js" });
         }
 
         [Theory]
@@ -182,7 +182,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
-      
+
         public void Will_turn_on_code_coverage_given_setting_in_json_file()
         {
             var scriptPath = @"JS\Test\TestSettings\CodeCoverage\cc.js";
@@ -479,7 +479,7 @@ namespace Chutzpah.Facts.Integration
 
             Assert.Equal(2, result.TotalCount);
         }
-      
+
         private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
         {
             var opts = new TestOptions
@@ -487,7 +487,7 @@ namespace Chutzpah.Facts.Integration
                                CoverageOptions = new CoverageOptions
                                                      {
                                                          Enabled = true,
-                                                         ExcludePatterns = new []{"*chai.js*"},
+                                                         ExcludePatterns = new[] { "*chai.js*" },
                                                      }
                            };
             mods.ToList().ForEach(a => a(opts.CoverageOptions));

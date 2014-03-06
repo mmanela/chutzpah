@@ -274,14 +274,6 @@ namespace Chutzpah
                                 testContext.InputTestFile);
                             testFileSummaries.Enqueue(testSummary);
                         }
-
-
-                        if (!m_debugEnabled && !options.OpenInBrowser)
-                        {
-                            ChutzpahTracer.TraceInformation("Cleaning up test context artifacts");
-                            // Don't clean up context if in debug mode
-                            testContextBuilder.CleanupContext(testContext);
-                        }
                     }
                     catch (Exception e)
                     {
@@ -301,6 +293,25 @@ namespace Chutzpah
                         ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFile, testRunnerMode);
                     }
                 });
+
+
+            // Clean up test context
+            foreach (var testContext in testContexts)
+            {
+                // Don't clean up context if in debug mode
+                if (!m_debugEnabled && !options.OpenInBrowser)
+                {
+                    try
+                    {
+                        ChutzpahTracer.TraceInformation("Cleaning up test context for {0}", testContext.InputTestFile);
+                        testContextBuilder.CleanupContext(testContext);
+                    }
+                    catch (Exception e)
+                    {
+                        ChutzpahTracer.TraceError(e,"Error cleaning up test context for {0}", testContext.InputTestFile);
+                    }
+                }
+            }
         }
 
         private void BuildTestContexts(
