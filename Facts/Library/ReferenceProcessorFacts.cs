@@ -408,6 +408,34 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_default_path_to_settings_folder_when_adding_from_settings_references()
+            {
+                var processor = new TestableReferenceProcessor();
+                var referenceFiles = new List<ReferencedFile>();
+                var settings = new ChutzpahTestSettingsFile();
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"c:\settingsDir")).Returns<string>(null);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingsDir")).Returns(@"c:\settingsDir");
+                processor.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles(@"c:\settingsDir", "*.*", SearchOption.AllDirectories))
+                    .Returns(new[] { @"settingsDir\subFile.js", @"settingsDir\newFile.js", @"other\subFile.js" });
+                settings.SettingsFileDirectory = @"c:\settingsDir";
+                settings.References.Add(
+                    new SettingsFileReference
+                    {
+                        Path = null,
+                        Include = "*subFile.js"
+                    });
+                var text = (@"some javascript code");
+
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, text, @"path\test.js", settings);
+
+                Assert.True(referenceFiles.Any(x => x.Path == @"settingsDir\subFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"path\subFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"path\newFile.js"));
+            }
+
+            [Fact]
             public void Will_exclude_from_test_harness_given_setting()
             {
                 var processor = new TestableReferenceProcessor();

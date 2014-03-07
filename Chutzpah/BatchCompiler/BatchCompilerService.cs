@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,11 +8,6 @@ using Chutzpah.Wrappers;
 
 namespace Chutzpah.BatchProcessor
 {
-    public interface IBatchCompilerService
-    {
-        void Compile(IEnumerable<TestContext> testContexts);
-    }
-
     public class BatchCompilerService : IBatchCompilerService
     {
         private readonly IProcessHelper processHelper;
@@ -41,17 +35,17 @@ namespace Chutzpah.BatchProcessor
 
                 // Build the mapping from source to output files and gather properties about them
                 var filePropeties = (from context in contextGroup
-                                     from file in context.ReferencedFiles.Distinct()
-                                     where testSettings.Compile.Extensions.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
-                                     let outputPath = GetOutputPath(file.Path, testSettings.Compile)
-                                     let sourceHasOutput = !testSettings.Compile.ExtensionsWithNoOutput.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
-                                     let sourceProperties = GetFileProperties(file.Path)
-                                     let outputProperties = sourceHasOutput ? GetFileProperties(outputPath) : null
-                                     select new SourceCompileInfo { SourceProperties = sourceProperties, OutputProperties = outputProperties, SourceHasOutput = sourceHasOutput }).ToList();
+                    from file in context.ReferencedFiles.Distinct()
+                    where testSettings.Compile.Extensions.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
+                    let outputPath = GetOutputPath(file.Path, testSettings.Compile)
+                    let sourceHasOutput = !testSettings.Compile.ExtensionsWithNoOutput.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
+                    let sourceProperties = GetFileProperties(file.Path)
+                    let outputProperties = sourceHasOutput ? GetFileProperties(outputPath) : null
+                    select new SourceCompileInfo { SourceProperties = sourceProperties, OutputProperties = outputProperties, SourceHasOutput = sourceHasOutput }).ToList();
 
                 var outputPathMap = filePropeties
-                                        .Where(x => x.SourceHasOutput)
-                                        .ToDictionary(x => x.SourceProperties.Path, x => x.OutputProperties.Path, StringComparer.OrdinalIgnoreCase);
+                    .Where(x => x.SourceHasOutput)
+                    .ToDictionary(x => x.SourceProperties.Path, x => x.OutputProperties.Path, StringComparer.OrdinalIgnoreCase);
 
                 // Check if the batch compile is needed
                 var shouldCompile = CheckIfCompileIsNeeded(testSettings, filePropeties);
@@ -61,10 +55,14 @@ namespace Chutzpah.BatchProcessor
                 {
                     RunBatchCompile(testSettings);
                 }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("All files update to date so skipping batch compile for {0}", testSettings.SettingsFileName);
+                }
 
                 // Now that compile finished set generated path on  all files who match the compiled extensions
                 var filesToUpdate = contextGroup.SelectMany(x => x.ReferencedFiles)
-                                                .Where(x => outputPathMap.ContainsKey(x.Path));
+                    .Where(x => outputPathMap.ContainsKey(x.Path));
 
                 foreach (var file in filesToUpdate)
                 {
@@ -87,19 +85,18 @@ namespace Chutzpah.BatchProcessor
 
         private void RunBatchCompile(ChutzpahTestSettingsFile testSettings)
         {
-            var settingsFile = Path.Combine(testSettings.SettingsFileDirectory, Constants.SettingsFileName);
             try
             {
                 var result = processHelper.RunBatchCompileProcess(testSettings.Compile);
                 if (result.ExitCode > 0)
                 {
-                    throw new ChutzpahCompilationFailedException(result.StandardError, settingsFile);
+                    throw new ChutzpahCompilationFailedException(result.StandardError, testSettings.SettingsFileName);
                 }
             }
             catch (Exception e)
             {
-                ChutzpahTracer.TraceError(e, "Error during batch compile of {0}", settingsFile);
-                throw new ChutzpahCompilationFailedException(e.Message, settingsFile, e);
+                ChutzpahTracer.TraceError(e, "Error during batch compile of {0}", testSettings.SettingsFileName);
+                throw new ChutzpahCompilationFailedException(e.Message, testSettings.SettingsFileName, e);
             }
         }
 
@@ -112,8 +109,8 @@ namespace Chutzpah.BatchProcessor
             if (testSettings.Compile.SkipIfUnchanged)
             {
                 var hasMissingOutput = filePropeties
-                                            .Where(x => x.SourceHasOutput)
-                                            .Any(x => !x.OutputProperties.Exists);
+                    .Where(x => x.SourceHasOutput)
+                    .Any(x => !x.OutputProperties.Exists);
                 var newsetInputFileTime = filePropeties
                     .Where(x => x.SourceProperties.Exists)
                     .Max(x => x.SourceProperties.LastModifiedDate);
@@ -124,7 +121,7 @@ namespace Chutzpah.BatchProcessor
 
                 var outputOutOfDate = newsetInputFileTime >= oldestOutputFileTime;
 
-                shouldCompile = hasMissingOutput && outputOutOfDate;
+                shouldCompile = hasMissingOutput || outputOutOfDate;
             }
             return shouldCompile;
         }
@@ -185,5 +182,4 @@ namespace Chutzpah.BatchProcessor
             public FileProperties OutputProperties { get; set; }
         }
     }
-
 }

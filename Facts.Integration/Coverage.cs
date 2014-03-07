@@ -106,27 +106,13 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
-        public static IEnumerable<object[]> AMDChutzpahSamples
+        public static IEnumerable<object[]> ChutzpahSamples
         {
-            get
-            {
-                return new[]
-                {
-                        new object[] {@"Samples\RequireJS\QUnit\chutzpah.json"},
-                        new object[] {@"Samples\RequireJS\Mocha\chutzpah.json"},
-                        new object[] {@"Samples\RequireJS\Jasmine\chutzpah.json"},
-                        new object[] {@"Samples\RequireJS\TypeScript\chutzpah.json"},
-
-                        new object[] {@"Samples\RequireJS\CustomBaseUrl\QUnit\chutzpah.json"},
-                        new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json"},
-                        new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json"},
-
-                };
-            }
+            get { return TestPathGroups.ChutzpahSamples; }
         }
 
         [Theory]
-        [PropertyData("AMDChutzpahSamples")]
+        [PropertyData("ChutzpahSamples")]
         public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath)
         {
             var testRunner = TestRunner.Create();

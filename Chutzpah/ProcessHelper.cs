@@ -38,7 +38,7 @@ namespace Chutzpah
             ChutzpahTracer.TraceInformation("Started batch compile using {0} with args {1}", compileConfiguration.Executable, compileConfiguration.Arguments);
             var p = new Process();
             // Append path to where .net drop is so you can use things like msbuild
-            p.StartInfo.EnvironmentVariables["Path"] += System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+            p.StartInfo.EnvironmentVariables["Path"] += ";" + System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory() + ";";
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.UseShellExecute = false;

@@ -57,7 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BatchCompiler\BatchCompiler.cs" />
+    <Compile Include="BatchCompiler\IBatchCompilerService.cs" />
+    <Compile Include="BatchCompiler\BatchCompilerService.cs" />
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="ChutzpahTestSettingsService.cs" />

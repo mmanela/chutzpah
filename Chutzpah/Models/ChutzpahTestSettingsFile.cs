@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Chutzpah.Compilers.TypeScript;
 namespace Chutzpah.Models
 {
@@ -161,8 +162,19 @@ namespace Chutzpah.Models
         /// </summary>
         public bool CoffeeScriptBareMode { get; set; }
 
+        /// <summary>
+        /// The compile settings which tell Chutzpah how to perform the batch compile
+        /// </summary>
         public BatchCompileConfiguration Compile { get; set; }
 
+
+        public string SettingsFileName
+        {
+            get
+            {
+                return Path.Combine(SettingsFileDirectory, Constants.SettingsFileName);
+            }
+        }
 
         public override int GetHashCode()
         {

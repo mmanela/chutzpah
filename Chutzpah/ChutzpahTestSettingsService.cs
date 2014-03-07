@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -34,11 +35,13 @@ namespace Chutzpah
 
         private readonly IFileProbe fileProbe;
         private readonly IJsonSerializer serializer;
+        private readonly IFileSystemWrapper fileSystem;
 
-        public ChutzpahTestSettingsService(IFileProbe fileProbe, IJsonSerializer serializer)
+        public ChutzpahTestSettingsService(IFileProbe fileProbe, IJsonSerializer serializer, IFileSystemWrapper fileSystem)
         {
             this.fileProbe = fileProbe;
             this.serializer = serializer;
+            this.fileSystem = fileSystem;
 
             var clrDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
             var msbuildExe = Path.Combine(clrDir, "msbuild.exe");
@@ -156,7 +159,7 @@ namespace Chutzpah
                 settings.Compile.Arguments = ExpandVariable(settings.Compile.Arguments ?? "");
                 settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
-                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(settings.Compile.OutDirectory));
+                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(settings.Compile.OutDirectory ?? ""), true);
 
                 // Default timeout to 5 minutes if missing
                 settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
@@ -167,10 +170,16 @@ namespace Chutzpah
         /// <summary>
         /// Resolved a path relative to the settings file if it is not absolute
         /// </summary>
-        private string ResolveFolderPath(ChutzpahTestSettingsFile settings, string path)
+        private string ResolveFolderPath(ChutzpahTestSettingsFile settings, string path, bool createIfNeeded = false)
         {
             string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, path ?? "");
             string absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
+            if (createIfNeeded && absoluteFilePath == null)
+            {
+                fileSystem.CreateDirectory(relativeLocationPath);
+                absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
+            }
+
             return absoluteFilePath;
         }
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Chutzpah.Models
 {
@@ -9,6 +8,7 @@ namespace Chutzpah.Models
         {
             Extensions = new List<string>();
             ExtensionsWithNoOutput = new List<string>();
+            SkipIfUnchanged = true;
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Chutzpah.Models
 
         /// <summary>
         /// Skips the execution if all files Chutzpah knows about are older than all of the output files
-        /// This is defaulted to false since it is possible chutzpah might not know about all the files your compilation
-        /// code is using. Ideally you can tell Chutzpah about these and then set this to be more performant
+        /// This is defaulted to true but if you hit issues since it is possible chutzpah might not know about all the files your compilation
+        /// code is using then you can turn this off. Ideally you can tell Chutzpah about these and then set this to be more performant
         /// </summary>
         public bool SkipIfUnchanged { get; set; }
     }

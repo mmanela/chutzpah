@@ -2,7 +2,12 @@
   "Compile": {
     "Extensions": [".ts"],
     "ExtensionsWithNoOutput": [".d.ts"],
-    "Executable": "compile.bat",
-    "SkipIfUnchanged": true
-  }
+    "Executable": "compile.bat"
+   },
+  "References": [
+    {"Include": "*/src/*.ts", "Exclude": "*/src/*.d.ts" }
+  ],
+  "Tests": [
+    { "Include": "*/test/*.ts", "Exclude": "*/test/*.d.ts" }
+  ]
 }

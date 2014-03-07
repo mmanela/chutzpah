@@ -134,6 +134,29 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(@"customPath4", settings.Compile.OutDirectory);
         }
 
+        [Fact]
+        public void Will_create_compile_out_dir_if_does_not_exist()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            service.ClassUnderTest.ClearCache();
+            var settings = new ChutzpahTestSettingsFile
+            {
+                Compile = new BatchCompileConfiguration
+                {
+                    Executable = "executable",
+                    WorkingDirectory = "work",
+                    SourceDirectory = "source",
+                    OutDirectory = "out",
+                }
+            };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
+            service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\out")).Returns<string>(null);
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFile("dir7");
+
+            service.Mock<IFileSystemWrapper>().Verify(x => x.CreateDirectory(@"C:\settingsDir7\out"));
+        }
 
 
         [Theory]

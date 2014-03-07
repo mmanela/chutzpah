@@ -64,6 +64,7 @@
     <Compile Include="ConsoleRunner\CallbackFacts.cs" />
     <Compile Include="ConsoleRunner\CommandLineFacts.cs" />
     <Compile Include="Exceptions\ExceptionFacts.cs" />
+    <Compile Include="Library\BatchCompilerServiceFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
     <Compile Include="Library\MochaLineNumberProcessorFacts.cs" />
     <Compile Include="Library\MochaDefinitionFacts.cs" />
