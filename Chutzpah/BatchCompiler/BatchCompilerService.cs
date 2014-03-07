@@ -34,8 +34,8 @@ namespace Chutzpah.BatchProcessor
                 if (testSettings.Compile == null) continue;
 
                 // Build the mapping from source to output files and gather properties about them
-                var filePropeties = (from context in contextGroup
-                    from file in context.ReferencedFiles.Distinct()
+                var filePropeties = (
+                    from file in contextGroup.SelectMany(x => x.ReferencedFiles).Distinct()
                     where testSettings.Compile.Extensions.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
                     let outputPath = GetOutputPath(file.Path, testSettings.Compile)
                     let sourceHasOutput = !testSettings.Compile.ExtensionsWithNoOutput.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))

@@ -356,7 +356,7 @@ namespace Chutzpah
 
             if (chutzpahTestSettings.Compile != null)
             {
-                ChutzpahTracer.TraceInformation("Skipping old style file compilation since we detected the new batch compile setting");
+                ChutzpahTracer.TraceInformation("Skipping old style file compilation since we detected the new compile setting");
                 return;
             }
 

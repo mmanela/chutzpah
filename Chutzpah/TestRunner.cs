@@ -326,7 +326,7 @@ namespace Chutzpah
         {
                 Parallel.ForEach(scriptPaths,parallelOptions,testFile =>
                 {
-                    ChutzpahTracer.TraceInformation("Building  test context for {0}", testFile.FullPath);
+                    ChutzpahTracer.TraceInformation("Building test context for {0}", testFile.FullPath);
 
                     try
                     {

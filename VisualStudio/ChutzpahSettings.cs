@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 
@@ -15,7 +16,7 @@ namespace Chutzpah.VS.Common.Settings
         public ChutzpahSettings()
         {
             // Set default value, these will get overridden when user changes them
-            MaxDegreeOfParallelism = 1;
+            MaxDegreeOfParallelism = Environment.ProcessorCount;
         }
 
         [Browsable(true)]
@@ -40,7 +41,7 @@ namespace Chutzpah.VS.Common.Settings
         {
             EnabledTracing = false;
             TimeoutMilliseconds = null;
-            MaxDegreeOfParallelism = 1;
+            MaxDegreeOfParallelism = Environment.ProcessorCount;
             base.ResetSettings();
         }
 

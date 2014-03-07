@@ -16,7 +16,7 @@ namespace Chutzpah.VS.Common.Settings
     {
         public ChutzpahUTESettings()
         {
-            maxDegreeOfParallelism = 1;
+            maxDegreeOfParallelism = Environment.ProcessorCount;
         }
 
 
@@ -88,7 +88,7 @@ namespace Chutzpah.VS.Common.Settings
             EnabledTracing = false;
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;
-            MaxDegreeOfParallelism = 1;
+            MaxDegreeOfParallelism = Environment.ProcessorCount;
             base.ResetSettings();
         }
 
