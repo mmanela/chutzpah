@@ -102,8 +102,6 @@ namespace Chutzpah.BatchProcessor
 
         private static bool CheckIfCompileIsNeeded(ChutzpahTestSettingsFile testSettings, List<SourceCompileInfo> filePropeties)
         {
-            bool shouldCompile = true;
-
             // If SkipIfUnchanged is true then we check if all the output files are newer than the input files
             // we will only run the compile if this fails
             if (testSettings.Compile.SkipIfUnchanged)
@@ -111,19 +109,23 @@ namespace Chutzpah.BatchProcessor
                 var hasMissingOutput = filePropeties
                     .Where(x => x.SourceHasOutput)
                     .Any(x => !x.OutputProperties.Exists);
-                var newsetInputFileTime = filePropeties
-                    .Where(x => x.SourceProperties.Exists)
-                    .Max(x => x.SourceProperties.LastModifiedDate);
-                var oldestOutputFileTime = filePropeties
-                    .Where(x => x.SourceHasOutput)
-                    .Where(x => x.OutputProperties.Exists)
-                    .Min(x => x.OutputProperties.LastModifiedDate);
 
-                var outputOutOfDate = newsetInputFileTime >= oldestOutputFileTime;
+                if (!hasMissingOutput)
+                {
+                    var newsetInputFileTime = filePropeties
+                        .Where(x => x.SourceProperties.Exists)
+                        .Max(x => x.SourceProperties.LastModifiedDate);
+                    var oldestOutputFileTime = filePropeties
+                        .Where(x => x.SourceHasOutput)
+                        .Where(x => x.OutputProperties.Exists)
+                        .Min(x => x.OutputProperties.LastModifiedDate);
 
-                shouldCompile = hasMissingOutput || outputOutOfDate;
+                    var outputOutOfDate = newsetInputFileTime >= oldestOutputFileTime;
+                    return outputOutOfDate;
+                }
             }
-            return shouldCompile;
+
+            return true;
         }
 
         private string GetOutputPath(string sourcePath, BatchCompileConfiguration compileConfiguration)

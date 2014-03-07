@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TscExe>tsc</TscExe>
+  </PropertyGroup>
+
+  <Target Name="CompileTS">
+    <Exec Command="$(TscExe) src/code.ts test/test.ts --declaration --sourcemap --outdir out" />
+  </Target>
+  
+
+</Project>

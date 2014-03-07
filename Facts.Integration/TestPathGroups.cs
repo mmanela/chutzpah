@@ -21,6 +21,7 @@ namespace Chutzpah.Facts.Integration
 
                     new object[] {@"Samples\Compilation\TypeScript\chutzpah.json"},
                     new object[] {@"Samples\Compilation\CoffeeScript\chutzpah.json"},
+                    new object[] {@"Samples\Compilation\TypeScriptMsbuild\chutzpah.json"},
 
                 };
             }

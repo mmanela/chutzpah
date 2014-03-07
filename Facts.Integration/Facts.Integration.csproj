@@ -60,6 +60,7 @@
     <Compile Include="ExceptionThrowingRunnerCallback.cs" />
     <Compile Include="Execution.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestPathGroups.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="JS\Code\AMDMode_RequireJS\chutzpah.json">

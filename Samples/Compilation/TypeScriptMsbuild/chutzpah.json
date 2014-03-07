@@ -1,0 +1,15 @@
+{
+  "Compile": {
+    "Extensions": [".ts"],
+    "ExtensionsWithNoOutput": [".d.ts"],
+    "Executable": "%msbuildexe%",
+    "Arguments": "/t:CompileTS /fl",
+    "OutDirectory": "out"
+   },
+  "References": [
+    {"Include": "*/src/*.ts", "Exclude": "*/src/*.d.ts" }
+  ],
+  "Tests": [
+    { "Include": "*/test/*.ts", "Exclude": "*/test/*.d.ts" }
+  ]
+}
