@@ -29,10 +29,6 @@ namespace Chutzpah
         private static readonly ConcurrentDictionary<string, ChutzpahTestSettingsFile> ChutzpahSettingsFileCache =
             new ConcurrentDictionary<string, ChutzpahTestSettingsFile>(StringComparer.OrdinalIgnoreCase);
 
-
-        private readonly IDictionary<string,string> chutzpahCompileVariables = new  Dictionary<string, string>();
-           
-
         private readonly IFileProbe fileProbe;
         private readonly IJsonSerializer serializer;
         private readonly IFileSystemWrapper fileSystem;
@@ -43,16 +39,7 @@ namespace Chutzpah
             this.serializer = serializer;
             this.fileSystem = fileSystem;
 
-            var clrDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
-            var msbuildExe = Path.Combine(clrDir, "msbuild.exe");
-            var powershellExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"windowspowershell\v1.0\powershell.exe");
 
-            chutzpahCompileVariables["%clrdir%"] = clrDir;
-            chutzpahCompileVariables["%msbuildexe%"] = msbuildExe;
-            chutzpahCompileVariables["%powershellexe%"] = powershellExe;
-
-            // This is not needed but it is a nice alias
-            chutzpahCompileVariables["%cmdexe%"] = Environment.ExpandEnvironmentVariables("%comspec%");
         }
 
         /// <summary>
@@ -154,12 +141,14 @@ namespace Chutzpah
                 {
                     throw new ArgumentException("Executable path must be passed for compile setting");
                 }
-                
-                settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(settings.Compile.Executable ?? ""));
-                settings.Compile.Arguments = ExpandVariable(settings.Compile.Arguments ?? "");
+
+                var compileVariables = BuildCompileVariables(settings);
+
+                settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(compileVariables, settings.Compile.Executable ?? ""));
+                settings.Compile.Arguments = ExpandVariable(compileVariables, settings.Compile.Arguments ?? "");
                 settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
-                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(settings.Compile.OutDirectory ?? ""), true);
+                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(compileVariables, settings.Compile.OutDirectory ?? ""), true);
 
                 // Default timeout to 5 minutes if missing
                 settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
@@ -190,12 +179,12 @@ namespace Chutzpah
             return absoluteFilePath;
         }
 
-        private string ExpandVariable(string str)
+        private string ExpandVariable(IDictionary<string, string> chutzpahCompileVariables, string str)
         {
-            return ExpandChutzpahVariables(Environment.ExpandEnvironmentVariables(str));
+            return ExpandChutzpahVariables(chutzpahCompileVariables, Environment.ExpandEnvironmentVariables(str));
         }
 
-        private string ExpandChutzpahVariables(string str)
+        private string ExpandChutzpahVariables(IDictionary<string, string> chutzpahCompileVariables, string str)
         {
             if (str == null)
             {
@@ -203,6 +192,34 @@ namespace Chutzpah
             }
 
             return chutzpahCompileVariables.Aggregate(str, (current, pair) => current.Replace(pair.Key, pair.Value));
+        }
+
+
+        private IDictionary<string, string> BuildCompileVariables(ChutzpahTestSettingsFile settings)
+        {
+            IDictionary<string, string> chutzpahCompileVariables = new Dictionary<string, string>();
+
+            var clrDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+            var msbuildExe = Path.Combine(clrDir, "msbuild.exe");
+            var powershellExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"windowspowershell\v1.0\powershell.exe");
+
+
+            AddCompileVariable(chutzpahCompileVariables, "chutzpahsettingsdir", settings.SettingsFileDirectory);
+
+            AddCompileVariable(chutzpahCompileVariables, "clrdir", clrDir);
+            AddCompileVariable(chutzpahCompileVariables, "msbuildexe", msbuildExe);
+            AddCompileVariable(chutzpahCompileVariables, "powershellexe", powershellExe);
+
+            // This is not needed but it is a nice alias
+            AddCompileVariable(chutzpahCompileVariables, "cmdexe", Environment.ExpandEnvironmentVariables("%comspec%"));
+
+            return chutzpahCompileVariables;
+        }
+
+        private void AddCompileVariable(IDictionary<string, string> chutzpahCompileVariables, string name, string value)
+        {
+            name = string.Format("%{0}%", name);
+            chutzpahCompileVariables[name] = value;
         }
     }
 }

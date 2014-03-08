@@ -99,7 +99,15 @@ namespace Chutzpah.BatchProcessor
                 throw new ChutzpahCompilationFailedException(e.Message, testSettings.SettingsFileName, e);
             }
         }
-
+        /// <summary>
+        /// Determines if a compile is needed. To figure this out we check the following things:
+        /// 1. Check if any source file which produces output is missing its output
+        /// 2. Check if any source file which produces output is newer than its output
+        /// 3. Check if any source file which does not produce output is newer than the oldest output file
+        /// </summary>
+        /// <param name="testSettings"></param>
+        /// <param name="filePropeties"></param>
+        /// <returns></returns>
         private static bool CheckIfCompileIsNeeded(ChutzpahTestSettingsFile testSettings, List<SourceCompileInfo> filePropeties)
         {
             // If SkipIfUnchanged is true then we check if all the output files are newer than the input files
@@ -112,16 +120,29 @@ namespace Chutzpah.BatchProcessor
 
                 if (!hasMissingOutput)
                 {
-                    var newsetInputFileTime = filePropeties
-                        .Where(x => x.SourceProperties.Exists)
-                        .Max(x => x.SourceProperties.LastModifiedDate);
-                    var oldestOutputFileTime = filePropeties
-                        .Where(x => x.SourceHasOutput)
-                        .Where(x => x.OutputProperties.Exists)
-                        .Min(x => x.OutputProperties.LastModifiedDate);
 
-                    var outputOutOfDate = newsetInputFileTime >= oldestOutputFileTime;
-                    return outputOutOfDate;
+
+                    var pairFileHasChanged = 
+                        filePropeties.Where(x => x.SourceHasOutput
+                                        && x.SourceProperties.Exists
+                                        && x.OutputProperties.Exists
+                                        && x.SourceProperties.LastModifiedDate > x.OutputProperties.LastModifiedDate)
+                                    .Any();
+
+
+                    // Get the time of the newest file change of a file which has no output (like a .d.ts)
+                    var newestSourceWithNewOutputFileTime = filePropeties
+                        .Where(x => x.SourceProperties.Exists && !x.SourceHasOutput)
+                        .Max(x => x.SourceProperties.LastModifiedDate);
+
+
+                    var oldestOutputFileTime = filePropeties
+                                                    .Where(x => x.SourceHasOutput && x.OutputProperties.Exists)
+                                                    .Min(x => x.OutputProperties.LastModifiedDate);
+
+                    var fileWithNoOutputHasChanged = newestSourceWithNewOutputFileTime >= oldestOutputFileTime;
+
+                    return pairFileHasChanged || fileWithNoOutputHasChanged;
                 }
             }
 
