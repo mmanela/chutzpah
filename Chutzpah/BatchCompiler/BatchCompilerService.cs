@@ -37,9 +37,9 @@ namespace Chutzpah.BatchProcessor
                 var filePropeties = (
                     from file in contextGroup.SelectMany(x => x.ReferencedFiles).Distinct()
                     where testSettings.Compile.Extensions.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
-                    let outputPath = GetOutputPath(file.Path, testSettings.Compile)
-                    let sourceHasOutput = !testSettings.Compile.ExtensionsWithNoOutput.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
                     let sourceProperties = GetFileProperties(file.Path)
+                    let sourceHasOutput = !testSettings.Compile.ExtensionsWithNoOutput.Any(x => file.Path.EndsWith(x, StringComparison.OrdinalIgnoreCase))
+                    let outputPath = GetOutputPath(file.Path, testSettings.Compile)
                     let outputProperties = sourceHasOutput ? GetFileProperties(outputPath) : null
                     select new SourceCompileInfo { SourceProperties = sourceProperties, OutputProperties = outputProperties, SourceHasOutput = sourceHasOutput }).ToList();
 
@@ -67,7 +67,7 @@ namespace Chutzpah.BatchProcessor
                 foreach (var file in filesToUpdate)
                 {
                     var outputPath = outputPathMap[file.Path];
-                    if (fileSystem.FileExists(outputPath))
+                    if (outputPath != null && fileSystem.FileExists(outputPath))
                     {
                         file.GeneratedFilePath = outputPath;
                         ChutzpahTracer.TraceWarning("Found generated path for {0} at {1}", file.Path, outputPath);
@@ -110,6 +110,11 @@ namespace Chutzpah.BatchProcessor
         /// <returns></returns>
         private static bool CheckIfCompileIsNeeded(ChutzpahTestSettingsFile testSettings, List<SourceCompileInfo> filePropeties)
         {
+            if (!filePropeties.Any(x => x.SourceHasOutput))
+            {
+                return false;
+            }
+
             // If SkipIfUnchanged is true then we check if all the output files are newer than the input files
             // we will only run the compile if this fails
             if (testSettings.Compile.SkipIfUnchanged)
@@ -123,24 +128,26 @@ namespace Chutzpah.BatchProcessor
 
 
                     var pairFileHasChanged = 
-                        filePropeties.Where(x => x.SourceHasOutput
-                                        && x.SourceProperties.Exists
-                                        && x.OutputProperties.Exists
-                                        && x.SourceProperties.LastModifiedDate > x.OutputProperties.LastModifiedDate)
-                                    .Any();
+                        filePropeties.Any(x => x.SourceHasOutput
+                                               && x.SourceProperties.Exists
+                                               && x.OutputProperties.Exists
+                                               && x.SourceProperties.LastModifiedDate > x.OutputProperties.LastModifiedDate);
 
 
-                    // Get the time of the newest file change of a file which has no output (like a .d.ts)
-                    var newestSourceWithNewOutputFileTime = filePropeties
-                        .Where(x => x.SourceProperties.Exists && !x.SourceHasOutput)
-                        .Max(x => x.SourceProperties.LastModifiedDate);
+                    var fileWithNoOutputHasChanged = false;
+                    var sourcesWithNoOutput = filePropeties.Where(x => x.SourceProperties.Exists && !x.SourceHasOutput).ToList();
+                    if (sourcesWithNoOutput.Any())
+                    {
+                        // Get the time of the newest file change of a file which has no output (like a .d.ts)
+                        var newestSourceWithNoOutputFileTime = sourcesWithNoOutput.Max(x => x.SourceProperties.LastModifiedDate);
 
 
-                    var oldestOutputFileTime = filePropeties
-                                                    .Where(x => x.SourceHasOutput && x.OutputProperties.Exists)
-                                                    .Min(x => x.OutputProperties.LastModifiedDate);
+                        var oldestOutputFileTime = filePropeties
+                                                        .Where(x => x.SourceHasOutput && x.OutputProperties.Exists)
+                                                        .Min(x => x.OutputProperties.LastModifiedDate);
 
-                    var fileWithNoOutputHasChanged = newestSourceWithNewOutputFileTime >= oldestOutputFileTime;
+                        fileWithNoOutputHasChanged = newestSourceWithNoOutputFileTime >= oldestOutputFileTime;
+                    }
 
                     return pairFileHasChanged || fileWithNoOutputHasChanged;
                 }

@@ -165,6 +165,7 @@ namespace Chutzpah.Facts.Library.Models
         [InlineData("powershellexe", false)]
         [InlineData("cmdexe", false)]
         [InlineData("comspec", false)]
+        [InlineData("chutzpahsettingsdir", false)]
         [InlineData("blah", true)]
         public void Will_expand_chutzpah_and_default_environment_variables(string variable, bool result)
         {
