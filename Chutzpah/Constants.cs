@@ -46,5 +46,10 @@ namespace Chutzpah
         public const string HtmScriptExtension = ".htm";
         public const string HtmlScriptExtension = ".html";
 
+        public const string MochaBddInterface = "bdd";
+        public const string MochaQunitInterface = "qunit";
+        public const string MochaTddInterface = "tdd";
+        public const string MochaExportsInterface = "exports";
+
     }
 }

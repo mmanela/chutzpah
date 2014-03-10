@@ -1,13 +1,14 @@
-﻿namespace Chutzpah.Facts.Library
+﻿using System.Collections.Generic;
+using Chutzpah.Facts.Properties;
+using Chutzpah.FileProcessors;
+using Chutzpah.FrameworkDefinitions;
+using Chutzpah.Models;
+using Moq;
+using Xunit;
+using Xunit.Extensions;
+
+namespace Chutzpah.Facts.Library
 {
-    using System.Collections.Generic;
-    using Chutzpah.Facts.Properties;
-    using Chutzpah.FileProcessors;
-    using Chutzpah.FrameworkDefinitions;
-    using Chutzpah.Models;
-    using Moq;
-    using Xunit;
-    using Xunit.Extensions;
 
     public class JasmineDefinitionFacts
     {
@@ -133,10 +134,9 @@
             {
                 var creator = new JasmineDefinitionCreator();
                 var processor = creator.Mock<IJasmineReferencedFileProcessor>();
-                processor.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
-                creator.ClassUnderTest.Process(new ReferencedFile());
+                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile());
 
-                processor.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
 
             [Fact]
@@ -145,14 +145,12 @@
                 var creator = new JasmineDefinitionCreator();
                 var processor1 = new Mock<IJasmineReferencedFileProcessor>();
                 var processor2 = new Mock<IJasmineReferencedFileProcessor>();
-                processor1.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
-                processor2.Setup(x => x.Process(It.IsAny<ReferencedFile>()));
                 creator.InjectArray<IJasmineReferencedFileProcessor>(new[] { processor1.Object, processor2.Object });
 
-                creator.ClassUnderTest.Process(new ReferencedFile());
+                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile());
 
-                processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
-                processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>()));
+                processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
+                processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
         }
 

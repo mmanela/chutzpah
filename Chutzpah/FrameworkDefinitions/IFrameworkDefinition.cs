@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Data.SqlTypes;
+using System.Collections.Generic;
+using Chutzpah.Models;
 
 namespace Chutzpah.FrameworkDefinitions
 {
-    using System.Collections.Generic;
-    using Chutzpah.Models;
 
     /// <summary>
     /// Interface that describes a test framework.
@@ -62,7 +62,9 @@ namespace Chutzpah.FrameworkDefinitions
         /// Processes a referenced file according to the framework's needs.
         /// </summary>
         /// <param name="referencedFile">A referenced file to process.</param>
-        void Process(ReferencedFile referencedFile);
+        /// <param name="testFileText"></param>
+        /// <param name="settings"></param>
+        void Process(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings);
 
         Dictionary<string, string> GetFrameworkReplacements(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText);
     }

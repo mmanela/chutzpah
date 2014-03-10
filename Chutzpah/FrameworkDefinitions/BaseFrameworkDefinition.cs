@@ -104,13 +104,15 @@ namespace Chutzpah.FrameworkDefinitions
         /// Processes a referenced file according to the framework's needs.
         /// </summary>
         /// <param name="referencedFile">A referenced file to process.</param>
-        public void Process(ReferencedFile referencedFile)
+        /// <param name="testFileText"></param>
+        /// <param name="settings"></param>
+        public void Process(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings)
         {
             if (FileProcessors != null)
             {
                 foreach (IReferencedFileProcessor item in FileProcessors)
                 {
-                    item.Process(referencedFile);
+                    item.Process(referencedFile, testFileText, settings);
                 }
             }
         }

@@ -23,7 +23,7 @@
                 var processor = new TestableJasmineLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, Path = "path" };
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 processor.Mock<IFileSystemWrapper>().Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
             }
@@ -42,12 +42,12 @@
                     "});"
                 });
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 Assert.Equal(3, file.FilePositions[0].Line);
-                Assert.Equal(3, file.FilePositions[0].Column);
+                Assert.Equal(7, file.FilePositions[0].Column);
                 Assert.Equal(4, file.FilePositions[1].Line);
-                Assert.Equal(5, file.FilePositions[1].Column);
+                Assert.Equal(9, file.FilePositions[1].Column);
             }
 
             [Fact]
@@ -62,10 +62,10 @@
                     "  it 'test1', ->"
                 });
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 Assert.Equal(3, file.FilePositions[0].Line);
-                Assert.Equal(3, file.FilePositions[0].Column);
+                Assert.Equal(7, file.FilePositions[0].Column);
             }
 
             [Fact]
@@ -80,10 +80,10 @@
                     "};"
                 });
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
-                Assert.Equal(2, file.FilePositions[0].Column);
+                Assert.Equal(7, file.FilePositions[0].Column);
             }
         }
     }

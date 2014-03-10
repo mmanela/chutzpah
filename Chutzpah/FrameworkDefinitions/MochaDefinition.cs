@@ -17,10 +17,10 @@ namespace Chutzpah.FrameworkDefinitions
 
         private static string[] knownInterfaces = new[]
         {
-            "bdd",
-            "qunit",
-            "tdd",
-            "exports"
+            Constants.MochaBddInterface,
+            Constants.MochaQunitInterface,
+            Constants.MochaTddInterface,
+            Constants.MochaExportsInterface,
         };
 
         /// <summary>
@@ -85,24 +85,24 @@ namespace Chutzpah.FrameworkDefinitions
 
             if (isCoffeeFile)
             {
-                if (RegexPatterns.MochaBddTestRegexCoffeeScript.IsMatch(testFileText)) return "bdd";
+                if (RegexPatterns.MochaBddTestRegexCoffeeScript.IsMatch(testFileText)) return Constants.MochaBddInterface;
                 if (RegexPatterns.MochaTddOrQunitTestRegexCoffeeScript.IsMatch(testFileText))
                 {
-                    return RegexPatterns.MochaTddSuiteRegexCoffeeScript.IsMatch(testFileText) ? "tdd" : "qunit";
+                    return RegexPatterns.MochaTddSuiteRegexCoffeeScript.IsMatch(testFileText) ? Constants.MochaTddInterface : Constants.MochaQunitInterface;
                 }
-                if (RegexPatterns.MochaExportsTestRegexCoffeeScript.IsMatch(testFileText)) return "exports";
+                if (RegexPatterns.MochaExportsTestRegexCoffeeScript.IsMatch(testFileText)) return Constants.MochaExportsInterface;
             }
             else
             {
-                if (RegexPatterns.MochaBddTestRegexJavaScript.IsMatch(testFileText)) return "bdd";
+                if (RegexPatterns.MochaBddTestRegexJavaScript.IsMatch(testFileText)) return Constants.MochaBddInterface;
                 if (RegexPatterns.MochaTddOrQunitTestRegexJavaScript.IsMatch(testFileText))
                 {
-                    return RegexPatterns.MochaTddSuiteRegexJavaScript.IsMatch(testFileText) ? "tdd" : "qunit";
+                    return RegexPatterns.MochaTddSuiteRegexJavaScript.IsMatch(testFileText) ? Constants.MochaTddInterface : Constants.MochaQunitInterface;
                 }
-                if (RegexPatterns.MochaExportsTestRegexJavaScript.IsMatch(testFileText)) return "exports";
+                if (RegexPatterns.MochaExportsTestRegexJavaScript.IsMatch(testFileText)) return Constants.MochaExportsInterface;
             }
 
-            return "bdd";
+            return Constants.MochaBddInterface;
         }
 
         public override Dictionary<string, string> GetFrameworkReplacements(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText)
@@ -112,5 +112,6 @@ namespace Chutzpah.FrameworkDefinitions
                 { "MochaUi", GetInterfaceType(chutzpahTestSettings, testFilePath, testFileText) }
             };
         }
+
     }
 }

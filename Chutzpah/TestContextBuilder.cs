@@ -122,7 +122,7 @@ namespace Chutzpah
                 var testHarnessDirectory = GetTestHarnessDirectory(chutzpahTestSettings, inputTestFileDir);
                 var fileUnderTest = GetFileUnderTest(testFilePath, chutzpahTestSettings);
                 referencedFiles.Add(fileUnderTest);
-                definition.Process(fileUnderTest);
+                definition.Process(fileUnderTest, testFileText, chutzpahTestSettings);
 
 
                 referenceProcessor.GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);

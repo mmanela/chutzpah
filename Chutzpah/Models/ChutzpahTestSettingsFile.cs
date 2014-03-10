@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using Chutzpah.Compilers.TypeScript;
 namespace Chutzpah.Models
 {
@@ -31,6 +32,7 @@ namespace Chutzpah.Models
     public class ChutzpahTestSettingsFile
     {
         public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile();
+        private Regex testPatternRegex;
 
         public ChutzpahTestSettingsFile()
         {
@@ -87,6 +89,13 @@ namespace Chutzpah.Models
         /// If TestHarnessLocationMode is set to Custom then this will be the path to the folder to place the generated test harness file
         /// </summary>
         public string TestHarnessDirectory { get; set; }
+
+        /// <summary>
+        /// A Regualr Expression which tells Chutpah where to find the names of your tests in the test file. 
+        /// The regex must contain a capture group named TestName like (?<TestName>) that contains the test name (inside of the quotes)
+        /// </summary>
+        public string TestPattern { get; set; }
+
 
         /// <summary>
         /// The path to your own test harness for Chutzpah to use. 
@@ -173,6 +182,20 @@ namespace Chutzpah.Models
             get
             {
                 return Path.Combine(SettingsFileDirectory, Constants.SettingsFileName);
+            }
+        }
+
+
+        public Regex TestPatternRegex
+        {
+            get
+            {
+                if (TestPattern == null)
+                {
+                    return null;
+                }
+
+                return testPatternRegex ?? (testPatternRegex = new Regex(TestPattern));
             }
         }
 

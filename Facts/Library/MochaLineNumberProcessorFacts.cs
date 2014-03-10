@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Linq;
-using Xunit.Extensions;
+using Chutzpah.FileProcessors;
+using Chutzpah.Models;
+using Chutzpah.Wrappers;
+using Moq;
+using Xunit;
 
 namespace Chutzpah.Facts.Library
 {
-    using Chutzpah.FileProcessors;
-    using Chutzpah.Models;
-    using Chutzpah.Wrappers;
-    using Moq;
-    using Xunit;
 
     public class MochaLineNumberProcessorFacts
     {
@@ -27,7 +25,7 @@ namespace Chutzpah.Facts.Library
                 var processor = new TestableMochaLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, Path = "path" };
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 processor.Mock<IFileSystemWrapper>().Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
             }
@@ -46,8 +44,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(4, 5)
+                    new FilePosition(3, 7),
+                    new FilePosition(4, 9)
                 };
 
                 TestPositions(false, lines, positions);
@@ -67,8 +65,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(4, 5)
+                    new FilePosition(3, 9),
+                    new FilePosition(4, 11)
                 };
 
                 TestPositions(false, lines, positions);
@@ -87,8 +85,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(4, 5)
+                    new FilePosition(3, 9),
+                    new FilePosition(4, 11)
                 };
 
                 TestPositions(false, lines, positions);
@@ -119,11 +117,11 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(5, 5),
-                    new FilePosition(6, 5),
-                    new FilePosition(8, 7),
-                    new FilePosition(10, 9)
+                    new FilePosition(3, 4),
+                    new FilePosition(5, 6),
+                    new FilePosition(6, 6),
+                    new FilePosition(8, 8),
+                    new FilePosition(10, 10)
                 };
 
                 TestPositions(false, lines, positions);
@@ -142,8 +140,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(4, 3)
+                    new FilePosition(3, 7),
+                    new FilePosition(4, 7)
                 };
 
                 TestPositions(true, lines, positions);
@@ -162,8 +160,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(4, 3)
+                    new FilePosition(3, 9),
+                    new FilePosition(4, 9)
                 };
 
                 TestPositions(true, lines, positions);
@@ -182,8 +180,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 1),
-                    new FilePosition(4, 1),
+                    new FilePosition(3, 7),
+                    new FilePosition(4, 7),
                 };
 
                 TestPositions(true, lines, positions);
@@ -213,11 +211,11 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 3),
-                    new FilePosition(5, 5),
-                    new FilePosition(6, 5),
-                    new FilePosition(8, 7),
-                    new FilePosition(10, 9)
+                    new FilePosition(3, 4),
+                    new FilePosition(5, 6),
+                    new FilePosition(6, 6),
+                    new FilePosition(8, 8),
+                    new FilePosition(10, 10)
                 };
 
                 TestPositions(true, lines, positions);
@@ -235,22 +233,21 @@ namespace Chutzpah.Facts.Library
                     "};"
                 });
 
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
-                Assert.Equal(2, file.FilePositions[0].Column);
+                Assert.Equal(7, file.FilePositions[0].Column);
             }
 
             private static void TestPositions(bool coffeeScript, string[] lines, FilePosition[] positions)
             {
                 var path = coffeeScript ? "path.coffee" : "path";
                 var processor = new TestableMochaLineNumberProcessor();
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines(It.IsAny<string>())).Returns(lines);
 
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = path };
 
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines(path)).Returns(lines);
-
-                processor.ClassUnderTest.Process(file);
+                processor.ClassUnderTest.Process(file, String.Join("\n", lines), new ChutzpahTestSettingsFile());
 
                 Assert.True(
                     file.FilePositions.Contains(positions.Length - 1),

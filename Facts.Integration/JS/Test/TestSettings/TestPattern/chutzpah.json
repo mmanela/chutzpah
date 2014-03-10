@@ -1,0 +1,4 @@
+﻿{
+    "Framework": "qunit",
+    "TestPattern": "this\\.(testCase|test)\\([\"'](?<TestName>.*)[\"']"
+}

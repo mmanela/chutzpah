@@ -13,13 +13,13 @@
                 RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
-        public static Regex QUnitTestRegexJavaScript = new Regex(@"((?<!\.)\b(?:QUnit\.)?(?<Tf>test|asyncTest)[\t ]*\([\t ]*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
-        public static Regex QUnitTestRegexCoffeeScript = new Regex(@"(^[\t ]*(?:QUnit\.)?(?<Tf>test|asyncTest)[\t ]+[""'](?<Test>.*)[""'])", RegexOptions.Compiled | RegexOptions.Multiline);
+        public static Regex QUnitTestRegexJavaScript = new Regex(@"((?<!\.)\b(?:QUnit\.)?(test|asyncTest)[\t ]*\([\t ]*[""'](?<TestName>.*)[""'])", RegexOptions.Compiled);
+        public static Regex QUnitTestRegexCoffeeScript = new Regex(@"(^[\t ]*(?:QUnit\.)?(test|asyncTest)[\t ]+[""'](?<TestName>.*)[""'])", RegexOptions.Compiled | RegexOptions.Multiline);
 
-        public static Regex JasmineTestAndModuleRegex = new Regex(@"(\bdescribe\s*\(\s*[""'](?<Module>.*)[""'])|(\bit\s*\(\s*[""'](?<Test>.*)[""'])", RegexOptions.Compiled);
+        public static Regex JasmineTestAndModuleRegex = new Regex(@"(\bdescribe\s*\(\s*[""'](?<Module>.*)[""'])|(\bit\s*\(\s*[""'](?<TestName>.*)[""'])", RegexOptions.Compiled);
 
-        public static Regex JasmineTestRegexJavaScript = new Regex(@"(?<!\.)\b(?<Tf>it)\s*\(\s*[""'](?<Test>.*)[""']", RegexOptions.Compiled);
-        public static Regex JasmineTestRegexCoffeeScript = new Regex(@"^[\t ]*(?<Tf>it)[\t ]+[""'](?<Test>.*)[""']", RegexOptions.Compiled | RegexOptions.Multiline);
+        public static Regex JasmineTestRegexJavaScript = new Regex(@"(?<!\.)\b(it)\s*\(\s*[""'](?<TestName>.*)[""']", RegexOptions.Compiled);
+        public static Regex JasmineTestRegexCoffeeScript = new Regex(@"^[\t ]*(it)[\t ]+[""'](?<TestName>.*)[""']", RegexOptions.Compiled | RegexOptions.Multiline);
 
         public static Regex SchemePrefixRegex = new Regex(@"^(http|https|file)://", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -35,7 +35,7 @@
         public static readonly Regex MochaTddOrQunitTestRegexJavaScript = QUnitTestRegexJavaScript;
         public static readonly Regex MochaTddSuiteRegexCoffeeScript = new Regex(@"^\s*suite\s*[""'].*[""']\s*,\s*->", RegexOptions.Compiled | RegexOptions.Multiline);
         public static readonly Regex MochaTddSuiteRegexJavaScript = new Regex(@"^\s*suite\(\s*[""'].*[""']\s*,\s*function\s*\(", RegexOptions.Compiled | RegexOptions.Multiline);
-        public static readonly Regex MochaExportsTestRegexCoffeeScript = new Regex(@"^\s*(?<Tf>[""'](?<Test>.*)[""'])\s*:\s*(\([^)]*\)\s*)?->", RegexOptions.Compiled | RegexOptions.Multiline);
-        public static readonly Regex MochaExportsTestRegexJavaScript = new Regex(@"^\s*(?<Tf>[""'](?<Test>.*)[""'])\s*:\s*function\s*\(", RegexOptions.Compiled | RegexOptions.Multiline);
+        public static readonly Regex MochaExportsTestRegexCoffeeScript = new Regex(@"^\s*([""'](?<TestName>.*)[""'])\s*:\s*(\([^)]*\)\s*)?->", RegexOptions.Compiled | RegexOptions.Multiline);
+        public static readonly Regex MochaExportsTestRegexJavaScript = new Regex(@"^\s*([""'](?<TestName>.*)[""'])\s*:\s*function\s*\(", RegexOptions.Compiled | RegexOptions.Multiline);
     }
 }

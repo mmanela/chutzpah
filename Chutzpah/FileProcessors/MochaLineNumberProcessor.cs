@@ -1,72 +1,46 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Chutzpah.FrameworkDefinitions;
+using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.FileProcessors
 {
-    using Chutzpah.Models;
-    using Chutzpah.Wrappers;
-
-    public class MochaLineNumberProcessor : IMochaReferencedFileProcessor
+    public class MochaLineNumberProcessor : LineNumberProcessor, IMochaReferencedFileProcessor
     {
-        private IFileSystemWrapper fileSystem;
+
 
         public MochaLineNumberProcessor(IFileSystemWrapper fileSystem)
+            : base(fileSystem)
         {
-            this.fileSystem = fileSystem;
+
         }
 
-        public void Process(ReferencedFile referencedFile)
+        public override Regex GetTestPattern(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings)
         {
-            if (!referencedFile.IsFileUnderTest)
-            {
-                return;
-            }
-
+            var mochaFrameworkDefinition = MochaDefinition.GetInterfaceType(settings, referencedFile.Path, testFileText);
             var isCoffeeFile = referencedFile.Path.EndsWith(Constants.CoffeeScriptExtension, StringComparison.OrdinalIgnoreCase);
-            
-            var lines = this.fileSystem.GetLines(referencedFile.Path);
-            
-            var contents = string.Join(Environment.NewLine, lines);
-
-            var coffeeScriptTestPatterns = new[] {
-                RegexPatterns.MochaBddTestRegexCoffeeScript,
-                RegexPatterns.MochaTddOrQunitTestRegexCoffeeScript,
-                RegexPatterns.MochaExportsTestRegexCoffeeScript
-            };
-
-            var javaScriptTestPatterns = new[] {
-                RegexPatterns.MochaBddTestRegexJavaScript,
-                RegexPatterns.MochaTddOrQunitTestRegexJavaScript,
-                RegexPatterns.MochaExportsTestRegexJavaScript
-            };
-
-            var patterns = isCoffeeFile ? coffeeScriptTestPatterns : javaScriptTestPatterns;
-
-            var regExp = patterns.FirstOrDefault(p => p.IsMatch(contents));
-
-            if (regExp == null)
-                return;
-
-            int lineNum = 1;
-
-            foreach (var line in lines)
+            switch (mochaFrameworkDefinition)
             {
-                var match = regExp.Match(line);
+                case Constants.MochaQunitInterface:
 
-                while (match.Success)
-                {
-                    var testName = match.Groups["Test"].Value;
+                    return isCoffeeFile ? RegexPatterns.MochaTddOrQunitTestRegexCoffeeScript : RegexPatterns.MochaTddOrQunitTestRegexJavaScript;
 
-                    if (!string.IsNullOrWhiteSpace(testName))
-                    {
-                        var testFunc = match.Groups["Tf"];
-                        referencedFile.FilePositions.Add(lineNum, testFunc.Index + 1);
-                    }
+                case Constants.MochaBddInterface:
 
-                    match = match.NextMatch();
-                }
+                    return isCoffeeFile ? RegexPatterns.MochaBddTestRegexCoffeeScript : RegexPatterns.MochaBddTestRegexJavaScript;
 
-                lineNum++;
+                case Constants.MochaTddInterface:
+
+                    return isCoffeeFile ? RegexPatterns.MochaTddOrQunitTestRegexCoffeeScript : RegexPatterns.MochaTddOrQunitTestRegexJavaScript;
+
+                case Constants.MochaExportsInterface:
+
+                    return isCoffeeFile ? RegexPatterns.MochaExportsTestRegexCoffeeScript : RegexPatterns.MochaExportsTestRegexJavaScript;
+
+                default:
+                    return isCoffeeFile ? RegexPatterns.MochaBddTestRegexCoffeeScript : RegexPatterns.MochaBddTestRegexJavaScript;
             }
         }
     }
