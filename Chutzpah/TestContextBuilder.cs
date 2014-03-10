@@ -356,10 +356,9 @@ namespace Chutzpah
 
             if (chutzpahTestSettings.Compile != null)
             {
-                ChutzpahTracer.TraceInformation("Skipping old style file compilation since we detected the new compile setting");
+                ChutzpahTracer.TraceInformation("Ignoring old style file compilation since we detected the new compile setting");
                 return;
             }
-
             ChutzpahTracer.TraceInformation("Starting legacy file compilation/generation");
 
             foreach (var fileGenerator in fileGenerators)

@@ -57,7 +57,7 @@ namespace Chutzpah.BatchProcessor
                 }
                 else
                 {
-                    ChutzpahTracer.TraceInformation("All files update to date so skipping batch compile for {0}", testSettings.SettingsFileName);
+                    ChutzpahTracer.TraceInformation("Skipping batch compile since all files are supdate to date for {0}", testSettings.SettingsFileName);
                 }
 
                 // Now that compile finished set generated path on  all files who match the compiled extensions

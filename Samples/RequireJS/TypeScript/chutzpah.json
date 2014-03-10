@@ -12,5 +12,11 @@
     ],
     "Tests" : [
       {"Path": "tests"}
-    ]
+    ],  
+   "Compile": {
+    "Extensions": [".ts"],
+    "ExtensionsWithNoOutput": [".d.ts"],
+    "OutDirectory": "out",
+    "Executable": "compile.bat"
+   }
 }

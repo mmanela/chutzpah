@@ -29,6 +29,8 @@ namespace Chutzpah.FileGenerators
 
             if (referencedFiles.Any())
             {
+                ChutzpahTracer.TraceWarning("Performing DEPRECATED old style Chutzpah TypeScript/CoffeeScript compilation. Please change to the newer method.");
+
                 var compiledMap = GenerateCompiledSources(referencedFiles, chutzpahTestSettings);
 
                 foreach (var referencedFile in referencedFiles)

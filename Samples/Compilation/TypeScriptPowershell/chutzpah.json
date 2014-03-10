@@ -2,9 +2,9 @@
   "Compile": {
     "Extensions": [".ts"],
     "ExtensionsWithNoOutput": [".d.ts"],
-    "Executable": "%msbuildexe%",
-    "Arguments": "/t:CompileTS ",
-    "OutDirectory": "out"
+    "OutDirectory": "out",
+    "Executable": "%powershellexe%",
+    "Arguments": "-NoProfile %chutzpahsettingsdir%\\compile.ps1"
    },
   "References": [
     {"Include": "*/src/*.ts", "Exclude": "*/src/*.d.ts" }
