@@ -14,12 +14,13 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* 185	Specify which tests to run using Chutzpah.json file
-* 207	Upgrade to Jasmine 2.0
-* 199	Show output of console.log in VS test adapter as well as context menu runner
-* 198	Visual Studio test discovery engine locks chutzpah.json file
-* 193	Chutzpah.json Caching issues
-* 204	QUnit global failure is ignored by chutzpah at console	
+* 224	Detect code coverage setting in TFS Build
+* 214	RequireJS BaseURL Problem
+* 181	Ability to debug TypeScript source in browser
+* 201	Exclude option is only used within chutzpah
+* 174	Potential Memory Issues Running JS Tests in VS2012
+* 183	Decouple TypeScript engine from Chutzpah
+* 222	Support custom test name
         </releaseNotes>
     </metadata>
 </package>

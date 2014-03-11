@@ -204,7 +204,11 @@ namespace Chutzpah
             testSettingsService.ClearCache();
 
 
-            ChutzpahTracer.TraceInformation("Chutzpah run finished ");
+            ChutzpahTracer.TraceInformation(
+                "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
+                overallSummary.PassedCount,
+                overallSummary.FailedCount,
+                overallSummary.Errors.Count);
 
             return overallSummary;
         }
@@ -261,12 +265,21 @@ namespace Chutzpah
                                 "Invoking headless browser on test harness '{0}' for file '{1}'",
                                 testContext.TestHarnessPath,
                                 testContext.InputTestFile);
+
                             var testSummary = InvokeTestRunner(
                                 headlessBrowserPath,
                                 options,
                                 testContext,
                                 testRunnerMode,
                                 callback);
+
+                            ChutzpahTracer.TraceInformation(
+                                "Test harness '{0}' for file '{1}' finished with {2} passed, {3} failed and {4} errors",
+                                testContext.TestHarnessPath,
+                                testContext.InputTestFile,
+                                testSummary.PassedCount,
+                                testSummary.FailedCount,
+                                testSummary.Errors.Count);
 
                             ChutzpahTracer.TraceInformation(
                                 "Finished running headless browser on test harness '{0}' for file '{1}'",
@@ -450,6 +463,7 @@ namespace Chutzpah
                 errors.Add(error);
 
                 callback.FileError(error);
+                ChutzpahTracer.TraceError("Headless browser returned with an error: {0}", errorMessage);
             }
         }
 
