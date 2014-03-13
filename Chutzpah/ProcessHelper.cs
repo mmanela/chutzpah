@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -36,6 +37,8 @@ namespace Chutzpah
         public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)
         {
             ChutzpahTracer.TraceInformation("Started batch compile using {0} with args {1}", compileConfiguration.Executable, compileConfiguration.Arguments);
+            
+            var timeout = compileConfiguration.Timeout.Value;
             var p = new Process();
             // Append path to where .net drop is so you can use things like msbuild
             p.StartInfo.EnvironmentVariables["Path"] += ";" + System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory() + ";";
@@ -47,14 +50,58 @@ namespace Chutzpah
             p.StartInfo.WorkingDirectory = compileConfiguration.WorkingDirectory;
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            p.Start();
-            p.WaitForExit(compileConfiguration.Timeout.Value);
-            var stdOut = p.StandardOutput.ReadToEnd();
-            var stdErr = p.StandardError.ReadToEnd();
 
-            ChutzpahTracer.TraceInformation("Finished batch compile with exit code {0} using {1} with args {2}", p.ExitCode, compileConfiguration.Executable, compileConfiguration.Arguments);
 
-            return new BatchCompileResult { StandardError = stdErr, StandardOutput = stdOut, ExitCode = p.ExitCode };
+            StringBuilder output = new StringBuilder();
+            StringBuilder error = new StringBuilder();
+
+            // Ensure we read both input/output fully and don't get into a deadlock
+            using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
+            using (AutoResetEvent errorWaitHandle = new AutoResetEvent(false))
+            {
+                p.OutputDataReceived += (sender, e) =>
+                {
+                    if (e.Data == null)
+                    {
+                        outputWaitHandle.Set();
+                    }
+                    else
+                    {
+                        output.AppendLine(e.Data);
+                    }
+                };
+                p.ErrorDataReceived += (sender, e) =>
+                {
+                    if (e.Data == null)
+                    {
+                        errorWaitHandle.Set();
+                    }
+                    else
+                    {
+                        error.AppendLine(e.Data);
+                    }
+                };
+
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                
+                if (p.WaitForExit(timeout) &&
+                    outputWaitHandle.WaitOne(timeout) &&
+                    errorWaitHandle.WaitOne(timeout))
+                {
+
+                    ChutzpahTracer.TraceInformation("Finished batch compile with exit code {0} using {1} with args {2}", p.ExitCode, compileConfiguration.Executable, compileConfiguration.Arguments);
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("Finished batch compile on a timeout with exit code {0} using {1} with args {2}", p.ExitCode, compileConfiguration.Executable, compileConfiguration.Arguments);
+                }
+
+                return new BatchCompileResult { StandardError = error.ToString(), StandardOutput = output.ToString(), ExitCode = p.ExitCode };
+
+            }
+
         }
 
         public void LaunchFileInBrowser(string file)
