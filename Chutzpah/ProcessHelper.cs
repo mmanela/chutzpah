@@ -52,12 +52,12 @@ namespace Chutzpah
             p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
 
-            StringBuilder output = new StringBuilder();
-            StringBuilder error = new StringBuilder();
+            var output = new StringBuilder();
+            var error = new StringBuilder();
 
             // Ensure we read both input/output fully and don't get into a deadlock
-            using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
-            using (AutoResetEvent errorWaitHandle = new AutoResetEvent(false))
+            using (var outputWaitHandle = new AutoResetEvent(false))
+            using (var errorWaitHandle = new AutoResetEvent(false))
             {
                 p.OutputDataReceived += (sender, e) =>
                 {
