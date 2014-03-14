@@ -2,6 +2,12 @@ using System.Collections.Generic;
 
 namespace Chutzpah.Models
 {
+    public enum BatchCompileMode
+    {
+        Executable,
+        External
+    }
+
     public class BatchCompileConfiguration
     {
         public BatchCompileConfiguration()
@@ -9,7 +15,14 @@ namespace Chutzpah.Models
             Extensions = new List<string>();
             ExtensionsWithNoOutput = new List<string>();
             SkipIfUnchanged = true;
+            Mode = BatchCompileMode.Executable;
         }
+
+        /// <summary>
+        /// Determines the mode of the compile setting. By default it is to run the executable but if you set it to External
+        /// then Chutzpah assumes some external force will compile and Chutzpah will just look for generated JS files
+        /// </summary>
+        public BatchCompileMode Mode { get; set; }
 
         /// <summary>
         /// The extension of the files which are getting compiled

@@ -81,6 +81,31 @@ namespace Chutzpah.Facts
         }
 
         [Fact]
+        public void Will_not_compile_if_compile_mode_is_external()
+        {
+            var service = new TestableBatchCompilerService();
+            var context = service.BuildContext();
+            context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
+            context.TestFileSettings.Compile.Mode = BatchCompileMode.External;
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\a.ts" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\b.ts" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\c.js" });
+            service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f.EndsWith(".js"))))
+                .Returns(false)
+                .Returns(true)
+                .Returns(false)
+                .Returns(true);
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f.EndsWith(".ts")))).Returns(true);
+
+            service.ClassUnderTest.Compile(new[] { context });
+
+            service.Mock<IProcessHelper>().Verify(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>()),Times.Never());
+            Assert.Null(context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
+            Assert.Equal(@"C:\src\b.js", context.ReferencedFiles.ElementAt(1).GeneratedFilePath);
+            Assert.Null(context.ReferencedFiles.ElementAt(2).GeneratedFilePath);
+        }
+
+        [Fact]
         public void Will_mark_generated_path_when_output_folder_is_set()
         {
             var service = new TestableBatchCompilerService();

@@ -18,7 +18,8 @@ namespace Chutzpah.Facts.Integration
                     new object[] {@"Samples\RequireJS\CustomBaseUrl\QUnit\chutzpah.json"},
                     new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json"},
                     new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json"},
-
+                    
+                    new object[] {@"Samples\Compilation\ExternalCompile\chutzpah.json"},
                     new object[] {@"Samples\Compilation\TypeScript\chutzpah.json"},
                     new object[] {@"Samples\Compilation\CoffeeScript\chutzpah.json"},
                     new object[] {@"Samples\Compilation\TypeScriptMsbuild\chutzpah.json"},

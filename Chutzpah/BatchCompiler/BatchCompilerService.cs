@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Chutzpah.Exceptions;
@@ -53,7 +54,14 @@ namespace Chutzpah.BatchProcessor
                 // Run the batch compile if necessary
                 if (shouldCompile)
                 {
-                    RunBatchCompile(testSettings);
+                    if (testSettings.Compile.Mode == BatchCompileMode.Executable)
+                    {
+                        RunBatchCompile(testSettings);
+                    }
+                    else if(testSettings.Compile.Mode == BatchCompileMode.External)
+                    {
+                        ChutzpahTracer.TraceError("Chutzpah determined generated .js files are missing but the compile mode is External so Chutzpah can't compile them. Test results may be wrong.");
+                    }
                 }
                 else
                 {

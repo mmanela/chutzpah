@@ -137,21 +137,27 @@ namespace Chutzpah
             {
                 settings.Compile.Extensions = settings.Compile.Extensions ?? new List<string>();
 
-                if (string.IsNullOrEmpty(settings.Compile.Executable))
-                {
-                    throw new ArgumentException("Executable path must be passed for compile setting");
-                }
-
                 var compileVariables = BuildCompileVariables(settings);
 
-                settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(compileVariables, settings.Compile.Executable ?? ""));
-                settings.Compile.Arguments = ExpandVariable(compileVariables, settings.Compile.Arguments ?? "");
-                settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
+                // If the mode is executable then set its properties
+                if (settings.Compile.Mode == BatchCompileMode.Executable)
+                {
+                    if (string.IsNullOrEmpty(settings.Compile.Executable))
+                    {
+                        throw new ArgumentException("Executable path must be passed for compile setting");
+                    }
+                    settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(compileVariables, settings.Compile.Executable ?? ""));
+                    settings.Compile.Arguments = ExpandVariable(compileVariables, settings.Compile.Arguments ?? "");
+                    settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
+
+                    // Default timeout to 5 minutes if missing
+                    settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
+                }
+
+                // These settings might be needed in either External
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
                 settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(compileVariables, settings.Compile.OutDirectory ?? ""), true);
 
-                // Default timeout to 5 minutes if missing
-                settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
             }
         }
 
