@@ -26,8 +26,9 @@ task Set-Version {
     $global:version = $v + ".0"
   }
   else {
-    $v = git describe --abbrev=0 --tags
-	  $global:version = $v.substring(1) + '.' + (git log $($v + '..') --pretty=oneline | measure-object).Count
+    $vtag = git describe --abbrev=0 --tags
+    $v = $vtag.substring(1)
+	  $global:version = $v + '.' + (git log $($vtag + '..') --pretty=oneline | measure-object).Count
   }
   
 
@@ -40,8 +41,9 @@ task Update-VersionInFiles {
     $commit = git log -1 --pretty=format:%H
   }
   else {
-    $v = git describe --abbrev=0 --tags
-    $commit = git log -1 $($v + '..') --pretty=format:%H
+    $vtag = git describe --abbrev=0 --tags
+    $v = $vtag.substring(1)
+    $commit = git log -1 $($vtag + '..') --pretty=format:%H
   }
   
     
