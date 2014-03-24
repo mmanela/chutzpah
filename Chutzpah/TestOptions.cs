@@ -17,6 +17,7 @@ namespace Chutzpah
             defaultParallelism = Environment.ProcessorCount;
             MaxDegreeOfParallelism = defaultParallelism;
             CoverageOptions = new CoverageOptions();
+            TestExecutionMode = TestExecutionMode.Execution;
 
         }
 
@@ -39,6 +40,12 @@ namespace Chutzpah
         /// testing html test harnesses directly or both
         /// </summary>
         public TestingMode TestingMode { get; set; }
+
+        /// <summary>
+        /// Marks if we are running in exeuction or discovery mode
+        /// </summary>
+        public TestExecutionMode TestExecutionMode { get; set; }
+
 
         /// <summary>
         /// This is the max number of files to run tests for

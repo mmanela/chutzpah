@@ -95,20 +95,19 @@ namespace Chutzpah
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths)
         {
-            var summary = ProcessTestPaths(testPaths, new TestOptions(), TestRunnerMode.Discovery, RunnerCallback.Empty);
-            return summary.Tests;
+            return DiscoverTests(testPaths, new TestOptions());
         }
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options)
         {
-            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Discovery, RunnerCallback.Empty);
-            return summary.Tests;
+            IList<TestError> testErrors;
+            return DiscoverTests(testPaths, options, out testErrors);
         }
 
 
         public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, out IList<TestError> errors)
         {
-            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Discovery, RunnerCallback.Empty);
+            var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Discovery, RunnerCallback.Empty);
             errors = summary.Errors;
             return summary.Tests;
         }
@@ -139,7 +138,7 @@ namespace Chutzpah
             callback = options.OpenInBrowser || callback == null ? RunnerCallback.Empty : callback;
             callback.TestSuiteStarted();
 
-            var summary = ProcessTestPaths(testPaths, options, TestRunnerMode.Execution, callback);
+            var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
 
             callback.TestSuiteFinished(summary);
             return summary;
@@ -147,11 +146,13 @@ namespace Chutzpah
 
         private TestCaseSummary ProcessTestPaths(IEnumerable<string> testPaths,
                                                  TestOptions options,
-                                                 TestRunnerMode testRunnerMode,
+                                                 TestExecutionMode testExecutionMode,
                                                  ITestMethodRunnerCallback callback)
         {
 
-            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testRunnerMode, options.MaxDegreeOfParallelism);
+            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, options.MaxDegreeOfParallelism);
+
+            options.TestExecutionMode = testExecutionMode;
 
             stopWatch.Start();
             string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
@@ -187,7 +188,7 @@ namespace Chutzpah
             }
 
             // Build test harness for each context and execute it in parallel
-            ExecuteTestContexts(options, testRunnerMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary);
+            ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary);
 
 
             // Gather TestFileSummaries into TaseCaseSummary
@@ -232,7 +233,7 @@ namespace Chutzpah
 
         private void ExecuteTestContexts(
             TestOptions options,
-            TestRunnerMode testRunnerMode,
+            TestExecutionMode testExecutionMode,
             ITestMethodRunnerCallback callback,
             ConcurrentBag<TestContext> testContexts,
             ParallelOptions parallelOptions,
@@ -245,7 +246,7 @@ namespace Chutzpah
                 parallelOptions,
                 testContext =>
                 {
-                    ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.InputTestFile, testRunnerMode);
+                    ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.InputTestFile, testExecutionMode);
 
                     try
                     {
@@ -270,7 +271,7 @@ namespace Chutzpah
                                 headlessBrowserPath,
                                 options,
                                 testContext,
-                                testRunnerMode,
+                                testExecutionMode,
                                 callback);
 
                             ChutzpahTracer.TraceInformation(
@@ -303,7 +304,7 @@ namespace Chutzpah
                     }
                     finally
                     {
-                        ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFile, testRunnerMode);
+                        ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFile, testExecutionMode);
                     }
                 });
 
@@ -419,13 +420,13 @@ namespace Chutzpah
         private TestFileSummary InvokeTestRunner(string headlessBrowserPath,
                                                  TestOptions options,
                                                  TestContext testContext,
-                                                 TestRunnerMode testRunnerMode,
+                                                 TestExecutionMode testExecutionMode,
                                                  ITestMethodRunnerCallback callback)
         {
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildHarnessUrl(testContext.TestHarnessPath, testContext.IsRemoteHarness);
 
-            string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testRunnerMode);
+            string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testExecutionMode);
             Func<ProcessStream, TestFileSummary> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, m_debugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
@@ -467,10 +468,10 @@ namespace Chutzpah
             }
         }
 
-        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestRunnerMode testRunnerMode)
+        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode)
         {
             string runnerArgs;
-            var testModeStr = testRunnerMode.ToString().ToLowerInvariant();
+            var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds;
             if (timeout.HasValue && timeout > 0)
             {

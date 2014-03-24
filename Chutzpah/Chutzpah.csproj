@@ -156,7 +156,7 @@
     <Compile Include="Models\ReferencedFile.cs" />
     <Compile Include="Models\PathType.cs" />
     <Compile Include="Models\TestCase.cs" />
-    <Compile Include="Models\TestRunnerMode.cs" />
+    <Compile Include="Models\TestExecutionMode.cs" />
     <Compile Include="Models\TestProcessExitCode.cs" />
     <Compile Include="ReferenceProcessor.cs" />
     <Compile Include="RegexPatterns.cs" />
