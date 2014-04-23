@@ -497,8 +497,10 @@ namespace Chutzpah
             }
             else
             {
-                const string fileUrlFormat = "\"file:///{0}\"";
-                return string.Format(fileUrlFormat, FileProbe.EncodeFilePath(absolutePath));
+                var encodedPartialPath = FileProbe.EncodeFilePath(absolutePath);
+                var fileUrlFormat = encodedPartialPath.StartsWith("//") ? "file://{0}" : "file:///{0}";                
+                var encodedFullPath = string.Format(fileUrlFormat, encodedPartialPath);
+                return encodedFullPath;
             }
         }
     }
