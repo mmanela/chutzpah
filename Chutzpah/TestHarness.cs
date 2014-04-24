@@ -284,7 +284,9 @@ namespace Chutzpah
             if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath))
             {
                 // Encode the reference path and then decode / (forward slash) and \ (back slash) into / (forward slash)
-                return "file:///" + FileProbe.EncodeFilePath(referencePath);
+                var encodedReferencePath = FileProbe.EncodeFilePath(referencePath);
+                var fileUrlFormat = encodedReferencePath.StartsWith("//") ? "file://{0}" : "file:///{0}";
+                return string.Format(fileUrlFormat, encodedReferencePath);
             }
 
             return referencePath;
