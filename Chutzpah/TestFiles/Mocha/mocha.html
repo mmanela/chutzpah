@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <title>Mocha Tests</title>
     @@TestFrameworkDependencies@@
+    <script type="text/javascript">
+        mocha.setup('@@MochaUi@@');
+    </script>
     @@CodeCoverageDependencies@@
     @@ReferencedCSSFiles@@
     @@TestHtmlTemplateFiles@@
     @@ReferencedJSFiles@@
-    <script type="text/javascript">
-        mocha.setup('@@MochaUi@@');
-    </script>
     @@TestJSFile@@
 </head>
 <body>
