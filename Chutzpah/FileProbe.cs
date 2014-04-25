@@ -240,13 +240,23 @@ namespace Chutzpah
             return null;
         }
 
-        public static string EncodeFilePath(string path)
+        private static string EncodeFilePath(string path)
         {
             return HttpUtility.UrlEncode(path)
                 .Replace("+", "%20")
                 .Replace("%3a", ":")
                 .Replace("%5c", "/")
                 .Replace("%2f", "/");
+        }
+
+        /// <summary>
+        /// This generates a file url based on an absolute file path
+        /// </summary>
+        public static string GenerateFileUrl(string absolutePath)
+        {
+            var encodedReferencePath = EncodeFilePath(absolutePath);
+            var fileUrlFormat = encodedReferencePath.StartsWith("//") ? "file://{0}" : "file:///{0}";
+            return string.Format(fileUrlFormat, encodedReferencePath);
         }
 
         public static string NormalizeFilePath(string path)
