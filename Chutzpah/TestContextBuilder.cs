@@ -373,7 +373,10 @@ namespace Chutzpah
         {
             // Don't run cod coverage if in discovery mode
             if (options.TestExecutionMode == TestExecutionMode.Discovery) return null;
-            if (!options.CoverageOptions.Enabled && !chutzpahTestSettings.EnableCodeCoverage) return null;
+
+            var codeCoverageEnabled = (!chutzpahTestSettings.EnableCodeCoverage.HasValue && options.CoverageOptions.Enabled)
+                                      || (chutzpahTestSettings.EnableCodeCoverage.HasValue && chutzpahTestSettings.EnableCodeCoverage.Value);
+            if (!codeCoverageEnabled) return null;
 
             ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
             mainCoverageEngine.ClearPatterns();
