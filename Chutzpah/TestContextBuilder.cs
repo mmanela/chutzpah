@@ -371,7 +371,7 @@ namespace Chutzpah
 
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            // Don't run cod coverage if in discovery mode
+            // Don't run code coverage if in discovery mode
             if (options.TestExecutionMode == TestExecutionMode.Discovery) return null;
 
             var codeCoverageEnabled = (!chutzpahTestSettings.EnableCodeCoverage.HasValue && options.CoverageOptions.Enabled)
