@@ -14,13 +14,11 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* 224	Detect code coverage setting in TFS Build
-* 214	RequireJS BaseURL Problem
-* 181	Ability to debug TypeScript source in browser
-* 201	Exclude option is only used within chutzpah
-* 174	Potential Memory Issues Running JS Tests in VS2012
-* 183	Decouple TypeScript engine from Chutzpah
-* 222	Support custom test name
+* 238 Disabling code coverage in VS is not possible
+* 232 VS 2013 Test Explorer shows no JS tests
+* 243 Mocha + angular-mocks incompatibility
+* Fix file path generation for network shares
+* Update legacy TypeScript support to 1.0 (the last time this will update)
         </releaseNotes>
     </metadata>
 </package>
