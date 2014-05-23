@@ -54,7 +54,7 @@ namespace Chutzpah.Utility
         {
             if (GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes <= 0) return;
             
-            // Mark that a mutation occured so we know to save
+            // Mark that a mutation occurred so we know to save
             mutated = true;
 
             var hash = hasher.Hash(key);

@@ -446,10 +446,10 @@ namespace Chutzpah
                 case TestProcessExitCode.SomeFailed:
                     return;
                 case TestProcessExitCode.Timeout:
-                    errorMessage = "Timeout occured when executing test file";
+                    errorMessage = "Timeout occurred when executing test file";
                     break;
                 default:
-                    errorMessage = "Unknown error occurred when executing test file. Recieved exit code of " + exitCode;
+                    errorMessage = "Unknown error occurred when executing test file. Received exit code of " + exitCode;
                     break;
             }
 

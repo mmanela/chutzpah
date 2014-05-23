@@ -42,14 +42,14 @@ namespace Chutzpah
         void TestFinished(TestCase testCase);
 
         /// <summary>
-        /// An exception occured in Chutzpah while running tests
+        /// An exception occurred in Chutzpah while running tests
         /// </summary>
         /// <param name="exception"></param>
         /// <param name="fileName"></param>
         void ExceptionThrown(Exception exception, string fileName);
 
         /// <summary>
-        /// An error that occured in a test file 
+        /// An error that occurred in a test file 
         /// </summary>
         /// <param name="error">Test file error</param>
         void FileError(TestError error);
