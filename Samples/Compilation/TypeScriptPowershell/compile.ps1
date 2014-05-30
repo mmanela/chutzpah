@@ -1,1 +1,1 @@
-tsc src/code.ts test/test.ts --sourcemap --declaration --outDir out
+tsc.cmd src/code.ts test/test.ts --sourcemap --declaration --outDir out
