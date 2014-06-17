@@ -238,6 +238,8 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/excluded.js"" chutzpah-exclude=""true"" />
                         /// <reference path=""../../js/doublenegative.js"" chutzpah-exclude=""false"" />
+                        /// <reference path=""../../js/excluded.js"" chutzpahExclude=""true"" />
+                        /// <reference path=""../../js/doublenegative.js"" chutzpahExclude=""false"" />
                         some javascript code
                         ";
 

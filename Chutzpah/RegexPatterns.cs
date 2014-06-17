@@ -5,7 +5,7 @@
     public static class RegexPatterns
     {
         public static Regex JsReferencePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""'](\s+chutzpah-exclude\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
+            new Regex(@"^\s*(///|##)\s*<\s*(?:chutzpah_)?reference\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""'](\s+(chutzpah-exclude|chutzpahExclude)\s*=\s*[""'](?<Exclude>[^""<>|]+)[""'])?\s*/>",
         RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static Regex JsTemplatePathRegex =
