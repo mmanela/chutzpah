@@ -261,7 +261,7 @@ namespace Chutzpah
                 }
 
                 // At this point we know that this file/folder does not exist!
-                ChutzpahTracer.TraceWarning("Referenced file '{0}' which was resolved to '{1}' does not exist", referencePath, relativeProcessingPathFolder);
+                ChutzpahTracer.TraceWarning("Referenced file '{0}' which was resolved to '{1}' does not exist", referencePath, relativeReferencePath);
             }
             else if (referenceUri.IsAbsoluteUri)
             {
