@@ -18,3 +18,9 @@ var mathLib = {
         return a * 5;
     }
 }
+
+function log(message) {
+  if(message) {
+    console.log(message);
+  }
+}

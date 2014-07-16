@@ -21,6 +21,9 @@ namespace Chutzpah
         // The max-size in bytes for the compilercache file
         public const int DefaultCompilerCacheFileMaxSize = 32*1024*1024;
 
+        // The default percentage of lines should be covered to show the coverage output as success or failure.
+        public const double DefaultCodeCoverageSuccessPercentage = 60;
+
         // Format for temporary files Chutzpah creates that should be ignored in source controler.
         // These get generated when Chutzpah needs to generate a file in place like when it needs to convert 
         // Coffee script to JS

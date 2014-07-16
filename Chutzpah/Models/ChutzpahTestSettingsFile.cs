@@ -41,6 +41,7 @@ namespace Chutzpah.Models
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             CoffeeScriptBareMode = true;
+            CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
         }
 
 
@@ -139,6 +140,11 @@ namespace Chutzpah.Models
         /// If False, forces code coverage to never run. 
         /// </summary>
         public bool? EnableCodeCoverage { get; set; }
+
+        /// <summary>
+        /// The percentage of lines should be covered to show the coverage output as success or failure. By default, this is 60.
+        /// </summary>
+        public double CodeCoverageSuccessPercentage { get; set; }
 
         /// <summary>
         /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.

@@ -12,7 +12,19 @@ namespace Chutzpah.Models
     /// </summary>
     public class CoverageData : Dictionary<string, CoverageFileData>
     {
+
         private double? coveragePercentage;
+
+        public CoverageData()
+        {
+        }
+
+        public CoverageData(double successPercentage)
+        {
+            SuccessPercentage = successPercentage; 
+        }
+
+        public double? SuccessPercentage { get; set; }
 
         /// <summary>
         /// The average percentage of line that were covered
@@ -57,6 +69,18 @@ namespace Chutzpah.Models
                 {
                     this[pair.Key] = new CoverageFileData(pair.Value);
                 }
+            }
+
+            // Since there could be multiple chutzpah.json files each setting their own success percentage
+            // we take the minimum of all of them. In the future, it would be nice to e able to apply each percentage to the 
+            // test files they came from.
+            if (!SuccessPercentage.HasValue)
+            {
+                SuccessPercentage = coverageData.SuccessPercentage;
+            }
+            else if (coverageData.SuccessPercentage.HasValue)
+            {
+                SuccessPercentage = Math.Min(SuccessPercentage.Value, coverageData.SuccessPercentage.Value);
             }
         }
     }

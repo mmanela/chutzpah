@@ -106,11 +106,11 @@ namespace Chutzpah.Coverage
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
-            BlanketCoverageObject data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
+            var data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
             IDictionary<string, string> generatedToOriginalFilePath =
                 testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
 
-            CoverageData coverageData = new CoverageData();
+            var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage);
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths, then only keep the ones

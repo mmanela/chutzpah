@@ -11,8 +11,6 @@ namespace Chutzpah.Coverage
 {
     public static class CoverageOutputGenerator
     {
-        private const double SuccessPercentage = 60;
-
         public static string WriteHtmlFile(string directory, CoverageData coverage)
         {
             var path = Path.Combine(directory, Constants.CoverageHtmlFileName);
@@ -39,6 +37,8 @@ namespace Chutzpah.Coverage
 
         public static void GenerateHtml(CoverageData coverage, Stream stream)
         {
+            var successPercentage = coverage.SuccessPercentage.HasValue ? coverage.SuccessPercentage.Value : Constants.DefaultCodeCoverageSuccessPercentage;
+           
             using (var writer = new StreamWriter(stream))
             {
                 writer.WriteLine(HtmlFragments.BodyContentStartFormat, HtmlFragments.Js, HtmlFragments.Css);
@@ -87,16 +87,16 @@ namespace Chutzpah.Coverage
                     totalLinesCovered += linesCovered;
                     totalLines += totalSmts;
 
-                    AppendResultLine(linesCovered, totalSmts, fileName, fileNumber, markup, writer);
+                    AppendResultLine(successPercentage, linesCovered, totalSmts, fileName, fileNumber, markup, writer);
                 }
 
 
-                AppendResultLine(totalLinesCovered, totalLines, "Total", 1+fileNumber, new string[0], writer);
+                AppendResultLine(successPercentage, totalLinesCovered, totalLines, "Total", 1 + fileNumber, new string[0], writer);
                 writer.WriteLine(HtmlFragments.BodyContentEnd);
             }
         }
 
-        private static void AppendResultLine(int linesCovered, int totalSmts, string fileName, int fileNumber, string[] markup, StreamWriter writer)
+        private static void AppendResultLine(double successPercentage, int linesCovered, int totalSmts, string fileName, int fileNumber, string[] markup, StreamWriter writer)
         {
             var result = FormatPercentage(linesCovered, totalSmts);
 
@@ -106,7 +106,7 @@ namespace Chutzpah.Coverage
                 .Replace("{{fileNumber}}", fileNumber.ToString(CultureInfo.InvariantCulture))
                 .Replace("{{totalSmts}}", totalSmts.ToString(CultureInfo.InvariantCulture))
                 .Replace("{{source}}", String.Join(" ", markup));
-            if (result < SuccessPercentage)
+            if (result < successPercentage)
             {
                 output = output.Replace("{{statusclass}}", "chutzpah-error");
             }

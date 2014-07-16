@@ -466,6 +466,17 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
+        [Fact]
+        public void Will_get_custom_success_percentage()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(@"JS\Test\Coverage\SuccessPercentage\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            var coverage = result.CoverageObject;
+            Assert.Equal(94.34, coverage.SuccessPercentage);
+        }
+
         private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
         {
             var opts = new TestOptions
