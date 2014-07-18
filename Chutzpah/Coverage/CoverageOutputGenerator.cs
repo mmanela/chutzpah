@@ -56,9 +56,13 @@ namespace Chutzpah.Coverage
                     var linesCovered = 0;
                     var markup = new string[fileData.SourceLines.Length + 1];
 
+                    var maxLineNumberLength = fileData.SourceLines.Length.ToString(CultureInfo.InvariantCulture).Length;
                     for (var i = 0; i < fileData.SourceLines.Length; i++)
                     {
-                        markup[i + 1] = "<div class='{{executed}}'><span class=''>" + (i + 1) + "</span>" + HttpUtility.HtmlEncode(fileData.SourceLines[i]) +
+                        var lineNumber = (i+1).ToString(CultureInfo.InvariantCulture).PadLeft(maxLineNumberLength);
+                        lineNumber = lineNumber.Replace(" ", "&nbsp;&nbsp;");
+                        var line = HttpUtility.HtmlEncode(fileData.SourceLines[i]).Replace(" ", "&nbsp;");
+                        markup[i + 1] = "<div class='{{executed}}'><span class=''>" + lineNumber + "</span>" + line +
                                         "</div>";
                     }
 
