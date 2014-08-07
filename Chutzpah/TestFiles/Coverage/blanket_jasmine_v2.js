@@ -5424,7 +5424,7 @@ _blanket.extend({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             jasmine.getEnv().execute = originalJasmineExecute;
-            jasmine.getEnv().execute();
+            window.initializeJasmine();
         }
     });
 })();
