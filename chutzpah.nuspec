@@ -14,11 +14,11 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* 238 Disabling code coverage in VS is not possible
-* 232 VS 2013 Test Explorer shows no JS tests
-* 243 Mocha + angular-mocks incompatibility
-* Fix file path generation for network shares
-* Update legacy TypeScript support to 1.0 (the last time this will update)
+* Update QUnit to 1.14.0
+* Improve log messages
+* Add configurable code coverage percentage
+* Fix code coverage formatting
+* Ignore ssl errors
         </releaseNotes>
     </metadata>
 </package>
