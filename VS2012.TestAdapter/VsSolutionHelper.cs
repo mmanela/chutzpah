@@ -45,6 +45,15 @@ namespace VS11.Plugin
 		public static IEnumerable<string> GetProjectItems(IVsHierarchy project, uint itemId)
 		{
 
+            // Don't enumerate over nodes that have side effects
+            // This is to prevent errors that could occur since the side affect code can do things like try to
+            // connect to a db
+            object hasSideEffects = GetPropertyValue((int)__VSHPROPID.VSHPROPID_HasEnumerationSideEffects, itemId, project);
+		    if (hasSideEffects != null && ((bool) hasSideEffects))
+		    {
+		        yield break;
+		    }
+
 			object pVar = GetPropertyValue((int)__VSHPROPID.VSHPROPID_FirstChild, itemId, project);
 
 			uint childId = GetItemId(pVar);
