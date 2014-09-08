@@ -35,7 +35,8 @@ namespace Chutzpah.Transformers
                 {
                     if (test.Passed)
                     {
-                        builder.AppendLine(string.Format(@"    <testcase name=""{0}"" />", Encode(test.GetDisplayName())));
+                        builder.AppendLine(string.Format(@"    <testcase name=""{0}"" time=""{1}"" />",
+                                           Encode(test.GetDisplayName()), test.TimeTaken));
                     }
                     else
                     {
@@ -43,8 +44,8 @@ namespace Chutzpah.Transformers
                         if (failureCase != null)
                         {
                             string failureMessage = failureCase.GetFailureMessage();
-                            builder.AppendLine(string.Format(@"    <testcase name=""{0}"">",
-                                                             Encode(test.GetDisplayName())));
+                            builder.AppendLine(string.Format(@"    <testcase name=""{0}"" time=""{1}"">",
+                                                             Encode(test.GetDisplayName()), test.TimeTaken));
                             builder.AppendLine(string.Format(@"      <failure message=""{0}""></failure>",
                                                              Encode(failureMessage)));
                             builder.AppendLine(string.Format(@"    </testcase>"));
