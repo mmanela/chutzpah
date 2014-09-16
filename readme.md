@@ -1,4 +1,4 @@
-# Chutzpah - A JavaScript Test Runner
+# ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/chetTimes.png) Chutzpah - A JavaScript Test Runner
 Pronunciation: [hutz·pah](http://www.thefreedictionary.com/chutzpah)
 
 Chutzpah is an open source JavaScript test runner which enables you to run unit tests using QUnit, Jasmine, Mocha, CoffeeScript and TypeScript.
