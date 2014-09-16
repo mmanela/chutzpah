@@ -8,9 +8,9 @@
         <summary>Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</summary>
         <description>Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio. It also supports running in the TeamCity continuous integration server.</description>
         <language>en-US</language>
-        <projectUrl>http://chutzpah.codeplex.com</projectUrl>
-        <licenseUrl>http://chutzpah.codeplex.com/license</licenseUrl>
-        <iconUrl>http://matthewmanela.com/wp-content/uploads/2011/09/chetTimes.png</iconUrl>
+        <projectUrl>https://github.com/mmanela/chutzpah</projectUrl>
+        <licenseUrl>https://github.com/mmanela/chutzpah/blob/master/License.txt</licenseUrl>
+        <iconUrl>https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/chetTimes.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>

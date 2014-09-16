@@ -4,9 +4,9 @@
     <Identity Id="VS11.Plugin.Chutzpah.67f38ef0-909a-40b5-b183-9477ad8c266a" Version="3.2.3" Language="en-US" Publisher="Matthew Manela" />
     <DisplayName>Chutzpah Test Adapter for the Test Explorer</DisplayName>
     <Description xml:space="preserve">Chutzpah adapter for the Visual Studio Unit Test Explorer. Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
-    <MoreInfo>http://chutzpah.codeplex.com/</MoreInfo>
+    <MoreInfo>https://github.com/mmanela/chutzpah</MoreInfo>
     <License>EULA.rtf</License>
-    <GettingStartedGuide>http://chutzpah.codeplex.com/</GettingStartedGuide>
+    <GettingStartedGuide>https://github.com/mmanela/chutzpah</GettingStartedGuide>
     <Icon>chetTimes.png</Icon>
     <PreviewImage>chetTimes.png</PreviewImage>
     <Tags>Javascript, Unit Testing, HTML, Visual Studio 2012, TDD, qunit, jasmine, testing, CoffeeScript, TypeScript</Tags>
