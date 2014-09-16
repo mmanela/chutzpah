@@ -1,4 +1,4 @@
-# ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/chetTimesSmall.png) Chutzpah - A JavaScript Test Runner
+# ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/chetTimesSmall.png) Chutzpah - A JavaScript Test Runner
 Pronunciation: [hutz·pah](http://www.thefreedictionary.com/chutzpah)
 
 Chutzpah is an open source JavaScript test runner which enables you to run unit tests using QUnit, Jasmine, Mocha, CoffeeScript and TypeScript.
@@ -43,7 +43,7 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 
 ##### Runs JavaScript unit tests from the command line
   
- ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/commandLine.png)
+ ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/commandLine.png)
 
 
 
@@ -51,19 +51,19 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 
 * Right click menu to run tests
   
- ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/contextmenu.png)
+ ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/contextmenu.png)
 
 
 * Shows test results in Error window
   
- ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/errorWindow.png)
+ ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/errorWindow.png)
 
 
 * Shows test results in Ouput window
   
-![](https://github.com/mmanela/chutzpah/blob/master/doc/images/outputWindow.png)
+![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/outputWindow.png)
 
 
 * Integrates into VS 2012 Unit Test Explorer
   
- ![](https://github.com/mmanela/chutzpah/blob/master/doc/images/UnitTestExplorer.png)
+ ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/UnitTestExplorer.png)
