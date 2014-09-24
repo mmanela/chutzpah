@@ -319,7 +319,8 @@ namespace Chutzpah.VisualStudio
                                                           OpenInBrowser = openInBrowser
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);
-                                    if (withCodeCoverage && result.CoverageObject != null)
+ 
+                                    if (result.CoverageObject != null)
                                     {
                                         var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result.CoverageObject);
                                         processHelper.LaunchFileInBrowser(path);

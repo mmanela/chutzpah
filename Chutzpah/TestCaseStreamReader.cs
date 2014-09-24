@@ -73,7 +73,12 @@ namespace Chutzpah
             var referencedFile = testContext.ReferencedFiles.SingleOrDefault(x => x.IsFileUnderTest);
             var testIndex = 0;
             var summary = new TestFileSummary(testContext.InputTestFile);
-            if (testOptions.CoverageOptions.Enabled)
+
+
+            var codeCoverageEnabled = (!testContext.TestFileSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
+                                      || (testContext.TestFileSettings.EnableCodeCoverage.HasValue && testContext.TestFileSettings.EnableCodeCoverage.Value);
+
+            if (codeCoverageEnabled)
             {
                 summary.CoverageObject = new CoverageData();
             }
