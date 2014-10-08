@@ -54,7 +54,7 @@ namespace Chutzpah
 
         protected virtual string GetFileLogMessage(TestLog log)
         {
-            return string.Format("Log Message: {0} from {1}", log.Message, log.InputTestFile);
+            return string.Format("Log Message: {0} from {1}\n", log.Message, log.InputTestFile);
         }
 
         protected virtual string GetExceptionThrownMessage(Exception exception, string fileName)
