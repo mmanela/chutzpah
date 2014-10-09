@@ -67,7 +67,7 @@ namespace Chutzpah
         /// </summary>
         private int GetDegreeOfParallelism(int value)
         {
-            return Math.Min(Math.Max(value, defaultParallelism), Environment.ProcessorCount);
+            return Math.Min(Math.Max(value, 1), Environment.ProcessorCount);
         }
 
         /// <summary>
