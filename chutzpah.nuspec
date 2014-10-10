@@ -14,11 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Update QUnit to 1.14.0
-* Improve log messages
-* Add configurable code coverage percentage
-* Fix code coverage formatting
-* Ignore ssl errors
+* Enable Test Adapter in VS 14
+* Fix VS log message formatting
+* Honor code coverage setting when running from VS
+* Fixed issue where Chutzpah ignore parallelism setting
         </releaseNotes>
     </metadata>
 </package>
