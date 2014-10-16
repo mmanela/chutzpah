@@ -152,6 +152,12 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         trySetupTestFramework();
     };
 
+
+    page.onResourceError = function (res) {
+        onError(res.errorString);
+        rawLog("!!_!! Resource Error: " + res.url);
+    }
+
     // Since tests run inside of Phantom are not part of your websites domain
     // lets loosen remote resource security restrictions to help with some testing scenarios
 
