@@ -475,15 +475,16 @@ namespace Chutzpah
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds;
             if (timeout.HasValue && timeout > 0)
             {
-                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3}",
+                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3} {4}",
                                            runnerPath,
                                            fileUrl,
                                            testModeStr,
-                                           timeout);
+                                           timeout,
+                                           context.TestFileSettings.UserAgent);
             }
             else
             {
-                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2}", runnerPath, fileUrl, testModeStr);
+                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3}", runnerPath, fileUrl, testModeStr, context.TestFileSettings.UserAgent);
             }
 
             return runnerArgs;

@@ -57,7 +57,7 @@ namespace Chutzpah.Facts.ConsoleRunner
                 cb.FileLog(log);
                 cb.TestFinished(tc);
 
-                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|nPassed']", _out.ToString());
+                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|n|nPassed']", _out.ToString());
             }
 
             [Fact]
@@ -71,7 +71,7 @@ namespace Chutzpah.Facts.ConsoleRunner
                 cb.FileLog(log);
                 cb.TestFinished(tc);
 
-                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|nTest |'foo|' failed|n\tfailure|nin  (line 0)|n|n']", _out.ToString());
+                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|n|nTest |'foo|' failed|n\tfailure|nin  (line 0)|n|n']", _out.ToString());
             }
 
             [Fact]
@@ -92,8 +92,8 @@ namespace Chutzpah.Facts.ConsoleRunner
                 cb.FileLog(log2);
                 cb.TestFinished(tc2);
 
-                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|nPassed']", _out.ToString());
-                Assert.Contains("##teamcity[testStdOut name='bar' out='Log Message: world from test.js|nPassed']", _out.ToString());
+                Assert.Contains("##teamcity[testStdOut name='foo' out='Log Message: hello from test.js|n|nPassed']", _out.ToString());
+                Assert.Contains("##teamcity[testStdOut name='bar' out='Log Message: world from test.js|n|nPassed']", _out.ToString());
             }
         }
     }

@@ -31,7 +31,7 @@ namespace Chutzpah.Facts
 
             public static string BuildArgs(string runner, string harness, string mode = "execution", int? timeout = null)
             {
-                var format = "{0} \"{1}\" \"{2}\" {3} {4}";
+                var format = "{0} \"{1}\" \"{2}\" {3} {4} ";
                 return string.Format(format, "--ignore-ssl-errors=true --proxy-type=none", runner, harness, mode, timeout.HasValue ? timeout.ToString() : "");
             }
         }

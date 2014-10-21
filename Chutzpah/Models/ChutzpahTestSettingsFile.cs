@@ -121,20 +121,6 @@ namespace Chutzpah.Models
         public RootReferencePathMode RootReferencePathMode { get; set; }
 
         /// <summary>
-        /// The type of code for the TypeScript compiler to generate
-        /// ES3 - Generate ECMAScript 3 Compatible code
-        /// ES5 - Generate ECMAScript 5 Compatible code
-        /// </summary>
-        public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
-
-        /// <summary>
-        /// The type of module code TypeScript should generate
-        /// CommonJS - CommonJS Style
-        /// AMD - AMD Style
-        /// </summary>
-        public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
-
-        /// <summary>
         /// If True, forces code coverage to run always
         /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
         /// If False, forces code coverage to never run. 
@@ -174,14 +160,38 @@ namespace Chutzpah.Models
         public string SettingsFileDirectory { get; set; }
 
         /// <summary>
+        /// The compile settings which tell Chutzpah how to perform the batch compile
+        /// </summary>
+        public BatchCompileConfiguration Compile { get; set; }
+
+        /// <summary>
+        /// The user agent to tell PhantomJS to use when making web requests
+        /// </summary>
+        public string UserAgent { get; set; }
+
+
+        #region Deprecated Properties. These are part of the old compile support Chutzpah had where it would embed the compiler. Please use compile setting now
+
+        /// <summary>
         /// Determines if CoffeeScript should run in bare mode or not. Default is true.
         /// </summary>
         public bool CoffeeScriptBareMode { get; set; }
 
         /// <summary>
-        /// The compile settings which tell Chutzpah how to perform the batch compile
+        /// The type of code for the TypeScript compiler to generate
+        /// ES3 - Generate ECMAScript 3 Compatible code
+        /// ES5 - Generate ECMAScript 5 Compatible code
         /// </summary>
-        public BatchCompileConfiguration Compile { get; set; }
+        public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
+
+        /// <summary>
+        /// The type of module code TypeScript should generate
+        /// CommonJS - CommonJS Style
+        /// AMD - AMD Style
+        /// </summary>
+        public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
+
+        #endregion
 
 
         public string SettingsFileName

@@ -15,7 +15,8 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         testFile = null,
         testMode = null,
         timeOut = null,
-        startTime = null;
+        startTime = null,
+        userAgent = null;
 
     function trySetupTestFramework() {
         if (!testFrameworkLoaded) {
@@ -129,6 +130,11 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     testFile = phantom.args[0];
     testMode = phantom.args[1] || "execution";
     timeOut = parseInt(phantom.args[2]) || 5001;
+
+    if (phantom.args.length > 3) {
+        userAgent = phantom.args[3];
+    }
+
     page.onConsoleMessage = captureLogMessage;
     page.onError = onError;
 
@@ -166,6 +172,10 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
     // Stops all security (for example you can access content in other domain IFrames)
     page.settings.webSecurityEnabled = false; //(default true)
+
+    if (userAgent) {
+        page.settings.userAgent = userAgent;
+    }
 
     page.open(testFile, pageOpenHandler);
 };

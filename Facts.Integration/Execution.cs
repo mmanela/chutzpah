@@ -1159,6 +1159,18 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(24, test.Line);
                 Assert.Equal(24, test.Column);
             }
+
+            [Fact]
+            public void Will_set_user_agent()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\UserAgent\userAgentTest.js", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(1, result.PassedCount);
+                Assert.Equal(1, result.TotalCount);
+            }
         }
     }
 }

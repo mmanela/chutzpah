@@ -357,6 +357,9 @@
     <Content Include="JS\Test\TestSettings\TestPattern\testPattern.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\TestSettings\UserAgent\userAgentTest.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\TimeoutSetting\timeoutTest.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -436,6 +439,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\Coverage\SuccessPercentage\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\UserAgent\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="JS\Test\TypeScript\basic-mocha-bdd.ts">
