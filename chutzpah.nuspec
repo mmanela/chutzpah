@@ -18,6 +18,8 @@
 * Fix VS log message formatting
 * Honor code coverage setting when running from VS
 * Fixed issue where Chutzpah ignore parallelism setting
+* Report url loading errors
+* Support configuring user agent
         </releaseNotes>
     </metadata>
 </package>
