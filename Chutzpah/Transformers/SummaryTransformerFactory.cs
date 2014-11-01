@@ -6,8 +6,9 @@ namespace Chutzpah.Transformers
     {
         public static IEnumerable<SummaryTransformer> GetTransformers()
         {
-            return new[] {
-                             new JUnitXmlTransformer()
+            return new SummaryTransformer[] {
+                             new JUnitXmlTransformer(),
+                             new LcovTransformer()
                          };
         }
     }
