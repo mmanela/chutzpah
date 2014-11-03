@@ -59,6 +59,8 @@
 
             this.jasmineStarted = function () {
 
+                fileStartTime = new Date().getTime();
+
                 // Testing began
                 log({ type: "FileStart" });
             };
