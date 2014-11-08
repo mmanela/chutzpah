@@ -10,7 +10,7 @@ properties {
 
 # Aliases
 task Default -depends Build
-task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution, Package-Files, Package-NuGet
+task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution
 task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
 
@@ -162,6 +162,9 @@ task Package-Chocolatey -depends Clean-PackageFiles, Set-Version {
     
     create $chocolateyDir, $packageDir
     copy-item $chocolateyInstall, $nuspec -destination $chocolateyDir
+ 
+    $v = new-object -TypeName System.Version -ArgumentList $global:version
+    regex-replace "$chocolateyDir\chocolateyInstall.ps1" '(?m)@Version@' $v.ToString(3)
     
     push-location $chocolateyDir
     $v = new-object -TypeName System.Version -ArgumentList $global:version
