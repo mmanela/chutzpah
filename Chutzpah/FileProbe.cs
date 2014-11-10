@@ -124,7 +124,7 @@ namespace Chutzpah
                         break;
                     case PathType.Folder:
                         var query = from file in fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
-                                    where !IsTemporaryChutzpahFile(file) && testingMode.FileBelongsToTestingMode(file)
+                                    where file.Length < 260 && !IsTemporaryChutzpahFile(file) && testingMode.FileBelongsToTestingMode(file)
                                     select file;
                         foreach (var item in query)
                         {
