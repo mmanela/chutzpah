@@ -15,6 +15,7 @@
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
 * Fix bug in JasmineV2 support where timetaken isn't calculated correctly causing an integer overflow
+* Update QUnit to 1.15 and update legacy version support
         </releaseNotes>
     </metadata>
 </package>
