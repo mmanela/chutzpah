@@ -107,6 +107,7 @@
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
+    <Compile Include="Models\TransformConfig.cs" />
     <Compile Include="NativeImports.cs" />
     <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
@@ -175,10 +176,14 @@
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
     <Compile Include="ChutzpahTracer.cs" />
+    <Compile Include="Transformers\ISummaryTransformerProvider.cs" />
+    <Compile Include="Transformers\ITransformProcessor.cs" />
     <Compile Include="Transformers\LcovTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
+    <Compile Include="Transformers\SummaryTransformerProvider.cs" />
+    <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\ICompilerCache.cs" />

@@ -9,6 +9,7 @@ using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
+using Chutzpah.Transformers;
 
 namespace Chutzpah.Facts
 {
@@ -534,6 +535,38 @@ namespace Chutzpah.Facts
                 testCallback.Verify(x => x.FileError(It.IsAny<TestError>()));
                 Assert.Equal(1, res.TotalCount);
                 Assert.Equal(1, res.Errors.Count);
+            }
+
+            [Fact]
+            public void Will_call_process_transforms()
+            {
+                var runner = new TestableTestRunner();
+                var summary = new TestFileSummary("somePath");
+                summary.AddTestCase(new TestCase());
+                var testCallback = new MockTestMethodRunnerCallback();
+                var context = new TestContext { TestHarnessPath = @"D:\harnessPath.html", TestRunner = "testRunner.js" };
+                runner.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.IsAny<PathInfo>(), It.IsAny<TestOptions>(), out context)).Returns(true);
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
+                runner.Mock<IProcessHelper>()
+                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStream, TestFileSummary>>()))
+                    .Returns(new ProcessResult<TestFileSummary>((int)TestProcessExitCode.Unknown, summary));
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
+
+                runner.Mock<ITransformProcessor>().Verify(x => x.ProcessTransforms(It.Is<IEnumerable<TestContext>>(c => c.Count() == 1 && c.Single() == context), res));
+            }
+
+            private ChutzpahTestSettingsFile GetTransformTestSettings(string path)
+            {
+                return new ChutzpahTestSettingsFile
+                {
+                    Transforms = new List<TransformConfig> 
+                    {
+                        new TransformConfig { Name = "mock", Path = path }
+                    }
+                };
             }
         }
     }

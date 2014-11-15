@@ -1,4 +1,5 @@
 ﻿using Chutzpah.Models;
+using Chutzpah.Wrappers;
 using System;
 using System.Text;
 
@@ -18,6 +19,12 @@ namespace Chutzpah.Transformers
         public override string Description
         {
             get { return "outputs results as LCOV data for further processing"; }
+        }
+
+        public LcovTransformer(IFileSystemWrapper fileSystem)
+            : base(fileSystem)
+        {
+
         }
 
         public override string Transform(TestCaseSummary testFileSummary)

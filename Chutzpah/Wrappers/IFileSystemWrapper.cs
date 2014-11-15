@@ -33,5 +33,6 @@ namespace Chutzpah.Wrappers
         string GetRandomFileName();
         DateTime GetLastWriteTime(string path);
         void WriteAllText(string path, string text);
+        bool IsPathRooted(string path);
     }
 }

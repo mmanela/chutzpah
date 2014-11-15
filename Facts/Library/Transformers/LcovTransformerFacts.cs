@@ -1,5 +1,7 @@
 ﻿using Chutzpah.Models;
 using Chutzpah.Transformers;
+using Chutzpah.Wrappers;
+using Moq;
 using System;
 using Xunit;
 
@@ -27,28 +29,33 @@ namespace Chutzpah.Facts.Library.Transformers
             return toReturn;
         }
 
+        private IFileSystemWrapper GetFileSystemWrapper()
+        {
+            return new Mock<IFileSystemWrapper>().Object;
+        }
+
         [Fact]
         public void Has_Appropriate_Name()
         {
-            Assert.Equal("lcov", new LcovTransformer().Name);
+            Assert.Equal("lcov", new LcovTransformer(GetFileSystemWrapper()).Name);
         }
 
         [Fact]
         public void Has_Description()
         {
-            Assert.False(string.IsNullOrWhiteSpace(new LcovTransformer().Description));
+            Assert.False(string.IsNullOrWhiteSpace(new LcovTransformer(GetFileSystemWrapper()).Description));
         }
 
         [Fact]
         public void Returns_Empty_String_If_No_Coverage_Data()
         {
-            Assert.Equal(string.Empty, new LcovTransformer().Transform(new TestCaseSummary()));
+            Assert.Equal(string.Empty, new LcovTransformer(GetFileSystemWrapper()).Transform(new TestCaseSummary()));
         }
 
         [Fact]
         public void Throws_If_Null_TestCaseSummary_Supplied()
         {
-            Exception ex = Record.Exception(() => new LcovTransformer().Transform(null));
+            Exception ex = Record.Exception(() => new LcovTransformer(GetFileSystemWrapper()).Transform(null));
 
             Assert.IsType<ArgumentNullException>(ex);
         }
@@ -66,7 +73,7 @@ DA:4,0
 end_of_record
 ";
 
-            var actual = new LcovTransformer().Transform(GetTestCaseSummary());
+            var actual = new LcovTransformer(GetFileSystemWrapper()).Transform(GetTestCaseSummary());
 
             Assert.Equal(expected, actual);
         }

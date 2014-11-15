@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using Chutzpah.Models;
 using Encoder = Microsoft.Security.Application.Encoder;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.Transformers
 {
@@ -16,6 +17,12 @@ namespace Chutzpah.Transformers
         public override string Description
         {
             get { return "output results to JUnit-style XML file"; }
+        }
+
+        public JUnitXmlTransformer(IFileSystemWrapper fileSystem)
+            : base(fileSystem)
+        {
+
         }
 
         public override string Transform(TestCaseSummary testFileSummary)

@@ -6,6 +6,7 @@ using Chutzpah.Models;
 using Chutzpah.RunnerCallbacks;
 using System.Linq;
 using Chutzpah.Transformers;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -108,7 +109,7 @@ namespace Chutzpah
             Console.WriteLine("  /showFailureReport     : Show a failure report after the test run. Usefull if you have a large number of tests.");
 
 
-            foreach (var transformer in SummaryTransformerFactory.GetTransformers())
+            foreach (var transformer in SummaryTransformerFactory.GetTransformers(new FileSystemWrapper()))
             {
                 Console.WriteLine("  /{0} filename        : {1}", transformer.Name, transformer.Description);
             }
@@ -191,7 +192,7 @@ namespace Chutzpah
 
         private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
         {
-            var transformers = SummaryTransformerFactory.GetTransformers();
+            var transformers = SummaryTransformerFactory.GetTransformers(new FileSystemWrapper());
             foreach (var transformer in transformers.Where(x => commandLine.UnmatchedArguments.ContainsKey(x.Name)))
             {
                 var path = commandLine.UnmatchedArguments[transformer.Name];
