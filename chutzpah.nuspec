@@ -14,12 +14,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Enable Test Adapter in VS 14
-* Fix VS log message formatting
-* Honor code coverage setting when running from VS
-* Fixed issue where Chutzpah ignore parallelism setting
-* Report url loading errors
-* Support configuring user agent
+* Fix bug in JasmineV2 support where timetaken isn't calculated correctly causing an integer overflow
+* Update QUnit to 1.15 and update legacy version support
         </releaseNotes>
     </metadata>
 </package>

@@ -129,7 +129,7 @@
         they are empty functions. The heuristic below is too look for 'config[key]'.
         If we see that it is a newer version of qunit. Otherwise we need to do some more work. 
         */
-        if (beginCallbackContent.indexOf('config[key]') < 0) {
+        if (beginCallbackContent.indexOf('callback') < 0) {
             var oldCallback = {
                 begin: QUnit.begin,
                 done: QUnit.done,

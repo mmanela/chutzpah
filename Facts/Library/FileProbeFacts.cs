@@ -477,6 +477,36 @@ namespace Chutzpah.Facts
                 Assert.Contains("subFile1.js", fullPaths);
             }
 
+            [Fact]
+            public void Will_skip_files_with_paths_too_long()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
+                probe.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
+                    .Returns(new []
+                    {
+                        "subFile1.js",
+                        "folder\\folder\\" + new string('_', 260) + Constants.JavaScriptExtension,
+                        "folder\\folder\\" + new string('_', 260) + Constants.TypeScriptExtension,
+                        "folder\\folder\\" + new string('_', 260) + Constants.CoffeeScriptExtension,
+                        "subFile2.js"
+                    });
+                var paths = new List<string>
+                {
+                    "folder"
+                };
+
+                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.All);
+
+                Assert.Equal(2, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains("subFile1.js", fullPaths);
+                Assert.Contains("subFile2.js", fullPaths);
+            }
+
         }
 
 
