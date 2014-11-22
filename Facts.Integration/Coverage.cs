@@ -7,7 +7,7 @@ using Xunit.Extensions;
 
 namespace Chutzpah.Facts.Integration
 {
-    public class Coverage
+    public class Coverage : CoverageBase
     {
         public Coverage()
         {
@@ -475,20 +475,6 @@ namespace Chutzpah.Facts.Integration
 
             var coverage = result.CoverageObject;
             Assert.Equal(94.34, coverage.SuccessPercentage);
-        }
-
-        private TestOptions WithCoverage(params Action<CoverageOptions>[] mods)
-        {
-            var opts = new TestOptions
-                           {
-                               CoverageOptions = new CoverageOptions
-                                                     {
-                                                         Enabled = true,
-                                                         ExcludePatterns = new[] { "*chai.js*" },
-                                                     }
-                           };
-            mods.ToList().ForEach(a => a(opts.CoverageOptions));
-            return opts;
         }
 
         private bool HasKeyWithSubstring<T>(IDictionary<string, T> dict, string subString)

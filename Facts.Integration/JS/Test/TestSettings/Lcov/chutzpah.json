@@ -1,0 +1,7 @@
+{
+    "EnableCodeCoverage": "true",
+    "TestHarnessLocationMode":  "SettingsFileAdjacent",
+    "Transforms": [
+        { "Name":  "lcov", "Path":  "lcov.dat" }
+    ]
+}
