@@ -75,7 +75,7 @@ end_of_record
 
             var actual = new LcovTransformer(GetFileSystemWrapper()).Transform(GetTestCaseSummary());
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"));
         }
     }
 }
