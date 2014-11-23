@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Chutzpah.Models;
+using Chutzpah.Wrappers;
 
 namespace Chutzpah.Transformers
 {
@@ -13,13 +14,26 @@ namespace Chutzpah.Transformers
         public abstract string Description { get; }
         public abstract string Transform(TestCaseSummary testFileSummary);
 
-        public  void Transform(TestCaseSummary testFileSummary, string outFile)
+        private readonly IFileSystemWrapper fileSystem;
+
+        public SummaryTransformer(IFileSystemWrapper fileSystem)
         {
-            if (testFileSummary == null) throw new ArgumentNullException("testFileSummary");
-            if(string.IsNullOrEmpty(outFile)) throw new ArgumentNullException("outFile");
+            this.fileSystem = fileSystem;
+        }
+
+        public virtual void Transform(TestCaseSummary testFileSummary, string outFile)
+        {
+            if (testFileSummary == null)
+            {
+                throw new ArgumentNullException("testFileSummary");
+            }
+            else if (string.IsNullOrEmpty(outFile))
+            {
+                throw new ArgumentNullException("outFile");
+            }
 
             var result = Transform(testFileSummary);
-            File.WriteAllText(outFile, result);
+            fileSystem.WriteAllText(outFile, result);
         }
     }
 }

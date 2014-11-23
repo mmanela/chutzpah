@@ -10,6 +10,7 @@ using Chutzpah.BatchProcessor;
 using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
+using Chutzpah.Transformers;
 
 namespace Chutzpah
 {
@@ -26,6 +27,7 @@ namespace Chutzpah
         private readonly ITestContextBuilder testContextBuilder;
         private readonly ICompilerCache compilerCache;
         private readonly IChutzpahTestSettingsService testSettingsService;
+        private readonly ITransformProcessor transformProcessor;
         private bool m_debugEnabled;
 
         public static ITestRunner Create(bool debugEnabled = false)
@@ -46,7 +48,8 @@ namespace Chutzpah
                           ITestHarnessBuilder testHarnessBuilder,
                           ITestContextBuilder htmlTestFileCreator,
                           ICompilerCache compilerCache,
-                          IChutzpahTestSettingsService testSettingsService)
+                          IChutzpahTestSettingsService testSettingsService,
+                          ITransformProcessor transformProcessor)
         {
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
@@ -57,6 +60,7 @@ namespace Chutzpah
             testContextBuilder = htmlTestFileCreator;
             this.compilerCache = compilerCache;
             this.testSettingsService = testSettingsService;
+            this.transformProcessor = transformProcessor;
         }
 
 
@@ -196,8 +200,12 @@ namespace Chutzpah
             {
                 overallSummary.Append(fileSummary);
             }
+
             stopWatch.Stop();
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
+
+            transformProcessor.ProcessTransforms(testContexts, overallSummary);
+            
             compilerCache.Save();
 
             // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.

@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using Chutzpah.Models;
 using Chutzpah.Transformers;
 using Xunit;
+using Chutzpah.Wrappers;
+using Moq;
 
 namespace Chutzpah.Facts.Library.Transformers
 {
     public class JUnitXmlTransformerFacts
     {
+        private IFileSystemWrapper GetFileSystemWrapper()
+        {
+            return new Mock<IFileSystemWrapper>().Object;
+        }
+
         private static TestCaseSummary BuildTestCaseSummary()
         {
             var summary = new TestCaseSummary();
@@ -49,7 +56,7 @@ namespace Chutzpah.Facts.Library.Transformers
         [Fact]
         public void Will_throw_if_test_summary_is_null()
         {
-            var transformer = new JUnitXmlTransformer();
+            var transformer = new JUnitXmlTransformer(GetFileSystemWrapper());
 
             Exception ex = Record.Exception(() => transformer.Transform(null));
 
@@ -59,7 +66,7 @@ namespace Chutzpah.Facts.Library.Transformers
         [Fact]
         public void Will_generate_junit_xml()
         {
-            var transformer = new JUnitXmlTransformer();
+            var transformer = new JUnitXmlTransformer(GetFileSystemWrapper());
             var summary = BuildTestCaseSummary();
             var expected =
                 @"<?xml version=""1.0"" encoding=""UTF-8"" ?>

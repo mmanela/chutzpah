@@ -86,6 +86,10 @@
     <Compile Include="Library\TestHarnessFacts.cs" />
     <Compile Include="Library\TestingModeExtensionsFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
+    <Compile Include="Library\Transformers\LcovTransformerFacts.cs" />
+    <Compile Include="Library\Transformers\SummaryTransformerFacts.cs" />
+    <Compile Include="Library\Transformers\SummaryTransformerProviderFacts.cs" />
+    <Compile Include="Library\Transformers\TransformProcessorFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Models\TestResultFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

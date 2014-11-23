@@ -56,14 +56,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coverage.cs" />
+    <Compile Include="CoverageBase.cs" />
     <Compile Include="Discovery.cs" />
     <Compile Include="ExceptionThrowingRunnerCallback.cs" />
     <Compile Include="Execution.cs" />
+    <Compile Include="Transforms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestPathGroups.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="JS\Code\AMDMode_RequireJS\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Code\CoverageTarget.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Code\TypeScriptRequireJS\chai.d.ts">
@@ -312,6 +317,9 @@
     <Content Include="JS\Test\TestSettings\FrameworkVersion\Jasmine_V2\versionTest.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\TestSettings\Lcov\lcov.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\TestSettings\ReferencePaths\Lib\skipThis.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -442,6 +450,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\TestSettings\UserAgent\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\Lcov\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="JS\Test\TypeScript\basic-mocha-bdd.ts">

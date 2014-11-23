@@ -42,6 +42,7 @@ namespace Chutzpah.Models
             Tests = new List<SettingsFileTestPath>();
             CoffeeScriptBareMode = true;
             CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
+            Transforms = new List<TransformConfig>();
         }
 
 
@@ -168,6 +169,11 @@ namespace Chutzpah.Models
         /// The user agent to tell PhantomJS to use when making web requests
         /// </summary>
         public string UserAgent { get; set; }
+
+        /// <summary>
+        /// Maps the names of transforms to run after testing with their corresponding output paths.
+        /// </summary>
+        public ICollection<TransformConfig> Transforms { get; set; }
 
 
         #region Deprecated Properties. These are part of the old compile support Chutzpah had where it would embed the compiler. Please use compile setting now

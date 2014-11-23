@@ -185,5 +185,9 @@ namespace Chutzpah.Wrappers
             throw new IOException("Unable to perform IO operation");
         }
 
+        public bool IsPathRooted(string path)
+        {
+            return Path.IsPathRooted(path);
+        }
     }
 }
