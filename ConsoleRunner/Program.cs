@@ -107,6 +107,7 @@ namespace Chutzpah
             Console.WriteLine("  /compilercachesize     : The maximum size of the cache in Mb. Defaults to 32Mb.");
             Console.WriteLine("  /testMode              : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
             Console.WriteLine("  /showFailureReport     : Show a failure report after the test run. Usefull if you have a large number of tests.");
+            Console.WriteLine("  /trxoutputfile         : Generate a trx file.");
 
 
             foreach (var transformer in SummaryTransformerFactory.GetTransformers(new FileSystemWrapper()))
@@ -137,9 +138,20 @@ namespace Chutzpah
             TestCaseSummary testResultsSummary = null;
             try
             {
-                var callback = commandLine.TeamCity 
-                                ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() 
-                                : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport);
+                ITestMethodRunnerCallback callback = null;
+
+                if (commandLine.TrxOutput)
+                {
+                    callback = new TrxConsoleRunnerCallback(commandLine.TrxOutputFile);
+                }else if (commandLine.TeamCity)
+                {
+                    callback = new TeamCityConsoleRunnerCallback();
+                }
+                else
+                {
+                    callback = new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport);
+                }
+
 
                 callback = new ParallelRunnerCallbackAdapter(callback);
 
