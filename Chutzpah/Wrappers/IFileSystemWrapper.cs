@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Chutzpah.Wrappers
 {
@@ -33,6 +34,7 @@ namespace Chutzpah.Wrappers
         string GetRandomFileName();
         DateTime GetLastWriteTime(string path);
         void WriteAllText(string path, string text);
+        void WriteAllText(string path, string text,Encoding encoding);
         bool IsPathRooted(string path);
     }
 }
