@@ -23,9 +23,6 @@ namespace Chutzpah
             Parse();
         }
 
-        public string TrxOutputFile { get; set; }
-
-        public bool TrxOutput { get; set; }
 
         public bool ShowFailureReport { get; set; }
 
@@ -135,10 +132,6 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     TeamCity = true;
-                }else if (optionName == "/trxoutput")
-                {
-                    AddTrxOutputOption(option.Value);
-                    TrxOutput = true;
                 }
                 else if (optionName == "/timeoutmilliseconds")
                 {
@@ -276,17 +269,6 @@ namespace Chutzpah
             }
 
             TimeOutMilliseconds = timeout;
-        }
-        
-        private void AddTrxOutputOption(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentException(
-                    "invalid or missing argument for /trxoutputfile.  Expecting a name of a file");
-            }
-
-            TrxOutputFile = value;
         }
 
         private void AddFileOption(string file)

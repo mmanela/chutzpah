@@ -61,7 +61,6 @@
     <Compile Include="RunnerCallbacks\ConsoleRunnerCallback.cs" />
     <Compile Include="RunnerCallbacks\StandardConsoleRunnerCallback.cs" />
     <Compile Include="RunnerCallbacks\TeamCityConsoleRunnerCallback.cs" />
-    <Compile Include="RunnerCallbacks\TrxConsoleRunnerCallback.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="JS\code.js">
