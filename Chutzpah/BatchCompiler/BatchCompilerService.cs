@@ -6,6 +6,7 @@ using System.Linq;
 using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.FileProcessors;
 
 namespace Chutzpah.BatchProcessor
 {
@@ -13,13 +14,14 @@ namespace Chutzpah.BatchProcessor
     {
         private readonly IProcessHelper processHelper;
         private readonly IFileSystemWrapper fileSystem;
+        private readonly ISourceMapDiscoverer sourceMapDiscoverer;
 
-        public BatchCompilerService(IProcessHelper processHelper, IFileSystemWrapper fileSystem)
+        public BatchCompilerService(IProcessHelper processHelper, IFileSystemWrapper fileSystem, ISourceMapDiscoverer sourceMapDiscoverer)
         {
             this.processHelper = processHelper;
             this.fileSystem = fileSystem;
+            this.sourceMapDiscoverer = sourceMapDiscoverer;
         }
-
 
         public void Compile(IEnumerable<TestContext> testContexts)
         {
@@ -85,10 +87,12 @@ namespace Chutzpah.BatchProcessor
                         ChutzpahTracer.TraceWarning("Couldn't find generated path for {0} at {1}", file.Path, outputPath);
                     }
 
+                    if (!string.IsNullOrWhiteSpace(file.GeneratedFilePath))
+                    {
+                        file.SourceMapFilePath = testSettings.UseSourceMaps ? sourceMapDiscoverer.FindSourceMap(file.GeneratedFilePath) : null;
+                    }
                 }
-
             }
-
         }
 
         private void RunBatchCompile(ChutzpahTestSettingsFile testSettings)

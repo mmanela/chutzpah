@@ -31,6 +31,12 @@ namespace Chutzpah.Models
         public string GeneratedFilePath { get; set; }
 
         /// <summary>
+        /// Gets or sets the path to the map file that translates the generated file (if set)
+        /// to its original source.
+        /// </summary>
+        public string SourceMapFilePath { get; set; }
+
+        /// <summary>
         /// Gets if this is a dependency of the test framework
         /// </summary>
         public bool IsTestFrameworkFile { get; set; }

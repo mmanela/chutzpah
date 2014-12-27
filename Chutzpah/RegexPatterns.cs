@@ -12,7 +12,6 @@
             new Regex(@"^\s*(///|##)\s*<\s*template\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""']\s*/>",
                 RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-
         public static Regex QUnitTestRegexJavaScript = new Regex(@"((?<!\.)\b(?:QUnit\.)?(test|asyncTest)[\t ]*\([\t ]*[""'](?<TestName>.*)[""'])", RegexOptions.Compiled);
         public static Regex QUnitTestRegexCoffeeScript = new Regex(@"(^[\t ]*(?:QUnit\.)?(test|asyncTest)[\t ]+[""'](?<TestName>.*)[""'])", RegexOptions.Compiled | RegexOptions.Multiline);
 

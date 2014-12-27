@@ -8,6 +8,7 @@ using System.Xml;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using SourceMapDotNet;
 
 namespace Chutzpah.Coverage
 {
@@ -19,14 +20,16 @@ namespace Chutzpah.Coverage
     {
         private readonly IFileSystemWrapper fileSystem;
         private readonly IJsonSerializer jsonSerializer;
+        private readonly ILineCoverageMapper lineCoverageMapper;
 
         private List<string> includePatterns { get; set; }
         private List<string> excludePatterns { get; set; }
 
-        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem)
+        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper)
         {
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
+            this.lineCoverageMapper = lineCoverageMapper;
 
             includePatterns = new List<string>();
             excludePatterns = new List<string>();
@@ -107,8 +110,8 @@ namespace Chutzpah.Coverage
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
             var data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
-            IDictionary<string, string> generatedToOriginalFilePath =
-                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf.Path);
+            IDictionary<string, ReferencedFile> generatedToReferencedFile =
+                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf);
 
             var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage);
 
@@ -133,21 +136,37 @@ namespace Chutzpah.Coverage
                 var fileUri = new Uri(filePath, UriKind.RelativeOrAbsolute);
                 filePath = fileUri.LocalPath;
 
+                ReferencedFile referencedFile;
                 string newKey;
-                if (!generatedToOriginalFilePath.TryGetValue(filePath, out newKey))
+                if (!generatedToReferencedFile.TryGetValue(filePath, out referencedFile))
                 {
                     newKey = filePath;
+                }
+                else
+                {
+                    newKey = referencedFile.Path;
+                    if (referencedFile.SourceMapFilePath != null && testContext.TestFileSettings.UseSourceMaps)
+                    {
+                        filePath = referencedFile.Path;
+                    }
                 }
 
                 if (IsFileEligibleForInstrumentation(newKey))
                 {
                     string[] sourceLines = fileSystem.GetLines(filePath);
+                    int?[] lineExecutionCounts = entry.Value;
+
+                    if (testContext.TestFileSettings.UseSourceMaps && referencedFile.SourceMapFilePath != null)
+                    {
+                        lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile.SourceMapFilePath);
+                    }
+
                     coverageData.Add(newKey, new CoverageFileData
-                                                 {
-                                                     LineExecutionCounts = entry.Value,
-                                                     FilePath = newKey,
-                                                     SourceLines = sourceLines
-                                                 });
+                    {
+                        LineExecutionCounts = lineExecutionCounts,
+                        FilePath = newKey,
+                        SourceLines = sourceLines
+                    });
                 }
             }
             return coverageData;
@@ -192,14 +211,14 @@ namespace Chutzpah.Coverage
             return true;
         }
 
-        private class BlanketCoverageObject : Dictionary<string, int?[]>
-        {
-        }
-
         private string GetBlanketScriptName(IFrameworkDefinition def, ChutzpahTestSettingsFile settingsFile)
         {
             return def.GetBlanketScriptName(settingsFile);
         }
 
+        public class BlanketCoverageObject : Dictionary<string, int?[]>
+        {
+
+        }
     }
 }

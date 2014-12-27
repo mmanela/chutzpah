@@ -40,8 +40,16 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\3rdParty\ServiceStack\ServiceStack.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="SourceMapDotNet, Version=1.0.5478.26629, Culture=neutral, PublicKeyToken=d357635542166cea, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SourceMapDotNet.1.0.5478.26629\lib\SourceMapDotNet.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.6.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -102,7 +110,11 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="Coverage\ILineCoverageMapper.cs" />
+    <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
+    <Compile Include="FileProcessors\ISourceMapDiscoverer.cs" />
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
+    <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />

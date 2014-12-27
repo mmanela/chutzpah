@@ -1,0 +1,15 @@
+{
+    "UseSourceMaps": true,
+    "Compile": {
+        "Mode": "External",
+        "Extensions": [ ".ts" ],
+        "ExtensionsWithNoOutput": [ ".d.ts" ]
+    },
+    "Tests": [
+        { "Path": "Tests.ts" }
+    ],
+    "References": [ 
+        { "Path": "SourceMappedLibrary.ts" }
+    ],
+    "CodeCoverageExcludes": ["*Tests.ts"]
+}
