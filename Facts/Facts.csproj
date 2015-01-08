@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\xunit.runner.visualstudio.0.99.9-build1021\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.0.99.9-build1021\build\net20\xunit.runner.visualstudio.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -90,6 +91,7 @@
     <Compile Include="Library\Transformers\SummaryTransformerFacts.cs" />
     <Compile Include="Library\Transformers\SummaryTransformerProviderFacts.cs" />
     <Compile Include="Library\Transformers\TransformProcessorFacts.cs" />
+    <Compile Include="Library\Transformers\TrxTransformerFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />
     <Compile Include="Models\TestResultFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
