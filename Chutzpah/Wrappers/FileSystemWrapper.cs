@@ -78,6 +78,11 @@ namespace Chutzpah.Wrappers
         {
             File.WriteAllText(path, text);
         }
+        
+        public void WriteAllText(string path, string text,Encoding encoding)
+        {
+            File.WriteAllText(path, text, encoding);
+        }
 
         public void DeleteDirectory(string path, bool recursive)
         {

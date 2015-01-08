@@ -102,12 +102,17 @@
     <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
     <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
+    <Compile Include="Extensions\VSTSExtensions.cs" />
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
     <Compile Include="Models\TransformConfig.cs" />
+    <Compile Include="Models\vstsModel\vstst.cs">
+      <DependentUpon>vstst.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Models\VSTSTestCase.cs" />
     <Compile Include="NativeImports.cs" />
     <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
     <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
@@ -184,6 +189,7 @@
     <Compile Include="Transformers\SummaryTransformerFactory.cs" />
     <Compile Include="Transformers\SummaryTransformerProvider.cs" />
     <Compile Include="Transformers\TransformProcessor.cs" />
+    <Compile Include="Transformers\TrxXmlTransformer.cs" />
     <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\ICompilerCache.cs" />
@@ -308,6 +314,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Models\vstsModel\vstst.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
