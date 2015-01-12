@@ -10,7 +10,8 @@ namespace Chutzpah.Transformers
             return new SummaryTransformer[] 
             {
                 new JUnitXmlTransformer(fileSystem),
-                new LcovTransformer(fileSystem)
+                new LcovTransformer(fileSystem),
+                new TrxXmlTransformer(fileSystem), 
             };
         }
     }

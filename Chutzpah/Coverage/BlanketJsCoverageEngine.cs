@@ -133,6 +133,10 @@ namespace Chutzpah.Coverage
                 // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
                 // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
                 filePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(filePath, "$1");
+
+                //REMOVE URI Query part from filepath like ?ver=1233123
+                filePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(filePath, "$1");
+
                 var fileUri = new Uri(filePath, UriKind.RelativeOrAbsolute);
                 filePath = fileUri.LocalPath;
 
