@@ -109,6 +109,24 @@ namespace Chutzpah.Facts.Library.Coverage
         }
 
         [Fact]
+        public void DeserializeCoverageObject_UsesGeneratedSource_IfNoOriginalSourceAvailable()
+        {
+            var testContext = GetContext();
+            var coverageDict = GetLineExecutions();
+            
+            // Add in a file we didn't know about
+            coverageDict[@"X:\file3.js"] = new int?[0];
+
+            var mapperOutput = new int?[] { 1, null };
+            var underTest = new TestableCoverageEngine(coverageDict, mapperOutput);
+            var file = testContext.ReferencedFiles.Single(x => x.Path == @"X:\file1.ts");
+
+            var result = underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
+
+            Assert.True(result.ContainsKey(@"X:\file3.js"));
+        }
+
+        [Fact]
         public void DeserializeCoverageObject_UsesGeneratedSource_WhenSourceMapsDisabled()
         {
             var testContext = GetContext();
