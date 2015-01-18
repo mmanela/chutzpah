@@ -32,6 +32,7 @@ namespace Chutzpah
                             scan.AddAllTypesOf<IQUnitReferencedFileProcessor>();
                             scan.AddAllTypesOf<IJasmineReferencedFileProcessor>();
                             scan.AddAllTypesOf<IMochaReferencedFileProcessor>();
+                            scan.AddAllTypesOf<ILineCoverageMapper>();
                             scan.AddAllTypesOf<IFrameworkDefinition>();
                         });
                 });

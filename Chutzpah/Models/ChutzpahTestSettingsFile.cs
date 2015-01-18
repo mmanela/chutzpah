@@ -175,6 +175,11 @@ namespace Chutzpah.Models
         /// </summary>
         public ICollection<TransformConfig> Transforms { get; set; }
 
+        /// <summary>
+        /// Configures whether .map files should be loaded (if available) to convert under-test JS
+        /// line numbers to those of their original source files.
+        /// </summary>
+        public bool UseSourceMaps { get; set; }
 
         #region Deprecated Properties. These are part of the old compile support Chutzpah had where it would embed the compiler. Please use compile setting now
 

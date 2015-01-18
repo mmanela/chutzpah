@@ -7,6 +7,7 @@ using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
+using Chutzpah.FileProcessors;
 
 namespace Chutzpah.Facts
 {
@@ -18,7 +19,7 @@ namespace Chutzpah.Facts
             {
 
                 Mock<IProcessHelper>().Setup(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>())).Returns(new BatchCompileResult());
-
+                Mock<ISourceMapDiscoverer>().Setup(x => x.FindSourceMap(@"C:\src\a.js")).Returns(@"C:\src\a.js.map");
             }
 
             public TestContext BuildContext()
@@ -141,6 +142,45 @@ namespace Chutzpah.Facts
 
             Assert.Equal(@"C:\src\a.js", context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
             Assert.Null(context.ReferencedFiles.ElementAt(1).GeneratedFilePath);
+        }
+
+        [Fact]
+        public void Will_set_source_map_path_when_UseSourceMap_setting_enabled()
+        {
+            var service = new TestableBatchCompilerService();
+            var context = service.BuildContext();
+            context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
+            context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context.TestFileSettings.UseSourceMaps = true;
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
+            service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
+                .Returns(false)
+                .Returns(true);
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".ts")))).Returns(true);
+
+            service.ClassUnderTest.Compile(new[] { context });
+
+            Assert.Equal(@"C:\src\a.js.map", context.ReferencedFiles.ElementAt(0).SourceMapFilePath);
+        }
+
+        [Fact]
+        public void Will_not_set_source_map_path_when_UseSourceMap_setting_disabled()
+        {
+            var service = new TestableBatchCompilerService();
+            var context = service.BuildContext();
+            context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
+            context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context.TestFileSettings.UseSourceMaps = false;
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
+            service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
+                .Returns(false)
+                .Returns(true);
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".ts")))).Returns(true);
+
+            service.ClassUnderTest.Compile(new[] { context });
+
+            Assert.Null(context.ReferencedFiles.ElementAt(0).SourceMapFilePath);
+            service.Mock<ISourceMapDiscoverer>().Verify(x => x.FindSourceMap(It.IsAny<string>()), Times.Never());
         }
 
         [Fact]

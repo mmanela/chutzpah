@@ -31,9 +31,23 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\chutzpah.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SourceMapDotNet, Version=1.0.5478.26629, Culture=neutral, PublicKeyToken=d357635542166cea, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SourceMapDotNet.1.0.5478.26629\lib\SourceMapDotNet.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.6.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -67,6 +81,8 @@
     <Compile Include="Exceptions\ExceptionFacts.cs" />
     <Compile Include="Library\BatchCompilerServiceFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
+    <Compile Include="Library\Coverage\BlanketJsCoverageEngineFacts.cs" />
+    <Compile Include="Library\Coverage\SourceMapDotNetLineCoverageMapperFacts.cs" />
     <Compile Include="Library\MochaLineNumberProcessorFacts.cs" />
     <Compile Include="Library\MochaDefinitionFacts.cs" />
     <Compile Include="Library\FileGenerators\CompileToJavascriptFileGeneratorFacts.cs" />
@@ -81,6 +97,7 @@
     <Compile Include="Library\FileProbeFacts.cs" />
     <Compile Include="Library\FileGenerators\CoffeeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\ReferenceProcessorFacts.cs" />
+    <Compile Include="Library\SourceMapDiscovererFacts.cs" />
     <Compile Include="Library\TestCaseStreamReaderFacts.cs" />
     <Compile Include="Library\TestContextBuilderFacts.cs" />
     <Compile Include="Library\TestHarnessBuilderFacts.cs" />

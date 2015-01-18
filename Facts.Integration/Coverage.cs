@@ -16,6 +16,7 @@ namespace Chutzpah.Facts.Integration
 
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
         private const string ACoffeeTestScript = @"JS\Test\basic-jasmine-coffee.coffee";
+        private const string ASourceMappedTestScript = @"JS\Test\Coverage\SourceMaps\Tests.ts";
 
         public static IEnumerable<object[]> BasicTestScripts
         {
@@ -168,7 +169,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(4, result.TotalCount);
         }
 
-
+        [Fact]
         public void Will_turn_on_code_coverage_given_setting_in_json_file()
         {
             var scriptPath = @"JS\Test\TestSettings\CodeCoverage\cc.js";
@@ -178,7 +179,6 @@ namespace Chutzpah.Facts.Integration
 
             ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject, new[] { scriptPath, "JS\\Code\\code.js" });
         }
-
 
         [Fact]
         public void Will_get_coverage_for_path_with_hash_tag()
@@ -328,6 +328,31 @@ namespace Chutzpah.Facts.Integration
 
             var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code.js"));
             Assert.NotNull(codeCoffeeEntry.Value.SourceLines);
+        }
+
+        [Fact]
+        public void Will_put_orginal_source_code_in_coverage_object_for_TypeScript_with_source_maps_enabled()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ASourceMappedTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
+            var tsEntry = dict.Single(e => e.Key.Contains("SourceMappedLibrary.ts"));
+            Assert.True(tsEntry.Value.SourceLines.Any(l => l.Contains("module SourceMaps.Library")));
+        }
+
+        [Fact]
+        public void Will_convert_covered_lines_via_source_maps_when_enabled()
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(ASourceMappedTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var dict = result.TestFileSummaries.Single().CoverageObject;
+
+            var tsEntry = dict.Single(e => e.Key.Contains("SourceMappedLibrary.ts"));
+            Assert.Equal(28, tsEntry.Value.LineExecutionCounts.Length);
+            Assert.Equal(0.875, tsEntry.Value.CoveragePercentage, 3);
         }
 
         [Fact]
