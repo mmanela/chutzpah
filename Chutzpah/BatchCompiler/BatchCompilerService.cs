@@ -89,7 +89,7 @@ namespace Chutzpah.BatchProcessor
 
                     if (!string.IsNullOrWhiteSpace(file.GeneratedFilePath))
                     {
-                        file.SourceMapFilePath = testSettings.UseSourceMaps ? sourceMapDiscoverer.FindSourceMap(file.GeneratedFilePath) : null;
+                        file.SourceMapFilePath = testSettings.Compile.UseSourceMaps ? sourceMapDiscoverer.FindSourceMap(file.GeneratedFilePath) : null;
                     }
                 }
             }

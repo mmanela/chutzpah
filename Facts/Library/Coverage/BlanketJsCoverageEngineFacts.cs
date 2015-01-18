@@ -58,7 +58,10 @@ namespace Chutzpah.Facts.Library.Coverage
             {
                 TestFileSettings = new ChutzpahTestSettingsFile
                 {
-                    UseSourceMaps = true,
+                    Compile = new BatchCompileConfiguration
+                    {
+                        UseSourceMaps = true,
+                    }
                 },
                 ReferencedFiles = new[] 
                 { 
@@ -130,7 +133,7 @@ namespace Chutzpah.Facts.Library.Coverage
         public void DeserializeCoverageObject_UsesGeneratedSource_WhenSourceMapsDisabled()
         {
             var testContext = GetContext();
-            testContext.TestFileSettings.UseSourceMaps = false;
+            testContext.TestFileSettings.Compile.UseSourceMaps = false;
             var coverageDict = GetLineExecutions();
             var mapperOutput = new int?[] { 1, null };
             var underTest = new TestableCoverageEngine(coverageDict, mapperOutput);
@@ -148,7 +151,7 @@ namespace Chutzpah.Facts.Library.Coverage
         public void DeserializeCoverageObject_SkipsLineCoverageMapper_IfSettingsDisabled()
         {
             var testContext = GetContext();
-            testContext.TestFileSettings.UseSourceMaps = false;
+            testContext.TestFileSettings.Compile.UseSourceMaps = false;
 
             var underTest = new TestableCoverageEngine(GetLineExecutions());
             underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);

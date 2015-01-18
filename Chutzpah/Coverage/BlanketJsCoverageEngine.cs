@@ -149,7 +149,7 @@ namespace Chutzpah.Coverage
                 else
                 {
                     newKey = referencedFile.Path;
-                    if (referencedFile.SourceMapFilePath != null && testContext.TestFileSettings.UseSourceMaps)
+                    if (referencedFile.SourceMapFilePath != null && testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps)
                     {
                         filePath = referencedFile.Path;
                     }
@@ -160,7 +160,7 @@ namespace Chutzpah.Coverage
                     string[] sourceLines = fileSystem.GetLines(filePath);
                     int?[] lineExecutionCounts = entry.Value;
 
-                    if (testContext.TestFileSettings.UseSourceMaps && referencedFile != null && referencedFile.SourceMapFilePath != null)
+                    if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile != null && referencedFile.SourceMapFilePath != null)
                     {
                         lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile.SourceMapFilePath);
                     }
