@@ -75,5 +75,11 @@ namespace Chutzpah.Models
         /// code is using then you can turn this off. Ideally you can tell Chutzpah about these and then set this to be more performant
         /// </summary>
         public bool SkipIfUnchanged { get; set; }
+
+        /// <summary>
+        /// Configures whether .map files should be loaded (if available) to convert under-test JS
+        /// line numbers to those of their original source files.
+        /// </summary>
+        public bool UseSourceMaps { get; set; }
     }
 }

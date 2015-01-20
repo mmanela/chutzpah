@@ -151,7 +151,7 @@ namespace Chutzpah.Facts
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
             context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
-            context.TestFileSettings.UseSourceMaps = true;
+            context.TestFileSettings.Compile.UseSourceMaps = true;
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
             service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
                 .Returns(false)
@@ -170,7 +170,7 @@ namespace Chutzpah.Facts
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
             context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
-            context.TestFileSettings.UseSourceMaps = false;
+            context.TestFileSettings.Compile.UseSourceMaps = false;
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
             service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
                 .Returns(false)

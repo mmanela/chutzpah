@@ -1,6 +1,6 @@
 {
-    "UseSourceMaps": true,
     "Compile": {
+        "UseSourceMaps": true,
         "Mode": "External",
         "Extensions": [ ".ts" ],
         "ExtensionsWithNoOutput": [ ".d.ts" ]
