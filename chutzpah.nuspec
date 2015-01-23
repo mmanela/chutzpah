@@ -14,8 +14,15 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Fix bug in JasmineV2 support where timetaken isn't calculated correctly causing an integer overflow
-* Update QUnit to 1.15 and update legacy version support
+* Update to QUnit 1.16
+* Update to Jasmine 2.1.3
+* Skip paths that are too long while discovering tests
+* Integrate test result transformers into Chutzpah.json file
+* Add LCOV test result transformer
+* Add TRX test result transformer
+* Add source map support for code coverage
+* Fix issue with requirejs urls containing querystrings
+* Move HTML template injection from HEAD tag to BODY tag
         </releaseNotes>
     </metadata>
 </package>
