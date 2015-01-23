@@ -13,7 +13,7 @@ namespace Chutzpah.Models
 
         public Exception exception { get; set; }
 
-        public bool Passed { get; set; }
+        public new bool Passed { get; set; }
 
         public VSTSTestCase()
         {

@@ -121,7 +121,6 @@ namespace Chutzpah.Facts.Library.Transformers
 
             Assert.Equal(counters.passed,2);
             Assert.Equal(counters.failed,2);
-            TestRunType trxObject;
         }
     }
 }
