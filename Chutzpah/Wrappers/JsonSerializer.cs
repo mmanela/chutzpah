@@ -1,17 +1,17 @@
-﻿
-
-using System.IO;
+﻿using System.IO;
+using Newtonsoft.Json;
 
 namespace Chutzpah.Wrappers
 {
     public class JsonSerializer : IJsonSerializer
     {
         public T DeserializeFromFile<T>(string path)
-        {
-            using (var streamReader = new StreamReader(path))
-            {
-                return ServiceStack.Text.JsonSerializer.DeserializeFromReader<T>(streamReader);
-            }
+        {   
+            // NOTE: This method is use Json.Net instead of the servicestack serializer.
+            //       The reason is Json.Net is a more friendly parser for a user facing thing like the 
+            //       settings file but the servicestack is much faster for use in communication with phantom
+            var text = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<T>(text);
         }
 
         public T Deserialize<T>(string response)

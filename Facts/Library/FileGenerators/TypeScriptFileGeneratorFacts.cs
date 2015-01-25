@@ -51,7 +51,7 @@ namespace Chutzpah.Facts
             {
                 var generator = new TestableTypeScriptFileGenerator();
                 var file = new ReferencedFile { Path = "path1.ts" };
-                generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>(), It.IsAny<object[]>())).Returns("{\"path1.ts\" :\"compiled\"");
+                generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>(), It.IsAny<object[]>())).Returns("{\"path1.ts\" :\"compiled\"}");
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
                 generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>())).Returns((string)null);
 

@@ -1,7 +1,7 @@
 {
    "TestHarnessReferenceMode": "AMD",
    "TestHarnessLocationMode": "SettingsFileAdjacent",
-   "TypeScriptModuleKind": "AMD"
+   "TypeScriptModuleKind": "AMD",
 	"MochaInterface": "qunit",
     "CodeCoverageExcludes": ["*chai.js"],
     "References" : [

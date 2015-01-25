@@ -32,8 +32,8 @@
 
         var activeTestCase = null,
             isGlobalError = false,
-            fileStartTime = null,
-            testStartTime = null,
+            fileStartTime = new Date().getTime(),
+            testStartTime = new Date().getTime(),
             beginCallbackContent = QUnit.begin.toString(),
             callback = {};
 
@@ -112,7 +112,7 @@
 
         function logCoverage() {
             if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
-                log({ type: "CoverageObject", object: window[window._Chutzpah_covobj_name] });
+                log({ type: "CoverageObject", object: JSON.stringify(window[window._Chutzpah_covobj_name]) });
             }
         }
 

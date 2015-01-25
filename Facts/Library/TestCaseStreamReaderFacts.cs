@@ -314,7 +314,7 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":{}}";
+                var json = @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":""""}";
                 var context = new TestContext { InputTestFile = "file" };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);

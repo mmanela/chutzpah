@@ -39,7 +39,7 @@
 
         function logCoverage() {
             if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
-                log({ type: "CoverageObject", object: window[window._Chutzpah_covobj_name] });
+                log({ type: "CoverageObject", object: JSON.stringify(window[window._Chutzpah_covobj_name]) });
             }
         }
 
