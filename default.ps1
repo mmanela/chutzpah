@@ -156,6 +156,8 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
 }
 
+task Push-Public -depends Push-Nuget, Push-Chocolatey
+
 task Package-Chocolatey -depends Clean-PackageFiles, Set-Version {
     $nuspec = "$baseDir\Chutzpah.nuspec"
     $chocolateyInstall = "$baseDir\chocolateyInstall.ps1"
