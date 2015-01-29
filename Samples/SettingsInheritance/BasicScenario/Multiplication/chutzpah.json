@@ -1,0 +1,17 @@
+﻿{
+	// Tells Chutzpah to find the parent chutzpah.json and inherit it's settings
+	"InheritFromParent": true,
+
+	// These reference settings are appended to the parent reference settings
+    "References" : [
+        {"Include": "*mult.js","Exclude": "*Test.js" }
+    ],
+    "Tests" : [
+      {"Include": "*multTest.js"}
+    ],    
+
+    // When this transform gets inherited the path will still be relative to the file it was defined in
+    "Transforms": [
+        { "Name":  "junit", "Path":  "_Chutzpah.junit2.dat" }
+    ]
+}

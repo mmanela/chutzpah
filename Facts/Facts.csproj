@@ -90,7 +90,7 @@
     <Compile Include="Library\FileGenerators\TypeScriptFileGeneratorFacts.cs" />
     <Compile Include="Library\JasmineDefinitionFacts.cs" />
     <Compile Include="Library\JasmineLineNumberProcessorFacts.cs" />
-    <Compile Include="Library\Models\ChutzpahTestSettingsFileFacts.cs" />
+    <Compile Include="Library\Models\ChutzpahTestSettingsServiceFacts.cs" />
     <Compile Include="Library\Models\CoverageDataFacts.cs" />
     <Compile Include="Library\QUnitDefinitionFacts.cs" />
     <Compile Include="Library\QUnitLineNumberProcessorFacts.cs" />

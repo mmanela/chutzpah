@@ -81,5 +81,10 @@ namespace Chutzpah.Models
         /// line numbers to those of their original source files.
         /// </summary>
         public bool UseSourceMaps { get; set; }
+
+        /// <summary>
+        /// The settings file directory that this batch compile configuration came from
+        /// </summary>
+        public string SettingsFileDirectory { get; set; }
     }
 }

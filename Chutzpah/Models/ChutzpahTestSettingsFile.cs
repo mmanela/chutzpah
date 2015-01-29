@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Chutzpah.Compilers.TypeScript;
+using System.Linq;
+
 namespace Chutzpah.Models
 {
     public enum TestHarnessReferenceMode
@@ -31,7 +33,7 @@ namespace Chutzpah.Models
     /// </summary>
     public class ChutzpahTestSettingsFile
     {
-        public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile();
+        public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile(true);
         private Regex testPatternRegex;
 
         public ChutzpahTestSettingsFile()
@@ -40,11 +42,28 @@ namespace Chutzpah.Models
             CodeCoverageExcludes = new List<string>();
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
-            CoffeeScriptBareMode = true;
-            CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
             Transforms = new List<TransformConfig>();
+            CoffeeScriptBareMode = true;
         }
 
+        private ChutzpahTestSettingsFile(bool isDefaultSetings) : this()
+        {
+            IsDefaultSettings = isDefaultSetings;
+
+            CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
+            TestHarnessReferenceMode = Chutzpah.Models.TestHarnessReferenceMode.Normal;
+            TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.TestFileAdjacent;
+            RootReferencePathMode = Chutzpah.Models.RootReferencePathMode.DriveRoot;
+
+        }
+
+        public bool IsDefaultSettings { get; set; }
+
+        /// <summary>
+        /// Determines if this settings file should inherit and merge with the settings of its
+        /// parent settings file.
+        /// </summary>
+        public bool InheritFromParent { get; set; }
 
         /// <summary>
         /// The time to wait for the tests to compelte in milliseconds
@@ -76,7 +95,7 @@ namespace Chutzpah.Models
         /// Normal - Sets the test harness for normal test running
         /// AMD - Sets the test harness to running tests using AMD
         /// </summary>
-        public TestHarnessReferenceMode TestHarnessReferenceMode { get; set; }
+        public TestHarnessReferenceMode? TestHarnessReferenceMode { get; set; }
 
 
         /// <summary>
@@ -85,7 +104,7 @@ namespace Chutzpah.Models
         /// SettingsFileAdjacent - Places the harness next to the first chutzpah.json file found up the directory tree from the file under test
         /// Custom - Lets you specify the TestHarnessDirectory property to give a custom folder to place the test harness. If folder is not found it will revert to the default.
         /// </summary>
-        public TestHarnessLocationMode TestHarnessLocationMode { get; set; }
+        public TestHarnessLocationMode? TestHarnessLocationMode { get; set; }
 
         /// <summary>
         /// If TestHarnessLocationMode is set to Custom then this will be the path to the folder to place the generated test harness file
@@ -119,7 +138,7 @@ namespace Chutzpah.Models
         /// DriveRoot - Make it relative to the root of the drive (e.g. C:\). This is default.
         /// SettingsFileDirectory - Makes root path relative to the directory of the settings file
         /// </summary>
-        public RootReferencePathMode RootReferencePathMode { get; set; }
+        public RootReferencePathMode? RootReferencePathMode { get; set; }
 
         /// <summary>
         /// If True, forces code coverage to run always
@@ -131,7 +150,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// The percentage of lines should be covered to show the coverage output as success or failure. By default, this is 60.
         /// </summary>
-        public double CodeCoverageSuccessPercentage { get; set; }
+        public double? CodeCoverageSuccessPercentage { get; set; }
 
         /// <summary>
         /// The collection code coverage file patterns to include in coverage. These are in glob format. If you specify none all files are included.
@@ -147,6 +166,8 @@ namespace Chutzpah.Models
         /// The collection of test files. These can list individual tests or folders scanned recursively. This setting can work in two ways:
         /// 1. If you run tests normally by specifying folders/files then this settings will filter the sets of those files.
         /// 2. If you run tests by running a specific chutzpah.json file then this settings will select the test files you choose.
+        /// 
+        /// This settings will not get inherited from parent settings file
         /// </summary>
         public ICollection<SettingsFileTestPath> Tests { get; set; }
 
@@ -246,6 +267,73 @@ namespace Chutzpah.Models
 
             return SettingsFileDirectory != null && SettingsFileDirectory.Equals(settings.SettingsFileDirectory, StringComparison.OrdinalIgnoreCase);
 
+        }
+
+        public ChutzpahTestSettingsFile InheritFromDefault()
+        {
+            return this.InheritFrom(Default);
+        }
+
+        /// <summary>
+        /// Merge a selection of settings from a parent file into the current one.
+        /// This merge will work as follows
+        /// 1. For basic properties the child's property wins if it is different than the default
+        /// 2. For complex objects the child's property wins if it is not null
+        /// 3. For lists the childs items get added to the parents
+        /// </summary>
+        /// <param name="parent"></param>
+        public ChutzpahTestSettingsFile InheritFrom(ChutzpahTestSettingsFile parent)
+        {
+            if (parent == null || this.IsDefaultSettings)
+            {
+                return this;
+            }
+
+
+            this.References = parent.References.Concat(this.References).ToList();
+            this.CodeCoverageIncludes = parent.CodeCoverageIncludes.Concat(this.CodeCoverageIncludes).ToList();
+            this.CodeCoverageExcludes = parent.CodeCoverageExcludes.Concat(this.CodeCoverageExcludes).ToList();
+            this.Transforms = parent.Transforms.Concat(this.Transforms).ToList();
+
+            if (this.Compile == null)
+            {
+                this.Compile = parent.Compile;
+            }
+
+
+            this.AMDBasePath = this.AMDBasePath == null ? parent.AMDBasePath : this.AMDBasePath;
+            this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage == null ? parent.CodeCoverageSuccessPercentage : this.CodeCoverageSuccessPercentage;
+            this.CustomTestHarnessPath = this.CustomTestHarnessPath == null ? parent.CustomTestHarnessPath : this.CustomTestHarnessPath;
+            this.EnableCodeCoverage = this.EnableCodeCoverage == null ? parent.EnableCodeCoverage : this.EnableCodeCoverage;
+            this.Framework = this.Framework == null ? parent.Framework : this.Framework;
+            this.FrameworkVersion = this.FrameworkVersion == null ? parent.FrameworkVersion : this.FrameworkVersion;
+            this.MochaInterface = this.MochaInterface == null ? parent.MochaInterface : this.MochaInterface;
+            this.RootReferencePathMode = this.RootReferencePathMode == null ? parent.RootReferencePathMode : this.RootReferencePathMode;
+            this.TestFileTimeout = this.TestFileTimeout == null ? parent.TestFileTimeout : this.TestFileTimeout;
+            this.TestHarnessReferenceMode = this.TestHarnessReferenceMode == null ? parent.TestHarnessReferenceMode : this.TestHarnessReferenceMode;
+            this.TestPattern = this.TestPattern == null ? parent.TestPattern : this.TestPattern;
+            this.UserAgent = this.UserAgent == null ? parent.UserAgent : this.UserAgent;
+
+            // We need to handle an inherited test harness location mode specially
+            // If the parent set their mode to SettingsFileAdjacent and the current file has it set to null 
+            // Then we make the curent file have a Custom mode with the parent files settings directory
+            if (this.TestHarnessLocationMode == null)
+            {
+                if (parent.TestHarnessLocationMode == Chutzpah.Models.TestHarnessLocationMode.SettingsFileAdjacent && !parent.IsDefaultSettings)
+                {
+                    this.TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.Custom;
+                    this.TestHarnessDirectory = parent.SettingsFileDirectory;
+                }
+                else
+                {
+                    this.TestHarnessDirectory = parent.TestHarnessDirectory;
+                    this.TestHarnessLocationMode = parent.TestHarnessLocationMode;
+                }
+            }
+            
+
+
+            return this;
         }
     }
 }

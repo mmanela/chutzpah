@@ -35,7 +35,7 @@ namespace Chutzpah.Facts
                         SourceDirectory = @"C:\src",
                         OutDirectory = @"C:\src",
                     }
-                };
+                }.InheritFromDefault();
 
                 return context;
             }

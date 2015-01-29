@@ -23,7 +23,7 @@ namespace Chutzpah.Facts
                 var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, Path = "path" };
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 processor.Mock<IFileSystemWrapper>().Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
             }
@@ -57,7 +57,7 @@ namespace Chutzpah.Facts
                     "//js file", "test (\"test1\", function(){}); ", "module ( \"module1\");", "  asyncTest('test2', function(){});"
                 });
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(8, file.FilePositions[0].Column);
@@ -76,7 +76,7 @@ namespace Chutzpah.Facts
                     "  test \"test1\", ->"
                 });
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(9, file.FilePositions[0].Column);
@@ -92,7 +92,7 @@ namespace Chutzpah.Facts
                     "module ( \"modu\"le'1\");", " test (\"t\"e'st1\", function(){}); "
                 });
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(9, file.FilePositions[0].Column);

@@ -25,7 +25,7 @@ namespace Chutzpah.Facts.Library
                 var processor = new TestableMochaLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = false, Path = "path" };
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 processor.Mock<IFileSystemWrapper>().Verify(x => x.GetLines(It.IsAny<string>()), Times.Never());
             }
@@ -233,7 +233,7 @@ namespace Chutzpah.Facts.Library
                     "};"
                 });
 
-                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(7, file.FilePositions[0].Column);
@@ -247,7 +247,7 @@ namespace Chutzpah.Facts.Library
 
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = path };
 
-                processor.ClassUnderTest.Process(file, String.Join("\n", lines), new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.Process(file, String.Join("\n", lines), new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.True(
                     file.FilePositions.Contains(positions.Length - 1),

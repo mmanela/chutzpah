@@ -62,7 +62,7 @@ namespace Chutzpah.Facts.Library.Coverage
                     {
                         UseSourceMaps = true,
                     }
-                },
+                }.InheritFromDefault(),
                 ReferencedFiles = new[] 
                 { 
                     new ReferencedFile { Path = @"X:\file1.ts", GeneratedFilePath = @"X:\file1.js", SourceMapFilePath = @"X:\file1.map" }

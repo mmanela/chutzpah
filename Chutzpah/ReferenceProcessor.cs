@@ -84,12 +84,12 @@ namespace Chutzpah
             foreach (var reference in chutzpahTestSettings.References.Where(reference => reference != null))
             {
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
-                var referencePath = string.IsNullOrEmpty(reference.Path) ? chutzpahTestSettings.SettingsFileDirectory : reference.Path;
+                var referencePath = string.IsNullOrEmpty(reference.Path) ? reference.SettingsFileDirectory : reference.Path;
 
                 ProcessFilePathAsReference(
                     referencePathSet,
                     definition,
-                    chutzpahTestSettings.SettingsFileDirectory,
+                    reference.SettingsFileDirectory,
                     chutzpahTestSettings,
                     referencePath,
                     referencedFiles,

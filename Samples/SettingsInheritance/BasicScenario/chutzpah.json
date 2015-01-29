@@ -1,0 +1,24 @@
+﻿{
+    "Framework": "qunit",
+
+    // By setting this and not overriding in the child file (Multiplication/chutzpah.json)
+    // will result in tests run on the child setting to use this chutzpah.json's directory
+    // as the test harness directory.
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    
+
+    "References" : [
+        {"Path" : "addition.js" }
+    ],
+
+    // Tests do *not* get inherited. 
+    "Tests" : [
+      {"Path": "additionTest.js"}
+    ],
+
+    // When this transform gets inherited the path will still be relative to the file it was defined in
+    // If a child file has its own transforms they both will run
+    "Transforms": [
+        { "Name":  "junit", "Path":  "_Chutzpah.junit1.dat" }
+    ]
+}

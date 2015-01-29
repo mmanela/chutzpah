@@ -42,7 +42,7 @@ namespace Chutzpah.Facts
                 var referencedFile = new ReferencedFile {Path = @"C:\some\path\code\test.js"};
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
     
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles,testHarnessDirectory, new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles,testHarnessDirectory, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("code/test",referencedFile.AmdFilePath);
                 Assert.Null(referencedFile.AmdGeneratedFilePath);
@@ -104,7 +104,7 @@ namespace Chutzpah.Facts
                 var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
 
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("code/test", referencedFile.AmdFilePath);
                 Assert.Null(referencedFile.AmdGeneratedFilePath);
@@ -118,7 +118,7 @@ namespace Chutzpah.Facts
                 var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.ts", GeneratedFilePath = @"C:\some\path\code\_Chutzpah.1.test.js" };
                 var referenceFiles = new List<ReferencedFile> { referencedFile };
 
-                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile());
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("code/test", referencedFile.AmdFilePath);
                 Assert.Equal("code/_Chutzpah.1.test", referencedFile.AmdGeneratedFilePath);
@@ -133,7 +133,7 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableReferenceProcessor();
                 var referenceFiles = new List<ReferencedFile>();
-                var settings = new ChutzpahTestSettingsFile {};
+                var settings = new ChutzpahTestSettingsFile {}.InheritFromDefault();
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
 
@@ -400,7 +400,8 @@ namespace Chutzpah.Facts
                 settings.References.Add(
                     new SettingsFileReference
                     {
-                        Path = "here.js"
+                        Path = "here.js",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -414,7 +415,7 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableReferenceProcessor();
                 var referenceFiles = new List<ReferencedFile>();
-                var settings = new ChutzpahTestSettingsFile();
+                var settings = new ChutzpahTestSettingsFile().InheritFromDefault();
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
                 processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"c:\settingsDir")).Returns<string>(null);
                 processor.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingsDir")).Returns(@"c:\settingsDir");
@@ -426,7 +427,8 @@ namespace Chutzpah.Facts
                     new SettingsFileReference
                     {
                         Path = null,
-                        Include = "*subFile.js"
+                        Include = "*subFile.js",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -450,7 +452,8 @@ namespace Chutzpah.Facts
                     new SettingsFileReference
                     {
                         Path = "here.js",
-                        IncludeInTestHarness = true
+                        IncludeInTestHarness = true,
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -475,7 +478,8 @@ namespace Chutzpah.Facts
                 settings.References.Add(
                     new SettingsFileReference
                     {
-                        Path = "here"
+                        Path = "here",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -502,7 +506,8 @@ namespace Chutzpah.Facts
                     new SettingsFileReference
                     {
                         Path = "here",
-                        Exclude = @"*path\sub*"
+                        Exclude = @"*path\sub*",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -529,7 +534,8 @@ namespace Chutzpah.Facts
                     new SettingsFileReference
                     {
                         Path = "here",
-                        Include = @"*path\sub*"
+                        Include = @"*path\sub*",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -557,7 +563,8 @@ namespace Chutzpah.Facts
                     {
                         Path = "here",
                         Include = @"path\*",
-                        Exclude = @"*path\pare*"
+                        Exclude = @"*path\pare*",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 
@@ -586,7 +593,8 @@ namespace Chutzpah.Facts
                     {
                         Path = "here",
                         Include = @"PATH/*",
-                        Exclude = @"*paTh/pAre*"
+                        Exclude = @"*paTh/pAre*",
+                        SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
 

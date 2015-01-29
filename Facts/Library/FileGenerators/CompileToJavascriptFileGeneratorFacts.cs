@@ -47,7 +47,7 @@ namespace Chutzpah.Facts
                 var file = new ReferencedFile { Path = "somePath.js" };
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile());
+                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("somePath.js", file.Path);
                 Assert.Empty(tempFiles);
@@ -66,7 +66,7 @@ namespace Chutzpah.Facts
                 var resultPath = @"path\to\" + string.Format(Constants.ChutzpahTemporaryFileFormat, Thread.CurrentThread.ManagedThreadId, "someFile.js");
                 var tempFiles = new List<string>();
 
-                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile());
+                generator.ClassUnderTest.Generate(new[] { file }, tempFiles, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 generator.Mock<IFileSystemWrapper>().Verify(x => x.WriteAllText(resultPath, "jsContents"));
                 Assert.Equal(@"path\to\someFile.coffee", file.Path);

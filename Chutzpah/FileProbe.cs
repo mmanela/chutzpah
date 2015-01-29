@@ -162,9 +162,9 @@ namespace Chutzpah
 
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
-                var testPath = string.IsNullOrEmpty(pathSettings.Path) ? chutzpahTestSettings.SettingsFileDirectory : pathSettings.Path;
+                var testPath = string.IsNullOrEmpty(pathSettings.Path) ? pathSettings.SettingsFileDirectory : pathSettings.Path;
                 testPath = NormalizeFilePath(testPath);
-                testPath = testPath != null ? Path.Combine(chutzpahTestSettings.SettingsFileDirectory, testPath) : null;
+                testPath = testPath != null ? Path.Combine(pathSettings.SettingsFileDirectory, testPath) : null;
 
                 // If a file path is given just return that file
                 var filePath = FindFilePath(testPath);

@@ -113,7 +113,7 @@ namespace Chutzpah.Coverage
             IDictionary<string, ReferencedFile> generatedToReferencedFile =
                 testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf);
 
-            var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage);
+            var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage.Value);
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths, then only keep the ones

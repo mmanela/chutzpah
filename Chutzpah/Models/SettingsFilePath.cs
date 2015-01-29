@@ -17,5 +17,10 @@ namespace Chutzpah.Models
         /// A glob expression of the paths to exclude. This is usefull when you specify the path as a folder
         /// </summary>
         public string Exclude { get; set; }
+
+        /// <summary>
+        /// The settings file directory that this batch compile configuration came from
+        /// </summary>
+        public string SettingsFileDirectory { get; set; }
     }
 }

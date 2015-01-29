@@ -1,0 +1,16 @@
+﻿{
+	// Tells Chutzpah to find the parent chutzpah.json and inherit it's settings. 
+	"InheritFromParent": true,
+
+	// These reference settings are appended to the parent reference settings
+    "References" : [
+        {"Include": "*.js","Exclude": "*Test.js" }
+    ],
+    "Tests" : [
+      {"Include": "*Test.js"}
+    ],
+
+    "Transforms": [
+        { "Name":  "trx", "Path":  "_Chutzpah.trx.dat" }
+    ]
+}

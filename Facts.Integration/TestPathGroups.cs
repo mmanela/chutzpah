@@ -25,6 +25,12 @@ namespace Chutzpah.Facts.Integration
                     new object[] {@"Samples\Compilation\TypeScriptMsbuild\chutzpah.json"},
                     new object[] {@"Samples\Compilation\TypeScriptPowershell\chutzpah.json"},
 
+
+                    // Chutzpah Settings Inheritance Samples
+                    new object[] {@"Samples\SettingsInheritance\BasicScenario\chutzpah.json"},
+                    new object[] {@"Samples\SettingsInheritance\BasicScenario\Multiplication\chutzpah.json"},
+                    new object[] {@"Samples\SettingsInheritance\BasicScenario\Multiplication\Power\chutzpah.json"},
+
                 };
             }
         }

@@ -536,7 +536,8 @@ namespace Chutzpah.Facts
                     {
                         new SettingsFileTestPath
                         {
-                            Path = "file.js"
+                            Path = "file.js",
+                            SettingsFileDirectory = "dir"
                         }
                     }
                 };
@@ -574,6 +575,7 @@ namespace Chutzpah.Facts
                             Path = "someFolder",
                             Include = "*src/*",
                             Exclude = "*.js",
+                            SettingsFileDirectory = "dir"
                         }
                     }
                 };

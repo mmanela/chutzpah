@@ -71,7 +71,7 @@ namespace Chutzpah.Facts
                     InputTestFile = @"C:\folder\test.js",
                     TestHarnessDirectory = @"C:\folder",
                     FrameworkDefinition = Mock<IFrameworkDefinition>().Object,
-                    TestFileSettings = new ChutzpahTestSettingsFile()
+                    TestFileSettings = new ChutzpahTestSettingsFile().InheritFromDefault()
                 };
 
                 context.TestFileSettings.SettingsFileDirectory = "settingsPath";

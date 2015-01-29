@@ -38,7 +38,7 @@ namespace Chutzpah.Facts
                 ChutzpahTestSettingsFile = new ChutzpahTestSettingsFile
                 {
                     SettingsFileDirectory = "settingsPath"
-                };
+                }.InheritFromDefault();
                 Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(It.IsAny<string>())).Returns(ChutzpahTestSettingsFile);
 
 
@@ -123,11 +123,11 @@ namespace Chutzpah.Facts
             public void Will_return_true_if_settings_include_path_matches()
             {
                 var creator = new TestableTestContextBuilder();
+                creator.ChutzpahTestSettingsFile.SettingsFileDirectory = @"C:\settingsPath";
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Include = "*test.js"} 
+                    new SettingsFileTestPath{ Include = "*test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.ChutzpahTestSettingsFile.SettingsFileDirectory = @"C:\settingsPath";
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPath\path\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -163,7 +163,7 @@ namespace Chutzpah.Facts
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Exclude = "*path2/test.js"} 
+                    new SettingsFileTestPath{ Exclude = "*path2/test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPathpath\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -179,7 +179,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Path = "path/test.js"} 
+                    new SettingsFileTestPath{ Path = "path/test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -195,7 +195,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Path = "path/"} 
+                    new SettingsFileTestPath{ Path = "path/", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
@@ -213,7 +213,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Path = "path/", Include = "*.js"} 
+                    new SettingsFileTestPath{ Path = "path/", Include = "*.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
@@ -231,7 +231,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Path = "path/", Include = "*.ts"} 
+                    new SettingsFileTestPath{ Path = "path/", Include = "*.ts", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
@@ -249,7 +249,7 @@ namespace Chutzpah.Facts
                 var creator = new TestableTestContextBuilder();
                 creator.ChutzpahTestSettingsFile.Tests = new[]
                 {
-                    new SettingsFileTestPath{ Path = "path/", Exclude = "*.js"} 
+                    new SettingsFileTestPath{ Path = "path/", Exclude = "*.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);

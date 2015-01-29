@@ -47,7 +47,13 @@ namespace Chutzpah
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
+        /// 
         public ChutzpahTestSettingsFile FindSettingsFile(string directory)
+        {
+            return FindSettingsFile(directory, mergeResultWithDefaultSettings: true);
+        }
+
+        private ChutzpahTestSettingsFile FindSettingsFile(string directory, bool mergeResultWithDefaultSettings = true)
         {
             if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
@@ -71,6 +77,10 @@ namespace Chutzpah
                     {
                         settings = ChutzpahTestSettingsFile.Default;
                     }
+                    else
+                    {
+                        settings.IsDefaultSettings = false;
+                    }
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
@@ -80,6 +90,18 @@ namespace Chutzpah
 
                     ResolveBatchCompileConfiguration(settings);
 
+                    SetSettingsFileDirectoryOnRelativePathSettings(settings);
+
+                    if (settings.InheritFromParent)
+                    {
+                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), mergeResultWithDefaultSettings: false);
+                        if (!parentSettingsFile.IsDefaultSettings)
+                        {
+                            settings.InheritFrom(parentSettingsFile);
+                        }
+
+                    }
+
                     // Add a mapping in the cache for the directory that contains the test settings file
                     ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
                 }
@@ -88,7 +110,9 @@ namespace Chutzpah
                 ChutzpahSettingsFileCache.TryAdd(directory, settings);
             }
 
-            return settings;
+
+
+            return mergeResultWithDefaultSettings ? settings.InheritFromDefault() : settings;
         }
 
 
@@ -131,10 +155,29 @@ namespace Chutzpah
             }
         }
 
+        private void SetSettingsFileDirectoryOnRelativePathSettings(ChutzpahTestSettingsFile settings)
+        {
+            foreach (var test in settings.Tests)
+            {
+                test.SettingsFileDirectory = settings.SettingsFileDirectory;
+            }
+
+            foreach (var reference in settings.References)
+            {
+                reference.SettingsFileDirectory = settings.SettingsFileDirectory;
+            }
+
+            foreach (var transform in settings.Transforms)
+            {
+                transform.SettingsFileDirectory = settings.SettingsFileDirectory;
+            }
+        }
+
         private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
         {
             if (settings.Compile != null)
             {
+                settings.Compile.SettingsFileDirectory = settings.SettingsFileDirectory;
                 settings.Compile.Extensions = settings.Compile.Extensions ?? new List<string>();
 
                 var compileVariables = BuildCompileVariables(settings);

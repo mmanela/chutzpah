@@ -47,9 +47,9 @@ namespace Chutzpah.Transformers
                 if (knownTransforms.TryGetValue(transformConfig.Name, out transform))
                 {
                     var outputPath = transformConfig.Path;
-                    if (!fileSystem.IsPathRooted(outputPath) && !string.IsNullOrWhiteSpace(settings.SettingsFileDirectory))
+                    if (!fileSystem.IsPathRooted(outputPath) && !string.IsNullOrWhiteSpace(transformConfig.SettingsFileDirectory))
                     {
-                        outputPath = fileSystem.GetFullPath(Path.Combine(settings.SettingsFileDirectory, outputPath));
+                        outputPath = fileSystem.GetFullPath(Path.Combine(transformConfig.SettingsFileDirectory, outputPath));
                     }
 
                     // TODO: In future, this would ideally split out the summary to just those parts

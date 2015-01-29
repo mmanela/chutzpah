@@ -55,7 +55,7 @@ namespace Chutzpah.Facts
                 generator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns("content");
                 generator.Mock<ITypeScriptEngineWrapper>().Setup(x => x.Compile(It.IsAny<string>())).Returns((string)null);
 
-                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] {file}, new ChutzpahTestSettingsFile());
+                var result = generator.ClassUnderTest.GenerateCompiledSources(new[] { file }, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("compiled", result[file.Path]);
             }

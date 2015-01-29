@@ -22,7 +22,7 @@ namespace Chutzpah.Facts.Library.Transformers
             var settings1 = new ChutzpahTestSettingsFile 
             {
                 SettingsFileDirectory = @"D:\directory1",
-                Transforms = new List<TransformConfig>{ new TransformConfig { Name = "testtransform1", Path = @"D:\testtransform1.out" } }
+                Transforms = new List<TransformConfig> { new TransformConfig { Name = "testtransform1", Path = @"D:\testtransform1.out", SettingsFileDirectory = @"D:\directory1" } }
             };
 
             var settings2 = new ChutzpahTestSettingsFile
@@ -30,8 +30,8 @@ namespace Chutzpah.Facts.Library.Transformers
                 SettingsFileDirectory = @"D:\directory2",
                 Transforms = new List<TransformConfig>
                 {
-                    new TransformConfig { Name = "testtransform1", Path = @"D:\testtransform1.out" },
-                    new TransformConfig { Name = "testtransform2", Path = @"D:\testtransform2.out" }
+                    new TransformConfig { Name = "testtransform1", Path = @"D:\testtransform1.out", SettingsFileDirectory = @"D:\directory2" },
+                    new TransformConfig { Name = "testtransform2", Path = @"D:\testtransform2.out", SettingsFileDirectory = @"D:\directory2" }
                 }
             };
 

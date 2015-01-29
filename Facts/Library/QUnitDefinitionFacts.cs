@@ -86,14 +86,14 @@
             public void ReturnsTrue_GivenQUnitFile()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("qunit.js", new ChutzpahTestSettingsFile()));
+                Assert.True(creator.ClassUnderTest.ReferenceIsDependency("qunit.js", new ChutzpahTestSettingsFile().InheritFromDefault()));
             }
 
             [Fact]
             public void ReturnsFalse_GivenJasmineFile()
             {
                 var creator = new QUnitDefinitionCreator();
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js", new ChutzpahTestSettingsFile()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency("jasmine.js", new ChutzpahTestSettingsFile().InheritFromDefault()));
             }
 
             [Fact]
@@ -101,8 +101,8 @@
             {
                 var creator = new QUnitDefinitionCreator();
 
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty, new ChutzpahTestSettingsFile()));
-                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null, new ChutzpahTestSettingsFile()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(string.Empty, new ChutzpahTestSettingsFile().InheritFromDefault()));
+                Assert.False(creator.ClassUnderTest.ReferenceIsDependency(null, new ChutzpahTestSettingsFile().InheritFromDefault()));
             }
         }
 
@@ -114,7 +114,7 @@
                 var creator = new QUnitDefinitionCreator();
                 var processor = creator.Mock<IQUnitReferencedFileProcessor>();
 
-                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile());
+                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 processor.Verify(x => x.Process(It.IsAny<ReferencedFile>(),It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
@@ -127,7 +127,7 @@
                 var processor2 = creator.Mock<IQUnitReferencedFileProcessor>();
                 creator.InjectArray<IQUnitReferencedFileProcessor>(new[] { processor1.Object, processor2.Object });
 
-                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile());
+                creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
                 processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));

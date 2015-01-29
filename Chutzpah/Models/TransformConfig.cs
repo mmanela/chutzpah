@@ -18,5 +18,10 @@ namespace Chutzpah.Models
         /// Gets or sets the output path for the transform.
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// The settings file directory that this batch compile configuration came from
+        /// </summary>
+        public string SettingsFileDirectory { get; set; }
     }
 }
