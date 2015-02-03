@@ -273,28 +273,33 @@ namespace Chutzpah
                             ChutzpahTracer.TraceInformation(
                                 "Invoking headless browser on test harness '{0}' for file '{1}'",
                                 testContext.TestHarnessPath,
-                                testContext.InputTestFile);
+                                String.Join(",",testContext.InputTestFiles));
 
-                            var testSummary = InvokeTestRunner(
+                            var testSummaries = InvokeTestRunner(
                                 headlessBrowserPath,
                                 options,
                                 testContext,
                                 testExecutionMode,
                                 callback);
 
-                            ChutzpahTracer.TraceInformation(
-                                "Test harness '{0}' for file '{1}' finished with {2} passed, {3} failed and {4} errors",
-                                testContext.TestHarnessPath,
-                                testContext.InputTestFile,
-                                testSummary.PassedCount,
-                                testSummary.FailedCount,
-                                testSummary.Errors.Count);
+                            foreach (var testSummary in testSummaries)
+                            {
 
-                            ChutzpahTracer.TraceInformation(
-                                "Finished running headless browser on test harness '{0}' for file '{1}'",
-                                testContext.TestHarnessPath,
-                                testContext.InputTestFile);
-                            testFileSummaries.Enqueue(testSummary);
+                                ChutzpahTracer.TraceInformation(
+                                    "Test harness '{0}' for file '{1}' finished with {2} passed, {3} failed and {4} errors",
+                                    testContext.TestHarnessPath,
+                                    testSummary.Path,
+                                    testSummary.PassedCount,
+                                    testSummary.FailedCount,
+                                    testSummary.Errors.Count);
+
+                                ChutzpahTracer.TraceInformation(
+                                    "Finished running headless browser on test harness '{0}' for file '{1}'",
+                                    testContext.TestHarnessPath,
+                                    testSummary.Path);
+
+                                testFileSummaries.Enqueue(testSummary);
+                            }
                         }
                     }
                     catch (Exception e)
@@ -425,7 +430,7 @@ namespace Chutzpah
             return scriptPaths;
         }
 
-        private TestFileSummary InvokeTestRunner(string headlessBrowserPath,
+        private IList<TestFileSummary> InvokeTestRunner(string headlessBrowserPath,
                                                  TestOptions options,
                                                  TestContext testContext,
                                                  TestExecutionMode testExecutionMode,
@@ -435,11 +440,11 @@ namespace Chutzpah
             string fileUrl = BuildHarnessUrl(testContext.TestHarnessPath, testContext.IsRemoteHarness);
 
             string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testExecutionMode);
-            Func<ProcessStream, TestFileSummary> streamProcessor =
+            Func<ProcessStream, IList<TestFileSummary>> streamProcessor =
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, m_debugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
-            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile, processResult.Model.Errors, callback);
+            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile, processResult.Model.SelectMany(x => x.Errors).ToList(), callback);
 
             return processResult.Model;
         }

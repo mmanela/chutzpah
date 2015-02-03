@@ -44,13 +44,17 @@
         if (window.chutzpah.testMode === 'discovery') {
             // In discovery mode override QUnit's functions
 
-            window.module = QUnit.module = function (name) {
-                window.chutzpah.currentModule = name;
-            };
-            window.test = window.asyncTest = QUnit.test = QUnit.asyncTest = function (name) {
-                if (name === 'global failure') return;
-                var testCase = { moduleName: window.chutzpah.currentModule, testName: name };
-                log({ type: "TestDone", testCase: testCase });
+            var realTest = window.test = QUnit.test;
+
+            window.test = QUnit.test = function (name) {
+                if (arguments.length === 2) {
+                    arguments[1] = function () { }
+                }
+                else {
+                    arguments[2] = function () { }
+                }
+
+                realTest.apply(this, arguments);
             };
         }
 

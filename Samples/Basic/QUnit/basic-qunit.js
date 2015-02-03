@@ -1,5 +1,6 @@
 ﻿/// <reference path="../code.js" />
 
+
  test("A basic test", function () {
       ok(true, "this test is fine");
       var value = "hello";

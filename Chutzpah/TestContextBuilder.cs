@@ -56,81 +56,114 @@ namespace Chutzpah
 
         public TestContext BuildContext(PathInfo file, TestOptions options)
         {
-            if (file == null)
+            return BuildContext(new List<PathInfo> { file }, options);
+        }
+
+        public bool TryBuildContext(string file, TestOptions options, out TestContext context)
+        {
+            context = BuildContext(file, options);
+            return context != null;
+        }
+
+        public bool TryBuildContext(PathInfo file, TestOptions options, out TestContext context)
+        {
+            context = BuildContext(file, options);
+            return context != null;
+        }
+
+        public TestContext BuildContext(IEnumerable<PathInfo> files, TestOptions options)
+        {
+            if (files == null)
             {
                 throw new ArgumentNullException("testFilePathInfo");
             }
 
+            if (!files.Any())
+            {
+                ChutzpahTracer.TraceInformation("No files given to build test context for");
+                return null;
+            }
+            
+            var fileCount = files.Count();
 
-            ChutzpahTracer.TraceInformation("Building test context for '{0}'", file.FullPath);
+            var allFilePathString = string.Join(",", files.Select(x => x.FullPath));
+            ChutzpahTracer.TraceInformation("Building test context for '{0}'", allFilePathString);
 
-            PathType testFileKind = file.Type;
-            string testFilePath = file.FullPath;
+            // Make sure all test paths have been resolved to real files
+            var missingPaths = files.Where(x => x.FullPath == null).ToList();
+            if (missingPaths.Any())
+            {
+                throw new FileNotFoundException("Unable to find files: " + string.Join(",",missingPaths.Select(x => x.Path)));
+            }
 
-            if (!IsValidTestPathType(testFileKind))
+            // Make sure all test paths have a valid file type
+            if (!files.Select(x => x.Type).All(IsValidTestPathType))
             {
                 throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file or a url");
             }
 
-            if (testFilePath == null)
+            if(fileCount > 1 && files.Any(x => x.Type == PathType.Url || x.Type == PathType.Html))
             {
-                throw new FileNotFoundException("Unable to find file: " + file.Path);
+                throw new InvalidOperationException("Cannot build a batch context for Url or Html test files");
             }
 
-            var testFileDirectory = Path.GetDirectoryName(testFilePath);
-            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
+            // We use the first file's directory to find the chutzpah.json file and to test framework 
+            // since we assume all files in the batch must have the same values for those
+            PathType firstFileKind = files.First().Type;
+            string firstFilePath = files.First().FullPath;
 
-            if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
+            var firstTestFileDirectory = Path.GetDirectoryName(firstFilePath);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(firstTestFileDirectory);
+
+            // Exclude any files that are not included based on the settings file
+            var testedPaths = files.Select(f => new { File = f, IsIncluded = IsTestPathIncluded(f.FullPath, chutzpahTestSettings) }).ToList();
+            if (testedPaths.Any(x => !x.IsIncluded))
             {
-                ChutzpahTracer.TraceInformation("Excluded test file '{0}' given chutzpah.json settings", testFilePath);
-                return null;
+                var pathString = string.Join(",",testedPaths.Where(x => !x.IsIncluded).Select(x => x.File.FullPath));
+                ChutzpahTracer.TraceInformation("Excluding test files {0} given chutzpah.json settings", pathString);
+                files = testedPaths.Where(x => x.IsIncluded).Select(x => x.File).ToList();
             }
 
-            string testFileText;
-            if (testFileKind == PathType.Url)
+            string firstTestFileText;
+            if (firstFileKind == PathType.Url)
             {
-                testFileText = httpClient.GetContent(testFilePath);
+                firstTestFileText = httpClient.GetContent(firstFilePath);
             }
             else
             {
-                testFileText = fileSystem.GetText(testFilePath);
+                firstTestFileText = fileSystem.GetText(firstFilePath);
             }
 
             IFrameworkDefinition definition;
 
-            if (TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition))
+            if (TryDetectFramework(firstTestFileText, firstFileKind, chutzpahTestSettings, out definition))
             {
                 // For HTML test files we don't need to create a test harness to just return this file
-                if (testFileKind == PathType.Html || testFileKind == PathType.Url)
+                if (firstFileKind == PathType.Html || firstFileKind == PathType.Url)
                 {
-                    ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the supplied test harness and not building our own", testFileKind);
+                    ChutzpahTracer.TraceInformation("Test kind is {0} so we are trusting the supplied test harness and not building our own", firstFileKind);
 
                     return new TestContext
                     {
-                        InputTestFile = testFilePath,
-                        TestHarnessPath = testFilePath,
-                        IsRemoteHarness = testFileKind == PathType.Url,
+                        InputTestFile = firstFilePath,
+                        TestHarnessPath = firstFilePath,
+                        IsRemoteHarness = firstFileKind == PathType.Url,
                         TestRunner = definition.GetTestRunner(chutzpahTestSettings),
                     };
                 }
 
-                var referencedFiles = new List<ReferencedFile>();
                 var temporaryFiles = new List<string>();
 
+                string firstInputTestFileDir = Path.GetDirectoryName(firstFilePath);
+                var testHarnessDirectory = GetTestHarnessDirectory(chutzpahTestSettings, firstInputTestFileDir);
 
-                string inputTestFileDir = Path.GetDirectoryName(testFilePath);
-                var testHarnessDirectory = GetTestHarnessDirectory(chutzpahTestSettings, inputTestFileDir);
-                var fileUnderTest = GetFileUnderTest(testFilePath, chutzpahTestSettings);
-                referencedFiles.Add(fileUnderTest);
-                definition.Process(fileUnderTest, testFileText, chutzpahTestSettings);
+                var referencedFiles = GetFilesUnderTest(files, chutzpahTestSettings).ToList();
 
-
-                referenceProcessor.GetReferencedFiles(referencedFiles, definition, testFileText, testFilePath, chutzpahTestSettings);
+                referenceProcessor.GetReferencedFiles(referencedFiles, definition, chutzpahTestSettings);
 
                 // This is the legacy way Chutzpah compiled files that are TypeScript or CoffeeScript
-                // Remaining but will eventually be deprecated and removed
+                // Remaining but will eventually be removed
                 ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
-
 
                 IEnumerable<string> deps = definition.GetFileDependencies(chutzpahTestSettings);
 
@@ -143,7 +176,8 @@ namespace Chutzpah
                 {
                     FrameworkDefinition = definition,
                     CoverageEngine = coverageEngine,
-                    InputTestFile = testFilePath,
+                    InputTestFile = firstFilePath,
+                    InputTestFiles = referencedFiles.Where(x => x.IsFileUnderTest).Select(x => x.Path).ToList(),
                     TestHarnessDirectory = testHarnessDirectory,
                     ReferencedFiles = referencedFiles,
                     TestRunner = definition.GetTestRunner(chutzpahTestSettings),
@@ -153,10 +187,88 @@ namespace Chutzpah
             }
             else
             {
-                ChutzpahTracer.TraceWarning("Failed to detect test framework for '{0}'", testFilePath);
+                ChutzpahTracer.TraceWarning("Failed to detect test framework for '{0}'", firstFilePath);
             }
 
             return null;
+        }
+
+        public TestContext BuildContext(IEnumerable<string> files, TestOptions options)
+        {
+            if (files == null)
+            {
+                throw new ArgumentNullException("files");
+            }
+
+            return BuildContext(files.Select(fileProbe.GetPathInfo), options);
+        }
+
+        public bool TryBuildContext(IEnumerable<PathInfo> files, TestOptions options, out TestContext context)
+        {
+            context = BuildContext(files, options);
+            return context != null;
+        }
+
+        public bool TryBuildContext(IEnumerable<string> files, TestOptions options, out TestContext context)
+        {
+            context = BuildContext(files, options);
+            return context != null;
+        }
+
+        public bool IsTestFile(string file)
+        {
+            ChutzpahTracer.TraceInformation("Determining if '{0}' might be a test file", file);
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return false;
+            }
+
+            PathInfo pathInfo = fileProbe.GetPathInfo(file);
+            PathType testFileKind = pathInfo.Type;
+            string testFilePath = pathInfo.FullPath;
+
+            if (testFilePath == null || !IsValidTestPathType(testFileKind))
+            {
+                ChutzpahTracer.TraceInformation("Rejecting '{0}' since either it doesnt exist or does not have test extension", file);
+                return false;
+            }
+
+            var testFileDirectory = Path.GetDirectoryName(testFilePath);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
+
+            if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
+            {
+                ChutzpahTracer.TraceInformation("Excluded test file '{0}' given chutzpah.json settings", testFilePath);
+                return false;
+            }
+
+            string testFileText = fileSystem.GetText(testFilePath);
+
+            IFrameworkDefinition definition;
+            var frameworkDetetected = TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition);
+
+            if (frameworkDetetected)
+            {
+                ChutzpahTracer.TraceInformation("Assuming '{0}' is a test file", file);
+            }
+
+            return frameworkDetetected;
+        }
+
+        public void CleanupContext(TestContext context)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+            foreach (var file in context.TemporaryFiles)
+            {
+                try
+                {
+                    fileSystem.DeleteFile(file);
+                }
+                catch (IOException)
+                {
+                    // Supress exception
+                }
+            }
         }
 
         /// <summary>
@@ -271,73 +383,6 @@ namespace Chutzpah
             return coverageEngine;
         }
 
-        public bool TryBuildContext(string file, TestOptions options, out TestContext context)
-        {
-            context = BuildContext(file, options);
-            return context != null;
-        }
-
-        public bool TryBuildContext(PathInfo file, TestOptions options, out TestContext context)
-        {
-            context = BuildContext(file, options);
-            return context != null;
-        }
-
-        public bool IsTestFile(string file)
-        {
-            ChutzpahTracer.TraceInformation("Determining if '{0}' might be a test file", file);
-            if (string.IsNullOrWhiteSpace(file))
-            {
-                return false;
-            }
-
-            PathInfo pathInfo = fileProbe.GetPathInfo(file);
-            PathType testFileKind = pathInfo.Type;
-            string testFilePath = pathInfo.FullPath;
-
-            if (testFilePath == null || !IsValidTestPathType(testFileKind))
-            {
-                ChutzpahTracer.TraceInformation("Rejecting '{0}' since either it doesnt exist or does not have test extension", file);
-                return false;
-            }
-
-            var testFileDirectory = Path.GetDirectoryName(testFilePath);
-            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
-
-            if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
-            {
-                ChutzpahTracer.TraceInformation("Excluded test file '{0}' given chutzpah.json settings", testFilePath);
-                return false;
-            }
-
-            string testFileText = fileSystem.GetText(testFilePath);
-
-            IFrameworkDefinition definition;
-            var frameworkDetetected = TryDetectFramework(testFileText, testFileKind, chutzpahTestSettings, out definition);
-
-            if (frameworkDetetected)
-            {
-                ChutzpahTracer.TraceInformation("Assuming '{0}' is a test file", file);
-            }
-
-            return frameworkDetetected;
-        }
-
-        public void CleanupContext(TestContext context)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-            foreach (var file in context.TemporaryFiles)
-            {
-                try
-                {
-                    fileSystem.DeleteFile(file);
-                }
-                catch (IOException)
-                {
-                    // Supress exception
-                }
-            }
-        }
 
         private static bool IsValidTestPathType(PathType testFileKind)
         {
@@ -385,15 +430,15 @@ namespace Chutzpah
             return mainCoverageEngine;
         }
 
-        private ReferencedFile GetFileUnderTest(string testFilePath, ChutzpahTestSettingsFile chutzpahTestSettings)
+        private IEnumerable<ReferencedFile> GetFilesUnderTest(IEnumerable<PathInfo> testFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            return new ReferencedFile
+            return testFiles.Select(f => new ReferencedFile
             {
-                Path = testFilePath,
+                Path = f.FullPath,
                 IsLocal = true,
                 IsFileUnderTest = true,
                 IncludeInTestHarness = chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
-            };
+            });
         }
 
         private bool TryDetectFramework(string content, PathType pathType, ChutzpahTestSettingsFile chutzpahTestSettings, out IFrameworkDefinition definition)

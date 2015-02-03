@@ -44,8 +44,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 7),
-                    new FilePosition(4, 9)
+                    new FilePosition(3, 7, "someTest1"),
+                    new FilePosition(4, 9, "someTest2")
                 };
 
                 TestPositions(false, lines, positions);
@@ -65,8 +65,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 9),
-                    new FilePosition(4, 11)
+                    new FilePosition(3, 9, "someTest1"),
+                    new FilePosition(4, 11, "someTest2")
                 };
 
                 TestPositions(false, lines, positions);
@@ -85,8 +85,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 9),
-                    new FilePosition(4, 11)
+                    new FilePosition(3, 9, "someTest1"),
+                    new FilePosition(4, 11, "someTest2")
                 };
 
                 TestPositions(false, lines, positions);
@@ -117,11 +117,11 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 4),
-                    new FilePosition(5, 6),
-                    new FilePosition(6, 6),
-                    new FilePosition(8, 8),
-                    new FilePosition(10, 10)
+                    new FilePosition(3, 4, "someTest1"),
+                    new FilePosition(5, 6, "someTest2"),
+                    new FilePosition(6, 6, "someTest3"),
+                    new FilePosition(8, 8, "someTest4"),
+                    new FilePosition(10, 10, "someTest5")
                 };
 
                 TestPositions(false, lines, positions);
@@ -140,8 +140,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 7),
-                    new FilePosition(4, 7)
+                    new FilePosition(3, 7, "someTest1"),
+                    new FilePosition(4, 7, "someTest2")
                 };
 
                 TestPositions(true, lines, positions);
@@ -160,8 +160,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 9),
-                    new FilePosition(4, 9)
+                    new FilePosition(3, 9, "someTest1"),
+                    new FilePosition(4, 9, "someTest2")
                 };
 
                 TestPositions(true, lines, positions);
@@ -180,8 +180,8 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 7),
-                    new FilePosition(4, 7),
+                    new FilePosition(3, 7, "someTest1"),
+                    new FilePosition(4, 7, "someTest2"),
                 };
 
                 TestPositions(true, lines, positions);
@@ -211,11 +211,11 @@ namespace Chutzpah.Facts.Library
 
                 var positions = new[]
                 {
-                    new FilePosition(3, 4),
-                    new FilePosition(5, 6),
-                    new FilePosition(6, 6),
-                    new FilePosition(8, 8),
-                    new FilePosition(10, 10)
+                    new FilePosition(3, 4, "someTest1"),
+                    new FilePosition(5, 6, "someTest2"),
+                    new FilePosition(6, 6, "someTest3"),
+                    new FilePosition(8, 8, "someTest4"),
+                    new FilePosition(10, 10, "someTest5")
                 };
 
                 TestPositions(true, lines, positions);

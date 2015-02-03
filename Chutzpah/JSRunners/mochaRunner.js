@@ -31,13 +31,17 @@
         }
 
         function discoverTests(suite) {
+            log({ type: "FileStart" });
             suite.tests.forEach(function (test) {
                 var testCase = { moduleName: suite.fullTitle(), testName: test.title };
+                log({ type: "TestStart", testCase: testCase });
                 log({ type: "TestDone", testCase: testCase });
             });
 
             suite.suites.forEach(discoverTests);
 
+
+            log({ type: "FileDone" });
             chutzpah.isTestingFinished = true;
         }
 

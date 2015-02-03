@@ -14,9 +14,16 @@ namespace Chutzpah.Models
         }
         
         /// <summary>
-        /// The test file given by the user
+        /// The test file given by the user 
+        /// TODO (mmanela): DELETE
         /// </summary>
         public string InputTestFile { get; set; }
+
+
+        /// <summary>
+        /// The test files given by the user
+        /// </summary>
+        public ICollection<string> InputTestFiles { get; set; }
 
         /// <summary>
         /// The path to the test runner
@@ -63,6 +70,5 @@ namespace Chutzpah.Models
         /// Instance of the code coverage engine for the context
         /// </summary>
         public ICoverageEngine CoverageEngine { get; set; }
-
     }
 }

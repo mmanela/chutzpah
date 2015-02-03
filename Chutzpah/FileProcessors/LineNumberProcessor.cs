@@ -41,7 +41,7 @@ namespace Chutzpah.FileProcessors
 
                     if (!string.IsNullOrWhiteSpace(testName))
                     {
-                        referencedFile.FilePositions.Add(lineNum, testNameGroup.Index + 1);
+                        referencedFile.FilePositions.Add(lineNum, testNameGroup.Index + 1, testName);
                     }
 
                     match = match.NextMatch();

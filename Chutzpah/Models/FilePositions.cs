@@ -1,6 +1,8 @@
-﻿namespace Chutzpah.Models
+﻿using System.Linq;
+using System.Collections.Generic;
+
+namespace Chutzpah.Models
 {
-    using System.Collections.Generic;
 
     public class FilePositions
     {
@@ -19,14 +21,20 @@
             }
         }
 
+
         public bool Contains(int index)
         {
             return index >= 0 && index < positions.Count;
         }
 
-        public void Add(int line, int column)
+        public bool Contains(string testName)
         {
-            this.positions.Add(new FilePosition(line, column));
+            return this.positions.Any(x => x.TestName.Equals(testName));
+        }
+
+        public void Add(int line, int column, string testName)
+        {
+            this.positions.Add(new FilePosition(line, column, testName));
         }
     }
 }

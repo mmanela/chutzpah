@@ -46,8 +46,6 @@ namespace Chutzpah.Facts
                     .Setup(x => x.GetReferencedFiles(
                                 It.IsAny<List<ReferencedFile>>(),
                                 It.IsAny<IFrameworkDefinition>(),
-                                It.IsAny<string>(),
-                                It.IsAny<string>(),
                                 It.IsAny<ChutzpahTestSettingsFile>()))
                     .Callback<List<ReferencedFile>, IFrameworkDefinition, string, string, ChutzpahTestSettingsFile>(
                         (refs, def, text, path, settings) =>

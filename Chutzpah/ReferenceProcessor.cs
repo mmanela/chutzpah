@@ -47,11 +47,9 @@ namespace Chutzpah
         /// </summary>
         /// <param name="referencedFiles">The list of referenced files</param>
         /// <param name="definition">Test framework defintition</param>
-        /// <param name="textToParse">The content of the file to parse and extract from</param>
-        /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="chutzpahTestSettings"></param>
         /// <returns></returns>
-        void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string textToParse, string currentFilePath, ChutzpahTestSettingsFile chutzpahTestSettings);
+        void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings);
 
         void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings);
     }
@@ -76,8 +74,10 @@ namespace Chutzpah
         /// <param name="currentFilePath">Path to the file under test</param>
         /// <param name="chutzpahTestSettings"></param>
         /// <returns></returns>
-        public void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, string textToParse, string currentFilePath, ChutzpahTestSettingsFile chutzpahTestSettings)
+        public void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
+            var filesUnderTests = referencedFiles.Where(x => x.IsFileUnderTest).ToList();
+
             var referencePathSet = new HashSet<string>(referencedFiles.Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
 
             // Process the references that the user specifies in the chutzpah settings file
@@ -97,18 +97,26 @@ namespace Chutzpah
             }
 
             // Process the references defined using /// <reference comments in test file contents
-            IList<ReferencedFile> result = GetReferencedFiles(
-                referencePathSet,
-                definition,
-                textToParse,
-                currentFilePath,
-                chutzpahTestSettings);
+            foreach (var fileUnderTest in filesUnderTests)
+            {
+                var testFileText = fileSystem.GetText(fileUnderTest.Path);
+
+                definition.Process(fileUnderTest, testFileText, chutzpahTestSettings);
+
+                var result = GetReferencedFiles(
+                    referencePathSet,
+                    definition,
+                    testFileText,
+                    fileUnderTest.Path,
+                    chutzpahTestSettings);
 
 
-            IEnumerable<ReferencedFile> flattenedReferenceTree = from root in result
-                from flattened in FlattenReferenceGraph(root)
-                select flattened;
-            referencedFiles.AddRange(flattenedReferenceTree);
+                var flattenedReferenceTree = from root in result
+                                             from flattened in FlattenReferenceGraph(root)
+                                             select flattened;
+
+                referencedFiles.AddRange(flattenedReferenceTree);
+            }
         }
 
         /// <summary>
