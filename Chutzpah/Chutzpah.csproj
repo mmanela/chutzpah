@@ -115,6 +115,7 @@
     <Compile Include="FileProcessors\ISourceMapDiscoverer.cs" />
     <Compile Include="Extensions\VSTSExtensions.cs" />
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
+    <Compile Include="FileProcessors\MochaInterfaceDetectionProcessor.cs" />
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />

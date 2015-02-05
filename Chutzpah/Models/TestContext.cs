@@ -12,18 +12,13 @@ namespace Chutzpah.Models
             TemporaryFiles = new List<string>();
             TestFileSettings = ChutzpahTestSettingsFile.Default;    
         }
-        
-        /// <summary>
-        /// The test file given by the user 
-        /// TODO (mmanela): DELETE
-        /// </summary>
-        public string InputTestFile { get; set; }
-
 
         /// <summary>
         /// The test files given by the user
         /// </summary>
         public ICollection<string> InputTestFiles { get; set; }
+
+        public string InputTestFilesDisplayString { get; set; }
 
         /// <summary>
         /// The path to the test runner

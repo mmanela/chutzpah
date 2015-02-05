@@ -68,7 +68,7 @@ namespace Chutzpah.Facts
                 var context =  new TestContext
                 {
 
-                    InputTestFile = @"C:\folder\test.js",
+                    InputTestFiles = new []{ @"C:\folder\test.js"},
                     TestHarnessDirectory = @"C:\folder",
                     FrameworkDefinition = Mock<IFrameworkDefinition>().Object,
                     TestFileSettings = new ChutzpahTestSettingsFile().InheritFromDefault()
@@ -90,7 +90,7 @@ namespace Chutzpah.Facts
 
             creator.Mock<IFileSystemWrapper>().Verify(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()));
             Assert.Equal(@"C:\folder\_Chutzpah.hash.test.html", context.TestHarnessPath);
-            Assert.Equal(@"C:\folder\test.js", context.InputTestFile);
+            Assert.Equal(@"C:\folder\test.js", context.InputTestFiles.FirstOrDefault());
         }
 
         [Fact]

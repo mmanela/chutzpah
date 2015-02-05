@@ -254,7 +254,7 @@ namespace Chutzpah
                 parallelOptions,
                 testContext =>
                 {
-                    ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.InputTestFile, testExecutionMode);
+                    ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.InputTestFilesDisplayString, testExecutionMode);
 
                     try
                     {
@@ -265,7 +265,7 @@ namespace Chutzpah
                             ChutzpahTracer.TraceInformation(
                                 "Launching test harness '{0}' for file '{1}' in a browser",
                                 testContext.TestHarnessPath,
-                                testContext.InputTestFile);
+                                testContext.InputTestFilesDisplayString);
                             process.LaunchFileInBrowser(testContext.TestHarnessPath);
                         }
                         else
@@ -273,7 +273,7 @@ namespace Chutzpah
                             ChutzpahTracer.TraceInformation(
                                 "Invoking headless browser on test harness '{0}' for file '{1}'",
                                 testContext.TestHarnessPath,
-                                String.Join(",",testContext.InputTestFiles));
+                                testContext.InputTestFilesDisplayString);
 
                             var testSummaries = InvokeTestRunner(
                                 headlessBrowserPath,
@@ -306,18 +306,18 @@ namespace Chutzpah
                     {
                         var error = new TestError
                         {
-                            InputTestFile = testContext.InputTestFile,
+                            InputTestFile = testContext.InputTestFiles.FirstOrDefault(),
                             Message = e.ToString()
                         };
 
                         overallSummary.Errors.Add(error);
                         callback.FileError(error);
 
-                        ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testContext.InputTestFile);
+                        ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testContext.InputTestFilesDisplayString);
                     }
                     finally
                     {
-                        ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFile, testExecutionMode);
+                        ChutzpahTracer.TraceInformation("Finished test run for {0} in {1} mode", testContext.InputTestFilesDisplayString, testExecutionMode);
                     }
                 });
 
@@ -330,12 +330,12 @@ namespace Chutzpah
                 {
                     try
                     {
-                        ChutzpahTracer.TraceInformation("Cleaning up test context for {0}", testContext.InputTestFile);
+                        ChutzpahTracer.TraceInformation("Cleaning up test context for {0}", testContext.InputTestFilesDisplayString);
                         testContextBuilder.CleanupContext(testContext);
                     }
                     catch (Exception e)
                     {
-                        ChutzpahTracer.TraceError(e,"Error cleaning up test context for {0}", testContext.InputTestFile);
+                        ChutzpahTracer.TraceError(e, "Error cleaning up test context for {0}", testContext.InputTestFilesDisplayString);
                     }
                 }
             }
@@ -444,7 +444,7 @@ namespace Chutzpah
                 processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, m_debugEnabled);
             var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
 
-            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFile, processResult.Model.SelectMany(x => x.Errors).ToList(), callback);
+            HandleTestProcessExitCode(processResult.ExitCode, testContext.InputTestFilesDisplayString, processResult.Model.SelectMany(x => x.Errors).ToList(), callback);
 
             return processResult.Model;
         }

@@ -45,7 +45,7 @@ namespace Chutzpah
 
             SetupAmdPathsIfNeeded(testContext.TestFileSettings, testContext.ReferencedFiles.ToList(), testContext.TestHarnessDirectory);
 
-            string testFilePathHash = hasher.Hash(testContext.InputTestFile);
+            string testFilePathHash = hasher.Hash(string.Join(",",testContext.InputTestFiles));
 
             string testHtmlFilePath = Path.Combine(testContext.TestHarnessDirectory, string.Format(Constants.ChutzpahTemporaryFileFormat, testFilePathHash, "test.html"));
             testContext.TemporaryFiles.Add(testHtmlFilePath);
@@ -61,10 +61,15 @@ namespace Chutzpah
                 testContext.CoverageEngine.PrepareTestHarnessForCoverage(harness, testContext.FrameworkDefinition, testContext.TestFileSettings);
             }
 
-            string testFileContents = fileSystem.GetText(testContext.InputTestFile);
-            var frameworkReplacements = testContext.FrameworkDefinition.GetFrameworkReplacements(testContext.TestFileSettings, testContext.InputTestFile, testFileContents)
-                                        ?? new Dictionary<string, string>();
-
+            var kvps = testContext.ReferencedFiles
+                .Where(x => x.IsFileUnderTest && x.ReferencedFiles.Any())
+                .SelectMany(x => x.FrameworkReplacements);
+            var frameworkReplacements = new Dictionary<string, string>();
+            foreach (var pair in kvps)
+            {
+                frameworkReplacements[pair.Key] = pair.Value;
+            }
+                 
             string testHtmlText = harness.CreateHtmlText(testHtmlTemplate, frameworkReplacements);
             fileSystem.Save(testHtmlFilePath, testHtmlText);
             testContext.TestHarnessPath = testHtmlFilePath;

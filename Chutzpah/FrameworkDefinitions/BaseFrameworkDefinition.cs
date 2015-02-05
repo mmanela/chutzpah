@@ -112,7 +112,7 @@ namespace Chutzpah.FrameworkDefinitions
             {
                 foreach (IReferencedFileProcessor item in FileProcessors)
                 {
-                    item.Process(referencedFile, testFileText, settings);
+                    item.Process(this, referencedFile, testFileText, settings);
                 }
             }
         }

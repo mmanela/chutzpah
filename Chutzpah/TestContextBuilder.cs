@@ -145,7 +145,8 @@ namespace Chutzpah
 
                     return new TestContext
                     {
-                        InputTestFile = firstFilePath,
+                        InputTestFiles = new []{ firstFilePath },
+                        InputTestFilesDisplayString = firstFilePath,
                         TestHarnessPath = firstFilePath,
                         IsRemoteHarness = firstFileKind == PathType.Url,
                         TestRunner = definition.GetTestRunner(chutzpahTestSettings),
@@ -171,13 +172,13 @@ namespace Chutzpah
 
                 AddTestFrameworkDependencies(deps, referencedFiles);
 
-
+                var testFiles = referencedFiles.Where(x => x.IsFileUnderTest).Select(x => x.Path).ToList();
                 return new TestContext
                 {
                     FrameworkDefinition = definition,
                     CoverageEngine = coverageEngine,
-                    InputTestFile = firstFilePath,
-                    InputTestFiles = referencedFiles.Where(x => x.IsFileUnderTest).Select(x => x.Path).ToList(),
+                    InputTestFiles = testFiles,
+                    InputTestFilesDisplayString = testFiles.FirstOrDefault(),
                     TestHarnessDirectory = testHarnessDirectory,
                     ReferencedFiles = referencedFiles,
                     TestRunner = definition.GetTestRunner(chutzpahTestSettings),

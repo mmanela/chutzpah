@@ -10,7 +10,7 @@ namespace Chutzpah.Models
             FilePositions = new FilePositions();
             ReferencedFiles = new List<ReferencedFile>();
             IncludeInTestHarness = true;
-
+            FrameworkReplacements = new Dictionary<string, string>();
         }
 
         public bool IsFileUnderTest { get; set; }
@@ -76,5 +76,10 @@ namespace Chutzpah.Models
 
             return Path != null && Path.Equals(referencedFile.Path, StringComparison.OrdinalIgnoreCase);
         }
+
+        /// <summary>
+        /// A mapping of tokens and values to replace in the harness specific to this file
+        /// </summary>
+        public Dictionary<string, string> FrameworkReplacements { get; set; }
     }
 }

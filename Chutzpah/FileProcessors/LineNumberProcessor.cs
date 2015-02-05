@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
 
@@ -18,7 +19,7 @@ namespace Chutzpah.FileProcessors
 
         public abstract Regex GetTestPattern(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings);
 
-        public void Process(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings)
+        public void Process(IFrameworkDefinition frameworkDefinition, ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings)
         {
             if (!referencedFile.IsFileUnderTest)
             {

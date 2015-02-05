@@ -9,6 +9,6 @@ namespace Chutzpah.FileProcessors
     /// </summary>
     public interface IReferencedFileProcessor
     {
-        void Process(ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings);
+        void Process(IFrameworkDefinition frameworkDefinition, ReferencedFile referencedFile, string testFileText, ChutzpahTestSettingsFile settings);
     }
 }

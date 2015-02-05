@@ -116,7 +116,7 @@
 
                 creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
-                processor.Verify(x => x.Process(It.IsAny<ReferencedFile>(),It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
+                processor.Verify(x => x.Process(It.IsAny<IFrameworkDefinition>(), It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
 
             [Fact]
@@ -129,8 +129,8 @@
 
                 creator.ClassUnderTest.Process(new ReferencedFile(), "", new ChutzpahTestSettingsFile().InheritFromDefault());
 
-                processor1.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
-                processor2.Verify(x => x.Process(It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
+                processor1.Verify(x => x.Process(It.IsAny<IFrameworkDefinition>(), It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
+                processor2.Verify(x => x.Process(It.IsAny<IFrameworkDefinition>(), It.IsAny<ReferencedFile>(), It.IsAny<string>(), It.IsAny<ChutzpahTestSettingsFile>()));
             }
         }
     }

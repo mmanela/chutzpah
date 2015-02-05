@@ -414,7 +414,6 @@ namespace Chutzpah.Facts
                 var context = new TestContext
                 {
                     TestHarnessPath = "htmlTestFile",
-                    InputTestFile = "inputTestFile",
                     ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
@@ -446,7 +445,6 @@ namespace Chutzpah.Facts
                 var context = new TestContext
                 {
                     TestHarnessPath = "htmlTestFile",
-                    InputTestFile = "inputTestFile",
                     ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
