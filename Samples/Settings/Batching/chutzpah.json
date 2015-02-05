@@ -1,0 +1,14 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "EnableTestFileBatching": true,
+
+    "References" : [
+      {"Path" : "number.js" }
+    ],
+
+    // Tests do *not* get inherited. 
+    "Tests" : [
+      {"Include": "*Test.js"}
+    ]
+}

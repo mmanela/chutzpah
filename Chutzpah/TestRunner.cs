@@ -178,11 +178,17 @@ namespace Chutzpah
             var cancellationSource = new CancellationTokenSource();
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token };
 
+
+            // Given the input paths discover the potential test files
             var scriptPaths = FindTestFiles(testPaths, options);
 
-
-            // Build test contexts in parallel
-            BuildTestContexts(options, scriptPaths, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
+            // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
+            // If so, we keep those tests in a group together to be used in one context
+            // Otherwise, we put each file in its own test group so each get their own context
+            var testGroups = BuildTestingGroups(scriptPaths);
+            
+            // Build test contexts in parallel given a list of files each
+            BuildTestContexts(options, testGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
 
 
             // Compile the test contexts
@@ -220,6 +226,35 @@ namespace Chutzpah
                 overallSummary.Errors.Count);
 
             return overallSummary;
+        }
+
+        private List<List<PathInfo>> BuildTestingGroups(IEnumerable<PathInfo> scriptPaths)
+        {
+            // Find all chutzpah.json files for the input files
+            // Then group files by their respective settings file
+            var testGroups = new List<List<PathInfo>>();
+            var fileSettingGroups = from path in scriptPaths
+                                    let settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(path.FullPath))
+                                    group path by settingsFile;
+
+            // Scan over the grouped test files and if this file is set up for batching we add those files
+            // as a group to be tested. Otherwise, we will explode them out individually so they get run in their
+            // own context
+            foreach (var group in fileSettingGroups)
+            {
+                if (group.Key.EnableTestFileBatching.Value)
+                {
+                    testGroups.Add(group.ToList());
+                }
+                else
+                {
+                    foreach (var path in group)
+                    {
+                        testGroups.Add(new List<PathInfo> { path });
+                    }
+                }
+            }
+            return testGroups;
         }
 
         private bool PerformBatchCompile(ITestMethodRunnerCallback callback, IEnumerable<TestContext> testContexts)
@@ -343,7 +378,7 @@ namespace Chutzpah
 
         private void BuildTestContexts(
             TestOptions options,
-            IEnumerable<PathInfo> scriptPaths,
+            List<List<PathInfo>> scriptPathGroups,
             ParallelOptions parallelOptions,
             CancellationTokenSource cancellationSource,
             int resultCount,
@@ -351,9 +386,10 @@ namespace Chutzpah
             ITestMethodRunnerCallback callback, 
             TestCaseSummary overallSummary)
         {
-                Parallel.ForEach(scriptPaths,parallelOptions,testFile =>
+                Parallel.ForEach(scriptPathGroups, parallelOptions, testFiles =>
                 {
-                    ChutzpahTracer.TraceInformation("Building test context for {0}", testFile.FullPath);
+                    var pathString =  string.Join(",",testFiles.Select(x => x.FullPath));
+                    ChutzpahTracer.TraceInformation("Building test context for {0}", pathString);
 
                     try
                     {
@@ -361,13 +397,13 @@ namespace Chutzpah
                         TestContext testContext;
 
                         resultCount++;
-                        if (testContextBuilder.TryBuildContext(testFile, options, out testContext))
+                        if (testContextBuilder.TryBuildContext(testFiles, options, out testContext))
                         {
                             testContexts.Add(testContext);
                         }
                         else
                         {
-                            ChutzpahTracer.TraceWarning("Unable to build test context for {0}", testFile.FullPath);
+                            ChutzpahTracer.TraceWarning("Unable to build test context for {0}", pathString);
                         }
 
                         // Limit the number of files we can scan to attempt to build a context for
@@ -383,18 +419,18 @@ namespace Chutzpah
                     {
                         var error = new TestError
                         {
-                            InputTestFile = testFile.FullPath,
+                            InputTestFile = testFiles.Select(x => x.FullPath).FirstOrDefault(),
                             Message = e.ToString()
                         };
 
                         overallSummary.Errors.Add(error);
                         callback.FileError(error);
 
-                        ChutzpahTracer.TraceError(e, "Error during building test context for {0}", testFile.FullPath);
+                        ChutzpahTracer.TraceError(e, "Error during building test context for {0}", pathString);
                     }
                     finally
                     {
-                        ChutzpahTracer.TraceInformation("Finished building test context for {0}", testFile.FullPath);
+                        ChutzpahTracer.TraceInformation("Finished building test context for {0}", pathString);
                     }
                 });
         }
@@ -404,7 +440,7 @@ namespace Chutzpah
             IEnumerable<PathInfo> scriptPaths = Enumerable.Empty<PathInfo>();
 
             // If the path list contains only chutzpah.json files then use those files for getting the list of test paths
-            var testPathList = testPaths.ToList();
+            var testPathList = testPaths.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             if (testPathList.All(testPath => Path.GetFileName(testPath).Equals(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase)))
             {
                 ChutzpahTracer.TraceInformation("Using Chutzpah.json files to find tests");
@@ -427,7 +463,9 @@ namespace Chutzpah
             {
                 scriptPaths = fileProbe.FindScriptFiles(testPathList, options.TestingMode);
             }
-            return scriptPaths;
+            return scriptPaths
+                    .Where(x => x.FullPath != null)
+                    .ToList(); ;
         }
 
         private IList<TestFileSummary> InvokeTestRunner(string headlessBrowserPath,

@@ -54,7 +54,7 @@ namespace Chutzpah.Models
             TestHarnessReferenceMode = Chutzpah.Models.TestHarnessReferenceMode.Normal;
             TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.TestFileAdjacent;
             RootReferencePathMode = Chutzpah.Models.RootReferencePathMode.DriveRoot;
-
+            EnableTestFileBatching = false;
         }
 
         public bool IsDefaultSettings { get; set; }
@@ -64,6 +64,11 @@ namespace Chutzpah.Models
         /// parent settings file.
         /// </summary>
         public bool InheritFromParent { get; set; }
+
+        /// <summary>
+        /// Determines if Chutzpah should try to batch all test files for this chutzpah.json file in one test harness
+        /// </summary>
+        public bool? EnableTestFileBatching { get; set; }
 
         /// <summary>
         /// The time to wait for the tests to compelte in milliseconds
@@ -313,6 +318,7 @@ namespace Chutzpah.Models
             this.TestHarnessReferenceMode = this.TestHarnessReferenceMode == null ? parent.TestHarnessReferenceMode : this.TestHarnessReferenceMode;
             this.TestPattern = this.TestPattern == null ? parent.TestPattern : this.TestPattern;
             this.UserAgent = this.UserAgent == null ? parent.UserAgent : this.UserAgent;
+            this.EnableTestFileBatching = this.EnableTestFileBatching == null ? parent.EnableTestFileBatching : this.EnableTestFileBatching;
 
             // We need to handle an inherited test harness location mode specially
             // If the parent set their mode to SettingsFileAdjacent and the current file has it set to null 

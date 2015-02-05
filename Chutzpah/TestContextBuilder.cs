@@ -83,7 +83,7 @@ namespace Chutzpah
                 ChutzpahTracer.TraceInformation("No files given to build test context for");
                 return null;
             }
-            
+
             var fileCount = files.Count();
 
             var allFilePathString = string.Join(",", files.Select(x => x.FullPath));
