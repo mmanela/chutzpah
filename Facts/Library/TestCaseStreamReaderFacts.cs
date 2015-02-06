@@ -39,6 +39,7 @@ namespace Chutzpah.Facts
                     return new TestContext 
                     { 
                         InputTestFiles = files,
+                        InputTestFilesString = string.Join(",",files),
                         ReferencedFiles = files.Select(x => new ReferencedFile { Path = x, IsFileUnderTest = true, FilePositions = fp }).ToList() 
                     }; 
                 }

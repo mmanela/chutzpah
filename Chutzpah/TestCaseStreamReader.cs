@@ -56,13 +56,13 @@ namespace Chutzpah
 
             if (readerTask.IsCompleted)
             {
-                ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.InputTestFilesDisplayString);
+                ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.FirstInputTestFile);
                 return readerTask.Result;
             }
             else
             {
                 // We timed out so kill the process and return an empty test file summary
-                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.InputTestFilesDisplayString, (DateTime.Now - lastTestEvent).TotalMilliseconds);
+                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.FirstInputTestFile, (DateTime.Now - lastTestEvent).TotalMilliseconds);
 
                 processStream.TimedOut = true;
                 processStream.KillProcess();
@@ -109,10 +109,10 @@ namespace Chutzpah
             callback.TestFinished(jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
         }
-
-        private void FireFileStarted(ITestMethodRunnerCallback callback, TestFileContext testFileContext)
+        
+        private void FireFileStarted(ITestMethodRunnerCallback callback, TestContext testContext)
         {
-            callback.FileStarted(testFileContext.ReferencedFile.Path);
+            callback.FileStarted(testContext.InputTestFilesString);
         }
 
         private void FireCoverageObject(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
@@ -121,11 +121,21 @@ namespace Chutzpah
             testFileContext.TestFileSummary.CoverageObject = coverageEngine.DeserializeCoverageObject(jsCov.Object, testFileContext.TestContext);
         }
 
-        private void FireFileFinished(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireFileFinished(ITestMethodRunnerCallback callback, string testFilesString, IEnumerable<TestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
         {
             var jsFileDone = jsRunnerOutput as JsFileDone;
-            testFileContext.TestFileSummary.TimeTaken = jsFileDone.TimeTaken;
-            callback.FileFinished(testFileContext.ReferencedFile.Path, testFileContext.TestFileSummary);
+
+            var testFileSummary = new TestFileSummary(testFilesString);
+            testFileSummary.TimeTaken = jsFileDone.TimeTaken;
+
+            foreach (var context in testFileContexts)
+            {
+
+                context.TestFileSummary.TimeTaken = jsFileDone.TimeTaken;
+                testFileSummary.AddTestCases(context.TestFileSummary.Tests);
+            }
+
+            callback.FileFinished(testFilesString, testFileSummary);
         }
 
         private void FireLogOutput(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
@@ -164,7 +174,7 @@ namespace Chutzpah
                                               .Where(x => x.IsFileUnderTest)
                                               .Select(x => new TestFileContext(x, testContext, codeCoverageEnabled))
                                               .ToList();
-            
+
 
             var testIndex = 0;
 
@@ -200,14 +210,8 @@ namespace Chutzpah
                     switch (type)
                     {
                         case "FileStart":
-                            if(currentTestFileContext == null)
-                            {
-                                deferredEvents.Add((fileContext) => FireFileStarted(callback, fileContext));
-                            }
-                            else
-                            {
-                                FireFileStarted(callback, currentTestFileContext);
-                            }
+
+                            FireFileStarted(callback, testContext);
 
                             break;
 
@@ -217,7 +221,7 @@ namespace Chutzpah
 
                             if (currentTestFileContext == null)
                             {
-                                deferredEvents.Add((fileContext) => FireCoverageObject(callback,fileContext,jsCov));
+                                deferredEvents.Add((fileContext) => FireCoverageObject(callback, fileContext, jsCov));
                             }
                             else
                             {
@@ -228,65 +232,52 @@ namespace Chutzpah
 
                         case "FileDone":
 
-                            if (currentTestFileContext == null)
-                            {
-                                // If we got here and still couldn't figure out which file these tests belong to then we
-                                // just assume the first file not used yet is the one.
-                                // NOTE: In the future we could be much smarted and deferr these tests until the very end and then do further analysis
-                                var greedyFileContext = testFileContexts.FirstOrDefault(x => !x.IsUsed);
+                            var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
+                            FireFileFinished(callback, testContext.InputTestFilesString, testFileContexts, jsFileDone);
 
-                                currentTestFileContext = greedyFileContext;
-                                if(greedyFileContext == null)
-                                {
-                                    ChutzpahTracer.TraceError("Chutzpah was unable to figure out what path to associate of file of tests with. Skipping file!");
-                                }
-                                else
-                                {
-                                    ChutzpahTracer.TraceError("Chutzpah was unable to figure out what path to associate of file of tests with. Assuming {0}", greedyFileContext.ReferencedFile.Path);
-                                }
-                                
-                            }
-
-                            if (currentTestFileContext != null)
-                            {
-                                var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
-                                FireFileFinished(callback, currentTestFileContext, jsFileDone);
-                            }
-
-                            // Rest test index for next file
-                            testIndex = 0;
-                            currentTestFileContext = null;
-                            deferredEvents.Clear();
                             break;
 
                         case "TestStart":
                             var jsTestCaseStart = jsonSerializer.Deserialize<JsTestCase>(json);
+                            TestFileContext newContext = null;
 
-
-                            if(currentTestFileContext != null)
+                            var fileContexts = GetFileMatches(jsTestCaseStart.TestCase.TestName, testFileContexts);
+                            if (fileContexts.Count == 0 && currentTestFileContext == null)
                             {
-                                FireTestStarted(callback, currentTestFileContext,jsTestCaseStart);
+                                // If there are no matches just use the most recent file context
+                                // Let just choose the first context
+                                newContext = testFileContexts[0];
                             }
-                            else
+                            else if (fileContexts.Count > 1)
                             {
-                                var fileContexts = GetFileMatches(jsTestCaseStart.TestCase.TestName, testFileContexts);
-                                if(fileContexts.Count == 0 || fileContexts.Count > 1)
-                                {
-                                    // Either we couldnt figure out which files this test name can be for
-                                    // or we found more than one possible match
-                                    deferredEvents.Add((fileContext) => FireTestStarted(callback, fileContext, jsTestCaseStart));
-                                }
-                                else if(fileContexts.Count == 1)
-                                {
-                                    // We found a unique match
-                                    currentTestFileContext = fileContexts[0];
-                                    currentTestFileContext.IsUsed = true;
+                                // If we found the test has more than one file match
+                                // try to choose the best match, otherwise just choose the first one
 
-                                    PlayDeferredEvents(currentTestFileContext, deferredEvents);
-
-                                    FireTestStarted(callback, currentTestFileContext, jsTestCaseStart);
+                                // If none match the current context pick the first match that is not used yet
+                                if (!fileContexts.Any(x => x == currentTestFileContext))
+                                {
+                                    // Either take first not used context OR the first one
+                                    newContext = fileContexts.Where(x => !x.IsUsed).FirstOrDefault() ?? fileContexts.First();
                                 }
                             }
+                            else if (fileContexts.Count == 1)
+                            {
+                                // We found a unique match
+                                newContext = fileContexts[0];
+                            }
+
+
+                            if (newContext != null && newContext != currentTestFileContext)
+                            {
+                                currentTestFileContext = newContext;
+                                testIndex = 0;
+                            }
+
+                            currentTestFileContext.IsUsed = true;
+
+                            PlayDeferredEvents(currentTestFileContext, deferredEvents);
+
+                            FireTestStarted(callback, currentTestFileContext, jsTestCaseStart);
 
                             break;
 
@@ -294,15 +285,7 @@ namespace Chutzpah
                             var jsTestCaseDone = jsonSerializer.Deserialize<JsTestCase>(json);
                             var currentTestIndex = testIndex;
 
-                            if(currentTestFileContext != null)
-                            {
-                                FireTestFinished(callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
-                            }
-                            else
-                            {
-                                deferredEvents.Add((fileContext) => FireTestFinished(callback, fileContext, jsTestCaseDone, currentTestIndex));
-                            }
-
+                            FireTestFinished(callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
 
                             testIndex++;
 
@@ -331,7 +314,7 @@ namespace Chutzpah
                             {
                                 deferredEvents.Add((fileContext) => FireErrorOutput(callback, fileContext, error));
                             }
-                                
+
                             break;
                     }
                 }
@@ -353,6 +336,8 @@ namespace Chutzpah
             {
                 deferredEvent(currentTestFileContext);
             }
+
+            deferredEvents.Clear();
         }
 
         private static IList<TestFileContext> GetFileMatches(string testName, IEnumerable<TestFileContext> testFileContexts)

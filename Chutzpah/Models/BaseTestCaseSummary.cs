@@ -90,5 +90,13 @@ namespace Chutzpah.Models
             TestGroups[module].Add(testCase);
 
         }
+
+        public void AddTestCases(IEnumerable<TestCase> testCases)
+        {
+            foreach (var testCase in testCases)
+            {
+                AddTestCase(testCase);
+            }
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace Chutzpah.Models
         /// </summary>
         public ICollection<string> InputTestFiles { get; set; }
 
-        public string InputTestFilesDisplayString { get; set; }
+        public string FirstInputTestFile { get; set; }
 
         /// <summary>
         /// The path to the test runner
@@ -65,5 +65,7 @@ namespace Chutzpah.Models
         /// Instance of the code coverage engine for the context
         /// </summary>
         public ICoverageEngine CoverageEngine { get; set; }
+
+        public string InputTestFilesString { get; set; }
     }
 }

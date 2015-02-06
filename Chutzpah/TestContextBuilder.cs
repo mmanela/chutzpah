@@ -146,7 +146,8 @@ namespace Chutzpah
                     return new TestContext
                     {
                         InputTestFiles = new []{ firstFilePath },
-                        InputTestFilesDisplayString = firstFilePath,
+                        FirstInputTestFile = firstFilePath,
+                        InputTestFilesString = firstFilePath,
                         TestHarnessPath = firstFilePath,
                         IsRemoteHarness = firstFileKind == PathType.Url,
                         TestRunner = definition.GetTestRunner(chutzpahTestSettings),
@@ -178,7 +179,8 @@ namespace Chutzpah
                     FrameworkDefinition = definition,
                     CoverageEngine = coverageEngine,
                     InputTestFiles = testFiles,
-                    InputTestFilesDisplayString = testFiles.FirstOrDefault(),
+                    FirstInputTestFile = testFiles.FirstOrDefault(),
+                    InputTestFilesString = string.Join(",",testFiles),
                     TestHarnessDirectory = testHarnessDirectory,
                     ReferencedFiles = referencedFiles,
                     TestRunner = definition.GetTestRunner(chutzpahTestSettings),
