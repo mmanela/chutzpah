@@ -29,12 +29,12 @@ namespace Chutzpah.Models
 
         public bool Contains(string testName)
         {
-            return this.positions.Any(x => x.TestName.Equals(testName));
+            return this.positions.Any(x => x.TestName.Equals(testName.Trim()));
         }
 
         public void Add(int line, int column, string testName)
         {
-            this.positions.Add(new FilePosition(line, column, testName));
+            this.positions.Add(new FilePosition(line, column, testName.Trim()));
         }
     }
 }

@@ -312,6 +312,18 @@
     <Content Include="JS\Test\excludeReference.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\TestSettings\Batching\Ambiguous1\doubleTest.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\Batching\Ambiguous1\halveTest.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\Batching\Ambiguous1\number.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\Batching\Ambiguous1\tripleTest.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\TestSettings\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -474,6 +486,9 @@
     <Content Include="JS\Test\Coverage\SourceMaps\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="JS\Test\TestSettings\Batching\Ambiguous1\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="JS\Test\TypeScript\basic-mocha-bdd.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

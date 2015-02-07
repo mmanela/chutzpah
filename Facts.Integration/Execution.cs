@@ -716,6 +716,32 @@ namespace Chutzpah.Facts.Integration
 
         }
 
+
+        public class TestFileBatching
+        {
+            public TestFileBatching()
+            {
+                ChutzpahTracer.Enabled = false;
+            }
+
+            [Fact]
+            public void Will_place_ambiguous_tests_correctly_when_file_contains_unambiguous_tests()
+            {
+                var testRunner = TestRunner.Create();
+
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\Batching\Ambiguous1\chutzpah.json", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(6, result.PassedCount);
+                Assert.Equal(6, result.TotalCount);
+                foreach (var file in result.TestFileSummaries)
+                {
+                    Assert.Equal(2, file.Tests.Count());
+                }
+            }
+
+        }
+
         public class JasmineDdescribeIit
         {
             public JasmineDdescribeIit()

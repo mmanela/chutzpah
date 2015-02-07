@@ -79,8 +79,11 @@ namespace Chutzpah
 
             public bool IsUsed { get; set; }
 
+            public HashSet<Tuple<string, string>> SeenTests { get; set; }
+
             public TestFileContext(ReferencedFile referencedFile, TestContext testContext, bool coverageEnabled)
             {
+                SeenTests = new HashSet<Tuple<string, string>>();
                 ReferencedFile = referencedFile;
                 TestContext = testContext;
                 TestFileSummary = new TestFileSummary(referencedFile.Path);
@@ -91,14 +94,16 @@ namespace Chutzpah
                 }
 
             }
-        }
 
+            public bool HasTestBeenSeen(string module, string test)
+            {
+                return SeenTests.Contains(Tuple.Create(module, test));
+            }
 
-        private void FireTestStarted(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
-        {
-            var jsTestCase = jsRunnerOutput as JsTestCase;
-            jsTestCase.TestCase.InputTestFile = testFileContext.ReferencedFile.Path;
-            callback.TestStarted(jsTestCase.TestCase);
+            public void MarkTestSeen(string module, string test)
+            {
+                SeenTests.Add(Tuple.Create(module ?? "", test));
+            }
         }
 
         private void FireTestFinished(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
@@ -109,7 +114,7 @@ namespace Chutzpah
             callback.TestFinished(jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
         }
-        
+
         private void FireFileStarted(ITestMethodRunnerCallback callback, TestContext testContext)
         {
             callback.FileStarted(testContext.InputTestFilesString);
@@ -240,8 +245,10 @@ namespace Chutzpah
                         case "TestStart":
                             var jsTestCaseStart = jsonSerializer.Deserialize<JsTestCase>(json);
                             TestFileContext newContext = null;
+                            var testName = jsTestCaseStart.TestCase.TestName.Trim();
+                            var moduleName = (jsTestCaseStart.TestCase.ModuleName ?? "").Trim();
 
-                            var fileContexts = GetFileMatches(jsTestCaseStart.TestCase.TestName, testFileContexts);
+                            var fileContexts = GetFileMatches(testName, testFileContexts);
                             if (fileContexts.Count == 0 && currentTestFileContext == null)
                             {
                                 // If there are no matches just use the most recent file context
@@ -253,11 +260,31 @@ namespace Chutzpah
                                 // If we found the test has more than one file match
                                 // try to choose the best match, otherwise just choose the first one
 
-                                // If none match the current context pick the first match that is not used yet
-                                if (!fileContexts.Any(x => x == currentTestFileContext))
+                                // If we have no file context yet take the first one
+                                if (currentTestFileContext == null)
                                 {
-                                    // Either take first not used context OR the first one
-                                    newContext = fileContexts.Where(x => !x.IsUsed).FirstOrDefault() ?? fileContexts.First();
+                                    newContext = fileContexts.First();
+                                }
+                                else
+                                {
+                                    // In this case we have an existing file context so we need to
+                                    // 1. Check to see if this test has been seen already on that context
+                                    //    if so we need to try the next file context that matches it
+                                    // 2. If it is not seen yet in the current context and the current context
+                                    //    is one of the matches then keep using it
+
+                                    var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
+                                    var currentContextInFileMatches = fileContexts.Any(x => x == currentTestFileContext);
+                                    if (!testAlreadySeenInCurrentContext && currentContextInFileMatches)
+                                    {
+                                        // Keep the current context
+                                        newContext = currentTestFileContext;
+                                    }
+                                    else
+                                    {
+                                        // Either take first not used context OR the first one
+                                        newContext = fileContexts.Where(x => !x.IsUsed).FirstOrDefault() ?? fileContexts.First();
+                                    }
                                 }
                             }
                             else if (fileContexts.Count == 1)
@@ -275,9 +302,12 @@ namespace Chutzpah
 
                             currentTestFileContext.IsUsed = true;
 
+                            currentTestFileContext.MarkTestSeen(moduleName, testName);
+
                             PlayDeferredEvents(currentTestFileContext, deferredEvents);
 
-                            FireTestStarted(callback, currentTestFileContext, jsTestCaseStart);
+                            jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
+                            callback.TestStarted(jsTestCaseStart.TestCase);
 
                             break;
 
