@@ -47,8 +47,8 @@ namespace Chutzpah.Facts
                                 It.IsAny<List<ReferencedFile>>(),
                                 It.IsAny<IFrameworkDefinition>(),
                                 It.IsAny<ChutzpahTestSettingsFile>()))
-                    .Callback<List<ReferencedFile>, IFrameworkDefinition, string, string, ChutzpahTestSettingsFile>(
-                        (refs, def, text, path, settings) =>
+                    .Callback<List<ReferencedFile>, IFrameworkDefinition, ChutzpahTestSettingsFile>(
+                        (refs, def, settings) =>
                         {
                             refs.AddRange(ReferenceFiles);
                         });
@@ -361,7 +361,7 @@ namespace Chutzpah.Facts
             public void Will_throw_if_test_file_is_not_a_valid_test_type_file()
             {
                 var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { Type = PathType.Other });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { FullPath = "somePath", Type = PathType.Other });
 
                 Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext("test.blah", new TestOptions()));
 

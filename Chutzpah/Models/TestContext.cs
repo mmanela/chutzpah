@@ -10,7 +10,7 @@ namespace Chutzpah.Models
         {
             ReferencedFiles = new List<ReferencedFile>();
             TemporaryFiles = new List<string>();
-            TestFileSettings = ChutzpahTestSettingsFile.Default;    
+            TestFileSettings = new ChutzpahTestSettingsFile().InheritFromDefault();    
         }
 
         /// <summary>
