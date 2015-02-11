@@ -1,5 +1,6 @@
 ﻿{
     "Framework": "qunit",
+    "EnableTestFileBatching": true,
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "References" : [

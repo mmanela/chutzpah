@@ -17,8 +17,8 @@
     <div id="mocha"></div>
     <script type="text/javascript">
         var requireExists = window.require && typeof window.require === "function";
-        var amdTestPath = "@@AMDTestPath@@";
-        if (requireExists && amdTestPath !== "") {
+        var amdTestPaths = [@@AMDTestPath@@];
+        if (requireExists && amdTestPaths.length > 0) {
             if (window.chutzpah) {
 
                 console.log("!!_!! Test file is using module loader.");
@@ -33,7 +33,7 @@
                 }
             });
 
-            window.require([amdTestPath], function () {
+            window.require(amdTestPaths, function () {
                 mocha.run();
             });
 

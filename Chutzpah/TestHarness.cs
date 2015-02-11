@@ -51,11 +51,11 @@ namespace Chutzpah
                                codeCoverageDependencies);
 
 
-            string amdTestFilePath = "";
+            string amdTestFilePathArrayString = "";
             string amdModuleMap = "";
             if (chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.AMD)
             {
-                amdTestFilePath = referencedFiles.First(x => x.IsFileUnderTest).AmdFilePath;
+                amdTestFilePathArrayString = BuildAmdTestFileArrayString();
                 amdModuleMap = BuildModuleMapForGeneratedFiles();
             }
 
@@ -67,7 +67,7 @@ namespace Chutzpah
                 {"ReferencedJSFiles", referenceJsReplacement.ToString()},
                 {"ReferencedCSSFiles", referenceCssReplacement.ToString()},
                 {"TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString()},
-                {"AMDTestPath", amdTestFilePath},
+                {"AMDTestPath", amdTestFilePathArrayString},
                 {"AMDModuleMap", amdModuleMap}
             };
 
@@ -91,6 +91,22 @@ namespace Chutzpah
             foreach (var referencedFile in referencedFiles.Where(x => !string.IsNullOrEmpty(x.GeneratedFilePath)))
             {
                 builder.AppendFormat("\"{0}\":\"{1}\",\n", referencedFile.AmdFilePath, referencedFile.AmdGeneratedFilePath);
+            }
+
+            return builder.ToString();
+        }
+
+
+        /// <summary>
+        /// Build a string representation of the array of test files
+        /// </summary>
+        /// <returns></returns>
+        private string BuildAmdTestFileArrayString()
+        {
+            var builder = new StringBuilder();
+            foreach (var referencedFile in referencedFiles.Where(x => x.IsFileUnderTest))
+            {
+                builder.AppendFormat("\"{0}\",", referencedFile.AmdFilePath);
             }
 
             return builder.ToString();

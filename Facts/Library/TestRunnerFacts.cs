@@ -40,18 +40,19 @@ namespace Chutzpah.Facts
                 return string.Format(format, "--ignore-ssl-errors=true --proxy-type=none", runner, harness, mode, timeout.HasValue ? timeout.ToString() : "");
             }
 
-            public TestContext SetupTestContext(string testPath = null,  string harnessPath = @"D:\harnessPath.html", string testRunnerPath = "testRunner.js", bool success = true, bool @throw = false)
+            public TestContext SetupTestContext(string[] testPaths = null,  string harnessPath = @"D:\harnessPath.html", string testRunnerPath = "testRunner.js", bool success = true, bool @throw = false)
             {
                 var context = new TestContext { TestHarnessPath = harnessPath, TestRunner = testRunnerPath };
-                if (testPath != null)
+                if (testPaths != null)
                 {
+                    var pathCount = testPaths.Count();
                     if (@throw)
                     {
-                        this.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.Is<IEnumerable<PathInfo>>(fs => fs.Any(f => f.FullPath == testPath)), It.IsAny<TestOptions>(), out context)).Throws(new Exception());
+                        this.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.Is<IEnumerable<PathInfo>>(fs => fs.Select(f => f.FullPath).Intersect(testPaths).Count() == pathCount), It.IsAny<TestOptions>(), out context)).Throws(new Exception());
                     }
                     else
                     {
-                        this.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.Is<IEnumerable<PathInfo>>(fs => fs.Any(f => f.FullPath == testPath)), It.IsAny<TestOptions>(), out context)).Returns(success);
+                        this.Mock<ITestContextBuilder>().Setup(x => x.TryBuildContext(It.Is<IEnumerable<PathInfo>>(fs => fs.Select(f => f.FullPath).Intersect(testPaths).Count() == pathCount), It.IsAny<TestOptions>(), out context)).Returns(success);
                 
                     }
                 }
@@ -175,7 +176,7 @@ namespace Chutzpah.Facts
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
                 summary.AddTestCase(new TestCase());
-                var context = runner.SetupTestContext(testPath: @"path\tests.html", harnessPath: @"D:\harnessPath.html", testRunnerPath: "runner");
+                var context = runner.SetupTestContext(testPaths: new []{@"path\tests.html"}, harnessPath: @"D:\harnessPath.html", testRunnerPath: "runner");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
@@ -230,7 +231,7 @@ namespace Chutzpah.Facts
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
                 summary.AddTestCase(new TestCase());
-                var context = runner.SetupTestContext(testPath: @"path\tests.html", harnessPath: @"D:\harnessPath.html", testRunnerPath: "runner");
+                var context = runner.SetupTestContext(testPaths: new []{@"path\tests.html"}, harnessPath: @"D:\harnessPath.html", testRunnerPath: "runner");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
@@ -384,8 +385,8 @@ namespace Chutzpah.Facts
                 var runner = new TestableTestRunner();
                 var summary = new TestFileSummary("somePath");
                 summary.AddTestCase(new TestCase());
-                var context1 = runner.SetupTestContext(harnessPath: @"D:\harnessPath1.html", testRunnerPath: "runner1", testPath: @"path\tests1.html");
-                var context2 = runner.SetupTestContext(harnessPath: @"D:\harnessPath2.htm", testRunnerPath: "runner2", testPath: @"path\tests2.html");
+                var context1 = runner.SetupTestContext(harnessPath: @"D:\harnessPath1.html", testRunnerPath: "runner1", testPaths: new []{@"path\tests1.html"});
+                var context2 = runner.SetupTestContext(harnessPath: @"D:\harnessPath2.htm", testRunnerPath: "runner2", testPaths: new []{@"path\tests2.html"});
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests1.html")).Returns(@"D:\path\tests1.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests2.htm")).Returns(@"D:\path\tests2.htm");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner1")).Returns("jsPath1");
@@ -403,6 +404,42 @@ namespace Chutzpah.Facts
                     .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests1.html" }, new PathInfo { FullPath = @"path\tests2.html" } });
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" });
+
+                Assert.Equal(2, res.TotalCount);
+            }
+
+            [Fact]
+            public void Will_batch_test_files_with_same_context_given_testFileBatching_setting_is_enabled()
+            {
+                var runner = new TestableTestRunner();
+                var summary = new TestFileSummary("somePath");
+                summary.AddTestCase(new TestCase());
+                var context1 = runner.SetupTestContext(harnessPath: @"D:\harnessPath1.html", testRunnerPath: "runner1", testPaths: new[] { @"path\tests1.js", @"path\tests2.js" });
+                var context2 = runner.SetupTestContext(harnessPath: @"D:\harnessPath2.htm", testRunnerPath: "runner2", testPaths: new[] { @"path2\tests1.js", @"path2\tests2.js" });
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner1")).Returns("jsPath1");
+                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner2")).Returns("jsPath2");
+                var args1 = TestableTestRunner.BuildArgs("jsPath1", "file:///D:/harnessPath1.html", "execution", Constants.DefaultTestFileTimeout);
+                var args2 = TestableTestRunner.BuildArgs("jsPath2", "file:///D:/harnessPath2.htm", "execution", Constants.DefaultTestFileTimeout);
+                runner.Mock<IProcessHelper>()
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args1, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
+                runner.Mock<IProcessHelper>()
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
+                runner.Mock<IFileProbe>()
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" }, It.IsAny<TestingMode>()))
+                    .Returns(new List<PathInfo> { 
+                        new PathInfo { FullPath = @"path\tests1.js" }, 
+                        new PathInfo { FullPath = @"path\tests2.js" } ,
+                        new PathInfo { FullPath = @"path2\tests1.js" } ,
+                        new PathInfo { FullPath = @"path2\tests2.js" } ,
+                    });
+                var settingsForPath = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path", EnableTestFileBatching = true }.InheritFromDefault();
+                var settingsForPath2 = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path2", EnableTestFileBatching = true }.InheritFromDefault();
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path")).Returns(settingsForPath);
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path2")).Returns(settingsForPath2);
+
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" });
 
                 Assert.Equal(2, res.TotalCount);
             }
@@ -496,8 +533,8 @@ namespace Chutzpah.Facts
                 summary.AddTestCase(new TestCase());
                 var testCallback = new MockTestMethodRunnerCallback();
                 var exception = new Exception();
-                var context = runner.SetupTestContext(testRunnerPath: "testRunner.js", testPath: @"path\tests1.html");
-                runner.SetupTestContext(testRunnerPath: "testRunner.js", testPath: @"path\tests2.html", @throw: true);
+                var context = runner.SetupTestContext(testRunnerPath: "testRunner.js", testPaths: new []{@"path\tests1.html"});
+                runner.SetupTestContext(testRunnerPath: "testRunner.js", testPaths: new []{@"path\tests2.html"}, @throw: true);
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests1.html")).Throws(exception);
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests2.html")).Returns(@"D:\path\tests2.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");

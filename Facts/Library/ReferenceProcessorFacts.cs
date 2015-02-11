@@ -144,6 +144,24 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_handle_multiple_test_files()
+            {
+                var processor = new TestableReferenceProcessor();
+                var settings = new ChutzpahTestSettingsFile { }.InheritFromDefault();
+                var referenceFiles = new List<ReferencedFile> { 
+                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test1.js" },
+                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test2.js" }};
+                var text = (@"/// <reference path=""lib.js"" />
+                        some javascript code");
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test1.js")).Returns(text);
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test2.js")).Returns(text);
+
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
+
+                Assert.Equal(2, referenceFiles.Count(x => x.IsFileUnderTest));
+            }
+
+            [Fact]
             public void Will_exclude_reference_from_harness_in_amd_mode()
             {
                 var processor = new TestableReferenceProcessor();

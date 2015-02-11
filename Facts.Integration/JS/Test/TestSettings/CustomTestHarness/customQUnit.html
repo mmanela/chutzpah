@@ -12,8 +12,8 @@
         @@TestJSFile@@
     
         <script>
-            var amdTestPath = "@@AMDTestPath@@";
-            if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+            var amdTestPaths = [@@AMDTestPath@@];
+            if (window.require && typeof window.require === "function" && amdTestPaths !== "") {
                 if (window.chutzpah) {
                     window.chutzpah.usingModuleLoader = true;
                 }
@@ -27,7 +27,7 @@
                 });
 
                 window.QUnit.config.autostart = false;
-                window.require([amdTestPath], function () {
+                window.require(amdTestPaths, function () {
                     console.log("!!_!! Starting QUnit from inline AMD call...");
                     if (!window._Chutzpah_covobj_name) {
                         window.QUnit.start();

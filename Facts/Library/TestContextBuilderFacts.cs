@@ -369,6 +369,31 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_throw_if_more_than_one_html_type_is_given()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test1.html")).Returns(new PathInfo { FullPath = "somePath", Type = PathType.Html });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test2.html")).Returns(new PathInfo { FullPath = "somePath", Type = PathType.Html });
+
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext(new []{"test1.html", "test2.html"}, new TestOptions()));
+
+                Assert.IsType<InvalidOperationException>(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_more_than_one_url_type_is_given()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test1.html")).Returns(new PathInfo { FullPath = "somePath", Type = PathType.Url });
+                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test2.html")).Returns(new PathInfo { FullPath = "somePath", Type = PathType.Url });
+
+                Exception ex = Record.Exception(() => creator.ClassUnderTest.BuildContext(new[] { "test1.html", "test2.html" }, new TestOptions()));
+
+                Assert.IsType<InvalidOperationException>(ex);
+            }
+
+
+            [Fact]
             public void Will_throw_if_test_file_does_not_exist()
             {
                 var creator = new TestableTestContextBuilder();
@@ -394,7 +419,6 @@ namespace Chutzpah.Facts
 
                 Assert.Null(context);
             }
-
             
             [Fact]
             public void Will_return_path_and_framework_for_html_file()
@@ -481,6 +505,21 @@ namespace Chutzpah.Facts
                 var context = creator.ClassUnderTest.BuildContext(@"C:\test.js", new TestOptions());
 
                 creator.Mock<IFileSystemWrapper>().Verify(x => x.CopyFile(It.Is<string>(p => p.Contains("lib.js")), It.IsAny<string>(), true), Times.Never());
+            }
+
+            [Fact]
+            public void Will_set_multiple_js_test_files_to_file_under_test()
+            {
+                var creator = new TestableTestContextBuilder();
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\test1.js")).Returns(@"C:\path\test1.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"C:\path\test1.js")).Returns("contents1");
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\test2.js")).Returns(@"C:\path\test2.js");
+                creator.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"C:\path\test2.js")).Returns("contents2");
+
+                var context = creator.ClassUnderTest.BuildContext(new []{@"C:\test1.js",@"C:\test2.js"}, new TestOptions());
+
+                Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test1.js")).IsFileUnderTest);
+                Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test2.js")).IsFileUnderTest);
             }
         }
 

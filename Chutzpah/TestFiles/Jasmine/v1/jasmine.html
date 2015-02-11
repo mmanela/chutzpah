@@ -25,9 +25,9 @@
             if (ddescribeIitSupport) {
                 ddescribeIitSupport.patch(jasmineEnv);
             }
-
-            var amdTestPath = "@@AMDTestPath@@";
-            if (window.require && typeof window.require === "function" && amdTestPath !== "") {
+            
+            var amdTestPaths = [@@AMDTestPath@@];
+            if (window.require && typeof window.require === "function" && amdTestPaths.length > 0) {
                 if (window.chutzpah) {
                     window.chutzpah.usingModuleLoader = true;
                 }
@@ -40,7 +40,7 @@
                     }
                 });
 
-                window.require([amdTestPath], function () {
+                window.require(amdTestPaths, function () {
 
                     console.log("!!_!! Stating Jasmine from AMD callback...");
                     jasmineEnv.execute();
