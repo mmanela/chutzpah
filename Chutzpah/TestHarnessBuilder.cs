@@ -62,7 +62,7 @@ namespace Chutzpah
             }
 
             var kvps = testContext.ReferencedFiles
-                .Where(x => x.IsFileUnderTest && x.ReferencedFiles.Any())
+                .Where(x => x.IsFileUnderTest)
                 .SelectMany(x => x.FrameworkReplacements);
             var frameworkReplacements = new Dictionary<string, string>();
             foreach (var pair in kvps)
