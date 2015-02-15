@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,17 +13,41 @@ using Xunit;
 namespace Chutzpah.Facts
 {
     public class TestCaseStreamReaderFacts
-    {
+    {        
 
-        private static string FileStartEventJson = @"#_#FileStart#_# {""type"": ""FileStart"", ""timetaken"":88}
+        private static class JsonStreamEvents
+        {
+
+            public static string FileStartEventJsonTemplate = @"#_#FileStart#_# {{""type"": ""FileStart"", ""timetaken"":88}}
+";          
+            public static string FileDoneEventJsonTemplate = @"#_#FileDone#_# {{""type"":""FileDone"",""timetaken"":10,""failed"":1,""passed"":2}}
+";          
+            public static string TestStartEventJsonTemplate = @"#_#TestStart#_# {{""type"":""TestStart"",""testCase"":{{""moduleName"":""{0}"",""testName"":""{1}"",""testResults"":[]}}}}
+";          
+            public static string TestDoneEventJsonTemplate = @"#_#TestDone#_# {{""type"":""TestDone"",""testCase"":{{""moduleName"":""{0}"",""testName"":""{1}"",""testResults"":[]}}}}
+";          
+            public static string LogEventJsonTemplate = @"#_#Log#_# {{""type"":""Log"",""Log"":{{""message"":""{0}""}}}}
 ";
-        private static string FileDoneEventJson = @"#_#FileDone#_# {""type"":""FileDone"",""timetaken"":10,""failed"":1,""passed"":2}
+            public static string ErrorEventJsonTemplate = @"#_#Error#_# {{""type"":""Error"",""Error"":{{""message"":""{0}"", ""stack"":[{{""file"":""errorFile"",""function"":""errorFunc"",""line"":22}}]}}}}
 ";
-        private static string TestStartEventJson = @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}
-";
-        private static string TestDoneEventJson = @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}
+            public static string CoverageEventJsonTemplate = @"#_#CoverageObject#_# {{""type"":""CoverageObject"",""Object"":""""}}
 ";
 
+            public static string FileStartEventJson = string.Format(FileStartEventJsonTemplate);
+            public static string FileDoneEventJson = string.Format(FileDoneEventJsonTemplate);
+            public static string TestStartEventJson = string.Format(TestStartEventJsonTemplate, "module", "test");
+            public static string TestDoneEventJson = string.Format(TestDoneEventJsonTemplate, "module", "test");
+            public static string LogEventJson = string.Format(LogEventJsonTemplate,"log");
+            public static string ErrorEventJson = string.Format(ErrorEventJsonTemplate, "error");
+            public static string CoverageEventJson = string.Format(CoverageEventJsonTemplate);
+
+            public static string BuildTestEventFile(params Tuple<string, string>[] moduleTestNames)
+            {
+                var testEvents = moduleTestNames.Select(x => string.Format(TestStartEventJsonTemplate, x.Item1, x.Item2) + string.Format(TestDoneEventJsonTemplate, x.Item1, x.Item2)).ToList();
+                return FileStartEventJson + string.Join("", testEvents) + FileDoneEventJson;
+            }
+
+        }
 
         private class TestableTestCaseStreamReader : Testable<TestCaseStreamReader>
         {
@@ -32,16 +57,44 @@ namespace Chutzpah.Facts
 
             public TestContext BuildContext(params string[] files)
             {
-                var fp = new FilePositions();
-                fp.Add(1,1,"test");
-                if (files != null && files.Length > 0)
+                var filesWithPosition = files.Select( x => Tuple.Create(x,"test",1,1)).ToList();
+                return BuildContext(filesWithPosition.ToArray());
+            }
+
+
+            /// <summary>
+            /// Build test context with file and position info.
+            /// </summary>
+            /// <param name="fileTestPositionInfos">
+            ///     Item1: file
+            ///     Item2: test
+            ///     Item3: line
+            ///     Item4: column
+            /// </param>
+            /// <returns></returns>
+            public TestContext BuildContext(params Tuple<string,string, int, int>[] fileTestPositionInfos)
+            {
+                var referencedFiles = new List<ReferencedFile>();
+                var files = fileTestPositionInfos.Select(x => x.Item1).Distinct().ToList();
+                foreach(var file in files)
                 {
-                    return new TestContext 
-                    { 
+                    var referencedFile = new ReferencedFile{ Path = file, IsFileUnderTest = true};
+                    var positionsForFile = fileTestPositionInfos.Where(x => x.Item1 == file);
+                    foreach(var position in positionsForFile)
+                    {
+                        referencedFile.FilePositions.Add(position.Item3, position.Item4, position.Item2);
+                    }
+                    referencedFiles.Add(referencedFile);
+                }
+
+                if (files != null && files.Count > 0)
+                {
+                    return new TestContext
+                    {
                         InputTestFiles = files,
-                        InputTestFilesString = string.Join(",",files),
-                        ReferencedFiles = files.Select(x => new ReferencedFile { Path = x, IsFileUnderTest = true, FilePositions = fp }).ToList() 
-                    }; 
+                        InputTestFilesString = string.Join(",", files),
+                        ReferencedFiles = referencedFiles
+                    };
                 }
                 else
                 {
@@ -105,8 +158,7 @@ namespace Chutzpah.Facts
             public void Will_fire_file_started_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = @"#_#FileStart#_# {""type"": ""FileStart"", ""timetaken"":88}
-" + TestStartEventJson;
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -121,7 +173,7 @@ namespace Chutzpah.Facts
             public void Will_fire_file_finished_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + TestDoneEventJson + @"#_#FileDone#_# {""type"":""FileDone"",""timetaken"":10,""failed"":1,""passed"":2}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.TestDoneEventJson + JsonStreamEvents.FileDoneEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -140,7 +192,7 @@ namespace Chutzpah.Facts
             public void Will_fire_test_started_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + @"#_#TestStart#_# {""type"":""TestStart"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -160,7 +212,7 @@ namespace Chutzpah.Facts
             public void Will_fire_test_finished_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.TestDoneEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -180,7 +232,7 @@ namespace Chutzpah.Facts
             public void Will_fire_log_event_if_file_is_already_known()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""hi""}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.LogEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -191,7 +243,7 @@ namespace Chutzpah.Facts
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
-                Assert.Equal("hi", result.Message);
+                Assert.Equal("log", result.Message);
                 Assert.Equal("file", result.InputTestFile);
             }
 
@@ -199,8 +251,7 @@ namespace Chutzpah.Facts
             public void Will_fire_log_event_if_file_is_not_already_known()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""hi""}}
-" + TestStartEventJson;
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.LogEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -211,7 +262,7 @@ namespace Chutzpah.Facts
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
 
                 Assert.NotNull(result);
-                Assert.Equal("hi", result.Message);
+                Assert.Equal("log", result.Message);
                 Assert.Equal("file", result.InputTestFile);
             }
 
@@ -220,7 +271,7 @@ namespace Chutzpah.Facts
             public void Will_supress_internal_log_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + @"#_#Log#_# {""type"":""Log"",""Log"":{""message"":""!!_!! hi""}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + string.Format(JsonStreamEvents.LogEventJsonTemplate, "!!_!! log");
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -237,7 +288,7 @@ namespace Chutzpah.Facts
             public void Will_fire_error_event()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + @"#_#Error#_# {""type"":""Error"",""Error"":{""message"":""uhoh"", ""stack"":[{""file"":""errorFile"",""function"":""errorFunc"",""line"":22}]}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.ErrorEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -249,7 +300,7 @@ namespace Chutzpah.Facts
 
                 Assert.NotNull(result);
                 Assert.Equal("file", result.InputTestFile);
-                Assert.Equal("uhoh", result.Message);
+                Assert.Equal("error", result.Message);
                 Assert.Equal("errorFile", result.Stack[0].File);
                 Assert.Equal("errorFunc", result.Stack[0].Function);
                 Assert.Equal("22", result.Stack[0].Line);
@@ -260,7 +311,7 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = FileStartEventJson + TestStartEventJson + @"
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + @"
 #_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[{""message"":""bad"",""passed"":false,""actual"":4,""expected"":5}]}}
 ";
                 var context = reader.BuildContext("file");
@@ -288,10 +339,7 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = FileStartEventJson + TestStartEventJson + @"
-#_#Log#_# {""type"":""Log"",""Log"":{""message"":""hi""}}
-#_#Log#_# {""type"":""Log"",""Log"":{""message"":""bye""}}
-";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + string.Format(JsonStreamEvents.LogEventJsonTemplate,"hi")+ string.Format(JsonStreamEvents.LogEventJsonTemplate,"bye");
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -310,9 +358,7 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = FileStartEventJson + TestStartEventJson + @"
-#_#Error#_# {""type"":""Error"",""Error"":{""message"":""uhoh"", ""stack"":[{""file"":""errorFile"",""function"":""errorFunc"",""line"":22}]}}
-";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.ErrorEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -322,7 +368,7 @@ namespace Chutzpah.Facts
                 
                 Assert.Equal(1, summary.Errors.Count);
                 Assert.Equal("file", summary.Errors[0].InputTestFile);
-                Assert.Equal("uhoh", summary.Errors[0].Message);
+                Assert.Equal("error", summary.Errors[0].Message);
                 Assert.Equal("errorFile", summary.Errors[0].Stack[0].File);
                 Assert.Equal("errorFunc", summary.Errors[0].Stack[0].Function);
                 Assert.Equal("22", summary.Errors[0].Stack[0].Line);
@@ -365,7 +411,7 @@ namespace Chutzpah.Facts
             {
                 var reader = new TestableTestCaseStreamReader();
 
-                var json = FileStartEventJson + TestStartEventJson + @"#_#CoverageObject#_# {""type"":""CoverageObject"",""Object"":""""}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.CoverageEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -386,8 +432,8 @@ namespace Chutzpah.Facts
 
                 var json = @"
 #_#Log#_# ""type"":""Log"",""Log"":{""message"":""hi""}}
-#_#Log#_# {""type"":""Log"",""Log"":{""message"":""bye""}}
-" +  FileStartEventJson + TestStartEventJson;
+"
++ string.Format(JsonStreamEvents.LogEventJsonTemplate,"bye") + JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
@@ -403,8 +449,8 @@ namespace Chutzpah.Facts
             [Fact]
             public void Will_get_map_line_numbers_to_test_result()
             {
-                var reader = new TestableTestCaseStreamReader(); 
-                var json = FileStartEventJson + TestStartEventJson + @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var reader = new TestableTestCaseStreamReader();
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson +  JsonStreamEvents.TestDoneEventJson;
                 var referencedFile = new ReferencedFile
                 {
                     IsFileUnderTest = true,
@@ -436,7 +482,7 @@ namespace Chutzpah.Facts
             public void Will_set_line_position_to_zero_when_no_matching_file_position()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var json = FileStartEventJson + TestStartEventJson + @"#_#TestDone#_# {""type"":""TestDone"",""testCase"":{""moduleName"":""module"",""testName"":""test"",""testResults"":[]}}";
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.TestDoneEventJson;
                 var referencedFile = new ReferencedFile
                 {
                     IsFileUnderTest = true,
@@ -515,6 +561,35 @@ namespace Chutzpah.Facts
 
                 Assert.NotNull(summary);
                 process.Verify(x => x.Kill());
+            }
+
+
+            [Fact]
+            public void Will_place_ambiguous_test_in_first_context_given_no_matches_and_no_current_file_match()
+            {
+                // This case covers the scenario where there are two files and each has the same test name
+                // what should happen is when we hit the first one we don't know which file it is from so we *assume* the first 
+                // one. Then when we find the same test name again we realize we can't assign it to the current file
+                // so we assign it to the next
+
+                var reader = new TestableTestCaseStreamReader();
+
+                var jsonFile1 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("", "test1"));
+                var jsonFile2 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("", "test1"));
+                var json = jsonFile1 + jsonFile2;
+                var context = reader.BuildContext(Tuple.Create("file1", "test1", 1, 1), Tuple.Create("file2", "test1", 2, 2));
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.Equal(1, summaries[0].Tests.Count);
+                Assert.Equal("file1", summaries[0].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[0].Tests[0].TestName);
+                Assert.Equal(1, summaries[1].Tests.Count);
+                Assert.Equal("file2", summaries[1].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[1].Tests[0].TestName);
             }
         }
     }

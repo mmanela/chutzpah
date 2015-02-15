@@ -247,13 +247,16 @@ namespace Chutzpah
                             TestFileContext newContext = null;
                             var testName = jsTestCaseStart.TestCase.TestName.Trim();
                             var moduleName = (jsTestCaseStart.TestCase.ModuleName ?? "").Trim();
-
+                            
+                            
                             var fileContexts = GetFileMatches(testName, testFileContexts);
                             if (fileContexts.Count == 0 && currentTestFileContext == null)
                             {
-                                // If there are no matches just use the most recent file context
-                                // Let just choose the first context
+                                // If there are no matches and not file context has been used yet
+                                // then just choose the first context
                                 newContext = testFileContexts[0];
+
+                                // If there is already a current context and no matches we just keep using that
                             }
                             else if (fileContexts.Count > 1)
                             {
