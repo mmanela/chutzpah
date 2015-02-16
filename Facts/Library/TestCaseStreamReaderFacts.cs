@@ -591,6 +591,74 @@ namespace Chutzpah.Facts
                 Assert.Equal("file2", summaries[1].Tests[0].InputTestFile);
                 Assert.Equal("test1", summaries[1].Tests[0].TestName);
             }
+
+            [Fact]
+            public void Will_place_not_found_test_in_first_context_given_no_matches_and_no_current_file_match()
+            {
+                // This case covers the scenario where the test names are not found in filePosition map
+                // what should happen is when we hit the first one we don't know which file it is from so we *assume* the first 
+                // one. Then when we find the same test name again we realize we can't assign it to the current file
+                // so we assign it to the next
+
+                var reader = new TestableTestCaseStreamReader();
+
+                var jsonFile1 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("", "test1"));
+                var jsonFile2 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("", "test1"));
+                var json = jsonFile1 + jsonFile2;
+                var context = reader.BuildContext(Tuple.Create("file1", "testNoMatch", 1, 1), Tuple.Create("file2", "testNoMatch", 2, 2));
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.Equal(1, summaries[0].Tests.Count);
+                Assert.Equal("file1", summaries[0].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[0].Tests[0].TestName);
+                Assert.Equal(1, summaries[1].Tests.Count);
+                Assert.Equal("file2", summaries[1].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[1].Tests[0].TestName);
+            }
+
+            [Fact]
+            public void Will_place_in_correct_file_given_module_names()
+            {
+                // This case covers the scenario where the test names are not found in filePosition map
+                // what should happen is when we hit the first one we don't know which file it is from so we *assume* the first 
+                // one. Then when we find the same test name again we realize we can't assign it to the current file
+                // so we assign it to the next
+
+                var reader = new TestableTestCaseStreamReader();
+
+                var jsonFile1 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("module1", "test1"), Tuple.Create("module2", "test1"));
+                var jsonFile2 = JsonStreamEvents.BuildTestEventFile(Tuple.Create("module1", "test1"), Tuple.Create("module2", "test1"));
+                var jsonFile3= JsonStreamEvents.BuildTestEventFile(Tuple.Create("module1", "test1"), Tuple.Create("module2", "test1"));
+                var json = jsonFile1 + jsonFile2 + jsonFile3;
+                var context = reader.BuildContext(Tuple.Create("file1", "test1", 1, 1), Tuple.Create("file1", "test1", 2, 1),
+                    Tuple.Create("file2", "test1", 1, 1), Tuple.Create("file2", "test1", 2, 1),
+                    Tuple.Create("file3", "test1", 1, 1), Tuple.Create("file3", "test1", 2, 1));
+                var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var callback = new Mock<ITestMethodRunnerCallback>();
+
+                var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
+
+                Assert.Equal(2, summaries[0].Tests.Count);
+                Assert.Equal("file1", summaries[0].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[0].Tests[0].TestName);
+                Assert.Equal("test1", summaries[0].Tests[1].TestName);
+                
+                Assert.Equal(2, summaries[1].Tests.Count);
+                Assert.Equal("file2", summaries[1].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[1].Tests[0].TestName);
+                Assert.Equal("test1", summaries[1].Tests[1].TestName);
+                
+                Assert.Equal(2, summaries[2].Tests.Count);
+                Assert.Equal("file3", summaries[2].Tests[0].InputTestFile);
+                Assert.Equal("test1", summaries[2].Tests[0].TestName);
+                Assert.Equal("test1", summaries[2].Tests[1].TestName);
+                
+            }
         }
     }
   

@@ -434,7 +434,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"C:\testThing.html", context.TestHarnessPath);
                 Assert.Equal(@"C:\testThing.html", context.InputTestFiles.FirstOrDefault());
                 Assert.False(context.IsRemoteHarness);
-                Assert.Empty(context.ReferencedFiles);
             }
 
             [Fact]
@@ -452,7 +451,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(@"http://someUrl.com", context.TestHarnessPath);
                 Assert.Equal(@"http://someUrl.com", context.InputTestFiles.FirstOrDefault());
                 Assert.True(context.IsRemoteHarness);
-                Assert.Empty(context.ReferencedFiles);
             }
 
             [Fact]

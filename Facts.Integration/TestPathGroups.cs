@@ -27,9 +27,9 @@ namespace Chutzpah.Facts.Integration
 
 
                     // Chutzpah Settings Inheritance Samples
-                    new object[] {@"Samples\SettingsInheritance\BasicScenario\chutzpah.json"},
-                    new object[] {@"Samples\SettingsInheritance\BasicScenario\Multiplication\chutzpah.json"},
-                    new object[] {@"Samples\SettingsInheritance\BasicScenario\Multiplication\Power\chutzpah.json"},
+                    new object[] {@"Samples\Settings\Inheritance\chutzpah.json"},
+                    new object[] {@"Samples\Settings\Inheritance\Multiplication\chutzpah.json"},
+                    new object[] {@"Samples\Settings\Inheritance\Multiplication\Power\chutzpah.json"},
 
                 };
             }

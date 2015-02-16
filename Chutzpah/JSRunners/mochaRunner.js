@@ -31,7 +31,6 @@
         }
 
         function discoverTests(suite) {
-            log({ type: "FileStart" });
             suite.tests.forEach(function (test) {
                 var testCase = { moduleName: suite.fullTitle(), testName: test.title };
                 log({ type: "TestStart", testCase: testCase });
@@ -40,15 +39,15 @@
 
             suite.suites.forEach(discoverTests);
 
-
-            log({ type: "FileDone" });
             chutzpah.isTestingFinished = true;
         }
 
         if (chutzpah.testMode === 'discovery') {
             console.log("!!_!! Starting Mocha in discovery mode");
             window.mocha.run = function () {
+                log({ type: "FileStart" });
                 discoverTests(window.mocha.suite);
+                log({ type: "FileDone" });
             };
             return;
         }

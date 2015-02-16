@@ -1,5 +1,4 @@
-﻿/// <reference path="../code/code.js" />
-
+﻿
 
 function spinWait(millis) {
     var date = new Date();

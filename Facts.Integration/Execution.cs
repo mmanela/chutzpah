@@ -387,7 +387,7 @@ namespace Chutzpah.Facts.Integration
 
             TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" }, new TestOptions { TestFileTimeoutMilliseconds = 500 });
 
-            Assert.Equal(2, result.Errors.Count);
+            Assert.Equal(1, result.Errors.Count);
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(0, result.PassedCount);
             Assert.Equal(0, result.TotalCount);

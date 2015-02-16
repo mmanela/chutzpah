@@ -256,7 +256,19 @@ namespace Chutzpah
                                 // then just choose the first context
                                 newContext = testFileContexts[0];
 
-                                // If there is already a current context and no matches we just keep using that
+                            }
+                            else if (fileContexts.Count == 0)
+                            {
+                                // If there is already a current context and no matches we just keep using that context
+                                // unless this test name has been used already in the current context. In that case
+                                // move to the next one that hasn't seen this file yet
+
+                                var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
+                                if (testAlreadySeenInCurrentContext)
+                                {
+                                    newContext = testFileContexts.FirstOrDefault(x => !x.HasTestBeenSeen(moduleName, testName)) ?? currentTestFileContext;
+                                }
+
                             }
                             else if (fileContexts.Count > 1)
                             {

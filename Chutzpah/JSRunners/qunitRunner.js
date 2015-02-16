@@ -44,14 +44,28 @@
         if (window.chutzpah.testMode === 'discovery') {
             // In discovery mode override QUnit's functions
 
+            var realAsyncTest = window.asyncTest = QUnit.asyncTest;
             var realTest = window.test = QUnit.test;
+
+            window.asyncTest = QUnit.asyncTest = function (name) {
+                if (arguments.length === 2) {
+                    arguments[1] = function () { expect(0); Qunit.start(); }
+                }
+                else {
+                    arguments[2] = function () { expect(0); Qunit.start(); }
+                }
+
+                var args = [].slice.call(arguments);
+                args.push(true);
+                realTest.apply(this, args);
+            };
 
             window.test = QUnit.test = function (name) {
                 if (arguments.length === 2) {
-                    arguments[1] = function () { }
+                    arguments[1] = function () { expect(0); }
                 }
                 else {
-                    arguments[2] = function () { }
+                    arguments[2] = function () { expect(0); }
                 }
 
                 realTest.apply(this, arguments);

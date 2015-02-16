@@ -93,7 +93,7 @@ namespace Chutzpah
             var missingPaths = files.Where(x => x.FullPath == null).ToList();
             if (missingPaths.Any())
             {
-                throw new FileNotFoundException("Unable to find files: " + string.Join(",",missingPaths.Select(x => x.Path)));
+                throw new FileNotFoundException("Unable to find files: " + string.Join(",", missingPaths.Select(x => x.Path)));
             }
 
             // Make sure all test paths have a valid file type
@@ -102,7 +102,7 @@ namespace Chutzpah
                 throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file or a url");
             }
 
-            if(fileCount > 1 && files.Any(x => x.Type == PathType.Url || x.Type == PathType.Html))
+            if (fileCount > 1 && files.Any(x => x.Type == PathType.Url || x.Type == PathType.Html))
             {
                 throw new InvalidOperationException("Cannot build a batch context for Url or Html test files");
             }
@@ -119,7 +119,7 @@ namespace Chutzpah
             var testedPaths = files.Select(f => new { File = f, IsIncluded = IsTestPathIncluded(f.FullPath, chutzpahTestSettings) }).ToList();
             if (testedPaths.Any(x => !x.IsIncluded))
             {
-                var pathString = string.Join(",",testedPaths.Where(x => !x.IsIncluded).Select(x => x.File.FullPath));
+                var pathString = string.Join(",", testedPaths.Where(x => !x.IsIncluded).Select(x => x.File.FullPath));
                 ChutzpahTracer.TraceInformation("Excluding test files {0} given chutzpah.json settings", pathString);
                 files = testedPaths.Where(x => x.IsIncluded).Select(x => x.File).ToList();
             }
@@ -145,7 +145,8 @@ namespace Chutzpah
 
                     return new TestContext
                     {
-                        InputTestFiles = new []{ firstFilePath },
+                        ReferencedFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = firstFilePath } },
+                        InputTestFiles = new[] { firstFilePath },
                         FirstInputTestFile = firstFilePath,
                         InputTestFilesString = firstFilePath,
                         TestHarnessPath = firstFilePath,
@@ -180,7 +181,7 @@ namespace Chutzpah
                     CoverageEngine = coverageEngine,
                     InputTestFiles = testFiles,
                     FirstInputTestFile = testFiles.FirstOrDefault(),
-                    InputTestFilesString = string.Join(",",testFiles),
+                    InputTestFilesString = string.Join(",", testFiles),
                     TestHarnessDirectory = testHarnessDirectory,
                     ReferencedFiles = referencedFiles,
                     TestRunner = definition.GetTestRunner(chutzpahTestSettings),
