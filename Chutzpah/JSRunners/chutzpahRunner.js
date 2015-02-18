@@ -11,6 +11,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     'use strict';
 
     var page = require('webpage').create(),
+        system = require("system"),
         testFrameworkLoaded = false,
         testFile = null,
         testMode = null,
@@ -122,17 +123,17 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         }
     }
 
-    if (phantom.args.length === 0) {
+    if (system.args.length <= 1) {
         console.log('Error: too few arguments');
         phantom.exit();
     }
 
-    testFile = phantom.args[0];
-    testMode = phantom.args[1] || "execution";
-    timeOut = parseInt(phantom.args[2]) || 5001;
+    testFile = system.args[1];
+    testMode = system.args[2] || "execution";
+    timeOut = parseInt(system.args[3]) || 5001;
 
-    if (phantom.args.length > 3) {
-        userAgent = phantom.args[3];
+    if (system.args.length > 4) {
+        userAgent = system.args[4];
     }
 
     page.onConsoleMessage = captureLogMessage;
