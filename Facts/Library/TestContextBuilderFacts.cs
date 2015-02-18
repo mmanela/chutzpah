@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -464,19 +463,6 @@ namespace Chutzpah.Facts
 
                 Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test.js")).IsFileUnderTest);
             }
-
-            [Fact]
-            public void Will_pass_referenced_files_to_a_file_generator()
-            {
-                var creator = new TestableTestContextBuilder();
-                var fileGenerator = new Mock<IFileGenerator>();
-                creator.InjectArray(new[] { fileGenerator.Object });
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo(@"C:\test.coffee")).Returns<string>(x => new PathInfo { FullPath = x, Type = PathType.CoffeeScript });
-
-                var context = creator.ClassUnderTest.BuildContext(@"C:\test.coffee", new TestOptions());
-
-                fileGenerator.Verify(x => x.Generate(It.IsAny<IEnumerable<ReferencedFile>>(), It.IsAny<List<string>>(), It.IsAny<ChutzpahTestSettingsFile>()));
-            }  
 
             [Fact]
             public void Will_not_copy_referenced_file_if_it_is_the_test_runner()

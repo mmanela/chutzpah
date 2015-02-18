@@ -15,7 +15,6 @@ namespace Chutzpah.Facts.Integration
         }
 
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
-        private const string ACoffeeTestScript = @"JS\Test\basic-jasmine-coffee.coffee";
         private const string ASourceMappedTestScript = @"JS\Test\Coverage\SourceMaps\Tests.ts";
 
         public static IEnumerable<object[]> BasicTestScripts
@@ -90,22 +89,6 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
-
-        public static IEnumerable<object[]> AMDTypeScriptTestScripts
-        {
-            get
-            {
-                return new[]
-                {
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.mocha-qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.mocha-qunit.test.ts"},
-                };
-            }
-        }
 
         public static IEnumerable<object[]> ChutzpahSamples
         {
@@ -300,22 +283,10 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(ASourceMappedTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            Assert.True(HasKeyWithSubstring(dict, "code-coffee.coffee"));
-        }
-
-        [Fact]
-        public void Will_put_converted_source_code_in_coverage_object_for_coffee_script()
-        {
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
-            var dict = result.TestFileSummaries.Single().CoverageObject;
-
-            var codeCoffeeEntry = dict.Single(e => e.Key.Contains("code-coffee.coffee"));
-            Assert.True(codeCoffeeEntry.Value.SourceLines.Any(l => l.Contains("function")));
+            Assert.True(HasKeyWithSubstring(dict, "SourceMappedLibrary.ts"));
         }
 
         [Fact]
@@ -360,11 +331,11 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(ACoffeeTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(ASourceMappedTestScript, WithCoverage(), new ExceptionThrowingRunnerCallback());
             var dict = result.TestFileSummaries.Single().CoverageObject;
 
-            var filePath = dict.Single(kvp => kvp.Key.Contains("code-coffee.coffee")).Value.FilePath;
-            Assert.Contains("\\code-coffee.coffee", filePath);
+            var filePath = dict.Single(kvp => kvp.Key.Contains("SourceMappedLibrary.ts")).Value.FilePath;
+            Assert.Contains("\\SourceMappedLibrary.ts", filePath);
         }
 
         [Fact]
@@ -381,7 +352,6 @@ namespace Chutzpah.Facts.Integration
         [Theory]
         [PropertyData("AmdTestScriptWithForcedRequire")]
         [PropertyData("AmdTestScriptWithAMDMode")]
-        [PropertyData("AMDTypeScriptTestScripts")]
         public void Will_create_coverage_object_for_test_where_test_file_uses_requirejs_command(string scriptPath)
         {
             var testRunner = TestRunner.Create();

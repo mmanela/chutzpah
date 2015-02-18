@@ -71,44 +71,6 @@
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="ChutzpahTestSettingsService.cs" />
     <Compile Include="CoverageOptions.cs" />
-    <EmbeddedResource Include="Compilers\CoffeeScript\compile-cs.js" />
-    <Content Include="Compilers\README.txt" />
-    <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptException.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ActiveScriptParseWrapper.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\BaseActiveScriptSite.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScript.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptError.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParse32.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParse64.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseProcedure32.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseProcedure64.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptParseWrapper.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptSite.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptSiteInterruptPoll.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IActiveScriptStats.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\IBindEventHandler.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptInfoFlags.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptInterruptFlags.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptItemFlags.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptProcedureFlags.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptState.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptStatistic.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptTextFlags.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptThreadId.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptThreadState.cs" />
-    <Compile Include="Compilers\Interop\ActiveScript\ScriptTypeLibFlags.cs" />
-    <Compile Include="Compilers\CoffeeScript\CoffeeScriptCompiler.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\IEJavaScriptRuntime.cs" />
-    <Compile Include="Compilers\IJavaScriptCompiler.cs" />
-    <Compile Include="Compilers\IJavaScriptRuntime.cs" />
-    <Compile Include="Compilers\JavaScriptCompilerBase.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\ChakraJavaScriptAuthor.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\ChakraJavaScriptEngine.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptAuthor.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptCompactEngine.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEncode.cs" />
-    <Compile Include="Compilers\Interop\JavaScriptEngines\JavaScriptEngine.cs" />
-    <Compile Include="Compilers\TypeScript\TypeScriptCompiler.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
@@ -128,9 +90,6 @@
     <Compile Include="Models\VSTSTestCase.cs" />
     <Compile Include="NativeImports.cs" />
     <Compile Include="Exceptions\ChutzpahCompilationFailedException.cs" />
-    <Compile Include="FileGenerators\CompileToJavascriptFileGenerator.cs" />
-    <Compile Include="FileGenerators\IFileGenerator.cs" />
-    <Compile Include="FileGenerators\TypeScriptFileGenerator.cs" />
     <Compile Include="FileProcessors\IMochaReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\MochaLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\IJasmineReferencedFileProcessor.cs" />
@@ -138,7 +97,6 @@
     <Compile Include="FileProcessors\IReferencedFileProcessor.cs" />
     <Compile Include="FileProcessors\JasmineLineNumberProcessor.cs" />
     <Compile Include="FileProcessors\QUnitLineNumberProcessor.cs" />
-    <Compile Include="FileGenerators\CoffeeScriptFileGenerator.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\ChutzpahException.cs" />
     <Compile Include="Exceptions\ChutzpahTimeoutException.cs" />
@@ -149,7 +107,6 @@
     <Compile Include="FrameworkDefinitions\IFrameworkDefinition.cs" />
     <Compile Include="FrameworkDefinitions\JasmineDefinition.cs" />
     <Compile Include="FrameworkDefinitions\QUnitDefinition.cs" />
-    <Compile Include="GlobalOptions.cs" />
     <Compile Include="ITestCaseStreamReader.cs" />
     <Compile Include="ITestCaseStreamReaderFactory.cs" />
     <Compile Include="Models\BaseTestCaseSummary.cs" />
@@ -203,14 +160,11 @@
     <Compile Include="Transformers\SummaryTransformerProvider.cs" />
     <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Transformers\TrxXmlTransformer.cs" />
-    <Compile Include="Utility\CompilerCache.cs" />
     <Compile Include="Utility\Hasher.cs" />
-    <Compile Include="Utility\ICompilerCache.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
-    <Compile Include="Wrappers\CoffeeScriptEngineWrapper.cs" />
     <Compile Include="Wrappers\BinarySerializer.cs" />
     <Compile Include="Wrappers\HttpWrapper.cs" />
     <Compile Include="Wrappers\ICompilerEngineWrapper.cs" />
@@ -229,12 +183,8 @@
     <Compile Include="Models\TestCaseSummary.cs" />
     <Compile Include="Models\ProcessStream.cs" />
     <Compile Include="Wrappers\ProcessWrapper.cs" />
-    <Compile Include="Wrappers\SingleThreadedJavaScriptHostedCompiler.cs" />
-    <Compile Include="Wrappers\TypeScriptEngineWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Compilers\TypeScript\lib.d.ts" />
-    <EmbeddedResource Include="Compilers\TypeScript\polyfill.js" />
     <Content Include="JSRunners\jasmineRunnerV2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -253,11 +203,6 @@
     <Content Include="TestFiles\Coverage\blanket_qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Compilers\CoffeeScript\coffee-script.js" />
-    <Content Include="Compilers\Interop\JavaScriptEngines\Notes.txt" />
-    <EmbeddedResource Include="Compilers\TypeScript\typescript.js" />
-    <EmbeddedResource Include="Compilers\TypeScript\compile-ts.js" />
-    <EmbeddedResource Include="Compilers\TypeScript\json2.js" />
     <Content Include="TestFiles\Jasmine\v1\jasmine-ddescribe-iit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -471,19 +471,6 @@ namespace Chutzpah.Facts
                 testCallback.Verify(x => x.TestSuiteFinished(It.IsAny<TestCaseSummary>()));
             }
 
-            [Fact]
-            public void Will_save_compiler_cache_after_test_run()
-            {
-                var runner = new TestableTestRunner();
-                var context = runner.SetupTestContext();
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
-
-                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
-
-                runner.Mock<ICompilerCache>().Verify(x => x.Save());
-            }
-
 
             [Fact]
             public void Will_clean_up_test_context()

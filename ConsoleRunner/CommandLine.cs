@@ -59,11 +59,8 @@ namespace Chutzpah
             protected set { testMode = value; }
         }
 
-        public string CompilerCacheFile { get; protected set; }
-
         public string CoverageIncludePatterns { get; protected set; }
-        public int? CompilerCacheFileMaxSizeMb { get; protected set; }
-
+        
         public string CoverageExcludePatterns { get; protected set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
@@ -163,14 +160,6 @@ namespace Chutzpah
                 {
                     AddCoverageExcludeOption(option.Value);
                 }
-                else if (optionName == "/compilercachefile")
-                {
-                    SetCompilerCacheFile(option.Value);
-                }
-                else if (optionName == "/compilercachesize")
-                {
-                    SetCompilerCacheMaxSize(option.Value);
-                }
                 else if (optionName == "/testmode")
                 {
                     TestingMode resultMode;
@@ -215,28 +204,6 @@ namespace Chutzpah
                     "invalid or missing argument for /coverageExcludes.  Expecting a list of comma separated file name patterns");
             }
             CoverageExcludePatterns = value;
-        }
-
-        private void SetCompilerCacheMaxSize(string value)
-        {
-            int maxSize;
-            if (string.IsNullOrEmpty(value) || !int.TryParse(value, out maxSize) || maxSize < 0)
-            {
-                throw new ArgumentException(
-                    "invalid or missing argument for /compilercachemaxsize.  Expecting a postivie integer");
-            }
-
-            CompilerCacheFileMaxSizeMb = maxSize;
-        }
-
-        private void SetCompilerCacheFile(string file)
-        {
-            if (string.IsNullOrEmpty(file))
-            {
-                throw new ArgumentException(
-                    "missing argument for /compilercachefile.  Expecting a file path for the cache.");
-            }
-            CompilerCacheFile = file;
         }
 
         private void AddParallelismOption(string value)

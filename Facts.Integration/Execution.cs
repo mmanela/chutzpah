@@ -38,27 +38,6 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
-        public static IEnumerable<object[]> CoffeeScriptTests
-        {
-            get
-            {
-                return new[]
-                    {
-                        new object[] {@"JS\Test\basic-qunit-coffee.coffee"},
-                        new object[] {@"JS\Test\basic-jasmine-coffee.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-bdd-coffee.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-tdd-coffee.coffee"},
-                        new object[] {@"JS\Test\basic-mocha-qunit-coffee.coffee"},
-
-                        
-                        // Exports does not work. Not sure how it is supposed to get the 
-                        // exports variable in the browser
-                        //new object[] {@"JS\Test\basic-mocha-exports.coffee"}
-                    };
-            }
-        }
-
-
         public static IEnumerable<object[]> BasicTestScripts
         {
             get
@@ -79,18 +58,6 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
-        public static IEnumerable<object[]> SyntaxErrorScripts
-        {
-            get
-            {
-                return new[]
-                           {
-                               new object[] {@"JS\Test\syntaxError-coffee.coffee", @"JS\Test\syntaxError-coffee.coffee", "unexpected ->"},
-                               new object[] {@"JS\Test\syntaxError-ts.ts", @"JS/Test/syntaxError-ts.ts", "'=' expected"}
-                           };
-            }
-        }
-
         public static IEnumerable<object[]> ChutzpahSamples
         {
             get { return TestPathGroups.ChutzpahSamples; }
@@ -100,8 +67,6 @@ namespace Chutzpah.Facts.Integration
         public Execution()
         {
             ChutzpahTracer.Enabled = false;
-            // Disable caching
-            GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = 0;
         }
 
         [Theory]
@@ -203,19 +168,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
             Assert.Equal(1, result.TotalCount);
-        }
-
-        [Theory]
-        [PropertyData("CoffeeScriptTests")]
-        public void Will_run_tests_from_a_coffee_script_file(string scriptPath)
-        {
-            var testRunner = TestRunner.Create();
-
-            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(1, result.FailedCount);
-            Assert.Equal(3, result.PassedCount);
-            Assert.Equal(4, result.TotalCount);
         }
 
         [Fact]
@@ -508,18 +460,6 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_coffee_script_test_that_asserts_unicode_characters()
-        {
-            var testRunner = TestRunner.Create();
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\coffeeEncoding.js", new ExceptionThrowingRunnerCallback());
-
-            Assert.Equal(0, result.FailedCount);
-            Assert.Equal(1, result.PassedCount);
-            Assert.Equal(1, result.TotalCount);
-        }
-
-        [Fact]
         public void Will_run_qunit_passing_tests_that_has_a_reference_to_web_url()
         {
             var testRunner = TestRunner.Create();
@@ -688,34 +628,6 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
-        [Theory]
-        [PropertyData("SyntaxErrorScripts")]
-        public void Will_report_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
-        {
-            var testRunner = TestRunner.Create();
-            var callback = new Mock<ITestMethodRunnerCallback>();
-
-            testRunner.RunTests(scriptPath, callback.Object);
-
-            callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains(errorMessage) && e.Message.Contains(includeScriptPath))));
-        }
-
-        [Theory]
-        [PropertyData("SyntaxErrorScripts")]
-        public void Will_strip_unnecessary_info_when_reporting_a_failed_script_compilation_to_the_callback(string scriptPath, string includeScriptPath, string errorMessage)
-        {
-            var testRunner = TestRunner.Create();
-            var callback = new Mock<ITestMethodRunnerCallback>();
-
-            testRunner.RunTests(scriptPath, callback.Object);
-
-            callback.Verify(x => x.FileError(It.Is<TestError>(e => !e.Message.Contains("Microsoft JScript runtime error") &&
-                                                !e.Message.Contains("Error Code") &&
-                                                !e.Message.Contains("Error WCode") &&
-                                                !Regex.IsMatch(e.Message, "^at line", RegexOptions.Multiline))));
-
-        }
-
 
         public class TestFileBatching
         {
@@ -806,130 +718,6 @@ namespace Chutzpah.Facts.Integration
                 TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-run-nothing.html", new ExceptionThrowingRunnerCallback());
 
                 Assert.Equal(0, result.TotalCount);
-            }
-        }
-
-        public class TypeScript
-        {
-            public TypeScript()
-            {
-                ChutzpahTracer.Enabled = false;
-            }
-
-            public static IEnumerable<object[]> TypeScriptTests
-            {
-                get
-                {
-                    return new[]
-                        {
-                            new object[] {@"JS\Test\TypeScript\basic-qunit.ts"},
-                            new object[] {@"JS\Test\TypeScript\basic-jasmine.ts"},
-                            new object[] {@"JS\Test\TypeScript\basic-mocha-bdd.ts"},
-                        };
-                }
-            }
-
-            public static IEnumerable<object[]> AMDTypeScriptTestScripts
-            {
-                get
-                {
-                    return new[]
-                {
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.jasmine.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.jasmine.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\base\base.mocha-qunit.test.ts"},
-                        new object[] {@"JS\Code\TypeScriptRequireJS\tests\ui\ui.mocha-qunit.test.ts"},
-                };
-                }
-            }
-
-            [Theory]
-            [PropertyData("TypeScriptTests")]
-            public void Will_run_tests_from_a_type_script_file(string scriptPath)
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(1, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(4, result.TotalCount);
-            }
-
-
-            [Theory]
-            [PropertyData("AMDTypeScriptTestScripts")]
-            public void Will_run_requirejs_tests_with_chutzpah_in_amd_mode(string path)
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(path, new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(1, result.PassedCount);
-                Assert.Equal(1, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_process_type_script_files_together()
-            {
-                // This test verifies that we run TypeScript compiler on all ts files at once 
-                // this is important since TS using typechecking engine to help generate code
-                var testRunner = TestRunner.Create();
-                var result = testRunner.RunTests(@"JS\Test\TypeScript\test.ts", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(1, result.PassedCount);
-                Assert.Equal(1, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_allow_user_to_speicfy_their_own_lib_d_ts()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\TypeScript\ownLib.ts", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(1, result.PassedCount);
-                Assert.Equal(1, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_convert_ES5_code_given_setting()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\TypeScript\ES5\ES5Test.ts", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(1, result.PassedCount);
-                Assert.Equal(1, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_typescript_test_using_jquery()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\TypeScript\jqueryTest.ts", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(1, result.PassedCount);
-                Assert.Equal(1, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_report_a_failed_TypeScript_compilation_to_the_callback()
-            {
-                var testRunner = TestRunner.Create();
-                var callback = new Mock<ITestMethodRunnerCallback>();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\syntaxError-ts.ts", callback.Object);
-
-                callback.Verify(x => x.FileError(It.Is<TestError>(e => e.Message.Contains("'=' expected"))));
             }
         }
 

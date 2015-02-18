@@ -30,7 +30,6 @@ namespace Chutzpah
             try
             {
                 CommandLine commandLine = CommandLine.Parse(args);
-                SetGlobalOptions(commandLine);
                 int failCount = RunTests(commandLine);
 
                 if (commandLine.Wait)
@@ -50,17 +49,6 @@ namespace Chutzpah
                 return -1;
             }
         }
-
-        private static void SetGlobalOptions(CommandLine commandLine)
-        {
-            GlobalOptions.Instance.CompilerCacheFile = commandLine.CompilerCacheFile;
-
-            if (commandLine.CompilerCacheFileMaxSizeMb.HasValue)
-            {
-                GlobalOptions.Instance.CompilerCacheFileMaxSizeBytes = commandLine.CompilerCacheFileMaxSizeMb.Value * 1024 * 1024;
-            }
-        }
-
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

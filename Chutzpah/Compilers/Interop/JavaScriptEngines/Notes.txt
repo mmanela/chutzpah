@@ -1,9 +1,0 @@
-﻿Chakra:
-JScript: {16d51579-a30b-4c8b-a276-0ff4dc41e755}
-JScript9 Author: {34a13fc7-86ab-42e6-a32c-b50666f04ff9}
-
-Classic:
-JScript.Compact: {cc5bbec3-db4a-4bed-828d-08d78ee3e1ed}
-JScript: {f414c260-6ac0-11cf-b6d1-00aa00bbbb58}
-JScript Author: {f414c261-6ac0-11cf-b6d1-00aa00bbbb58}
-JScript.Encode: {f414c262-6ac0-11cf-b6d1-00aa00bbbb58}

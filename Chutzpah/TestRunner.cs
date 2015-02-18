@@ -25,7 +25,6 @@ namespace Chutzpah
         private readonly IBatchCompilerService batchCompilerService;
         private readonly ITestHarnessBuilder testHarnessBuilder;
         private readonly ITestContextBuilder testContextBuilder;
-        private readonly ICompilerCache compilerCache;
         private readonly IChutzpahTestSettingsService testSettingsService;
         private readonly ITransformProcessor transformProcessor;
         private bool m_debugEnabled;
@@ -47,7 +46,6 @@ namespace Chutzpah
                           IBatchCompilerService batchCompilerService,
                           ITestHarnessBuilder testHarnessBuilder,
                           ITestContextBuilder htmlTestFileCreator,
-                          ICompilerCache compilerCache,
                           IChutzpahTestSettingsService testSettingsService,
                           ITransformProcessor transformProcessor)
         {
@@ -58,7 +56,6 @@ namespace Chutzpah
             this.testHarnessBuilder = testHarnessBuilder;
             stopWatch = new Stopwatch();
             testContextBuilder = htmlTestFileCreator;
-            this.compilerCache = compilerCache;
             this.testSettingsService = testSettingsService;
             this.transformProcessor = transformProcessor;
         }
@@ -211,8 +208,6 @@ namespace Chutzpah
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
 
             transformProcessor.ProcessTransforms(testContexts, overallSummary);
-            
-            compilerCache.Save();
 
             // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
             // If we don't clear then the user can never update the file.

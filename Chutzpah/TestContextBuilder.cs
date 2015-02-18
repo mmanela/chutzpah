@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chutzpah.Coverage;
-using Chutzpah.FileGenerator;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -18,7 +17,6 @@ namespace Chutzpah
         private readonly IHttpWrapper httpClient;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
-        private readonly IEnumerable<IFileGenerator> fileGenerators;
         private readonly IChutzpahTestSettingsService settingsService;
         private readonly ICoverageEngine mainCoverageEngine;
 
@@ -29,7 +27,6 @@ namespace Chutzpah
             IFileProbe fileProbe,
             ICoverageEngine coverageEngine,
             IEnumerable<IFrameworkDefinition> frameworkDefinitions,
-            IEnumerable<IFileGenerator> fileGenerators,
             IChutzpahTestSettingsService settingsService)
         {
             this.referenceProcessor = referenceProcessor;
@@ -37,7 +34,6 @@ namespace Chutzpah
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
             this.frameworkDefinitions = frameworkDefinitions;
-            this.fileGenerators = fileGenerators;
             this.settingsService = settingsService;
             mainCoverageEngine = coverageEngine;
         }
@@ -163,10 +159,6 @@ namespace Chutzpah
                 var referencedFiles = GetFilesUnderTest(files, chutzpahTestSettings).ToList();
 
                 referenceProcessor.GetReferencedFiles(referencedFiles, definition, chutzpahTestSettings);
-
-                // This is the legacy way Chutzpah compiled files that are TypeScript or CoffeeScript
-                // Remaining but will eventually be removed
-                ProcessForFilesGeneration(referencedFiles, temporaryFiles, chutzpahTestSettings);
 
                 IEnumerable<string> deps = definition.GetFileDependencies(chutzpahTestSettings);
 
@@ -395,27 +387,6 @@ namespace Chutzpah
                    || testFileKind == PathType.CoffeeScript
                    || testFileKind == PathType.Url
                    || testFileKind == PathType.Html;
-        }
-
-        /// <summary>
-        /// Iterates over filegenerators letting the generators decide if they handle any files
-        /// </summary>
-        private void ProcessForFilesGeneration(List<ReferencedFile> referencedFiles, List<string> temporaryFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
-        {
-
-            if (chutzpahTestSettings.Compile != null)
-            {
-                ChutzpahTracer.TraceInformation("Ignoring old style file compilation since we detected the new compile setting");
-                return;
-            }
-            ChutzpahTracer.TraceInformation("Starting legacy file compilation/generation");
-
-            foreach (var fileGenerator in fileGenerators)
-            {
-                fileGenerator.Generate(referencedFiles, temporaryFiles, chutzpahTestSettings);
-            }
-
-            ChutzpahTracer.TraceInformation("Finished legacy file compilation/generation");
         }
 
         private ICoverageEngine GetConfiguredCoverageEngine(TestOptions options, ChutzpahTestSettingsFile chutzpahTestSettings)

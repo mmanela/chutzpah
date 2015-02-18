@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Chutzpah.Compilers.TypeScript;
 using System.Linq;
 
 namespace Chutzpah.Models
@@ -43,7 +42,6 @@ namespace Chutzpah.Models
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             Transforms = new List<TransformConfig>();
-            CoffeeScriptBareMode = true;
         }
 
         private ChutzpahTestSettingsFile(bool isDefaultSetings) : this()
@@ -200,29 +198,6 @@ namespace Chutzpah.Models
         /// Maps the names of transforms to run after testing with their corresponding output paths.
         /// </summary>
         public ICollection<TransformConfig> Transforms { get; set; }
-
-        #region Deprecated Properties. These are part of the old compile support Chutzpah had where it would embed the compiler. Please use compile setting now
-
-        /// <summary>
-        /// Determines if CoffeeScript should run in bare mode or not. Default is true.
-        /// </summary>
-        public bool CoffeeScriptBareMode { get; set; }
-
-        /// <summary>
-        /// The type of code for the TypeScript compiler to generate
-        /// ES3 - Generate ECMAScript 3 Compatible code
-        /// ES5 - Generate ECMAScript 5 Compatible code
-        /// </summary>
-        public TypeScriptCodeGenTarget TypeScriptCodeGenTarget { get; set; }
-
-        /// <summary>
-        /// The type of module code TypeScript should generate
-        /// CommonJS - CommonJS Style
-        /// AMD - AMD Style
-        /// </summary>
-        public TypeScriptModuleKind TypeScriptModuleKind { get; set; }
-
-        #endregion
 
 
         public string SettingsFileName
