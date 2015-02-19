@@ -16,7 +16,6 @@ task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-Unit
 
 # Build Tasks
 task Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
-task Build-2010 -depends  Clean-Solution-2010, Build-Solution-2010, Run-UnitTests, Run-IntegrationTests
 task Build-2013 -depends  Clean-Solution-2013, Build-Solution-2013, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
@@ -68,14 +67,10 @@ task Clean-TeamCitySolution {
 
 }
 
-task Clean-Solution -depends Clean-Solution-2010, Clean-Solution-2013
+task Clean-Solution -depends Clean-Solution-2013
 
 task Clean-Solution-2013 {
     exec { msbuild Chutzpah.VS2013.sln /t:Clean /v:quiet }
-}
-
-task Clean-Solution-2010 {
-    exec { msbuild Chutzpah.VS2010.sln /t:Clean /v:quiet }
 }
 
 # CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
@@ -84,16 +79,11 @@ task Build-TeamCitySolution {
     exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
-task Build-Solution -depends Build-Solution-2010, Build-Solution-2013
+task Build-Solution -depends Build-Solution-2013
 
 task Build-Solution-2013 {
     exec { msbuild Chutzpah.VS2013.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
-
-task Build-Solution-2010 {
-    exec { msbuild Chutzpah.VS2010.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
-}
-
 
 task Run-PerfTester {
     $result = & "PerfTester\bin\$configuration\chutzpah.perftester.exe"
@@ -138,7 +128,7 @@ task Package-Files -depends Clean-PackageFiles {
     cd $baseDir
     
     # Copy over Vsix Files
-    copy-item "$baseDir\VisualStudio\bin\$configuration\chutzpah.visualstudio.vsix" -destination $packageDir
+    copy-item "$baseDir\VisualStudioContextMenu\bin\$configuration\Chutzpah.VisualStudioContextMenu.vsix" -destination $packageDir
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.vsix" -destination $packageDir
 }
 
@@ -254,8 +244,8 @@ function Update-OtherFiles ([string] $version) {
      $manifest.PackageManifest.Metadata.Identity.Version = $version
      $manifest.Save($manifestFile)
      
-     $manifestFile = Join-Path $baseDir "VisualStudio\source.extension.vsixmanifest"
+     $manifestFile = Join-Path $baseDir "VisualStudioContextMenu\source.extension.vsixmanifest"
      $manifest = [xml](Get-Content $manifestFile)
-     $manifest.Vsix.Identifier.Version = $version
+     $manifest.PackageManifest.Metadata.Identity.Version = $version
      $manifest.Save($manifestFile)
 }
