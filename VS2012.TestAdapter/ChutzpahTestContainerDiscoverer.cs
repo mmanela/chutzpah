@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -58,7 +59,7 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         private bool forceFullContainerRefresh;
 
-        private readonly List<ITestContainer> cachedContainers;
+        private readonly ConcurrentDictionary<string, ITestContainer> cachedContainers;
 
         public event EventHandler TestContainersUpdated;
 
@@ -75,7 +76,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         [ImportingConstructor]
         public ChutzpahTestContainerDiscoverer(
-            [Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
             IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,
@@ -104,7 +105,7 @@ namespace Chutzpah.VS2012.TestAdapter
                                                IChutzpahTestSettingsService chutzpahTestSettingsService)
         {
             initialContainerSearch = true;
-            cachedContainers = new List<ITestContainer>();
+            cachedContainers = new ConcurrentDictionary<string, ITestContainer>(StringComparer.OrdinalIgnoreCase);
             this.serviceProvider = serviceProvider;
             this.settingsMapper = settingsMapper;
             this.logger = logger;
@@ -277,6 +278,7 @@ namespace Chutzpah.VS2012.TestAdapter
             }
 
             var isTestFile = IsTestFile(file.Path);
+
             RemoveTestContainer(file); // Remove if there is an existing container
 
             if (isTestFile)
@@ -284,8 +286,9 @@ namespace Chutzpah.VS2012.TestAdapter
 
                 ChutzpahTracer.TraceInformation("Added test container for '{0}'", file.Path);
                 var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), Constants.ExecutorUri);
-                cachedContainers.Add(container);
+                cachedContainers[container.Source] = container;
             }
+
         }
 
         /// <summary>
@@ -300,12 +303,11 @@ namespace Chutzpah.VS2012.TestAdapter
                 return;
             }
 
-            var index = cachedContainers.FindIndex(x => x.Source.Equals(file.Path, StringComparison.OrdinalIgnoreCase));
-            if (index >= 0)
+            ITestContainer container;
+            var res = cachedContainers.TryRemove(file.Path, out container);
+            if (res)
             {
-
                 ChutzpahTracer.TraceInformation("Removed test container for '{0}'", file.Path);
-                cachedContainers.RemoveAt(index);
             }
         }
 
@@ -329,6 +331,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 chutzpahTestSettingsService.ClearCache();
 
                 cachedContainers.Clear();
+
                 var jsFiles = FindPotentialTestFiles();
                 UpdateTestContainersAndFileWatchers(jsFiles, true);
                 initialContainerSearch = false;
@@ -337,7 +340,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 ChutzpahTracer.TraceInformation("End Initial test container search");
             }
 
-            var containers = FilterContainers(cachedContainers);
+            var containers = FilterContainers(cachedContainers.Values);
 
             ChutzpahTracer.TraceInformation("End GetTestContainers");
             return containers;
@@ -371,7 +374,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
             try
             {
-                
+
                 ChutzpahTracer.TraceInformation("Begin selecting potential test files from project '{0}'", projectPath);
                 return (from item in VsSolutionHelper.GetProjectItems(project)
                         let hasTestExtension = HasTestFileExtension(item)
