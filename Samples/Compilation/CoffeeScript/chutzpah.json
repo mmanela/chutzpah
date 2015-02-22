@@ -8,9 +8,9 @@
     "SkipIfUnchanged": false
   },
   "References" : [
-    {"Include": "*/code/src/*.coffee" }
+    {"Includes": ["*/code/src/*.coffee"] }
   ],
   "Tests": [
-    { "Include": "*/code/test/*.coffee" }
+    { "Includes": ["*/code/test/*.coffee"] }
   ]
 }

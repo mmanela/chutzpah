@@ -118,6 +118,11 @@ namespace Chutzpah
                 var pathString = string.Join(",", testedPaths.Where(x => !x.IsIncluded).Select(x => x.File.FullPath));
                 ChutzpahTracer.TraceInformation("Excluding test files {0} given chutzpah.json settings", pathString);
                 files = testedPaths.Where(x => x.IsIncluded).Select(x => x.File).ToList();
+
+                if (!files.Any())
+                {
+                    return null;
+                }
             }
 
             string firstTestFileText;
@@ -285,8 +290,8 @@ namespace Chutzpah
 
             foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
-                var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
-                var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
+                var includePatterns = pathSettings.Includes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
+                var excludePatterns = pathSettings.Excludes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
                 var testPath = string.IsNullOrEmpty(pathSettings.Path) ? pathSettings.SettingsFileDirectory : pathSettings.Path;
@@ -310,27 +315,27 @@ namespace Chutzpah
                 {
                     if (testFilePath.Contains(folderPath))
                     {
-                        var shouldIncludeFile = (includePattern == null || NativeImports.PathMatchSpec(testFilePath, includePattern))
-                                                && (excludePattern == null || !NativeImports.PathMatchSpec(testFilePath, excludePattern));
+                        var shouldIncludeFile = (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(testFilePath, pat)))
+                                             && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(testFilePath, pat)));
 
                         if (shouldIncludeFile)
                         {
                             ChutzpahTracer.TraceInformation(
-                                "Test file {0} matched folder {1} with include {2} and exclude {3} patterns from settings file",
+                                "Test file {0} matched folder {1} with includes {2} and excludes {3} patterns from settings file",
                                 testFilePath,
                                 folderPath,
-                                includePattern,
-                                excludePattern);
+                                string.Join(",", includePatterns),
+                                string.Join(",", excludePatterns));
                             return true;
                         }
                         else
                         {
                             ChutzpahTracer.TraceInformation(
-                                "Test file {0} did not match folder {1} with include {2} and exclude {3} patterns from settings file",
+                                "Test file {0} did not match folder {1} with includes {2} and excludes {3} patterns from settings file",
                                 testFilePath,
                                 folderPath,
-                                includePattern,
-                                excludePattern);
+                                string.Join(",", includePatterns),
+                                string.Join(",", excludePatterns));
                         }
                     }
                 }

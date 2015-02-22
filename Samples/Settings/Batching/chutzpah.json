@@ -9,6 +9,6 @@
 
     // Tests do *not* get inherited. 
     "Tests" : [
-      {"Include": "*Test.js"}
+      {"Includes": ["*Test.js"]}
     ]
 }

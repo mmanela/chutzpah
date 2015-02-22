@@ -15,14 +15,16 @@ namespace Chutzpah
         public ReferencePathSettings()
         {
             ExpandNestedReferences = true;
+            Includes = new List<string>();
+            Excludes = new List<string>();
         }
 
         public ReferencePathSettings(SettingsFileReference settingsFileReference)
         {
             ExpandNestedReferences = false;
 
-            Include = settingsFileReference.Include;
-            Exclude = settingsFileReference.Exclude;
+            Includes = settingsFileReference.Includes;
+            Excludes = settingsFileReference.Excludes;
             IncludeInTestHarness = settingsFileReference.IncludeInTestHarness;
             IsTestFrameworkFile = settingsFileReference.IsTestFrameworkFile;
         }
@@ -34,8 +36,8 @@ namespace Chutzpah
         /// </summary>
         public bool ExpandNestedReferences { get; set; }
 
-        public string Include { get; set; }
-        public string Exclude { get; set; }
+        public ICollection<string> Includes { get; set; }
+        public ICollection<string> Excludes { get; set; }
         public bool IncludeInTestHarness { get; set; }
         public bool IsTestFrameworkFile { get; set; }
     }
@@ -250,8 +252,8 @@ namespace Chutzpah
                 string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
                 if (absoluteFolderPath != null)
                 {
-                    var includePattern = FileProbe.NormalizeFilePath(pathSettings.Include);
-                    var excludePattern = FileProbe.NormalizeFilePath(pathSettings.Exclude);
+                    var includePatterns = pathSettings.Includes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
+                    var excludePatterns = pathSettings.Excludes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
 
                     // Find all files in this folder including sub-folders. This can be ALOT of files.
                     // Only a subset of these files Chutzpah might understand so many of these will be ignored.
@@ -259,8 +261,8 @@ namespace Chutzpah
                     var validFiles = from file in childFiles
                         let normalizedFile = FileProbe.NormalizeFilePath(file)
                         where !fileProbe.IsTemporaryChutzpahFile(file)
-                              && (includePattern == null || NativeImports.PathMatchSpec(normalizedFile, includePattern))
-                              && (excludePattern == null || !NativeImports.PathMatchSpec(normalizedFile, excludePattern))
+                        && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
+                        && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
                         select file;
 
                     validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings));

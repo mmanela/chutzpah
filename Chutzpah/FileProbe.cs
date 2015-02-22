@@ -157,8 +157,8 @@ namespace Chutzpah
 
             foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
-                var includePattern = NormalizeFilePath(pathSettings.Include);
-                var excludePattern = NormalizeFilePath(pathSettings.Exclude);
+                var includePatterns = pathSettings.Includes.Select(x => NormalizeFilePath(x)).ToList();
+                var excludePatterns = pathSettings.Excludes.Select(x => NormalizeFilePath(x)).ToList();
 
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
@@ -181,10 +181,10 @@ namespace Chutzpah
 
                     var childFiles = fileSystem.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
-                                     let normlizedFile = NormalizeFilePath(file)
-                                     where !IsTemporaryChutzpahFile(normlizedFile)
-                                             && (includePattern == null || NativeImports.PathMatchSpec(normlizedFile, includePattern))
-                                             && (excludePattern == null || !NativeImports.PathMatchSpec(normlizedFile, excludePattern))
+                                     let normalizedFile = NormalizeFilePath(file)
+                                     where !IsTemporaryChutzpahFile(normalizedFile)
+                                             && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
+                                             && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
                                      select file;
 
 

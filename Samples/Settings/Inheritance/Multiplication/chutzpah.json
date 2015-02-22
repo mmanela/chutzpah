@@ -4,10 +4,10 @@
 
 	// These reference settings are appended to the parent reference settings
     "References" : [
-        {"Include": "*mult.js","Exclude": "*Test.js" }
+        {"Includes": ["*mult.js"],"Excludes": ["*Test.js"] }
     ],
     "Tests" : [
-      {"Include": "*multTest.js"}
+      {"Includes": ["*multTest.js"]}
     ],    
 
     // When this transform gets inherited the path will still be relative to the file it was defined in

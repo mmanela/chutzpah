@@ -7,9 +7,9 @@
     "Arguments": "-NoProfile %chutzpahsettingsdir%\\compile.ps1"
    },
   "References": [
-    {"Include": "*/src/*.ts", "Exclude": "*/src/*.d.ts" }
+    {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }
   ],
   "Tests": [
-    { "Include": "*/test/*.ts", "Exclude": "*/test/*.d.ts" }
+    { "Includes": ["*/test/*.ts"], "Excludes": ["*/test/*.d.ts"] }
   ]
 }

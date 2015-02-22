@@ -927,6 +927,17 @@ namespace Chutzpah.Facts.Integration
             }
 
             [Fact]
+            public void will_use_tests_setting_with_multiple_include_excludes_to_filter_tests()
+            {
+                var testRunner = TestRunner.Create();
+                var result = testRunner.RunTests(@"JS\Test\TestSettings\TestPathsMultipleIncludeExclude", new ExceptionThrowingRunnerCallback());
+
+                Assert.Equal(0, result.FailedCount);
+                Assert.Equal(4, result.PassedCount);
+                Assert.Equal(4, result.TotalCount);
+            }
+
+            [Fact]
             public void will_use_tests_setting_to_discover_tests()
             {
                 var testRunner = TestRunner.Create();

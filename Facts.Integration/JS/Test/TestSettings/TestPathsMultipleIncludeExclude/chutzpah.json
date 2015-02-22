@@ -1,0 +1,5 @@
+﻿{
+    "Tests": [
+        { "Includes": [ "*test1*", "*Dir1/*.js", "*Dir2/*.js", "*Dir3/test.js" ], "Excludes": [ "*Dir1/test4.js" ] }
+    ]
+}

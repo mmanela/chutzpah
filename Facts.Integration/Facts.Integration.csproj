@@ -366,6 +366,24 @@
     <Content Include="JS\Test\requirejs\WithSettings\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\Dir1\test3.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\Dir1\test4.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\Dir2\test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\Dir3\test.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\test1.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\test2.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="JS\Test\TestSettings\TestPaths\Dir1\test4.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -472,6 +490,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="JS\Test\TestSettings\Batching\Ambiguous1\chutzpah.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="JS\Test\TestSettings\TestPathsMultipleIncludeExclude\chutzpah.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="JS\Test\TypeScript\basic-mocha-bdd.ts">

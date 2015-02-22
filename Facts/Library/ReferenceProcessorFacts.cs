@@ -615,6 +615,37 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
+            public void Will_exclude_files_from_folder_from_settings_referenced_files_if_match_excludes_path_and_dont_match_include()
+            {
+                var processor = new TestableReferenceProcessor();
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var settings = new ChutzpahTestSettingsFile { };
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"c:\dir\here")).Returns<string>(null);
+                processor.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\dir\here")).Returns(@"c:\dir\here");
+                processor.Mock<IFileSystemWrapper>()
+                    .Setup(x => x.GetFiles(@"c:\dir\here", "*.*", SearchOption.AllDirectories))
+                    .Returns(new[] { @"path\parentFile.js", @"other\newFile.js", @"path\sub\childFile.js" });
+                settings.SettingsFileDirectory = @"c:\dir";
+                settings.References.Add(
+                    new SettingsFileReference
+                    {
+                        Path = "here",
+                        Includes = new[] { @"path\*", @"other\*", },
+                        Excludes = new []{ @"*path\pare*", @"other\new*" },
+                        SettingsFileDirectory = settings.SettingsFileDirectory
+                    });
+                var text = (@"some javascript code");
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
+
+                Assert.True(referenceFiles.Any(x => x.Path == @"path\sub\childFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"path\parentFile.js"));
+                Assert.False(referenceFiles.Any(x => x.Path == @"other\newFile.js"));
+            }
+
+            [Fact]
             public void Will_normlize_paths_for_case_and_slashes_for_path_include_exclude()
             {
                 var processor = new TestableReferenceProcessor();

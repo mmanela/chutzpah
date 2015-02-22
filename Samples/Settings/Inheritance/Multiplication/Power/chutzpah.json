@@ -4,10 +4,10 @@
 
 	// These reference settings are appended to the parent reference settings
     "References" : [
-        {"Include": "*.js","Exclude": "*Test.js" }
+        {"Includes": ["*.js"],"Excludes": ["*Test.js"] }
     ],
     "Tests" : [
-      {"Include": "*Test.js"}
+      {"Includes": ["*Test.js"]}
     ],
 
     "Transforms": [

@@ -587,6 +587,45 @@ namespace Chutzpah.Facts
                 Assert.Contains(@"somefolder\src\d.ts", fullPaths);
             }
 
+            public void Will_return_paths_from_folder_which_match_includes_excludes_patterns()
+            {
+                var probe = new TestableFileProbe();
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFullPath(It.IsAny<string>())).Returns<string>(x => x);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                probe.Mock<IFileSystemWrapper>().Setup(x => x.GetFiles(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SearchOption>()))
+                    .Returns(new[]
+                    {
+                        "somefolder/src/a.js",
+                        "somefolder/src/B.JS",
+                        "somefolder2/src/c.ts",
+                        "somefolder2/src/c.js",
+                        "somefolder\\src\\d.ts",
+                        "somefolder/e.ts"
+                    });
+                var setting = new ChutzpahTestSettingsFile
+                {
+                    SettingsFileDirectory = "dir",
+                    Tests = new List<SettingsFileTestPath>
+                    {
+                        new SettingsFileTestPath
+                        {
+                            Path = "someFolder",
+                            Includes = new []{"*somefolder/src/*", "*somefolder2/*"},
+                            Excludes = new []{"*somefolder/*.js","*somefolder2/*.js"},
+                            SettingsFileDirectory = "dir"
+                        }
+                    }
+                };
+                var res = probe.ClassUnderTest.FindScriptFiles(setting);
+
+                Assert.Equal(2, res.Count());
+                var fullPaths = res.Select(x => x.FullPath);
+                Assert.Contains(@"somefolder2/src/c.ts", fullPaths);
+                Assert.Contains(@"somefolder\src\d.ts", fullPaths);
+            }
+
+
 
         }
     }
