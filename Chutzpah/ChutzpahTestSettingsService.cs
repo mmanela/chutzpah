@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
@@ -84,13 +85,15 @@ namespace Chutzpah
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
-                    ResolveTestHarnessDirectory(settings);
+                    var chutzpahVariables = BuildChutzpahReplacementVariables(settings);
+
+                    ResolveTestHarnessDirectory(settings, chutzpahVariables);
 
                     ResolveAMDBaseUrl(settings);
 
-                    ResolveBatchCompileConfiguration(settings);
+                    ResolveBatchCompileConfiguration(settings, chutzpahVariables);
 
-                    SetSettingsFileDirectoryOnRelativePathSettings(settings);
+                    ProcessPathSettings(settings, chutzpahVariables);
 
                     if (settings.InheritFromParent)
                     {
@@ -122,13 +125,13 @@ namespace Chutzpah
             ChutzpahSettingsFileCache.Clear();
         }
 
-        private void ResolveTestHarnessDirectory(ChutzpahTestSettingsFile settings)
+        private void ResolveTestHarnessDirectory(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.TestHarnessLocationMode == TestHarnessLocationMode.Custom)
             {
                 if (settings.TestHarnessDirectory != null)
                 {
-                    string absoluteFilePath = ResolveFolderPath(settings, settings.TestHarnessDirectory);
+                    string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.TestHarnessDirectory));
                     settings.TestHarnessDirectory = absoluteFilePath;
                 }
 
@@ -155,32 +158,56 @@ namespace Chutzpah
             }
         }
 
-        private void SetSettingsFileDirectoryOnRelativePathSettings(ChutzpahTestSettingsFile settings)
+        private void ProcessPathSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
+            var i = 0;
             foreach (var test in settings.Tests)
             {
                 test.SettingsFileDirectory = settings.SettingsFileDirectory;
+                test.Path = ExpandVariable(chutzpahVariables, test.Path);
+
+
+                for (i = 0; i < test.Includes.Count; i++)
+                {
+                    test.Includes[i] = ExpandVariable(chutzpahVariables, test.Includes[i]);
+                } 
+                
+                for (i = 0; i < test.Excludes.Count; i++)
+                {
+                    test.Excludes[i] = ExpandVariable(chutzpahVariables, test.Excludes[i]);
+                }
             }
 
             foreach (var reference in settings.References)
             {
                 reference.SettingsFileDirectory = settings.SettingsFileDirectory;
+                reference.Path = ExpandVariable(chutzpahVariables, reference.Path);
+
+                for (i = 0; i < reference.Includes.Count; i++)
+                {
+                    reference.Includes[i] = ExpandVariable(chutzpahVariables, reference.Includes[i]);
+                }
+
+                for (i = 0; i < reference.Excludes.Count; i++)
+                {
+                    reference.Excludes[i] = ExpandVariable(chutzpahVariables, reference.Excludes[i]);
+                }
             }
 
             foreach (var transform in settings.Transforms)
             {
                 transform.SettingsFileDirectory = settings.SettingsFileDirectory;
+                transform.Path = ExpandVariable(chutzpahVariables, transform.Path);
             }
         }
 
-        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings)
+        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings, IDictionary<string,string> chutzpahVariables)
         {
             if (settings.Compile != null)
             {
                 settings.Compile.SettingsFileDirectory = settings.SettingsFileDirectory;
                 settings.Compile.Extensions = settings.Compile.Extensions ?? new List<string>();
 
-                var compileVariables = BuildCompileVariables(settings);
 
                 // If the mode is executable then set its properties
                 if (settings.Compile.Mode == BatchCompileMode.Executable)
@@ -189,8 +216,8 @@ namespace Chutzpah
                     {
                         throw new ArgumentException("Executable path must be passed for compile setting");
                     }
-                    settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(compileVariables, settings.Compile.Executable ?? ""));
-                    settings.Compile.Arguments = ExpandVariable(compileVariables, settings.Compile.Arguments ?? "");
+                    settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(chutzpahVariables, settings.Compile.Executable));
+                    settings.Compile.Arguments = ExpandVariable(chutzpahVariables, settings.Compile.Arguments);
                     settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
 
                     // Default timeout to 5 minutes if missing
@@ -199,7 +226,7 @@ namespace Chutzpah
 
                 // These settings might be needed in either External
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
-                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(compileVariables, settings.Compile.OutDirectory ?? ""), true);
+                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.Compile.OutDirectory), true);
 
             }
         }
@@ -230,7 +257,7 @@ namespace Chutzpah
 
         private string ExpandVariable(IDictionary<string, string> chutzpahCompileVariables, string str)
         {
-            return ExpandChutzpahVariables(chutzpahCompileVariables, Environment.ExpandEnvironmentVariables(str));
+            return ExpandChutzpahVariables(chutzpahCompileVariables, Environment.ExpandEnvironmentVariables(str ?? ""));
         }
 
         private string ExpandChutzpahVariables(IDictionary<string, string> chutzpahCompileVariables, string str)
@@ -244,7 +271,7 @@ namespace Chutzpah
         }
 
 
-        private IDictionary<string, string> BuildCompileVariables(ChutzpahTestSettingsFile settings)
+        private IDictionary<string, string> BuildChutzpahReplacementVariables(ChutzpahTestSettingsFile settings)
         {
             IDictionary<string, string> chutzpahCompileVariables = new Dictionary<string, string>();
 

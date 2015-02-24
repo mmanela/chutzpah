@@ -41,12 +41,12 @@ namespace Chutzpah.Models
         /// <summary>
         /// Glob expressions of the paths to include. 
         /// </summary>
-        public ICollection<string> Includes { get; set; }
+        public IList<string> Includes { get; set; }
 
         /// <summary>
         /// Glob expressions of the paths to exclude. 
         /// </summary>
-        public ICollection<string> Excludes { get; set; }
+        public IList<string> Excludes { get; set; }
 
 
 

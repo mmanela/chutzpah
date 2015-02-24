@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Chutzpah.Extensions;
@@ -315,7 +316,6 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             ChutzpahTracer.TraceInformation("Begin GetTestContainers");
             logger.Log("GetTestContainers() are called", "ChutzpahTestContainerDiscoverer", LogType.Information);
-
 
             ChutzpahTracingHelper.Toggle(settingsMapper.Settings.EnabledTracing);
 

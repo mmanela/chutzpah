@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using Chutzpah.Models;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
