@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -6,11 +8,14 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
+
     public class ChutzpahAdapterSettings : TestRunSettings
     {
         public const string SettingsName = "ChutzpahAdapterSettings";
 
         private static readonly XmlSerializer serializer = new XmlSerializer(typeof(ChutzpahAdapterSettings));
+
+        private ChutzpahSettingsFileEnvironments environmentsWrapper = null;
 
         public ChutzpahAdapterSettings() : base(SettingsName)
         {
@@ -18,6 +23,7 @@ namespace Chutzpah.VS2012.TestAdapter
             TestingMode = TestingMode.JavaScript;
             MaxDegreeOfParallelism = 1;
             EnabledTracing = false;
+            ChutzpahSettingsFileEnvironments = new Collection<ChutzpahSettingsFileEnvironment>();
         }
 
         /// <summary>
@@ -39,6 +45,22 @@ namespace Chutzpah.VS2012.TestAdapter
         /// Determines if chutzpah tracing is enabled
         /// </summary>
         public bool EnabledTracing { get; set; }
+
+        public Collection<ChutzpahSettingsFileEnvironment> ChutzpahSettingsFileEnvironments { get; set; }
+
+        [XmlIgnore]
+        public ChutzpahSettingsFileEnvironments ChutzpahSettingsFileEnvironmentsWrapper
+        {
+            get
+            {
+                if (environmentsWrapper == null)
+                {
+                    environmentsWrapper = new ChutzpahSettingsFileEnvironments(ChutzpahSettingsFileEnvironments);
+                }
+
+                return environmentsWrapper;
+            }
+        }
 
         public override XmlElement ToXml()
         {

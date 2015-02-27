@@ -17,7 +17,7 @@ namespace Chutzpah
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
-        ChutzpahTestSettingsFile FindSettingsFile(string directory);
+        ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments = null);
 
         void ClearCache();
     }
@@ -49,12 +49,12 @@ namespace Chutzpah
         /// <param name="directory"></param>
         /// <returns></returns>
         /// 
-        public ChutzpahTestSettingsFile FindSettingsFile(string directory)
+        public ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments = null)
         {
-            return FindSettingsFile(directory, mergeResultWithDefaultSettings: true);
+            return FindSettingsFile(directory, environments, mergeResultWithDefaultSettings: true);
         }
 
-        private ChutzpahTestSettingsFile FindSettingsFile(string directory, bool mergeResultWithDefaultSettings = true)
+        private ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments, bool mergeResultWithDefaultSettings = true)
         {
             if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
@@ -85,7 +85,7 @@ namespace Chutzpah
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
-                    var chutzpahVariables = BuildChutzpahReplacementVariables(settings);
+                    var chutzpahVariables = BuildChutzpahReplacementVariables(testSettingsFilePath, environments, settings);
 
                     ResolveTestHarnessDirectory(settings, chutzpahVariables);
 
@@ -97,7 +97,7 @@ namespace Chutzpah
 
                     if (settings.InheritFromParent)
                     {
-                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), mergeResultWithDefaultSettings: false);
+                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), environments, mergeResultWithDefaultSettings: false);
                         if (!parentSettingsFile.IsDefaultSettings)
                         {
                             settings.InheritFrom(parentSettingsFile);
@@ -271,28 +271,38 @@ namespace Chutzpah
         }
 
 
-        private IDictionary<string, string> BuildChutzpahReplacementVariables(ChutzpahTestSettingsFile settings)
+        private IDictionary<string, string> BuildChutzpahReplacementVariables(string settingsFilePath, ChutzpahSettingsFileEnvironments environments, ChutzpahTestSettingsFile settings)
         {
-            IDictionary<string, string> chutzpahCompileVariables = new Dictionary<string, string>();
+            IDictionary<string, string> chutzpahVariables = new Dictionary<string, string>();
 
             var clrDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
             var msbuildExe = Path.Combine(clrDir, "msbuild.exe");
             var powershellExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"windowspowershell\v1.0\powershell.exe");
 
 
-            AddCompileVariable(chutzpahCompileVariables, "chutzpahsettingsdir", settings.SettingsFileDirectory);
+            AddChutzpahVariable(chutzpahVariables, "chutzpahsettingsdir", settings.SettingsFileDirectory);
 
-            AddCompileVariable(chutzpahCompileVariables, "clrdir", clrDir);
-            AddCompileVariable(chutzpahCompileVariables, "msbuildexe", msbuildExe);
-            AddCompileVariable(chutzpahCompileVariables, "powershellexe", powershellExe);
+            AddChutzpahVariable(chutzpahVariables, "clrdir", clrDir);
+            AddChutzpahVariable(chutzpahVariables, "msbuildexe", msbuildExe);
+            AddChutzpahVariable(chutzpahVariables, "powershellexe", powershellExe);
 
             // This is not needed but it is a nice alias
-            AddCompileVariable(chutzpahCompileVariables, "cmdexe", Environment.ExpandEnvironmentVariables("%comspec%"));
+            AddChutzpahVariable(chutzpahVariables, "cmdexe", Environment.ExpandEnvironmentVariables("%comspec%"));
 
-            return chutzpahCompileVariables;
+            if (environments != null)
+            {
+                // See if we have a settingsfileenvironment set and if so add its properties as chutzpah settings file variables
+                var props = environments.GetPropertiesForEnvironment(settingsFilePath);
+                foreach (var prop in props)
+                {
+                    AddChutzpahVariable(chutzpahVariables, prop.Name, prop.Value);
+                }
+            }
+
+            return chutzpahVariables;
         }
 
-        private void AddCompileVariable(IDictionary<string, string> chutzpahCompileVariables, string name, string value)
+        private void AddChutzpahVariable(IDictionary<string, string> chutzpahCompileVariables, string name, string value)
         {
             name = string.Format("%{0}%", name);
             chutzpahCompileVariables[name] = value;

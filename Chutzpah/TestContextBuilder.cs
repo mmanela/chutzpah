@@ -109,7 +109,7 @@ namespace Chutzpah
             string firstFilePath = files.First().FullPath;
 
             var firstTestFileDirectory = Path.GetDirectoryName(firstFilePath);
-            var chutzpahTestSettings = settingsService.FindSettingsFile(firstTestFileDirectory);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(firstTestFileDirectory, options.ChutzpahSettingsFileEnvironments);
 
             // Exclude any files that are not included based on the settings file
             var testedPaths = files.Select(f => new { File = f, IsIncluded = IsTestPathIncluded(f.FullPath, chutzpahTestSettings) }).ToList();
@@ -216,7 +216,7 @@ namespace Chutzpah
             return context != null;
         }
 
-        public bool IsTestFile(string file)
+        public bool IsTestFile(string file, ChutzpahSettingsFileEnvironments environments = null)
         {
             ChutzpahTracer.TraceInformation("Determining if '{0}' might be a test file", file);
             if (string.IsNullOrWhiteSpace(file))
@@ -235,7 +235,7 @@ namespace Chutzpah
             }
 
             var testFileDirectory = Path.GetDirectoryName(testFilePath);
-            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory);
+            var chutzpahTestSettings = settingsService.FindSettingsFile(testFileDirectory, environments);
 
             if (!IsTestPathIncluded(testFilePath, chutzpahTestSettings))
             {

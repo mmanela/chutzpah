@@ -30,9 +30,6 @@ namespace Chutzpah
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
         public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}.{1}";
 
-        public const string ChutzpahCompilerCacheFolder = ChutzpahTemporaryFilePrefix + "cache";
-        public const string ChutzpahCompilerCacheFileName = ChutzpahTemporaryFilePrefix + "cache";
-
         public const string CoverageJsonFileName = ChutzpahTemporaryFilePrefix + "coverage.json";
         public const string CoverageHtmlFileName = ChutzpahTemporaryFilePrefix + "coverage.html";
 

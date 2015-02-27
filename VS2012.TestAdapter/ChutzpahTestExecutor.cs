@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Chutzpah.Callbacks;
 using Chutzpah.Coverage;
+using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -40,6 +41,7 @@ namespace Chutzpah.VS2012.TestAdapter
                     TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
                     TestingMode = settings.TestingMode,
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
+                    ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };
 
             testOptions.CoverageOptions.Enabled = runContext.IsDataCollectionEnabled;
@@ -51,7 +53,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         }
 
-        public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        public void RunTests(IEnumerable<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             // We'll just punt and run everything in each file that contains the selected tests
             var sources = tests.Select(test => test.Source).Distinct();

@@ -84,9 +84,9 @@ namespace Chutzpah
             return GetTestContext(testFile, new TestOptions());
         }
 
-        public bool IsTestFile(string testFile)
+        public bool IsTestFile(string testFile, ChutzpahSettingsFileEnvironments environments)
         {
-            return testContextBuilder.IsTestFile(testFile);
+            return testContextBuilder.IsTestFile(testFile, environments);
         }
 
         public IEnumerable<TestCase> DiscoverTests(string testPath)
@@ -182,7 +182,7 @@ namespace Chutzpah
             // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
             // If so, we keep those tests in a group together to be used in one context
             // Otherwise, we put each file in its own test group so each get their own context
-            var testGroups = BuildTestingGroups(scriptPaths);
+            var testGroups = BuildTestingGroups(scriptPaths, options);
             
             // Build test contexts in parallel given a list of files each
             BuildTestContexts(options, testGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
@@ -223,13 +223,13 @@ namespace Chutzpah
             return overallSummary;
         }
 
-        private List<List<PathInfo>> BuildTestingGroups(IEnumerable<PathInfo> scriptPaths)
+        private List<List<PathInfo>> BuildTestingGroups(IEnumerable<PathInfo> scriptPaths, TestOptions testOptions)
         {
             // Find all chutzpah.json files for the input files
             // Then group files by their respective settings file
             var testGroups = new List<List<PathInfo>>();
             var fileSettingGroups = from path in scriptPaths
-                                    let settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(path.FullPath))
+                                    let settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(path.FullPath), testOptions.ChutzpahSettingsFileEnvironments)
                                     group path by settingsFile;
 
             // Scan over the grouped test files and if this file is set up for batching we add those files
@@ -449,7 +449,7 @@ namespace Chutzpah
 
                     // The FindSettingsFile api takes the directory of the file since it caches this for use in later test runs
                     // this could be cleaned up to have two APIS one which lets you give the direct file
-                    var settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(chutzpahJsonPath));
+                    var settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(chutzpahJsonPath), options.ChutzpahSettingsFileEnvironments);
                     var pathInfos = fileProbe.FindScriptFiles(settingsFile);
                     scriptPaths = scriptPaths.Concat(pathInfos);
                 }

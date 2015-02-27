@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Chutzpah.Models;
 
 namespace Chutzpah
@@ -18,6 +19,8 @@ namespace Chutzpah
             MaxDegreeOfParallelism = defaultParallelism;
             CoverageOptions = new CoverageOptions();
             TestExecutionMode = TestExecutionMode.Execution;
+
+            ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments();
 
         }
 
@@ -74,5 +77,11 @@ namespace Chutzpah
         /// Contains options for code coverage collection.
         /// </summary>
         public CoverageOptions CoverageOptions { get; set; }
+
+        /// <summary>
+        /// Additional per Chutzpah.json properties that can be used when resolved paths in
+        /// the settings file
+        /// </summary>
+        public ChutzpahSettingsFileEnvironments ChutzpahSettingsFileEnvironments { get; set; }
     }
 }

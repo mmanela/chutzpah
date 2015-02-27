@@ -30,7 +30,7 @@ namespace Chutzpah.Facts
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{new TestFileSummary("somePath")}));
 
                 Mock<IChutzpahTestSettingsService>()
-                    .Setup(x => x.FindSettingsFile(It.IsAny<string>()))
+                    .Setup(x => x.FindSettingsFile(It.IsAny<string>(), It.IsAny<ChutzpahSettingsFileEnvironments>()))
                     .Returns(new ChutzpahTestSettingsFile().InheritFromDefault());
             }
 
@@ -118,9 +118,9 @@ namespace Chutzpah.Facts
             public void Will_true_if_test_file()
             {
                 var runner = new TestableTestRunner();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js")).Returns(true);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js", null)).Returns(true);
 
-                var result = runner.ClassUnderTest.IsTestFile("a.js");
+                var result = runner.ClassUnderTest.IsTestFile("a.js", null);
 
                 Assert.True(result);
             }
@@ -129,9 +129,9 @@ namespace Chutzpah.Facts
             public void Will_false_if_not_test_file()
             {
                 var runner = new TestableTestRunner();
-                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js")).Returns(false);
+                runner.Mock<ITestContextBuilder>().Setup(x => x.IsTestFile("a.js", null)).Returns(false);
 
-                var result = runner.ClassUnderTest.IsTestFile("a.js");
+                var result = runner.ClassUnderTest.IsTestFile("a.js", null);
 
                 Assert.False(result);
             }
@@ -436,8 +436,8 @@ namespace Chutzpah.Facts
                     });
                 var settingsForPath = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path", EnableTestFileBatching = true }.InheritFromDefault();
                 var settingsForPath2 = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path2", EnableTestFileBatching = true }.InheritFromDefault();
-                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path")).Returns(settingsForPath);
-                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path2")).Returns(settingsForPath2);
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path", It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath);
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path2", It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath2);
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" });
 

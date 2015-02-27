@@ -70,6 +70,7 @@
     <Compile Include="Callbacks\ParallelRunnerCallbackAdapter.cs" />
     <Compile Include="ChutzpahContainer.cs" />
     <Compile Include="ChutzpahTestSettingsService.cs" />
+    <Compile Include="ChutzpahMsBuildProps.cs" />
     <Compile Include="CoverageOptions.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
+    <Compile Include="Models\ChutzpahSettingsEnvironment.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
     <Compile Include="Models\TransformConfig.cs" />

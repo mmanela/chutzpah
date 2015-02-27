@@ -109,7 +109,6 @@ namespace Chutzpah.Facts.Library.Models
         public void Will_set_compile_configuration_paths_based_relative_to_settings_file_directory()
         {
             var service = new TestableChutzpahTestSettingsService();
-            service.ClassUnderTest.ClearCache();
             var settings = new ChutzpahTestSettingsFile
             {
                 Compile = new BatchCompileConfiguration
@@ -139,7 +138,6 @@ namespace Chutzpah.Facts.Library.Models
         public void Will_create_compile_out_dir_if_does_not_exist()
         {
             var service = new TestableChutzpahTestSettingsService();
-            service.ClassUnderTest.ClearCache();
             var settings = new ChutzpahTestSettingsFile
             {
                 Compile = new BatchCompileConfiguration
@@ -171,7 +169,6 @@ namespace Chutzpah.Facts.Library.Models
         public void Will_expand_chutzpah_and_default_environment_variables(string variable, bool result)
         {
             var service = new TestableChutzpahTestSettingsService();
-            service.ClassUnderTest.ClearCache();
             var varStr = string.Format("%{0}%", variable);
             var settings = new ChutzpahTestSettingsFile
             {
@@ -190,6 +187,43 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(result, settings.Compile.Executable.Contains(varStr));
             Assert.Equal(result, settings.Compile.Arguments.Contains(varStr));
             Assert.Equal(result, settings.Compile.OutDirectory.Contains(varStr));
+        }
+
+        [Fact]
+        public void Will_expand_variables_from_passed_in_environment()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            var environment = new ChutzpahSettingsFileEnvironment();
+            environment.Path = @"C:\settingsDir7\";
+            environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty { Name = "SomeName", Value = "SomeValue" });
+            var varStr = "%SomeName%";
+            var settings = new ChutzpahTestSettingsFile
+            {
+                Compile = new BatchCompileConfiguration
+                {
+                    Executable = string.Format("path {0} ok", varStr),
+                    Arguments = string.Format("path {0} ok", varStr),
+                    OutDirectory = string.Format("path {0} ok", varStr),
+                },
+                References = new []{new SettingsFileReference{ Path = varStr, Include = varStr, Exclude = varStr}},
+                Tests = new []{new SettingsFileTestPath{ Path = varStr, Include = varStr, Exclude = varStr}},
+                Transforms = new []{ new TransformConfig{ Path = varStr}}
+            };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFile("dir7", new ChutzpahSettingsFileEnvironments(new []{environment}));
+
+            Assert.True(settings.Compile.Executable.Contains("SomeValue"));
+            Assert.True(settings.Compile.Arguments.Contains("SomeValue"));
+            Assert.True(settings.Compile.OutDirectory.Contains("SomeValue"));
+            Assert.True(settings.References.ElementAt(0).Path.Contains("SomeValue"));
+            Assert.True(settings.References.ElementAt(0).Includes[0].Contains("SomeValue"));
+            Assert.True(settings.References.ElementAt(0).Excludes[0].Contains("SomeValue"));
+            Assert.True(settings.Tests.ElementAt(0).Path.Contains("SomeValue"));
+            Assert.True(settings.Tests.ElementAt(0).Includes[0].Contains("SomeValue"));
+            Assert.True(settings.Tests.ElementAt(0).Excludes[0].Contains("SomeValue"));
+            Assert.True(settings.Transforms.ElementAt(0).Path.Contains("SomeValue"));
         }
 
         [Fact]

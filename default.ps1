@@ -23,6 +23,10 @@ task Set-Version {
   if($arg1) {
     $v = $arg1
     $global:version = $v + ".0"
+    
+    if($arg2) {
+      $global:isBeta = $true
+    }
   }
   else {
     $vtag = git describe --abbrev=0 --tags
@@ -142,7 +146,14 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $nugetDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     $v = new-object -TypeName System.Version -ArgumentList $global:version
-    regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $v.ToString(3)
+    
+    
+    $vStr = $v.ToString(3)
+    if($global:isBeta) {
+      $vStr += "-beta"
+    }
+    
+    regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $vStr
     exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
 }
 

@@ -79,6 +79,7 @@
     <Compile Include="Exceptions\ExceptionFacts.cs" />
     <Compile Include="Library\BatchCompilerServiceFacts.cs" />
     <Compile Include="Library\ChutzpahContainerFacts.cs" />
+    <Compile Include="Library\ChutzpahSettingsFileEnvironmentFacts.cs" />
     <Compile Include="Library\Coverage\BlanketJsCoverageEngineFacts.cs" />
     <Compile Include="Library\Coverage\SourceMapDotNetLineCoverageMapperFacts.cs" />
     <Compile Include="Library\MochaLineNumberProcessorFacts.cs" />

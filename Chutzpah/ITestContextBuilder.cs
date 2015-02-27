@@ -16,7 +16,7 @@ namespace Chutzpah
         bool TryBuildContext(IEnumerable<PathInfo> files, TestOptions options, out TestContext context);
         bool TryBuildContext(IEnumerable<string> files, TestOptions options, out TestContext context);
 
-        bool IsTestFile(string file);
+        bool IsTestFile(string file, ChutzpahSettingsFileEnvironments environments = null);
         void CleanupContext(TestContext context);
     }
 }

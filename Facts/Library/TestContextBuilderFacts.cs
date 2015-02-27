@@ -38,7 +38,7 @@ namespace Chutzpah.Facts
                 {
                     SettingsFileDirectory = "settingsPath"
                 }.InheritFromDefault();
-                Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(It.IsAny<string>())).Returns(ChutzpahTestSettingsFile);
+                Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(It.IsAny<string>(), It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(ChutzpahTestSettingsFile);
 
 
                 Mock<IReferenceProcessor>()
@@ -61,7 +61,7 @@ namespace Chutzpah.Facts
             {
                 var creator = new TestableTestContextBuilder();
 
-                var result = creator.ClassUnderTest.IsTestFile(null);
+                var result = creator.ClassUnderTest.IsTestFile(null, null);
 
                 Assert.False(result);
             }

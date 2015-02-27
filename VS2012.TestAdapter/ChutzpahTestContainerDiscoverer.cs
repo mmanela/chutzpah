@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +11,7 @@ using Chutzpah.Models;
 using Chutzpah.VS.Common;
 using Chutzpah.VS11.EventWatchers;
 using Chutzpah.VS11.EventWatchers.EventArgs;
+using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -46,6 +48,8 @@ namespace Chutzpah.VS2012.TestAdapter
         private ISolutionEventsListener solutionListener;
         private ITestFilesUpdateWatcher testFilesUpdateWatcher;
         private ITestFileAddRemoveListener testFilesAddRemoveListener;
+
+        private object sync = new object();
 
         /// <summary>
         /// This is set to true one initial plugin load and then reset to false when a 
@@ -170,11 +174,13 @@ namespace Chutzpah.VS2012.TestAdapter
                 if (e.ChangedReason == SolutionChangedReason.Load)
                 {
                     ChutzpahTracer.TraceInformation("Project Loaded: '{0}'", projectPath);
+                    UpdateChutzpahEnvironmentForProject(projectPath);
                     UpdateTestContainersAndFileWatchers(files, true);
                 }
                 else if (e.ChangedReason == SolutionChangedReason.Unload)
                 {
                     ChutzpahTracer.TraceInformation("Project Unloaded: '{0}'", projectPath);
+                    RemoveChutzpahEnvironmentForProject(projectPath);
                     UpdateTestContainersAndFileWatchers(files, false);
 
                 }
@@ -371,6 +377,7 @@ namespace Chutzpah.VS2012.TestAdapter
         private IEnumerable<TestFileCandidate> FindPotentialTestFiles(IVsProject project)
         {
             string projectPath = VsSolutionHelper.GetProjectPath(project);
+            UpdateChutzpahEnvironmentForProject(projectPath);
 
             try
             {
@@ -391,6 +398,51 @@ namespace Chutzpah.VS2012.TestAdapter
             }
         }
 
+        private void RemoveChutzpahEnvironmentForProject(string projectPath)
+        {
+            lock (sync)
+            {
+                var dirPath = Path.GetDirectoryName(projectPath);
+                var envProps = settingsMapper.Settings.ChutzpahSettingsFileEnvironments
+                                             .FirstOrDefault(x => x.Path.TrimEnd('/', '\\').Equals(dirPath, StringComparison.OrdinalIgnoreCase));
+
+                settingsMapper.Settings.ChutzpahSettingsFileEnvironments.Remove(envProps);
+            }
+
+        }
+
+        private void UpdateChutzpahEnvironmentForProject(string projectPath)
+        {
+            var buildProject = ProjectCollection.GlobalProjectCollection.LoadedProjects
+                                                .FirstOrDefault(x => x.FullPath.Equals(projectPath, StringComparison.OrdinalIgnoreCase));
+
+            var chutzpahEnvProps = new Collection<ChutzpahSettingsFileEnvironmentProperty>();
+
+            if (buildProject != null)
+            {
+                var dirPath = Path.GetDirectoryName(projectPath);
+                foreach (var prop in ChutzpahMsBuildProps.GetProps())
+                {
+                    chutzpahEnvProps.Add(new ChutzpahSettingsFileEnvironmentProperty { Name = prop, Value = buildProject.GetPropertyValue(prop) });
+                }
+
+                lock (sync)
+                {
+                    var envProps = settingsMapper.Settings.ChutzpahSettingsFileEnvironments
+                                                          .FirstOrDefault(x => x.Path.TrimEnd('/', '\\').Equals(dirPath, StringComparison.OrdinalIgnoreCase));
+                    if (envProps == null)
+                    {
+                        envProps = new ChutzpahSettingsFileEnvironment { Path = dirPath };
+
+                        settingsMapper.Settings.ChutzpahSettingsFileEnvironments.Add(envProps);
+
+                    }
+
+                    envProps.Properties = chutzpahEnvProps;
+                }
+            }
+        }
+
 
         private static bool HasTestFileExtension(string path)
         {
@@ -401,7 +453,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             try
             {
-                return HasTestFileExtension(path) && testRunner.IsTestFile(path);
+                return HasTestFileExtension(path) && testRunner.IsTestFile(path, settingsMapper.Settings.ChutzpahSettingsFileEnvironmentsWrapper);
             }
             catch (IOException e)
             {
