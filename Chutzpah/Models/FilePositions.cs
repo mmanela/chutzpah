@@ -21,6 +21,20 @@ namespace Chutzpah.Models
             }
         }
 
+        public FilePosition this[string testName]
+        {
+            get
+            {
+                var matches = this.positions.Where(x => x.TestName.Equals(testName.Trim())).ToList();
+                if (matches.Count == 1)
+                {
+                    return matches[0];
+                }
+
+                return null;
+            }
+        }
+
 
         public bool Contains(int index)
         {

@@ -423,7 +423,7 @@ namespace Chutzpah.VS2012.TestAdapter
                 var dirPath = Path.GetDirectoryName(projectPath);
                 foreach (var prop in ChutzpahMsBuildProps.GetProps())
                 {
-                    chutzpahEnvProps.Add(new ChutzpahSettingsFileEnvironmentProperty { Name = prop, Value = buildProject.GetPropertyValue(prop) });
+                    chutzpahEnvProps.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, buildProject.GetPropertyValue(prop)));
                 }
 
                 lock (sync)
@@ -432,7 +432,7 @@ namespace Chutzpah.VS2012.TestAdapter
                                                           .FirstOrDefault(x => x.Path.TrimEnd('/', '\\').Equals(dirPath, StringComparison.OrdinalIgnoreCase));
                     if (envProps == null)
                     {
-                        envProps = new ChutzpahSettingsFileEnvironment { Path = dirPath };
+                        envProps = new ChutzpahSettingsFileEnvironment(dirPath);
 
                         settingsMapper.Settings.ChutzpahSettingsFileEnvironments.Add(envProps);
 

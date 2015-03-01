@@ -17,6 +17,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using DTEConstants = EnvDTE.Constants;
 using Task = System.Threading.Tasks.Task;
 using Chutzpah.Coverage;
+using Microsoft.Build.Evaluation;
+using Chutzpah.Models;
 
 namespace Chutzpah.VisualStudioContextMenu
 {
@@ -46,13 +48,16 @@ namespace Chutzpah.VisualStudioContextMenu
     {
         private DTE2 dte;
         private ITestRunner testRunner;
-        private IChutzpahTestSettingsService chutzpahSettingsService;
         internal ILogger Logger { get; private set; }
         private ITestMethodRunnerCallback runnerCallback;
         private IVsStatusbar statusBar;
         private IProcessHelper processHelper;
         private readonly object syncLock = new object();
         private bool testingInProgress;
+
+        private SolutionEventsListener solutionListener;
+
+        private ChutzpahSettingsFileEnvironments settingsEnvironments = new ChutzpahSettingsFileEnvironments();
 
         public ChutzpahSettings Settings { get; private set; }
 
@@ -86,7 +91,6 @@ namespace Chutzpah.VisualStudioContextMenu
             }
 
             testRunner = TestRunner.Create();
-            chutzpahSettingsService = ChutzpahContainer.Get<IChutzpahTestSettingsService>();
 
             processHelper = new ProcessHelper();
             Logger = new Logger(this);
@@ -119,9 +123,50 @@ namespace Chutzpah.VisualStudioContextMenu
                 mcs.AddCommand(runJsTestCodeCoverageMenuCmd);
 
             }
+
+
+            this.solutionListener = new SolutionEventsListener(this);
+            this.solutionListener.SolutionUnloaded += OnSolutionUnloaded;
+            this.solutionListener.SolutionProjectChanged += OnSolutionProjectChanged;
+            this.solutionListener.StartListeningForChanges();
+                
         }
 
-        private TestFileType GetFileType(ProjectItem item)
+        private void InitializeSettingsFileEnvironments()
+        {
+            var newEnvironments = new ChutzpahSettingsFileEnvironments();
+            var buildProjects = ProjectCollection.GlobalProjectCollection.LoadedProjects
+                                        .Where(x => !x.FullPath.Equals(".user", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var buildProject in buildProjects)
+            {
+                var dirPath = buildProject.DirectoryPath;
+                var environment = new ChutzpahSettingsFileEnvironment(dirPath);
+                foreach (var prop in ChutzpahMsBuildProps.GetProps())
+                {
+                    environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, buildProject.GetPropertyValue(prop)));
+                }
+
+                newEnvironments.AddEnvironment(environment);
+            }
+
+            settingsEnvironments = newEnvironments;
+        }
+
+        private void OnSolutionProjectChanged(object sender, SolutionEventsListenerEventArgs e)
+        {
+            if (e.ChangedReason == SolutionChangedReason.Load || e.ChangedReason == SolutionChangedReason.Unload)
+            {
+                InitializeSettingsFileEnvironments();
+            }
+        }
+
+        private void OnSolutionUnloaded(object sender, EventArgs e)
+        {
+            settingsEnvironments = null;
+        }
+
+        private TestFileType GetFileType(EnvDTE.ProjectItem item)
         {
             if (IsFile(item))
             {
@@ -239,8 +284,8 @@ namespace Chutzpah.VisualStudioContextMenu
                 Array activeItems = SolutionExplorerItems;
                 foreach (UIHierarchyItem item in activeItems)
                 {
-                    var projectItem = (item).Object as ProjectItem;
-                    var projectNode = (item).Object as Project;
+                    var projectItem = (item).Object as EnvDTE.ProjectItem;
+                    var projectNode = (item).Object as EnvDTE.Project;
 
                     TestFileType fileType = TestFileType.Other;
                     if (projectItem != null)
@@ -303,11 +348,18 @@ namespace Chutzpah.VisualStudioContextMenu
                         dte.Documents.SaveAll();
                         var solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
                         testingInProgress = true;
+
                         Task.Factory.StartNew(
                             () =>
                             {
                                 try
                                 {
+                                    // If setttings file environments have not yet been initialized, do so here.
+                                    if (settingsEnvironments == null || settingsEnvironments.Count == 0)
+                                    {
+                                        InitializeSettingsFileEnvironments();
+                                    }
+
                                     var options = new TestOptions
                                                       {
                                                           TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds,
@@ -316,7 +368,8 @@ namespace Chutzpah.VisualStudioContextMenu
                                                           {
                                                               Enabled = withCodeCoverage
                                                           },
-                                                          OpenInBrowser = openInBrowser
+                                                          OpenInBrowser = openInBrowser,
+                                                          ChutzpahSettingsFileEnvironments = settingsEnvironments
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);
  
@@ -346,8 +399,8 @@ namespace Chutzpah.VisualStudioContextMenu
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
-                var projectNode = ((UIHierarchyItem)item).Object as Project;
+                var projectItem = ((UIHierarchyItem)item).Object as EnvDTE.ProjectItem;
+                var projectNode = ((UIHierarchyItem)item).Object as EnvDTE.Project;
 
                 if (projectItem != null)
                 {
@@ -372,7 +425,7 @@ namespace Chutzpah.VisualStudioContextMenu
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var projectItem = ((UIHierarchyItem)item).Object as ProjectItem;
+                var projectItem = ((UIHierarchyItem)item).Object as EnvDTE.ProjectItem;
                 if (projectItem != null)
                 {
                     string filePath = projectItem.FileNames[0];
@@ -405,7 +458,7 @@ namespace Chutzpah.VisualStudioContextMenu
                                       Predicate<TestFileType> validFile,
                                       List<string> filePaths)
         {
-            foreach (ProjectItem projectItem in projectItems)
+            foreach (EnvDTE.ProjectItem projectItem in projectItems)
             {
                 if (IsFile(projectItem))
                 {
@@ -418,7 +471,7 @@ namespace Chutzpah.VisualStudioContextMenu
             }
         }
 
-        private bool IsFile(ProjectItem projectItem)
+        private bool IsFile(EnvDTE.ProjectItem projectItem)
         {
             try
             {
@@ -433,7 +486,7 @@ namespace Chutzpah.VisualStudioContextMenu
         }
 
 
-        private bool IsFolder(ProjectItem projectItem)
+        private bool IsFolder(EnvDTE.ProjectItem projectItem)
         {
             try
             {

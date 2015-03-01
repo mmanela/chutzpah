@@ -393,11 +393,20 @@ namespace Chutzpah
 
         private static void AddLineNumber(ReferencedFile referencedFile, int testIndex, JsTestCase jsTestCase)
         {
-            if (referencedFile != null && referencedFile.FilePositions.Contains(testIndex))
+            if (referencedFile != null)
             {
-                var position = referencedFile.FilePositions[testIndex];
-                jsTestCase.TestCase.Line = position.Line;
-                jsTestCase.TestCase.Column = position.Column;
+                var position = referencedFile.FilePositions[jsTestCase.TestCase.TestName];
+                if (position != null)
+                {
+                    jsTestCase.TestCase.Line = position.Line;
+                    jsTestCase.TestCase.Column = position.Column;
+                }
+                else if (referencedFile.FilePositions.Contains(testIndex))
+                {
+                    position = referencedFile.FilePositions[testIndex];
+                    jsTestCase.TestCase.Line = position.Line;
+                    jsTestCase.TestCase.Column = position.Column;
+                }
             }
         }
     }

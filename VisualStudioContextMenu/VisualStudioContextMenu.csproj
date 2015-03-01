@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <!-- If VisualStudioVersionOverride is set use it here -->
     <VisualStudioVersion Condition="'$(VisualStudioVersionOverride)'!=''">$(VisualStudioVersionOverride)</VisualStudioVersion>
@@ -42,6 +42,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop" />
@@ -137,6 +138,8 @@
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="RunnerCallback\VisualStudioRunnerCallback.cs" />
+    <Compile Include="SolutionEventsListener.cs" />
+    <Compile Include="SolutionEventsListenerEventArgs.cs" />
     <Compile Include="TestFileType.cs" />
     <Compile Include="VisualStudioContextMenuPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

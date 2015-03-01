@@ -193,9 +193,9 @@ namespace Chutzpah.Facts.Library.Models
         public void Will_expand_variables_from_passed_in_environment()
         {
             var service = new TestableChutzpahTestSettingsService();
-            var environment = new ChutzpahSettingsFileEnvironment();
+            var environment = new ChutzpahSettingsFileEnvironment("path");
             environment.Path = @"C:\settingsDir7\";
-            environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty { Name = "SomeName", Value = "SomeValue" });
+            environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty("SomeName", "SomeValue"));
             var varStr = "%SomeName%";
             var settings = new ChutzpahTestSettingsFile
             {

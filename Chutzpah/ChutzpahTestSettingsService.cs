@@ -51,10 +51,29 @@ namespace Chutzpah
         /// 
         public ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments = null)
         {
-            return FindSettingsFile(directory, environments, mergeResultWithDefaultSettings: true);
+            if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
+
+            directory = directory.TrimEnd('/', '\\');
+
+            ChutzpahTestSettingsFile settings;
+            if (!ChutzpahSettingsFileCache.TryGetValue(directory, out settings))
+            {
+                ChutzpahSettingsFileEnvironment environment = null;
+                if (environments != null)
+                {
+                    var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
+                    environment = environments.GetSettingsFileEnvironment(testSettingsFilePath);
+                }
+
+                return FindSettingsFile(directory, environment).InheritFromDefault();
+            }
+            else
+            {
+                return settings;
+            }
         }
 
-        private ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments, bool mergeResultWithDefaultSettings = true)
+        private ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironment environment)
         {
             if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
@@ -85,7 +104,7 @@ namespace Chutzpah
 
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
-                    var chutzpahVariables = BuildChutzpahReplacementVariables(testSettingsFilePath, environments, settings);
+                    var chutzpahVariables = BuildChutzpahReplacementVariables(testSettingsFilePath, environment, settings);
 
                     ResolveTestHarnessDirectory(settings, chutzpahVariables);
 
@@ -97,7 +116,7 @@ namespace Chutzpah
 
                     if (settings.InheritFromParent)
                     {
-                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), environments, mergeResultWithDefaultSettings: false);
+                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), environment);
                         if (!parentSettingsFile.IsDefaultSettings)
                         {
                             settings.InheritFrom(parentSettingsFile);
@@ -115,7 +134,7 @@ namespace Chutzpah
 
 
 
-            return mergeResultWithDefaultSettings ? settings.InheritFromDefault() : settings;
+            return settings;
         }
 
 
@@ -170,8 +189,8 @@ namespace Chutzpah
                 for (i = 0; i < test.Includes.Count; i++)
                 {
                     test.Includes[i] = ExpandVariable(chutzpahVariables, test.Includes[i]);
-                } 
-                
+                }
+
                 for (i = 0; i < test.Excludes.Count; i++)
                 {
                     test.Excludes[i] = ExpandVariable(chutzpahVariables, test.Excludes[i]);
@@ -201,7 +220,7 @@ namespace Chutzpah
             }
         }
 
-        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings, IDictionary<string,string> chutzpahVariables)
+        private void ResolveBatchCompileConfiguration(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.Compile != null)
             {
@@ -271,7 +290,7 @@ namespace Chutzpah
         }
 
 
-        private IDictionary<string, string> BuildChutzpahReplacementVariables(string settingsFilePath, ChutzpahSettingsFileEnvironments environments, ChutzpahTestSettingsFile settings)
+        private IDictionary<string, string> BuildChutzpahReplacementVariables(string settingsFilePath, ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings)
         {
             IDictionary<string, string> chutzpahVariables = new Dictionary<string, string>();
 
@@ -289,10 +308,10 @@ namespace Chutzpah
             // This is not needed but it is a nice alias
             AddChutzpahVariable(chutzpahVariables, "cmdexe", Environment.ExpandEnvironmentVariables("%comspec%"));
 
-            if (environments != null)
+            if (environment != null)
             {
                 // See if we have a settingsfileenvironment set and if so add its properties as chutzpah settings file variables
-                var props = environments.GetPropertiesForEnvironment(settingsFilePath);
+                var props = environment.Properties;
                 foreach (var prop in props)
                 {
                     AddChutzpahVariable(chutzpahVariables, prop.Name, prop.Value);

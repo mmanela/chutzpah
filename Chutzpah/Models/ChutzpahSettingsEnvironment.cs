@@ -11,6 +11,17 @@ namespace Chutzpah.Models
     [XmlType("Property")]
     public class ChutzpahSettingsFileEnvironmentProperty
     {
+        public ChutzpahSettingsFileEnvironmentProperty()
+        {
+
+        }
+
+        public ChutzpahSettingsFileEnvironmentProperty(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
+
         public string Name { get; set; }
         public string Value { get; set; }
     }
@@ -20,6 +31,12 @@ namespace Chutzpah.Models
     {
         public ChutzpahSettingsFileEnvironment()
         {
+
+        }
+
+        public ChutzpahSettingsFileEnvironment(string path)
+        {
+            Path = path;
             Properties = new Collection<ChutzpahSettingsFileEnvironmentProperty>();
         }
 
@@ -32,55 +49,72 @@ namespace Chutzpah.Models
 
     public class ChutzpahSettingsFileEnvironments
     {
-        private ICollection<ChutzpahSettingsFileEnvironment> environments;
+        private Dictionary<string, ChutzpahSettingsFileEnvironment> environmentMap;
+
+        public int Count
+        {
+            get
+            {
+                return environmentMap.Count;
+            }
+        }
 
         public ChutzpahSettingsFileEnvironments()
         {
-            environments = new List<ChutzpahSettingsFileEnvironment>();
+            environmentMap = new Dictionary<string, ChutzpahSettingsFileEnvironment>(StringComparer.OrdinalIgnoreCase);
         }
 
         public ChutzpahSettingsFileEnvironments(ICollection<ChutzpahSettingsFileEnvironment> environments)
+            : this()
         {
             if (environments == null)
             {
                 throw new ArgumentNullException("environments");
             }
 
-            this.environments = environments;
-
             foreach (var environment in environments)
             {
-                // Normalize all paths
-                environment.Path = FileProbe.NormalizeFilePath(environment.Path).TrimEnd('\\');
+                AddEnvironment(environment);
             }
         }
 
-        public IEnumerable<ChutzpahSettingsFileEnvironmentProperty> GetPropertiesForEnvironment(string path)
+        public void AddEnvironment(ChutzpahSettingsFileEnvironment environment)
+        {
+            environment.Path = FileProbe.NormalizeFilePath(environment.Path).TrimEnd('\\');
+            if (!environmentMap.ContainsKey(environment.Path))
+            {
+                environmentMap[environment.Path] = environment;
+            }
+        }
+
+        public void RemoveEnvironment(string path)
+        {
+            path = FileProbe.NormalizeFilePath(path).TrimEnd('\\'); ;
+            if (environmentMap.ContainsKey(path))
+            {
+                environmentMap.Remove(path);
+            }
+
+        }
+
+        public ChutzpahSettingsFileEnvironment GetSettingsFileEnvironment(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
-                return Enumerable.Empty<ChutzpahSettingsFileEnvironmentProperty>();
+                return null;
             }
 
             path = FileProbe.NormalizeFilePath(path).TrimEnd('\\');
 
 
             // Find the longest path that matches the chutzpah.json file
-            var matchedEnvironment = (  from environment in environments
-                                        where path.StartsWith(environment.Path, StringComparison.OrdinalIgnoreCase)
-                                        orderby environment.Path.Length descending
-                                        select environment).FirstOrDefault();
+            var matchedEnvironment = (from environment in environmentMap.Values
+                                      where path.StartsWith(environment.Path, StringComparison.OrdinalIgnoreCase)
+                                      orderby environment.Path.Length descending
+                                      select environment).FirstOrDefault();
 
+            return matchedEnvironment;
 
-
-            if (matchedEnvironment == null)
-            {
-                return Enumerable.Empty<ChutzpahSettingsFileEnvironmentProperty>();
-            }
-            else
-            {
-                return matchedEnvironment.Properties;
-            }
         }
 
     }
