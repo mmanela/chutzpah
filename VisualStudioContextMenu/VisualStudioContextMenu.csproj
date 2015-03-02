@@ -49,12 +49,8 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0" />
-    <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0">
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Shell.Interop.12.0">
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.11.0" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.12.0" />
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.12.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
@@ -129,8 +125,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Guids.cs" />
-    <Compile Include="ILogger.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -138,8 +132,6 @@
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="RunnerCallback\VisualStudioRunnerCallback.cs" />
-    <Compile Include="SolutionEventsListener.cs" />
-    <Compile Include="SolutionEventsListenerEventArgs.cs" />
     <Compile Include="TestFileType.cs" />
     <Compile Include="VisualStudioContextMenuPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -177,7 +169,10 @@
     <None Include="Resources\Images.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="chetTimes.png" />
+    <Content Include="chetTimes.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Resource Include="Resources\chetTimes.png" />
     <Resource Include="Resources\ChutzpahStrip.png" />
     <Content Include="Resources\Package.ico" />
@@ -186,6 +181,10 @@
     <ProjectReference Include="..\Chutzpah\Chutzpah.csproj">
       <Project>{5e8ee6d2-52a1-46ee-bd2b-449b0b8fda6f}</Project>
       <Name>Chutzpah</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VS.Common\VS.Common.csproj">
+      <Project>{1689355d-3366-460c-8cf3-5f035ee21b05}</Project>
+      <Name>VS.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using Chutzpah.VS11.EventWatchers.EventArgs;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using VS11.Plugin;
 
-namespace Chutzpah.VS11.EventWatchers
+namespace Chutzpah.VS.Common
 {
 	[Export(typeof(ISolutionEventsListener))]
     public class SolutionEventsListener : IVsSolutionEvents, ISolutionEventsListener
@@ -25,7 +22,6 @@ namespace Chutzpah.VS11.EventWatchers
         [ImportingConstructor]
         public SolutionEventsListener([Import(typeof(SVsServiceProvider))]IServiceProvider serviceProvider)
         {
-            ValidateArg.NotNull(serviceProvider, "serviceProvider");
             this.solution = serviceProvider.GetService<IVsSolution>(typeof(SVsSolution));
         }
 

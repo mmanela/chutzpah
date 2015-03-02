@@ -1,7 +1,6 @@
 using System;
-using Chutzpah.VS11.EventWatchers.EventArgs;
 
-namespace Chutzpah.VS11.EventWatchers
+namespace Chutzpah.VS.Common
 {
     public interface ISolutionEventsListener
     {

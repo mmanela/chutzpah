@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using VS11.Plugin;
+using Chutzpah.VS.Common;
 
 namespace Chutzpah.VS11.EventWatchers
 {

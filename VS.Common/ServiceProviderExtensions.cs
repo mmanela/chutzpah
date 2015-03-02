@@ -3,11 +3,8 @@ using System.Globalization;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TestWindow.Extensibility;
-using Microsoft.VisualStudio.TestWindow.Extensibility.Model;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace VS11.Plugin
+namespace Chutzpah.VS.Common
 {
     public static class ServiceProviderExtensions
     {
@@ -23,9 +20,6 @@ namespace VS11.Plugin
         public static T GetService<T>(this IServiceProvider serviceProvider, Type serviceType)
             where T:class
         {
-            ValidateArg.NotNull(serviceProvider, "serviceProvider");
-            ValidateArg.NotNull(serviceType, "serviceType");
-
             var serviceInstance = serviceProvider.GetService(serviceType) as T;
             if (serviceInstance == null)
             {
