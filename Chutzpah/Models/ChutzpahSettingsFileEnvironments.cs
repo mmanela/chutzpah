@@ -19,7 +19,7 @@ namespace Chutzpah.Models
         public ChutzpahSettingsFileEnvironmentProperty(string name, string value)
         {
             Name = name;
-            Value = value;
+            Value = value ?? "";
         }
 
         public string Name { get; set; }

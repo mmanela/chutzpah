@@ -114,12 +114,12 @@ namespace Chutzpah.RunnerCallbacks
             ClearCounter();
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("{0} [FAIL]", testCase.GetDisplayName());
+            Console.Error.WriteLine("{0} [FAIL]", testCase.GetDisplayName());
             Console.ResetColor();
 
-            Console.WriteLine(Indent(GetTestFailureMessage(testCase)));
+            Console.Error.WriteLine(Indent(GetTestFailureMessage(testCase)));
 
-            Console.WriteLine();
+            Console.Error.WriteLine();
         }
 
         protected override string GetTestFailureLocationString(TestCase testCase)
@@ -154,7 +154,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.ForegroundColor = ConsoleColor.Red;
 
             var errorMessage = GetExceptionThrownMessage(exception, fileName);
-            Console.WriteLine(errorMessage);
+            Console.Error.WriteLine(errorMessage);
             Console.ResetColor();
         }
 
@@ -165,7 +165,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.ForegroundColor = ConsoleColor.Red;
 
             var errorMessage = GetFileErrorMessage(error);
-            Console.WriteLine(errorMessage);
+            Console.Error.WriteLine(errorMessage);
             Console.ResetColor();
         }
 

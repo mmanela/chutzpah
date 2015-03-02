@@ -87,6 +87,41 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class SettingsFileEnvironmentOptionFacts
+        {
+            [Fact]
+            public void Will_add_environment()
+            {
+                var arguments = new[] { "/SettingsFileEnvironment", "somePath\\chutzpah.json;a=1;b=ok" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(1, commandLine.SettingsFileEnvironments.Count);
+                var env = commandLine.SettingsFileEnvironments.GetSettingsFileEnvironment("somePath\\chutzpah.json");
+                Assert.Equal(2, env.Properties.Count);
+                Assert.Equal("a", env.Properties[0].Name);
+                Assert.Equal("1", env.Properties[0].Value);
+                Assert.Equal("b", env.Properties[1].Name);
+                Assert.Equal("ok", env.Properties[1].Value);
+            }
+
+            [Fact]
+            public void Will_add_multiple_environment()
+            {
+                var arguments = new[] { "/SettingsFileEnvironment", "somePath\\chutzpah.json;a=1;b=ok", "/SettingsFileEnvironment", "somePath2;aa=1;bb=ok" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal(2, commandLine.SettingsFileEnvironments.Count);
+                var env = commandLine.SettingsFileEnvironments.GetSettingsFileEnvironment("somePath2");
+                Assert.Equal(2, env.Properties.Count);
+                Assert.Equal("aa", env.Properties[0].Name);
+                Assert.Equal("1", env.Properties[0].Value);
+                Assert.Equal("bb", env.Properties[1].Name);
+                Assert.Equal("ok", env.Properties[1].Value);
+            }
+        }
+
         public class ShowFailureReportOptionFacts
         {
             [Fact]
@@ -243,6 +278,31 @@ namespace Chutzpah.Facts.ConsoleRunner
                 Assert.True(commandLine.Silent);
             }
         }
+
+        public class NoLogoOptionFacts
+        {
+            [Fact]
+            public void Silent_Option_Not_Passed_Silent_False()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.NoLogo);
+            }
+
+            [Fact]
+            public void Silent_Option_Silent_Is_True()
+            {
+                var arguments = new[] { "test.html", "/NoLogo" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.NoLogo);
+            }
+
+        }
+
 
         public class WaitOptionFacts
         {

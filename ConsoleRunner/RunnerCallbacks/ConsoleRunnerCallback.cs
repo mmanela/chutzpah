@@ -11,13 +11,13 @@ namespace Chutzpah.RunnerCallbacks
     {
         public override void ExceptionThrown(Exception exception, string fileName)
         {
-            Console.Write(GetExceptionThrownMessage(exception, fileName));
+            Console.Error.Write(GetExceptionThrownMessage(exception, fileName));
         }
 
         public override void FileError(TestError error)
         {
             var errorMessage = GetFileErrorMessage(error);
-            Console.Write(errorMessage);
+            Console.Error.Write(errorMessage);
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)

@@ -19,6 +19,7 @@ namespace Chutzpah
 
             UnmatchedArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Files = new List<string>();
+            SettingsFileEnvironments = new ChutzpahSettingsFileEnvironments();
             TeamCity = Environment.GetEnvironmentVariable(TeamcityProjectName) != null;
             Parse();
         }
@@ -35,6 +36,7 @@ namespace Chutzpah
         public bool Debug { get; protected set; }
 
         public bool Silent { get; protected set; }
+        public bool NoLogo { get; protected set; }
 
         public bool OpenInBrowser { get; protected set; }
 
@@ -47,6 +49,8 @@ namespace Chutzpah
         public bool Wait { get; protected set; }
 
         public IList<string> Files { get; set; }
+
+        public ChutzpahSettingsFileEnvironments SettingsFileEnvironments { get; set; }
 
         public IDictionary<string,string> UnmatchedArguments { get; set; }
 
@@ -125,6 +129,11 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     Silent = true;
                 }
+                else if (optionName == "/nologo")
+                {
+                    GuardNoOptionValue(option);
+                    NoLogo = true;
+                }
                 else if (optionName == "/teamcity")
                 {
                     GuardNoOptionValue(option);
@@ -174,6 +183,10 @@ namespace Chutzpah
                     GuardNoOptionValue(option);
                     ShowFailureReport = true;
                 }
+                else if (optionName == "/settingsfileenvironment")
+                {
+                    AddSettingsFileEnvironment(option.Value);
+                }
                 else
                 {
                     if (!optionName.StartsWith("/"))
@@ -185,6 +198,7 @@ namespace Chutzpah
                 }
             }
         }
+
 
         private void AddCoverageIncludeOption(string value)
         {
@@ -247,6 +261,35 @@ namespace Chutzpah
             }
 
             Files.Add(file);
+        }
+
+        
+        private void AddSettingsFileEnvironment(string environmentStr)
+        {   
+            if (string.IsNullOrEmpty(environmentStr))
+            {
+                throw new ArgumentException(
+                    "missing argument for /settingsFileEnvironment.  Expecting the settings file path and at least one property (e.g. settingsFilePath;prop1=val1;prop2=val2)");
+            }
+
+            var envParts = environmentStr.Split(new []{";"},StringSplitOptions.RemoveEmptyEntries);
+            if(envParts.Length <2)
+            {  
+                throw new ArgumentException(
+                    "invalid argument for /settingsFileEnvironment.  Expecting the settings file path and at least one property (e.g. settingsFilePath;prop1=val1;prop2=val2)");
+            }
+
+            var path = envParts[0];
+            var environment = new ChutzpahSettingsFileEnvironment(path);
+            for (var i = 1; i < envParts.Length; i++)
+            {
+                var propParts = envParts[i].Split('=');
+                var name = propParts[0];
+                var value = propParts.Length > 1 ? propParts[1] : "";
+                environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty(name, value));
+            }
+
+            SettingsFileEnvironments.AddEnvironment(environment);
         }
 
         private static KeyValuePair<string, string> PopOption(Stack<string> arguments)

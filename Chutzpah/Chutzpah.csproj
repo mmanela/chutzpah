@@ -82,7 +82,7 @@
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
-    <Compile Include="Models\ChutzpahSettingsEnvironment.cs" />
+    <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
     <Compile Include="Models\TransformConfig.cs" />
