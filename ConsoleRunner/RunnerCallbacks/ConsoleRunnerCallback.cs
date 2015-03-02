@@ -17,7 +17,7 @@ namespace Chutzpah.RunnerCallbacks
         public override void FileError(TestError error)
         {
             var errorMessage = GetFileErrorMessage(error);
-            Console.Error.Write(errorMessage);
+            Console.Write(errorMessage);
         }
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)

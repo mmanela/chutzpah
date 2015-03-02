@@ -12,15 +12,17 @@ namespace Chutzpah.RunnerCallbacks
     {
         readonly bool silent;
         readonly bool vsoutput;
+        readonly bool failOnError;
         private bool showFailureReport;
         int testCount;
         private readonly bool haveConsole;
 
-        public StandardConsoleRunnerCallback(bool silent, bool vsoutput, bool showFailureReport)
+        public StandardConsoleRunnerCallback(bool silent, bool vsoutput, bool showFailureReport, bool failOnError)
         {
             this.silent = silent;
             this.vsoutput = vsoutput;
             this.showFailureReport = showFailureReport;
+            this.failOnError = failOnError;
 
             try
             {
@@ -154,6 +156,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.ForegroundColor = ConsoleColor.Red;
 
             var errorMessage = GetExceptionThrownMessage(exception, fileName);
+
             Console.Error.WriteLine(errorMessage);
             Console.ResetColor();
         }
@@ -165,7 +168,14 @@ namespace Chutzpah.RunnerCallbacks
             Console.ForegroundColor = ConsoleColor.Red;
 
             var errorMessage = GetFileErrorMessage(error);
-            Console.Error.WriteLine(errorMessage);
+            if (failOnError)
+            {
+                Console.Error.Write(errorMessage);
+            }
+            else
+            {
+                Console.Write(errorMessage);
+            }
             Console.ResetColor();
         }
 

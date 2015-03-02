@@ -133,7 +133,7 @@ namespace Chutzpah
             {
                 var callback = commandLine.TeamCity 
                                 ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() 
-                                : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport);
+                                : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport, commandLine.FailOnError);
 
                 callback = new ParallelRunnerCallbackAdapter(callback);
 
