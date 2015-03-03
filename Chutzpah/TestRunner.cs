@@ -183,7 +183,7 @@ namespace Chutzpah
             // If so, we keep those tests in a group together to be used in one context
             // Otherwise, we put each file in its own test group so each get their own context
             var testGroups = BuildTestingGroups(scriptPaths, options);
-            
+
             // Build test contexts in parallel given a list of files each
             BuildTestContexts(options, testGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
 
@@ -378,56 +378,56 @@ namespace Chutzpah
             CancellationTokenSource cancellationSource,
             int resultCount,
             ConcurrentBag<TestContext> testContexts,
-            ITestMethodRunnerCallback callback, 
+            ITestMethodRunnerCallback callback,
             TestCaseSummary overallSummary)
         {
-                Parallel.ForEach(scriptPathGroups, parallelOptions, testFiles =>
+            Parallel.ForEach(scriptPathGroups, parallelOptions, testFiles =>
+            {
+                var pathString = string.Join(",", testFiles.Select(x => x.FullPath));
+                ChutzpahTracer.TraceInformation("Building test context for {0}", pathString);
+
+                try
                 {
-                    var pathString =  string.Join(",",testFiles.Select(x => x.FullPath));
-                    ChutzpahTracer.TraceInformation("Building test context for {0}", pathString);
+                    if (cancellationSource.IsCancellationRequested) return;
+                    TestContext testContext;
 
-                    try
+                    resultCount++;
+                    if (testContextBuilder.TryBuildContext(testFiles, options, out testContext))
                     {
-                        if (cancellationSource.IsCancellationRequested) return;
-                        TestContext testContext;
-
-                        resultCount++;
-                        if (testContextBuilder.TryBuildContext(testFiles, options, out testContext))
-                        {
-                            testContexts.Add(testContext);
-                        }
-                        else
-                        {
-                            ChutzpahTracer.TraceWarning("Unable to build test context for {0}", pathString);
-                        }
-
-                        // Limit the number of files we can scan to attempt to build a context for
-                        // This is important in the case of folder scanning where many JS files may not be
-                        // test files.
-                        if (resultCount >= options.FileSearchLimit)
-                        {
-                            ChutzpahTracer.TraceError("File search limit hit!!!");
-                            cancellationSource.Cancel();
-                        }
+                        testContexts.Add(testContext);
                     }
-                    catch (Exception e)
+                    else
                     {
-                        var error = new TestError
-                        {
-                            InputTestFile = testFiles.Select(x => x.FullPath).FirstOrDefault(),
-                            Message = e.ToString()
-                        };
-
-                        overallSummary.Errors.Add(error);
-                        callback.FileError(error);
-
-                        ChutzpahTracer.TraceError(e, "Error during building test context for {0}", pathString);
+                        ChutzpahTracer.TraceWarning("Unable to build test context for {0}", pathString);
                     }
-                    finally
+
+                    // Limit the number of files we can scan to attempt to build a context for
+                    // This is important in the case of folder scanning where many JS files may not be
+                    // test files.
+                    if (resultCount >= options.FileSearchLimit)
                     {
-                        ChutzpahTracer.TraceInformation("Finished building test context for {0}", pathString);
+                        ChutzpahTracer.TraceError("File search limit hit!!!");
+                        cancellationSource.Cancel();
                     }
-                });
+                }
+                catch (Exception e)
+                {
+                    var error = new TestError
+                    {
+                        InputTestFile = testFiles.Select(x => x.FullPath).FirstOrDefault(),
+                        Message = e.ToString()
+                    };
+
+                    overallSummary.Errors.Add(error);
+                    callback.FileError(error);
+
+                    ChutzpahTracer.TraceError(e, "Error during building test context for {0}", pathString);
+                }
+                finally
+                {
+                    ChutzpahTracer.TraceInformation("Finished building test context for {0}", pathString);
+                }
+            });
         }
 
         private IEnumerable<PathInfo> FindTestFiles(IEnumerable<string> testPaths, TestOptions options)
@@ -518,20 +518,16 @@ namespace Chutzpah
         {
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
-            var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds;
-            if (timeout.HasValue && timeout > 0)
-            {
-                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3} {4}",
-                                           runnerPath,
-                                           fileUrl,
-                                           testModeStr,
-                                           timeout,
-                                           context.TestFileSettings.UserAgent);
-            }
-            else
-            {
-                runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3}", runnerPath, fileUrl, testModeStr, context.TestFileSettings.UserAgent);
-            }
+            var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
+
+            runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3} {4} {5}",
+                                       runnerPath,
+                                       fileUrl,
+                                       testModeStr,
+                                       timeout,
+                                       options.IgnoreResourceLoadingError,
+                                       context.TestFileSettings.UserAgent);
+
 
             return runnerArgs;
         }

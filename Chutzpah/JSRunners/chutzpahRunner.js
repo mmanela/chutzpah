@@ -16,7 +16,8 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         testMode = null,
         timeOut = null,
         startTime = null,
-        userAgent = null;
+        userAgent = null,
+        ignoreResourceLoadingError = false;
 
     function trySetupTestFramework() {
         if (!testFrameworkLoaded) {
@@ -132,8 +133,13 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     timeOut = parseInt(phantom.args[2]) || 5001;
 
     if (phantom.args.length > 3) {
-        userAgent = phantom.args[3];
+        ignoreResourceLoadingError = "true" === phantom.args[3].toLowerCase();
     }
+
+    if (phantom.args.length > 4) {
+        userAgent = phantom.args[4];
+    }
+
 
     page.onConsoleMessage = captureLogMessage;
     page.onError = onError;
@@ -160,7 +166,9 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
 
     page.onResourceError = function (res) {
-        onError(res.errorString);
+        if (!ignoreResourceLoadingError) {
+            onError(res.errorString);
+        }
         rawLog("!!_!! Resource Error: " + res.url);
     }
 

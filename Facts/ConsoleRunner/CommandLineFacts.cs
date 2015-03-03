@@ -304,6 +304,29 @@ namespace Chutzpah.Facts.ConsoleRunner
         }
 
 
+        public class IgnoreResourceLoadingErrorOptionFacts
+        {
+            [Fact]
+            public void Will_set_default()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.False(commandLine.IgnoreResourceLoadingError);
+            }
+
+            [Fact]
+            public void Will_set_value()
+            {
+                var arguments = new[] { "test.html", "/ignoreResourceLoadingError" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.True(commandLine.IgnoreResourceLoadingError);
+            }
+        }
+
         public class WaitOptionFacts
         {
             [Fact]

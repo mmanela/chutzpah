@@ -87,6 +87,7 @@ namespace Chutzpah
             Console.WriteLine("  /teamcity                    : Forces TeamCity mode (normally auto-detected)");
             Console.WriteLine("  /wait                        : Wait for input after completion");
             Console.WriteLine("  /failOnError                 : Return a non-zero exit code if any script errors or timeouts occurs");
+            Console.WriteLine("  /ignoreResourceLoadingError  : Suppress resource loading errors");
             Console.WriteLine("  /debug                       : Print debugging information and tracing to console");
             Console.WriteLine("  /trace                       : Logs tracing information to chutzpah.log");
             Console.WriteLine("  /openInBrowser               : Launch the tests in the default browser");
@@ -144,6 +145,7 @@ namespace Chutzpah
                         MaxDegreeOfParallelism = commandLine.Parallelism,
                         TestingMode = commandLine.TestMode,
                         ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
+                        IgnoreResourceLoadingError = commandLine.IgnoreResourceLoadingError,
                         CoverageOptions = new CoverageOptions
                                               {
                                                   Enabled = commandLine.Coverage,
