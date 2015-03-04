@@ -5204,12 +5204,12 @@ _blanket.extend({
             //we check the never matches first
             var antimatch = _blanket.options("antifilter");
             if (typeof antimatch !== "undefined" &&
-                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                    _blanket.utils.matchPatternAttribute(url,antimatch)
                 ){
                 oldCb(content);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
                 _blanket.requiringFile(url,true);
-            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+            }else if (_blanket.utils.matchPatternAttribute(url,match)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
                 _blanket.instrument({
                     inputFile: content,

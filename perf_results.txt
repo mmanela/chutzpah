@@ -5,13 +5,13 @@
 Samples: 25
 
 Javascript:
-Average Time:   0.555 seconds
-Fastest Time:   0.523 seconds
-Slowest Time:   0.570 seconds
-Std Deviation:  0.011 seconds
+Average Time:   0.706 seconds
+Fastest Time:   0.689 seconds
+Slowest Time:   0.757 seconds
+Std Deviation:  0.022 seconds
 
 Coffeescript:
-Average Time:   0.585 seconds
-Fastest Time:   0.534 seconds
-Slowest Time:   0.792 seconds
-Std Deviation:  0.062 seconds
+Average Time:   10.767 seconds
+Fastest Time:   10.718 seconds
+Slowest Time:   10.833 seconds
+Std Deviation:  0.027 seconds

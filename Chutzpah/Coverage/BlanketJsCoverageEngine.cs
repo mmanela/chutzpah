@@ -47,12 +47,14 @@ namespace Chutzpah.Coverage
             string blanketScriptName = GetBlanketScriptName(definition, testSettingsFile);
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
-            IList<string> filesToExcludeFromCoverage =
+            var filesToExcludeFromCoverage =
                 harness.TestFrameworkDependencies.Concat(harness.CodeCoverageDependencies)
                 .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
                 .Select(dep => dep.Attributes["src"])
                 .Concat(excludePatterns.Select(ToRegex))
                 .ToList();
+
+            var filesToIncludeInCoverage = includePatterns.Select(ToRegex).ToList();
 
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
             {
@@ -76,11 +78,14 @@ namespace Chutzpah.Coverage
 
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
 
+            string dataCoverOnly = filesToIncludeInCoverage.Any()
+                                   ? "[" + string.Join(",", filesToIncludeInCoverage.Select(file => "'" + file + "'")) + "]"
+                                   : "//.*/";
 
             ChutzpahTracer.TraceInformation("Adding data-cover-never attribute to blanket: {0}", dataCoverNever);
 
             blanketMain.Attributes.Add("data-cover-flags", "ignoreError autoStart");
-            blanketMain.Attributes.Add("data-cover-only", "//.*/");
+            blanketMain.Attributes.Add("data-cover-only", dataCoverOnly);
             blanketMain.Attributes.Add("data-cover-never", dataCoverNever);
         }
 
@@ -93,12 +98,12 @@ namespace Chutzpah.Coverage
         private string ToRegex(string globPath)
         {
             // 1) Change all backslashes to forward slashes first
-            // 2) Escape . (by \\)
+            // 2) Escape . (by \\) (NOTE: we are skipping this since blanket has a bug with us using \.
             // 3) Replace * with the regex part ".*" (multiple characters)
             // 4) Replace ? with the regex part "." (single character)
             // 5) Replace [!] with the regex part "[^]" (negative character class)
             // 6) Surround the regex with // and /, and add the modifier i (case insensitive)
-            return string.Format("//{0}/i", globPath.Replace("\\", "\\/").Replace(".", "\\.").Replace("*", ".*").Replace("*", ".").Replace("[!", "[^"));
+            return string.Format("//{0}/i", globPath.Replace("\\", "/").Replace("*", ".*").Replace("[!", "[^"));
         }
 
         private bool IsScriptFile(ReferencedFile file)
