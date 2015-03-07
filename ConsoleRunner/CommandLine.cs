@@ -48,8 +48,6 @@ namespace Chutzpah
 
         public bool Wait { get; protected set; }
 
-        public bool IgnoreResourceLoadingError { get; set; }
-
         public IList<string> Files { get; set; }
 
         public ChutzpahSettingsFileEnvironments SettingsFileEnvironments { get; set; }
@@ -120,11 +118,6 @@ namespace Chutzpah
                 {
                     GuardNoOptionValue(option);
                     FailOnError = true;
-                }
-                else if (optionName == "/ignoreresourceloadingerror")
-                {
-                    GuardNoOptionValue(option);
-                    IgnoreResourceLoadingError = true;
                 }
                 else if (optionName == "/openinbrowser")
                 {

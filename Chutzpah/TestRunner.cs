@@ -525,7 +525,7 @@ namespace Chutzpah
                                        fileUrl,
                                        testModeStr,
                                        timeout,
-                                       options.IgnoreResourceLoadingError,
+                                       context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
                                        context.TestFileSettings.UserAgent);
 
 

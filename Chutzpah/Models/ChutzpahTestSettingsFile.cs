@@ -46,13 +46,14 @@ namespace Chutzpah.Models
 
         private ChutzpahTestSettingsFile(bool isDefaultSetings) : this()
         {
-            IsDefaultSettings = isDefaultSetings;
+            IsDefaultSettings = true;
 
             CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
             TestHarnessReferenceMode = Chutzpah.Models.TestHarnessReferenceMode.Normal;
             TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.TestFileAdjacent;
             RootReferencePathMode = Chutzpah.Models.RootReferencePathMode.DriveRoot;
             EnableTestFileBatching = false;
+            IgnoreResourceLoadingErrors = false;
         }
 
         public bool IsDefaultSettings { get; set; }
@@ -62,6 +63,12 @@ namespace Chutzpah.Models
         /// parent settings file.
         /// </summary>
         public bool InheritFromParent { get; set; }
+
+        /// <summary>
+        /// Suppress errors that are reporting when a script request to load a url (e.g. xhr/script/image)
+        /// and that url fails to load
+        /// </summary>
+        public bool? IgnoreResourceLoadingErrors { get; set; }
 
         /// <summary>
         /// Determines if Chutzpah should try to batch all test files for this chutzpah.json file in one test harness
@@ -119,7 +126,6 @@ namespace Chutzpah.Models
         /// The regex must contain a capture group named TestName like (?<TestName>) that contains the test name (inside of the quotes)
         /// </summary>
         public string TestPattern { get; set; }
-
 
         /// <summary>
         /// The path to your own test harness for Chutzpah to use. 
@@ -294,6 +300,8 @@ namespace Chutzpah.Models
             this.TestPattern = this.TestPattern == null ? parent.TestPattern : this.TestPattern;
             this.UserAgent = this.UserAgent == null ? parent.UserAgent : this.UserAgent;
             this.EnableTestFileBatching = this.EnableTestFileBatching == null ? parent.EnableTestFileBatching : this.EnableTestFileBatching;
+            this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors == null ? parent.IgnoreResourceLoadingErrors : this.IgnoreResourceLoadingErrors;
+
 
             // We need to handle an inherited test harness location mode specially
             // If the parent set their mode to SettingsFileAdjacent and the current file has it set to null 

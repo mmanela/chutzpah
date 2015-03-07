@@ -83,11 +83,5 @@ namespace Chutzpah
         /// the settings file
         /// </summary>
         public ChutzpahSettingsFileEnvironments ChutzpahSettingsFileEnvironments { get; set; }
-
-        /// <summary>
-        /// Suppress errors that are reporting when a script request to load a url (e.g. xhr/script/image)
-        /// and that url fails to load
-        /// </summary>
-        public bool IgnoreResourceLoadingError { get; set; }
     }
 }

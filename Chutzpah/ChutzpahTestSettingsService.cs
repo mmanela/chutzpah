@@ -61,8 +61,7 @@ namespace Chutzpah
                 ChutzpahSettingsFileEnvironment environment = null;
                 if (environments != null)
                 {
-                    var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
-                    environment = environments.GetSettingsFileEnvironment(testSettingsFilePath);
+                    environment = environments.GetSettingsFileEnvironment(directory);
                 }
 
                 return FindSettingsFile(directory, environment).InheritFromDefault();
@@ -246,7 +245,6 @@ namespace Chutzpah
                 // These settings might be needed in either External
                 settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
                 settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.Compile.OutDirectory), true);
-
             }
         }
 
