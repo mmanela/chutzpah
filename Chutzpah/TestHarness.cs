@@ -60,9 +60,14 @@ namespace Chutzpah
             }
 
             var amdBasePathUrl = "";
+
             if(!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
                 amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
+            }
+            else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrlOverride))
+            {
+                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBaseUrlOverride);
             }
 
             var replacements = new Dictionary<string, string>

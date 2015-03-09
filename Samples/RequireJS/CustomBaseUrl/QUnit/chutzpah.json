@@ -3,7 +3,7 @@
     "CodeCoverageExcludes": ["*/config.js"],
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
-    "AMDBasePath": "../src",
+    "AMDBasePath": "..\\src",
     "References" : [
         {"Path" : "require-2.1.8.js" }, 
         {"Path" : "config.js" }

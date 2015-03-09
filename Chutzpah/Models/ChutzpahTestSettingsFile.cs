@@ -142,6 +142,13 @@ namespace Chutzpah.Models
         /// </summary>
         public string AMDBasePath { get; set; }
 
+
+        /// <summary>
+        /// ADVANCED PROPERTY: This property allow you to tell Chutzpah to set the AMD - BaseUrl without having it try to do the file path
+        /// remapping that it does when you use the AMDBasePath property. This is helpful only in special situations where you need this control
+        /// </summary>
+        public string AMDBaseUrlOverride { get; set; }
+
         /// <summary>
         /// Determines what a reference path that starts with / or \  (.e.g <reference path="/" />) is relative to
         /// DriveRoot - Make it relative to the root of the drive (e.g. C:\). This is default.
@@ -286,8 +293,9 @@ namespace Chutzpah.Models
                 this.Compile = parent.Compile;
             }
 
-
+            
             this.AMDBasePath = this.AMDBasePath == null ? parent.AMDBasePath : this.AMDBasePath;
+            this.AMDBaseUrlOverride = this.AMDBaseUrlOverride == null ? parent.AMDBaseUrlOverride : this.AMDBaseUrlOverride;
             this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage == null ? parent.CodeCoverageSuccessPercentage : this.CodeCoverageSuccessPercentage;
             this.CustomTestHarnessPath = this.CustomTestHarnessPath == null ? parent.CustomTestHarnessPath : this.CustomTestHarnessPath;
             this.EnableCodeCoverage = this.EnableCodeCoverage == null ? parent.EnableCodeCoverage : this.EnableCodeCoverage;

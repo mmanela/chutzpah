@@ -208,7 +208,8 @@ namespace Chutzpah.Facts.Library.Models
                 References = new []{new SettingsFileReference{ Path = varStr, Include = varStr, Exclude = varStr}},
                 Tests = new []{new SettingsFileTestPath{ Path = varStr, Include = varStr, Exclude = varStr}},
                 Transforms = new []{ new TransformConfig{ Path = varStr}},
-                AMDBasePath = varStr
+                AMDBasePath = varStr,
+                AMDBaseUrlOverride = varStr
             };
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
@@ -226,6 +227,7 @@ namespace Chutzpah.Facts.Library.Models
             Assert.True(settings.Tests.ElementAt(0).Excludes[0].Contains("SomeValue"));
             Assert.True(settings.Transforms.ElementAt(0).Path.Contains("SomeValue"));
             Assert.True(settings.AMDBasePath.Contains("SomeValue"));
+            Assert.True(settings.AMDBaseUrlOverride.Contains("SomeValue"));
         }
 
         [Fact]

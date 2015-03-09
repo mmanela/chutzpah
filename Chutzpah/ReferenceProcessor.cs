@@ -134,7 +134,7 @@ namespace Chutzpah
             if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
             {
                 relativeAmdRootPath = FileProbe.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
-            }
+            } 
 
             foreach (var referencedFile in referencedFiles)
             {

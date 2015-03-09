@@ -174,6 +174,19 @@ namespace Chutzpah
                     ChutzpahTracer.TraceWarning("Unable to find AMDBasePath at {0}", settings.AMDBasePath);
                 }
             }
+
+
+            if (!string.IsNullOrEmpty(settings.AMDBaseUrlOverride))
+            {
+                string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.AMDBaseUrlOverride));
+                settings.AMDBaseUrlOverride = absoluteFilePath;
+
+                if (string.IsNullOrEmpty(settings.AMDBaseUrlOverride))
+                {
+                    ChutzpahTracer.TraceWarning("Unable to find AMDBaseUrlOverride at {0}", settings.AMDBaseUrlOverride);
+                }
+            }
+            
         }
 
         private void ProcessPathSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
