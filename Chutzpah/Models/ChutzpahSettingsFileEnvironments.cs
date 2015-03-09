@@ -80,21 +80,34 @@ namespace Chutzpah.Models
 
         public void AddEnvironment(ChutzpahSettingsFileEnvironment environment)
         {
-            environment.Path = FileProbe.NormalizeFilePath(environment.Path).TrimEnd('\\');
+            environment.Path = ProcessEnvironmentPath(environment.Path);
+
             if (!environmentMap.ContainsKey(environment.Path))
             {
                 environmentMap[environment.Path] = environment;
             }
         }
 
+
         public void RemoveEnvironment(string path)
         {
-            path = FileProbe.NormalizeFilePath(path).TrimEnd('\\'); ;
+            path = ProcessEnvironmentPath(path);
             if (environmentMap.ContainsKey(path))
             {
                 environmentMap.Remove(path);
             }
 
+        }
+
+        private static string ProcessEnvironmentPath(string path)
+        {
+            path = FileProbe.NormalizeFilePath(path).TrimEnd('\\', ' ');
+            if (path.EndsWith(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                path = Path.GetDirectoryName(path);
+            }
+
+            return path;
         }
 
         public ChutzpahSettingsFileEnvironment GetSettingsFileEnvironment(string path)
@@ -104,7 +117,7 @@ namespace Chutzpah.Models
                 return null;
             }
 
-            path = FileProbe.NormalizeFilePath(path).TrimEnd('\\');
+            path = ProcessEnvironmentPath(path);
 
 
             // Find the longest path that matches the chutzpah.json file
