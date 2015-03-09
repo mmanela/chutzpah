@@ -59,6 +59,12 @@ namespace Chutzpah
                 amdModuleMap = BuildModuleMapForGeneratedFiles();
             }
 
+            var amdBasePathUrl = "";
+            if(!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
+            {
+                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
+            }
+
             var replacements = new Dictionary<string, string>
             {
                 {"TestFrameworkDependencies", testFrameworkDependencies.ToString()},
@@ -68,7 +74,8 @@ namespace Chutzpah
                 {"ReferencedCSSFiles", referenceCssReplacement.ToString()},
                 {"TestHtmlTemplateFiles", referenceHtmlTemplateReplacement.ToString()},
                 {"AMDTestPath", amdTestFilePathArrayString},
-                {"AMDModuleMap", amdModuleMap}
+                {"AMDModuleMap", amdModuleMap},
+                {"AMDBasePath",  amdBasePathUrl }
             };
 
             var testHtmlStringBuilder = new StringBuilder(testHtmlTemplate);

@@ -107,7 +107,7 @@ namespace Chutzpah
 
                     ResolveTestHarnessDirectory(settings, chutzpahVariables);
 
-                    ResolveAMDBaseUrl(settings);
+                    ResolveAMDBaseUrl(settings, chutzpahVariables);
 
                     ResolveBatchCompileConfiguration(settings, chutzpahVariables);
 
@@ -161,12 +161,12 @@ namespace Chutzpah
             }
         }
 
-        private void ResolveAMDBaseUrl(ChutzpahTestSettingsFile settings)
+        private void ResolveAMDBaseUrl(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (!string.IsNullOrEmpty(settings.AMDBasePath))
             {
 
-                string absoluteFilePath = ResolveFolderPath(settings, settings.AMDBasePath);
+                string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.AMDBasePath));
                 settings.AMDBasePath = absoluteFilePath;
 
                 if (string.IsNullOrEmpty(settings.AMDBasePath))

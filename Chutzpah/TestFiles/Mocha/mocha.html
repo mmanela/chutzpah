@@ -25,6 +25,12 @@
                 window.chutzpah.usingModuleLoader = true;
             }
 
+            if("@@AMDBasePath@@") {
+                require.config({
+                    baseUrl: "@@AMDBasePath@@"
+                });
+            }
+
             require.config({
                 map: {
                     '*': {
