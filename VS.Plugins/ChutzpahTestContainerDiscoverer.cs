@@ -70,7 +70,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public Uri ExecutorUri
         {
-            get { return Constants.ExecutorUri; }
+            get { return AdapterConstants.ExecutorUri; }
         }
 
         public IEnumerable<ITestContainer> TestContainers
@@ -292,7 +292,7 @@ namespace Chutzpah.VS2012.TestAdapter
             {
 
                 ChutzpahTracer.TraceInformation("Added test container for '{0}'", file.Path);
-                var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), Constants.ExecutorUri);
+                var container = new JsTestContainer(this, file.Path.ToLowerInvariant(), AdapterConstants.ExecutorUri);
                 cachedContainers[container.Source] = container;
             }
 

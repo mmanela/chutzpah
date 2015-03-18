@@ -11,13 +11,11 @@ namespace Chutzpah.VS2012.TestAdapter
 
     public class ChutzpahAdapterSettings : TestRunSettings
     {
-        public const string SettingsName = "ChutzpahAdapterSettings";
-
         private static readonly XmlSerializer serializer = new XmlSerializer(typeof(ChutzpahAdapterSettings));
 
         private ChutzpahSettingsFileEnvironments environmentsWrapper = null;
 
-        public ChutzpahAdapterSettings() : base(SettingsName)
+        public ChutzpahAdapterSettings() : base(AdapterConstants.SettingsName)
         {
             TimeoutMilliseconds = null;
             TestingMode = TestingMode.JavaScript;

@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-    [ExtensionUri(Constants.ExecutorUriString)]
+    [ExtensionUri(AdapterConstants.ExecutorUriString)]
     public class ChutzpahTestExecutor : ITestExecutor
     {
         private readonly ITestRunner testRunner;
@@ -31,7 +31,7 @@ namespace Chutzpah.VS2012.TestAdapter
             ChutzpahTracer.TraceInformation("Begin Test Adapter Run Tests");
 
 
-            var settingsProvider = runContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
+            var settingsProvider = runContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
 
             ChutzpahTracingHelper.Toggle(settings.EnabledTracing);

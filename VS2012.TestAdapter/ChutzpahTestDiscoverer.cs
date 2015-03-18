@@ -18,7 +18,7 @@ namespace Chutzpah.VS2012.TestAdapter
     [FileExtension(Chutzpah.Constants.HtmlScriptExtension)]
     [FileExtension(Chutzpah.Constants.HtmScriptExtension)]
     [FileExtension(Chutzpah.Constants.JsonExtension)]
-    [DefaultExecutorUri(Constants.ExecutorUriString)]
+    [DefaultExecutorUri(AdapterConstants.ExecutorUriString)]
     public class ChutzpahTestDiscoverer : ITestDiscoverer
     {
         private readonly ITestRunner testRunner;
@@ -31,7 +31,7 @@ namespace Chutzpah.VS2012.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             ChutzpahTracer.TraceInformation("Begin Test Adapter Discover Tests");
-            var settingsProvider = discoveryContext.RunSettings.GetSettings(ChutzpahAdapterSettings.SettingsName) as ChutzpahAdapterSettingsService;
+            var settingsProvider = discoveryContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsService;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
 
             ChutzpahTracingHelper.Toggle(settings.EnabledTracing);

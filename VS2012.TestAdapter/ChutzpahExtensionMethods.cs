@@ -9,7 +9,7 @@ namespace Chutzpah.VS2012.TestAdapter
         public static TestCase ToVsTestCase(this Models.TestCase test)
         {
             var normalizedPath = test.InputTestFile.ToLowerInvariant();
-            var testCase = new TestCase(BuildFullyQualifiedName(test), Constants.ExecutorUri, normalizedPath)
+            var testCase = new TestCase(BuildFullyQualifiedName(test), AdapterConstants.ExecutorUri, normalizedPath)
                 {
                     CodeFilePath = normalizedPath,
                     DisplayName = GetTestDisplayText(test),

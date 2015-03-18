@@ -54,6 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdapterConstants.cs" />
+    <Compile Include="ChutzpahTracingHelper.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="ISolutionEventsListener.cs" />
     <Compile Include="Logger.cs" />
