@@ -25,7 +25,7 @@ namespace Chutzpah
             IReferenceProcessor referenceProcessor,
             IHttpWrapper httpWrapper,
             IFileProbe fileProbe,
-            ICoverageEngine coverageEngine,
+            ICoverageEngineFactory coverageEngineFactory,
             IEnumerable<IFrameworkDefinition> frameworkDefinitions,
             IChutzpahTestSettingsService settingsService)
         {
@@ -35,7 +35,7 @@ namespace Chutzpah
             this.fileProbe = fileProbe;
             this.frameworkDefinitions = frameworkDefinitions;
             this.settingsService = settingsService;
-            mainCoverageEngine = coverageEngine;
+            this.mainCoverageEngine = coverageEngineFactory.CreateCoverageEngine();
         }
 
         public TestContext BuildContext(string file, TestOptions options)

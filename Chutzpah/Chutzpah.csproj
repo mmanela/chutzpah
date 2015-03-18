@@ -72,6 +72,7 @@
     <Compile Include="ChutzpahTestSettingsService.cs" />
     <Compile Include="ChutzpahMsBuildProps.cs" />
     <Compile Include="CoverageOptions.cs" />
+    <Compile Include="Coverage\CoverageEngineFactory.cs" />
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />

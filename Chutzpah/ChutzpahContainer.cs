@@ -21,6 +21,7 @@ namespace Chutzpah
             container.Configure(config =>
                 {
                     config.For<IHasher>().Singleton().Use<Hasher>();
+                    config.For<ICoverageEngineFactory>().Singleton().Use<CoverageEngineFactory>();                    
                     config.For<ICoverageEngine>().Use<BlanketJsCoverageEngine>();
                     config.Scan(scan =>
                         {

@@ -45,6 +45,7 @@ namespace Chutzpah
         public const string CoffeeScriptExtension = ".coffee";
         public const string HtmScriptExtension = ".htm";
         public const string HtmlScriptExtension = ".html";
+        public const string JsonExtension = ".json";
 
         public const string MochaBddInterface = "bdd";
         public const string MochaQunitInterface = "qunit";

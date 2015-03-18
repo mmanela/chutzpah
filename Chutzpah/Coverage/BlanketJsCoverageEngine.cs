@@ -12,6 +12,7 @@ using SourceMapDotNet;
 
 namespace Chutzpah.Coverage
 {
+
     /// <summary>
     /// Coverage engine that uses Blanket.JS (http://blanketjs.org/) to do instrumentation
     /// and coverage collection.

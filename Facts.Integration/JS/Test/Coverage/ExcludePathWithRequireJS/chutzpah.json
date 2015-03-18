@@ -1,5 +1,5 @@
 {
-  "CodeCoverageExcludes": ["*code*"],
+  "CodeCoverageExcludes": ["*core*", "*screen*"],
   "TestHarnessLocationMode": "Custom",
   "TestHarnessDirectory": "../../../Code/RequireJS"
 }

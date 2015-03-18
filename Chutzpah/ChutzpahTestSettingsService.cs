@@ -115,10 +115,18 @@ namespace Chutzpah
 
                     if (settings.InheritFromParent)
                     {
+                        ChutzpahTracer.TraceInformation("Searching for parent Chutzpah.json to inherit from");
+
                         var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), environment);
                         if (!parentSettingsFile.IsDefaultSettings)
                         {
+
+                            ChutzpahTracer.TraceInformation("Found parent Chutzpah.json in directory {0}", parentSettingsFile.SettingsFileDirectory);
                             settings.InheritFrom(parentSettingsFile);
+                        }
+                        else
+                        {
+                            ChutzpahTracer.TraceInformation("Could not find a parent Chutzpah.json");
                         }
 
                     }
