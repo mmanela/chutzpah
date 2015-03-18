@@ -97,13 +97,13 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("ChutzpahSamples")]
-        public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath)
+        public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
 
-            Assert.Equal(2, result.TotalCount);
+            Assert.Equal(count, result.TotalCount);
         }
 
         [Fact]

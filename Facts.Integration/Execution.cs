@@ -71,15 +71,15 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("ChutzpahSamples")]
-        public void Will_run_tests_from_chutzpah_samples(string scriptPath)
+        public void Will_run_tests_from_chutzpah_samples(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
 
             var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
-            Assert.Equal(2, result.PassedCount);
-            Assert.Equal(2, result.TotalCount);
+            Assert.Equal(count, result.PassedCount);
+            Assert.Equal(count, result.TotalCount);
         }
 
         [Theory]

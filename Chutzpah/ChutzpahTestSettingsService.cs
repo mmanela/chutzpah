@@ -113,23 +113,7 @@ namespace Chutzpah
 
                     ProcessPathSettings(settings, chutzpahVariables);
 
-                    if (settings.InheritFromParent)
-                    {
-                        ChutzpahTracer.TraceInformation("Searching for parent Chutzpah.json to inherit from");
-
-                        var parentSettingsFile = FindSettingsFile(Path.GetDirectoryName(settings.SettingsFileDirectory), environment);
-                        if (!parentSettingsFile.IsDefaultSettings)
-                        {
-
-                            ChutzpahTracer.TraceInformation("Found parent Chutzpah.json in directory {0}", parentSettingsFile.SettingsFileDirectory);
-                            settings.InheritFrom(parentSettingsFile);
-                        }
-                        else
-                        {
-                            ChutzpahTracer.TraceInformation("Could not find a parent Chutzpah.json");
-                        }
-
-                    }
+                    ProcessInheritance(environment, settings);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
                     ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
@@ -142,6 +126,47 @@ namespace Chutzpah
 
 
             return settings;
+        }
+
+        private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings)
+        {
+            if (settings.InheritFromParent || !string.IsNullOrEmpty(settings.InheritFromPath))
+            {
+
+                if (string.IsNullOrEmpty(settings.InheritFromPath))
+                {
+                    ChutzpahTracer.TraceInformation("Searching for parent Chutzpah.json to inherit from");
+                    settings.InheritFromPath = Path.GetDirectoryName(settings.SettingsFileDirectory);
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("Searching for parent Chutzpah.json to inherit from at {0}", settings.InheritFromPath);
+
+                    string settingsToInherit = settings.InheritFromPath;
+                    if (settingsToInherit.EndsWith(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        settingsToInherit = Path.GetDirectoryName(settingsToInherit);
+                    }
+
+                    settingsToInherit = ResolveFolderPath(settings, settingsToInherit);
+
+                    settings.InheritFromPath = settingsToInherit;
+                }
+
+                var parentSettingsFile = FindSettingsFile(settings.InheritFromPath, environment);
+
+                if (!parentSettingsFile.IsDefaultSettings)
+                {
+
+                    ChutzpahTracer.TraceInformation("Found parent Chutzpah.json in directory {0}", parentSettingsFile.SettingsFileDirectory);
+                    settings.InheritFrom(parentSettingsFile);
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("Could not find a parent Chutzpah.json");
+                }
+
+            }
         }
 
 
@@ -307,7 +332,6 @@ namespace Chutzpah
 
             return chutzpahCompileVariables.Aggregate(str, (current, pair) => current.Replace(pair.Key, pair.Value));
         }
-
 
         private IDictionary<string, string> BuildChutzpahReplacementVariables(string settingsFilePath, ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings)
         {

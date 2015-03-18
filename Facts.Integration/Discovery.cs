@@ -69,13 +69,13 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("ChutzpahSamples")]
-        public void Will_discover_amd_tests_from_chutzpah_samples(string scriptPath)
+        public void Will_discover_amd_tests_from_chutzpah_samples(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
 
             var result = testRunner.DiscoverTests(scriptPath);
 
-            Assert.Equal(2, result.Count());
+            Assert.Equal(count, result.Count());
         }
 
         [Theory]

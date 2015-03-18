@@ -1,0 +1,16 @@
+﻿{
+	// Tells Chutzpah to find a given chutzpah.json given a folder and inherit it's settings. 
+	"InheritFromPath": "../Multiplication",
+
+	// These reference settings are appended to the parent reference settings
+    "References" : [
+        {"Includes": ["*.js"],"Excludes": ["*Test.js"] }
+    ],
+    "Tests" : [
+      {"Includes": ["*Test.js"]}
+    ],
+
+    "Transforms": [
+        { "Name":  "trx", "Path":  "_Chutzpah.trx.dat" }
+    ]
+}

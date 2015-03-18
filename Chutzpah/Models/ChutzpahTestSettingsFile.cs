@@ -65,6 +65,11 @@ namespace Chutzpah.Models
         public bool InheritFromParent { get; set; }
 
         /// <summary>
+        /// Determines if this settings file should inherit and merge with the settings of a given file
+        /// </summary>
+        public string InheritFromPath { get; set; }
+
+        /// <summary>
         /// Suppress errors that are reporting when a script request to load a url (e.g. xhr/script/image)
         /// and that url fails to load
         /// </summary>
