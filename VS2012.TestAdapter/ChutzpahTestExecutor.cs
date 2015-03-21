@@ -31,15 +31,13 @@ namespace Chutzpah.VS2012.TestAdapter
             ChutzpahTracer.TraceInformation("Begin Test Adapter Run Tests");
 
 
-            var settingsProvider = runContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsService;
+            var settingsProvider = runContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsProvider;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
 
             ChutzpahTracingHelper.Toggle(settings.EnabledTracing);
 
             var testOptions = new TestOptions
                 {
-                    TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
-                    TestingMode = settings.TestingMode,
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
                     ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };

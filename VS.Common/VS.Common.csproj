@@ -66,6 +66,7 @@
     </Compile>
     <Compile Include="SolutionEventsListener.cs" />
     <Compile Include="SolutionEventsListenerEventArgs.cs" />
+    <Compile Include="VsSolutionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Chutzpah\Chutzpah.csproj">

@@ -10,30 +10,16 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
-    [Export(typeof(ISettingsProvider))]
     [Export(typeof(IRunSettingsService))]
     [Export(typeof(IChutzpahSettingsMapper))]
     [SettingsName("ChutzpahAdapterSettings")]
-    public class ChutzpahAdapterSettingsService : IRunSettingsService, ISettingsProvider, IChutzpahSettingsMapper
+    public class ChutzpahAdapterSettingsService : ChutzpahAdapterSettingsProvider, IRunSettingsService, IChutzpahSettingsMapper
     {
-        private readonly XmlSerializer serializer;
-
-        // Locally remmember settings
-        public ChutzpahAdapterSettings Settings { get; private set; }
-        
-        public string Name { get; private set; }
-
-        public ChutzpahAdapterSettingsService()
-        {
-            Name = AdapterConstants.SettingsName;
-            Settings = new ChutzpahAdapterSettings();
-            serializer = new XmlSerializer(typeof(ChutzpahAdapterSettings));
-        }
+        public ChutzpahAdapterSettingsService() : base()
+        {}
 
         public void MapSettings(ChutzpahUTESettings settings)
         {
-            Settings.TestingMode = settings.TestingMode;
-            Settings.TimeoutMilliseconds = settings.TimeoutMilliseconds;
             Settings.MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism;
             Settings.EnabledTracing = settings.EnabledTracing;
         }
@@ -58,21 +44,6 @@ namespace Chutzpah.VS2012.TestAdapter
             navigator.MoveToRoot();
             return navigator;
         }
-
-        /// <summary>
-        /// Load the chutzpah adapter settings from the reader
-        /// </summary>
-        /// <param name="reader"></param>
-        public void Load(XmlReader reader)
-        {
-            ValidateArg.NotNull(reader, "reader");
-
-            if (reader.Read() && reader.Name.Equals(AdapterConstants.SettingsName))
-            {
-                Settings = serializer.Deserialize(reader) as ChutzpahAdapterSettings;
-            }
-        }
-
 
         private string SerializeSettings()
         {

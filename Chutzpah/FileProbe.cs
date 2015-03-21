@@ -91,14 +91,14 @@ namespace Chutzpah
             return !string.IsNullOrEmpty(fileName) && fileName.Equals(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase);
         }
 
-        public IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode)
+        public IEnumerable<PathInfo> FindScriptFiles(string path)
         {
             if (string.IsNullOrEmpty(path)) return Enumerable.Empty<PathInfo>();
 
-            return FindScriptFiles(new[] { path }, testingMode);
+            return FindScriptFiles(new[] { path });
         }
 
-        public IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode)
+        public IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths)
         {
             if (testPaths == null) yield break;
 
@@ -109,26 +109,25 @@ namespace Chutzpah
                 switch (pathInfo.Type)
                 {
                     case PathType.Url:
-                        if (testingMode == TestingMode.HTML || testingMode == TestingMode.All)
-                        {
                             yield return pathInfo;
-                        }
                         break;
                     case PathType.Html:
                     case PathType.JavaScript:
                     case PathType.CoffeeScript:
                     case PathType.TypeScript:
                     case PathType.TypeScriptDef:
-                        if (!testingMode.FileBelongsToTestingMode(path)) break;
                         yield return pathInfo;
                         break;
                     case PathType.Folder:
                         var query = from file in fileSystem.GetFiles(pathInfo.FullPath, "*.*", SearchOption.AllDirectories)
-                                    where file.Length < 260 && !IsTemporaryChutzpahFile(file) && testingMode.FileBelongsToTestingMode(file)
-                                    select file;
+                                    where file.Length < 260 && !IsTemporaryChutzpahFile(file)
+                                    let info = GetPathInfo(file)
+                                    where info.Type != PathType.Other
+                                    select info;
+
                         foreach (var item in query)
                         {
-                            yield return GetPathInfo(item);
+                            yield return item;
                         }
 
                         break;

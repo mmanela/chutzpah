@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using Chutzpah.Models;
-using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -31,15 +30,13 @@ namespace Chutzpah.VS2012.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             ChutzpahTracer.TraceInformation("Begin Test Adapter Discover Tests");
-            var settingsProvider = discoveryContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsService;
+            var settingsProvider = discoveryContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsProvider;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
 
             ChutzpahTracingHelper.Toggle(settings.EnabledTracing);
 
             var testOptions = new TestOptions
             {
-                TestFileTimeoutMilliseconds = settings.TimeoutMilliseconds,
-                TestingMode = settings.TestingMode,
                 MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
                 ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
             };

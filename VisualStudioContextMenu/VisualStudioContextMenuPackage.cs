@@ -362,7 +362,6 @@ namespace Chutzpah.VisualStudioContextMenu
 
                                     var options = new TestOptions
                                                       {
-                                                          TestFileTimeoutMilliseconds = Settings.TimeoutMilliseconds,
                                                           MaxDegreeOfParallelism = Settings.MaxDegreeOfParallelism,
                                                           CoverageOptions = new CoverageOptions
                                                           {

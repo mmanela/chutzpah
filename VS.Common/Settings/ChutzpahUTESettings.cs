@@ -19,40 +19,9 @@ namespace Chutzpah.VS.Common.Settings
             maxDegreeOfParallelism = Environment.ProcessorCount;
         }
 
-
-        private TestingMode? testingMode;
-        private int? timeoutMilliseconds;
         private int maxDegreeOfParallelism;
         private bool enableTracing;
 
-
-        [Browsable(true)]
-        [Category("UTE")]
-        [DisplayName("Test timeout (ms)")]
-        [Description("How long to wait for a given test to finish before timing out? (Defaults to 5000 ms)")]
-        public int? TimeoutMilliseconds
-        {
-            get { return timeoutMilliseconds; }
-            set
-            {
-                timeoutMilliseconds = value;
-                OnPropertyChanged("TimeoutMilliseconds");
-            }
-        }
-
-        [Browsable(true)]
-        [Category("UTE")]
-        [DisplayName("Testing Mode")]
-        [Description("Should the Unit Test Explorer scan JavaScript, TypeScript, CoffeeScript or HTML files or both?")]
-        public TestingMode TestingMode
-        {
-            get { return testingMode ?? TestingMode.AllExceptHTML; }
-            set
-            {
-                testingMode = value;
-                OnPropertyChanged("TestingMode");
-            }
-        }
 
         [Browsable(true)]
         [Category("UTE")]
@@ -86,8 +55,6 @@ namespace Chutzpah.VS.Common.Settings
         public override void ResetSettings()
         {
             EnabledTracing = false;
-            TimeoutMilliseconds = null;
-            TestingMode = TestingMode.JavaScript;
             MaxDegreeOfParallelism = Environment.ProcessorCount;
             base.ResetSettings();
         }

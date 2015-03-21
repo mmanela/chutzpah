@@ -515,39 +515,6 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
-        public class TestModeArgumentFacts
-        {
-            [Fact]
-            public void TestMode_Option_Not_Passed_TestMode_DefaultAll()
-            {
-                var arguments = new[] { "test.html" };
-
-                var commandLine = TestableCommandLine.Create(arguments);
-
-                Assert.Equal(TestingMode.All, commandLine.TestMode);
-            }
-
-            [Fact]
-            public void Incorrect_TestMode_Option_Passed_Defaults_To_All()
-            {
-                var arguments = new[] { "/testMode", "blah" };
-
-                var commandLine = TestableCommandLine.Create(arguments);
-
-                Assert.Equal(TestingMode.All, commandLine.TestMode);
-            }
-
-            [Fact]
-            public void TestMode_Option_Passed_TestMode_Set_Correctly()
-            {
-                var arguments = new[] { "/testMode", "TypeScript" };
-
-                var commandLine = TestableCommandLine.Create(arguments);
-
-                Assert.Equal(TestingMode.TypeScript, commandLine.TestMode);
-            }
-        }
-
         public class VSOutputArgumentFacts
         {
             [Fact]

@@ -26,5 +26,6 @@
     <Asset d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2012.TestAdapter|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|VS2012.TestAdapter|" />
     <Asset d:Source="Project" d:ProjectName="VS.Common" Type="Microsoft.VisualStudio.MefComponent" Path="|VS.Common|" />
+    <Asset d:Source="Project" d:ProjectName="VS2012" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2012|" />
   </Assets>
 </PackageManifest>

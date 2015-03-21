@@ -10,7 +10,6 @@ namespace Chutzpah
         private const string TeamcityProjectName = "TEAMCITY_PROJECT_NAME";
 
         private readonly Stack<string> arguments = new Stack<string>();
-        private TestingMode testMode = TestingMode.All;
 
         protected CommandLine(string[] args)
         {
@@ -57,11 +56,6 @@ namespace Chutzpah
         public bool VsOutput { get; protected set; }
 
         public bool Coverage { get; protected set; }
-        public TestingMode TestMode
-        {
-            get { return testMode; }
-            protected set { testMode = value; }
-        }
 
         public string CoverageIncludePatterns { get; protected set; }
         
@@ -168,15 +162,6 @@ namespace Chutzpah
                 else if (optionName == "/coverageexcludes")
                 {
                     AddCoverageExcludeOption(option.Value);
-                }
-                else if (optionName == "/testmode")
-                {
-                    TestingMode resultMode;
-                    if(Enum.TryParse(option.Value, true, out resultMode))
-                    {
-                        TestMode = resultMode; 
-                    }
-
                 }
                 else if (optionName == "/showfailurereport")
                 {

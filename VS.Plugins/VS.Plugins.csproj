@@ -53,18 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChutzpahMapperSettingsService.cs" />
-    <Compile Include="ChutzpahTestContainerDiscoverer.cs" />
-    <Compile Include="EventWatchers\EventArgs\TestFileChangedEventArgs.cs" />
-    <Compile Include="EventWatchers\ITestFileAddRemoveListener.cs" />
-    <Compile Include="EventWatchers\ITestFilesUpdateWatcher.cs" />
-    <Compile Include="EventWatchers\TestFileAddRemoveListener.cs" />
-    <Compile Include="EventWatchers\TestFilesUpdateWatcher.cs" />
-    <Compile Include="IChutzpahSettingsMapper.cs" />
-    <Compile Include="JsTestContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunContextFileExtensions.cs" />
-    <Compile Include="VsSolutionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Chutzpah\Chutzpah.csproj">

@@ -342,7 +342,7 @@ namespace Chutzpah.Facts
             {
                 var probe = new TestableFileProbe();
 
-                var res = probe.ClassUnderTest.FindScriptFiles((IEnumerable<string>)null, TestingMode.All);
+                var res = probe.ClassUnderTest.FindScriptFiles((IEnumerable<string>)null);
 
                 Assert.Empty(res);
             }
@@ -362,7 +362,7 @@ namespace Chutzpah.Facts
                                 "d.htm",
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.All);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(3, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
@@ -372,7 +372,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_files_that_match_testing_mode()
+            public void Will_return_files_that_are_js()
             {
                 var probe = new TestableFileProbe();
 
@@ -381,13 +381,10 @@ namespace Chutzpah.Facts
                 var paths = new List<string>
                             {
                                 "a.js",
-                                "a.coffee",
-                                "b.html",
-                                "c.blah",
-                                "d.htm",
+                                "a.exe"
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.JavaScript);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(1, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
@@ -395,7 +392,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_files_that_are_html_when_testing_mode_is_HTML()
+            public void Will_return_files_that_are_html()
             {
                 var probe = new TestableFileProbe();
 
@@ -403,14 +400,11 @@ namespace Chutzpah.Facts
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
                 var paths = new List<string>
                             {
-                                "a.js",
-                                "a.coffee",
                                 "b.html",
-                                "c.blah",
                                 "d.htm",
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.HTML);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(2, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
@@ -424,7 +418,7 @@ namespace Chutzpah.Facts
                 var probe = new TestableFileProbe();
                 var paths = new List<string> { "http://someurl.com/path" };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.HTML);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(1, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
@@ -432,7 +426,7 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_return_js_or_coffee_or_typescript_files_that_are_found_in_given_folder()
+            public void Will_return_files_from_folder()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.GetDirectoryName(It.IsAny<string>())).Returns("");
@@ -440,19 +434,20 @@ namespace Chutzpah.Facts
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FolderExists("folder")).Returns(true);
                 probe.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetFiles("folder", "*.*", SearchOption.AllDirectories))
-                    .Returns(new string[] { "subFile1.js", "subFile2.coffee", "subFile3.ts", "subFile4.html" });
+                    .Returns(new string[] { "subFile1.js", "subFile2.coffee", "subFile3.ts", "subFile4.html", "subFile5.exe" });
                 var paths = new List<string>
                             {
                                 "folder"
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.AllExceptHTML);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
-                Assert.Equal(3, res.Count());
+                Assert.Equal(4, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
                 Assert.Contains("subFile1.js", fullPaths);
                 Assert.Contains("subFile2.coffee", fullPaths);
                 Assert.Contains("subFile3.ts", fullPaths);
+                Assert.Contains("subFile4.html", fullPaths);
             }
 
             [Fact]
@@ -470,7 +465,7 @@ namespace Chutzpah.Facts
                                 "folder"
                             };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.AllExceptHTML);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(1, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);
@@ -499,7 +494,7 @@ namespace Chutzpah.Facts
                     "folder"
                 };
 
-                var res = probe.ClassUnderTest.FindScriptFiles(paths, TestingMode.All);
+                var res = probe.ClassUnderTest.FindScriptFiles(paths);
 
                 Assert.Equal(2, res.Count());
                 var fullPaths = res.Select(x => x.FullPath);

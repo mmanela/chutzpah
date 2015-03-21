@@ -14,7 +14,6 @@ namespace Chutzpah
         {
             FileSearchLimit = Constants.DefaultFileSeachLimit;
             TestFileTimeoutMilliseconds = Constants.DefaultTestFileTimeout;
-            TestingMode = TestingMode.All;
             defaultParallelism = Environment.ProcessorCount;
             MaxDegreeOfParallelism = defaultParallelism;
             CoverageOptions = new CoverageOptions();
@@ -37,12 +36,6 @@ namespace Chutzpah
             get { return testFileTimeoutMilliseconds; }
             set { testFileTimeoutMilliseconds = value ?? Constants.DefaultTestFileTimeout; }
         }
-
-        /// <summary>
-        /// Determines if we are testing JavaScript files (and creating harnesses for them), 
-        /// testing html test harnesses directly or both
-        /// </summary>
-        public TestingMode TestingMode { get; set; }
 
         /// <summary>
         /// Marks if we are running in exeuction or discovery mode

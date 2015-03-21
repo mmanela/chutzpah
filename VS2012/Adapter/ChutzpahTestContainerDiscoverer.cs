@@ -346,16 +346,9 @@ namespace Chutzpah.VS2012.TestAdapter
                 ChutzpahTracer.TraceInformation("End Initial test container search");
             }
 
-            var containers = FilterContainers(cachedContainers.Values);
 
             ChutzpahTracer.TraceInformation("End GetTestContainers");
-            return containers;
-        }
-
-        private IEnumerable<ITestContainer> FilterContainers(IEnumerable<ITestContainer> containers)
-        {
-            var mode = settingsMapper.Settings.TestingMode;
-            return containers.Where(x => mode.FileBelongsToTestingMode(x.Source));
+            return cachedContainers.Values;
         }
 
         private IEnumerable<TestFileCandidate> FindPotentialTestFiles()

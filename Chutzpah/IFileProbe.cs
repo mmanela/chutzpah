@@ -29,7 +29,7 @@ namespace Chutzpah
         /// <param name="testPaths">The test paths.</param>
         /// <param name="testingMode">The testing mode.</param>
         /// <returns>A list of files to test</returns>
-        IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths, TestingMode testingMode);
+        IEnumerable<PathInfo> FindScriptFiles(IEnumerable<string> testPaths);
 
         /// <summary>
         /// Gets the type and full path of the path.
@@ -38,7 +38,7 @@ namespace Chutzpah
         /// <returns>The type and full path the path points to.</returns>
         PathInfo GetPathInfo(string path);
 
-        IEnumerable<PathInfo> FindScriptFiles(string path, TestingMode testingMode);
+        IEnumerable<PathInfo> FindScriptFiles(string path);
 
         /// <summary>
         /// Determines if the file is a temporary chutzpah file

@@ -456,7 +456,7 @@ namespace Chutzpah
             }
             else
             {
-                scriptPaths = fileProbe.FindScriptFiles(testPathList, options.TestingMode);
+                scriptPaths = fileProbe.FindScriptFiles(testPathList);
             }
             return scriptPaths
                     .Where(x => x.FullPath != null)

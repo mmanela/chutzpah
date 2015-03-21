@@ -23,8 +23,8 @@ namespace Chutzpah.Facts
             {
                 Mock<IFileProbe>().Setup(x => x.FindFilePath(It.IsAny<string>())).Returns("");
                 Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(It.IsAny<IEnumerable<string>>(), It.IsAny<TestingMode>()))
-                    .Returns<IEnumerable<string>, TestingMode>((x, y) => x.Select(f => new PathInfo { Path = f, FullPath = f }));
+                    .Setup(x => x.FindScriptFiles(It.IsAny<IEnumerable<string>>()))
+                    .Returns<IEnumerable<string>>((x) => x.Select(f => new PathInfo { Path = f, FullPath = f }));
                 Mock<IProcessHelper>()
                     .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{new TestFileSummary("somePath")}));
@@ -289,29 +289,6 @@ namespace Chutzpah.Facts
                 Assert.Equal(1, res.TotalCount);
             }
 
-            [Fact]
-            public void Will_pass_testing_mode_option_to_test_runner()
-            {
-                var runner = new TestableTestRunner();
-                var summary = new TestFileSummary("somePath");
-                summary.AddTestCase(new TestCase());
-                var context = runner.SetupTestContext( testRunnerPath: "runner");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }, TestingMode.HTML))
-                    .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests.html" } });
-                var args = TestableTestRunner.BuildArgs("jsPath", "file:///D:/harnessPath.html", "execution", Constants.DefaultTestFileTimeout);
-                runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
-                 .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
-
-                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\testFolder", new TestOptions { TestingMode = TestingMode.HTML });
-
-                Assert.Equal(1, res.TotalCount);
-            }
-
             
             [Fact]
             public void Will_run_test_files_found_from_given_folder_path()
@@ -324,7 +301,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }, It.IsAny<TestingMode>()))
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\testFolder" }))
                     .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests.html" } });
                 var args = TestableTestRunner.BuildArgs("jsPath", "file:///D:/harnessPath.html", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
@@ -361,7 +338,7 @@ namespace Chutzpah.Facts
                 
                 Assert.Equal(1, res.TotalCount);
                 runner.Mock<IFileProbe>()
-                    .Verify(x => x.FindScriptFiles(It.IsAny<List<string>>(), It.IsAny<TestingMode>()), Times.Never());
+                    .Verify(x => x.FindScriptFiles(It.IsAny<List<string>>()), Times.Never());
             }
 
             [Fact]
@@ -400,7 +377,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
                 runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }, It.IsAny<TestingMode>()))
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }))
                     .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests1.html" }, new PathInfo { FullPath = @"path\tests2.html" } });
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" });
@@ -427,7 +404,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
                 runner.Mock<IFileProbe>()
-                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" }, It.IsAny<TestingMode>()))
+                    .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" }))
                     .Returns(new List<PathInfo> { 
                         new PathInfo { FullPath = @"path\tests1.js" }, 
                         new PathInfo { FullPath = @"path\tests2.js" } ,

@@ -90,7 +90,6 @@ namespace Chutzpah
             Console.WriteLine("  /debug                       : Print debugging information and tracing to console");
             Console.WriteLine("  /trace                       : Logs tracing information to chutzpah.log");
             Console.WriteLine("  /openInBrowser               : Launch the tests in the default browser");
-            Console.WriteLine("  /timeoutMilliseconds         : Amount of time to wait for a test file to finish before failing. (Defaults to {0})", Constants.DefaultTestFileTimeout);
             Console.WriteLine("  /parallelism [n]             : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
             Console.WriteLine("                               : If you specify more than 1 the test output may be a bit jumbled");
             Console.WriteLine("  /path path                   : Adds a path to a folder or file to the list of test paths to run.");
@@ -99,7 +98,6 @@ namespace Chutzpah
             Console.WriteLine("                               : (e.g. /path test1.html /path testFolder)");
             Console.WriteLine("  /vsoutput                    : Print output in a format that the VS error list recognizes");
             Console.WriteLine("  /coverage                    : Enable coverage collection");
-            Console.WriteLine("  /testMode                    : The mode to test in (All, Html, AllExceptHTML, TypeScript, CoffeeScript, JavaScript)");
             Console.WriteLine("  /showFailureReport           : Show a failure report after the test run. Usefull if you have a large number of tests.");
             Console.WriteLine("  /settingsFileEnvironment     : Sets the environment properties for a chutzpah.json settings file.");
             Console.WriteLine("                               : Specify more than one to add multiple environments.");
@@ -142,7 +140,6 @@ namespace Chutzpah
                         OpenInBrowser = commandLine.OpenInBrowser,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         MaxDegreeOfParallelism = commandLine.Parallelism,
-                        TestingMode = commandLine.TestMode,
                         ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
                         CoverageOptions = new CoverageOptions
                                               {

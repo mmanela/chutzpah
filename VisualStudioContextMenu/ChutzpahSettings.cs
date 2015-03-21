@@ -21,12 +21,6 @@ namespace Chutzpah.VS.Common.Settings
 
         [Browsable(true)]
         [Category("General")]
-        [DisplayName("Test timeout (ms)")]
-        [Description("How long to wait for a given test to finish before timing out? (Defaults to 5000 ms)")]
-        public int? TimeoutMilliseconds { get; set; }
-
-        [Browsable(true)]
-        [Category("General")]
         [DisplayName("Max degree of Parallelism")]
         [Description("The maximum amount of concurreny Chutzpah should use")]
         public int MaxDegreeOfParallelism { get; set; }
@@ -40,7 +34,6 @@ namespace Chutzpah.VS.Common.Settings
         public override void ResetSettings()
         {
             EnabledTracing = false;
-            TimeoutMilliseconds = null;
             MaxDegreeOfParallelism = Environment.ProcessorCount;
             base.ResetSettings();
         }
