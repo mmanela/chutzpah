@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,7 +18,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public ChutzpahAdapterSettings() : base(AdapterConstants.SettingsName)
         {
-            MaxDegreeOfParallelism = 1;
+            MaxDegreeOfParallelism = Environment.ProcessorCount;
             EnabledTracing = false;
             ChutzpahSettingsFileEnvironments = new Collection<ChutzpahSettingsFileEnvironment>();
         }
@@ -31,6 +32,11 @@ namespace Chutzpah.VS2012.TestAdapter
         /// Determines if chutzpah tracing is enabled
         /// </summary>
         public bool EnabledTracing { get; set; }
+
+        /// <summary>
+        /// Whether or not to launch the tests in the default browser
+        /// </summary>
+        public bool OpenInBrowser { get; set; }
 
         public Collection<ChutzpahSettingsFileEnvironment> ChutzpahSettingsFileEnvironments { get; set; }
 

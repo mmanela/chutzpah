@@ -38,6 +38,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
             var testOptions = new TestOptions
                 {
+                    OpenInBrowser = settings.OpenInBrowser,
                     MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
                     ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };

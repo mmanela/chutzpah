@@ -80,7 +80,7 @@ namespace Chutzpah.BatchProcessor
                     if (outputPath != null && fileSystem.FileExists(outputPath))
                     {
                         file.GeneratedFilePath = outputPath;
-                        ChutzpahTracer.TraceWarning("Found generated path for {0} at {1}", file.Path, outputPath);
+                        ChutzpahTracer.TraceInformation("Found generated path for {0} at {1}", file.Path, outputPath);
                     }
                     else
                     {
