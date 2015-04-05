@@ -70,8 +70,7 @@ namespace Chutzpah.Models
         public string InheritFromPath { get; set; }
 
         /// <summary>
-        /// Suppress errors that are reporting when a script request to load a url (e.g. xhr/script/image)
-        /// and that url fails to load
+        /// Suppress errors that are reported when a script request to load a url (e.g. xhr/script/image) fails
         /// </summary>
         public bool? IgnoreResourceLoadingErrors { get; set; }
 

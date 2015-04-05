@@ -140,7 +140,7 @@ namespace Chutzpah
                 }
                 else
                 {
-                    ChutzpahTracer.TraceInformation("Searching for parent Chutzpah.json to inherit from at {0}", settings.InheritFromPath);
+                    ChutzpahTracer.TraceInformation("Searching for Chutzpah.json to inherit from at {0}", settings.InheritFromPath);
 
                     string settingsToInherit = settings.InheritFromPath;
                     if (settingsToInherit.EndsWith(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase))
