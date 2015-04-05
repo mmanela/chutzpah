@@ -113,8 +113,16 @@
                 if (info.actual !== undefined || info.expected !== undefined) {
                     testResult.actual = QUnit.jsDump.parse(info.actual);
                     testResult.expected = QUnit.jsDump.parse(info.expected);
+
+                    testResult.message = "Expected: " + testResult.expected + ", Actual: " + testResult.actual;
                 }
-                testResult.message = (info.message || "") + "";
+
+                // If we also have a user supplied message add extra space to Expected has a space between it and the message
+                if (info.message) {
+                    testResult.message = " " + testResult.message;
+                }
+
+                testResult.message = (info.message || "") + testResult.message;
 
                 activeTestCase.testResults.push(testResult);
             }
