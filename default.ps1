@@ -126,6 +126,11 @@ task Package-Files -depends Clean-PackageFiles {
     copy-item "$baseDir\License.txt" -destination $filesDir
     copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $filesDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
+    
+    
+    # Copy Adapter files to package zip  
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $filesDir
  
     
     cd $filesDir
@@ -148,9 +153,9 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     
     
-      # Copy Adapter files to nuget zip  
-  copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $nugetTools
-  copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $nugetTools
+    # Copy Adapter files to nuget zip  
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $nugetTools
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $nugetTools
     
     
     $v = new-object -TypeName System.Version -ArgumentList $global:version
