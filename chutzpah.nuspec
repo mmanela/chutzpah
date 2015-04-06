@@ -15,6 +15,7 @@
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
 * Remove support for built in TypeScript and CoffeeScript compiler. Please use chutzpah.json compile setting instead.
+* Update to PhantomJs 2.0
 * Updated to QUnit 1.18
 * Added chutzpah.json inheritance
 * Added test harness batching per chutzpah.json file given setting
