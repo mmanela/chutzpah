@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -22,12 +23,12 @@ namespace Chutzpah.VS11.EventWatchers
             public DateTime LastEventTime { get; set; }
         }
 
-        private IDictionary<string, FileWatcherInfo> fileWatchers;
+        private ConcurrentDictionary<string, FileWatcherInfo> fileWatchers;
         public event EventHandler<TestFileChangedEventArgs> FileChangedEvent;
 
         public TestFilesUpdateWatcher()
         {
-            fileWatchers = new Dictionary<string, FileWatcherInfo>(StringComparer.OrdinalIgnoreCase);
+            fileWatchers = new ConcurrentDictionary<string, FileWatcherInfo>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void AddWatch(string path)
@@ -43,17 +44,19 @@ namespace Chutzpah.VS11.EventWatchers
                 if (!fileWatchers.TryGetValue(path, out watcherInfo))
                 {
                     watcherInfo = new FileWatcherInfo(new FileSystemWatcher(directoryName, fileName));
-                    fileWatchers.Add(path, watcherInfo);
+                    if (fileWatchers.TryAdd(path, watcherInfo))
+                    {
 
-                    watcherInfo.Watcher.Changed += OnChanged;
+                        watcherInfo.Watcher.Changed += OnChanged;
 
-                    // We are monitoring for this file to be renamed. 
-                    // This is needed to catch file modifications in VS2013+. In these version VS won't update an existing file.
-                    // It will create a new file, and then delete old one and swap in the new one transactionally
-                    watcherInfo.Watcher.Renamed += OnRenamed;
+                        // We are monitoring for this file to be renamed. 
+                        // This is needed to catch file modifications in VS2013+. In these version VS won't update an existing file.
+                        // It will create a new file, and then delete old one and swap in the new one transactionally
+                        watcherInfo.Watcher.Renamed += OnRenamed;
 
 
-                    watcherInfo.Watcher.EnableRaisingEvents = true;
+                        watcherInfo.Watcher.EnableRaisingEvents = true;
+                    }
                 }
             }
         }
@@ -70,15 +73,14 @@ namespace Chutzpah.VS11.EventWatchers
             if (!String.IsNullOrEmpty(path))
             {
                 FileWatcherInfo watcherInfo;
-                if (fileWatchers.TryGetValue(path, out watcherInfo))
+                if (fileWatchers.TryRemove(path, out watcherInfo))
                 {
                     watcherInfo.Watcher.EnableRaisingEvents = false;
-
-                    fileWatchers.Remove(path);
 
                     watcherInfo.Watcher.Changed -= OnChanged;
                     watcherInfo.Watcher.Dispose();
                     watcherInfo.Watcher = null;
+
                 }
             }
         }

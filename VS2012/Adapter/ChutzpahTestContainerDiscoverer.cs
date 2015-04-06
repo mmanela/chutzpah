@@ -6,6 +6,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Chutzpah.Extensions;
 using Chutzpah.Models;
 using Chutzpah.VS.Common;
@@ -200,7 +201,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
 
             ChutzpahTracer.TraceInformation("Begin UpdateTestContainersAndFileWatchers");
-            foreach (var file in files)
+            Parallel.ForEach(files, file =>
             {
                 if (isAdd)
                 {
@@ -215,7 +216,7 @@ namespace Chutzpah.VS2012.TestAdapter
                     testFilesUpdateWatcher.RemoveWatch(file.Path);
                     RemoveTestContainer(file);
                 }
-            }
+            });
 
             ChutzpahTracer.TraceInformation("End UpdateTestContainersAndFileWatchers");
         }
