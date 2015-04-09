@@ -22,7 +22,7 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 
 ## Recent News
 
-* **[Chutzpah 4.0](http://matthewmanela.com/blog/chutzpah-4-0-batching-inheritance-and-more/)**
+* **[Chutzpah 4.0 – Batching, Inheritance and more](http://matthewmanela.com/blog/chutzpah-4-0-batching-inheritance-and-more/)**
 * [Chutzpah 3.3](http://matthewmanela.com/blog/chutzpah-3-3-0/)
 * [Chutzpah 3.2 – A smarter approach to compilation](http://matthewmanela.com/blog/chutzpah-3-2-a-smarter-approach-to-compilation/)
 * [Chutzpah 3.1 – Smarter test running and Jasmine 2.0](http://matthewmanela.com/blog/chutzpah-3-1-smarter-test-running-and-jasmine-2-0/)
