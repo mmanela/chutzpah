@@ -110,7 +110,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_exclude_files_from_settings_file_using_requirejs()
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
 
             var result = testRunner.RunTests(@"JS\Test\Coverage\ExcludePathWithRequireJS\test.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
 

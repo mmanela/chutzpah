@@ -18,7 +18,7 @@ namespace Chutzpah
         private readonly IFileSystemWrapper fileSystem;
         private readonly IEnumerable<IFrameworkDefinition> frameworkDefinitions;
         private readonly IChutzpahTestSettingsService settingsService;
-        private readonly ICoverageEngine mainCoverageEngine;
+        private readonly ICoverageEngineFactory coverageEngineFactory;
 
         public TestContextBuilder(
             IFileSystemWrapper fileSystem,
@@ -35,7 +35,7 @@ namespace Chutzpah
             this.fileProbe = fileProbe;
             this.frameworkDefinitions = frameworkDefinitions;
             this.settingsService = settingsService;
-            this.mainCoverageEngine = coverageEngineFactory.CreateCoverageEngine();
+            this.coverageEngineFactory = coverageEngineFactory;
         }
 
         public TestContext BuildContext(string file, TestOptions options)
@@ -404,10 +404,11 @@ namespace Chutzpah
             if (!codeCoverageEnabled) return null;
 
             ChutzpahTracer.TraceInformation("Setting up code coverage in test context");
-            mainCoverageEngine.ClearPatterns();
-            mainCoverageEngine.AddIncludePatterns(chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns));
-            mainCoverageEngine.AddExcludePatterns(chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns));
-            return mainCoverageEngine;
+            var coverageEngine = coverageEngineFactory.CreateCoverageEngine();
+            coverageEngine.ClearPatterns();
+            coverageEngine.AddIncludePatterns(chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns));
+            coverageEngine.AddExcludePatterns(chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns));
+            return coverageEngine;
         }
 
         private IEnumerable<ReferencedFile> GetFilesUnderTest(IEnumerable<PathInfo> testFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
