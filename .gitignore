@@ -39,3 +39,4 @@ UpgradeLog.*
 *.StyleCop
 Chutzpah.sln.DotSettings.user
 *.orig
+lcov.dat

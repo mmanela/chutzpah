@@ -196,6 +196,29 @@ namespace Chutzpah
 
         private void ResolveAMDBaseUrl(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
+            if (!string.IsNullOrEmpty(settings.AMDBaseUrl))
+            {
+                string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.AMDBaseUrl));
+                settings.AMDBaseUrl = absoluteFilePath;
+
+                if (string.IsNullOrEmpty(settings.AMDBaseUrl))
+                {
+                    ChutzpahTracer.TraceWarning("Unable to find AMDBaseUrl at {0}", settings.AMDBaseUrl);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(settings.AMDAppDirectory))
+            {
+                string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.AMDAppDirectory));
+                settings.AMDAppDirectory = absoluteFilePath;
+
+                if (string.IsNullOrEmpty(settings.AMDAppDirectory))
+                {
+                    ChutzpahTracer.TraceWarning("Unable to find AMDAppDirectory at {0}", settings.AMDAppDirectory);
+                }
+            }
+
+            // Legacy AMDBasePath property
             if (!string.IsNullOrEmpty(settings.AMDBasePath))
             {
 
@@ -208,18 +231,6 @@ namespace Chutzpah
                 }
             }
 
-
-            if (!string.IsNullOrEmpty(settings.AMDBaseUrlOverride))
-            {
-                string absoluteFilePath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.AMDBaseUrlOverride));
-                settings.AMDBaseUrlOverride = absoluteFilePath;
-
-                if (string.IsNullOrEmpty(settings.AMDBaseUrlOverride))
-                {
-                    ChutzpahTracer.TraceWarning("Unable to find AMDBaseUrlOverride at {0}", settings.AMDBaseUrlOverride);
-                }
-            }
-            
         }
 
         private void ProcessPathSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)

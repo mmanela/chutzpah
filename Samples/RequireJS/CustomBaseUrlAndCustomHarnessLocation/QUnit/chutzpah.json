@@ -2,9 +2,10 @@
     "Framework": "qunit",
     "CodeCoverageExcludes": ["*/config.js"],
     "TestHarnessReferenceMode": "AMD",
-    "AMDBasePath": "../src",
+    "AMDBaseUrl": "../src",
     "TestHarnessLocationMode": "Custom",
     "TestHarnessDirectory": "tests",
+    "EnableTestFileBatching": true,
     "References" : [
         {"Path" : "require-2.1.8.js" }, 
         {"Path" : "config.js" }

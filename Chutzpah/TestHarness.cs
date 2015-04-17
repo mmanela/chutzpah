@@ -65,9 +65,9 @@ namespace Chutzpah
             {
                 amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
             }
-            else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrlOverride))
+            else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrl))
             {
-                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBaseUrlOverride);
+                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBaseUrl);
             }
 
             var replacements = new Dictionary<string, string>
@@ -95,14 +95,19 @@ namespace Chutzpah
 
         /// <summary>
         /// Generates the module map which is used to map from the original amd file path to the generated one
+        /// This is only needed in the AMDBasePath legacy setting which tries to generate absolute paths for all files.
+        /// This is not desirable anymore since its simpler and more flexible to let a user layout their files and specify baseurl
         /// </summary>
         /// <returns></returns>
         private string BuildModuleMapForGeneratedFiles()
         {
             var builder = new StringBuilder();
-            foreach (var referencedFile in referencedFiles.Where(x => !string.IsNullOrEmpty(x.GeneratedFilePath)))
+            if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
-                builder.AppendFormat("\"{0}\":\"{1}\",\n", referencedFile.AmdFilePath, referencedFile.AmdGeneratedFilePath);
+                foreach (var referencedFile in referencedFiles.Where(x => !string.IsNullOrEmpty(x.GeneratedFilePath)))
+                {
+                    builder.AppendFormat("\"{0}\":\"{1}\",\n", referencedFile.AmdFilePath, referencedFile.AmdGeneratedFilePath);
+                }
             }
 
             return builder.ToString();

@@ -140,18 +140,29 @@ namespace Chutzpah.Models
         /// </summary>
         public string CustomTestHarnessPath { get; set; }
 
+
         /// <summary>
-        /// This is the base url for use in resolving what path Chutzpah should use when it invokes your AMD test file.
-        /// You only need this if you configure the baseUrl in your Require.js config.
+        /// This property allow you to tell Chutzpah to set the AMD - BaseUrl without having it try to do the file path
+        /// remapping that it does when you use the AMDBasePath property. This is helpful only in special situations where you need this control
+        /// 
+        /// Defaults to the test harness directory if not set
+        /// </summary>
+        public string AMDBaseUrl { get; set; }
+
+
+        /// <summary>
+        /// Tells Chutzpah the root path for your AMD paths. This is only needed if your baseUrl is a different location than your source directory.
+        /// This is common if you are compiling from another language to JavaScript and copying those compiled files to a different folder.
+        /// For example if you have all your .ts files in /src and you compile them to a /out directry then your AMDBaseUrl is /out and AMDAppDirectory is /src
+        /// 
+        /// Defaults to the test harness directory if not set
+        /// </summary>
+        public string AMDAppDirectory { get; set; }
+
+        /// <summary>
+        /// OBSOLETE: This would set the base url and try to map the files relative to the test harness. This is deprecated in favor of AMDBaseUrl.
         /// </summary>
         public string AMDBasePath { get; set; }
-
-
-        /// <summary>
-        /// ADVANCED PROPERTY: This property allow you to tell Chutzpah to set the AMD - BaseUrl without having it try to do the file path
-        /// remapping that it does when you use the AMDBasePath property. This is helpful only in special situations where you need this control
-        /// </summary>
-        public string AMDBaseUrlOverride { get; set; }
 
         /// <summary>
         /// Determines what a reference path that starts with / or \  (.e.g <reference path="/" />) is relative to
@@ -297,9 +308,9 @@ namespace Chutzpah.Models
                 this.Compile = parent.Compile;
             }
 
-            
-            this.AMDBasePath = this.AMDBasePath == null ? parent.AMDBasePath : this.AMDBasePath;
-            this.AMDBaseUrlOverride = this.AMDBaseUrlOverride == null ? parent.AMDBaseUrlOverride : this.AMDBaseUrlOverride;
+
+            this.AMDBaseUrl = this.AMDBaseUrl == null ? parent.AMDBaseUrl : this.AMDBaseUrl;
+            this.AMDAppDirectory = this.AMDAppDirectory == null ? parent.AMDAppDirectory : this.AMDAppDirectory;            
             this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage == null ? parent.CodeCoverageSuccessPercentage : this.CodeCoverageSuccessPercentage;
             this.CustomTestHarnessPath = this.CustomTestHarnessPath == null ? parent.CustomTestHarnessPath : this.CustomTestHarnessPath;
             this.EnableCodeCoverage = this.EnableCodeCoverage == null ? parent.EnableCodeCoverage : this.EnableCodeCoverage;
@@ -313,6 +324,9 @@ namespace Chutzpah.Models
             this.UserAgent = this.UserAgent == null ? parent.UserAgent : this.UserAgent;
             this.EnableTestFileBatching = this.EnableTestFileBatching == null ? parent.EnableTestFileBatching : this.EnableTestFileBatching;
             this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors == null ? parent.IgnoreResourceLoadingErrors : this.IgnoreResourceLoadingErrors;
+
+            // Deprecated
+            this.AMDBasePath = this.AMDBasePath == null ? parent.AMDBasePath : this.AMDBasePath;
 
 
             // We need to handle an inherited test harness location mode specially

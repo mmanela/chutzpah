@@ -4,6 +4,7 @@
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "Custom",
     "TestHarnessDirectory": "src",
+    "EnableTestFileBatching": true,
     "References" : [
         {"Path" : "require-2.1.8.js" }, 
         {"Path" : "config.js" }

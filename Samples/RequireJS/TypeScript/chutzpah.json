@@ -3,12 +3,13 @@
    "TestHarnessReferenceMode": "AMD",
    "TestHarnessLocationMode": "SettingsFileAdjacent",
    "TypeScriptModuleKind": "AMD",
+   "EnableTestFileBatching": true,
+   "AMDBaseUrl": "out",
+   "AMDAppDirectory": "./",
     "References" : [
       { "Path": "require-2.1.8.js" },
 	    { "Path": "require.d.ts", "IncludeInTestHarness": "false" },
-	    { "Path": "qunit.d.ts", "IncludeInTestHarness": "false" },
-	    { "Path": "base", "IncludeInTestHarness": "false" },
-	    { "Path": "ui", "IncludeInTestHarness": "false" }
+	    { "Path": "qunit.d.ts", "IncludeInTestHarness": "false" }
     ],
     "Tests" : [
       {"Path": "tests"}

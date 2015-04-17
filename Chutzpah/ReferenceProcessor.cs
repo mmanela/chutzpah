@@ -129,6 +129,46 @@ namespace Chutzpah
         /// <param name="testSettings"></param>
         public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings)
         {
+            // If the legacy BasePath setting it set then defer to that
+            if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
+            {
+                SetupLegacyAmdFilePaths(referencedFiles, testHarnessDirectory, testSettings);
+                return;
+            }
+
+            // If AMDAppDirectory is set make amd paths relative to that
+            // Else if AMDBaseUrl is set make the amd path relative to that
+            // Otherwise make amd paths relative to test harness directory and make AMDBaseUrl the test harness directory
+            testSettings.AMDBaseUrl = string.IsNullOrEmpty(testSettings.AMDBaseUrl) ? testHarnessDirectory : testSettings.AMDBaseUrl;
+            string appRoot = string.IsNullOrEmpty(testSettings.AMDAppDirectory) ? testSettings.AMDBaseUrl : testSettings.AMDAppDirectory;
+
+            foreach (var referencedFile in referencedFiles)
+            {
+                referencedFile.AmdFilePath = GetAmdPath(referencedFile.Path, appRoot);
+            }
+        }
+
+        private static string GetAmdPath(string filePath, string amdAppRoot)
+        {
+            string amdModulePath = FileProbe.GetRelativePath(amdAppRoot, filePath);
+
+            amdModulePath = amdModulePath
+                .Replace(Path.GetExtension(filePath), "")
+                .Replace("\\", "/")
+                .Trim('/', '\\');
+
+
+            return amdModulePath;
+        }
+
+        /// <summary>
+        /// Add the AMD file paths for the Path and GeneratePath fields
+        /// </summary>
+        /// <param name="referencedFiles"></param>
+        /// <param name="testHarnessDirectory"></param>
+        /// <param name="testSettings"></param>
+        private void SetupLegacyAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings)
+        {
             // If the user set a AMD base path then we must relativize the amd path's using the path from the base path to the test harness directory
             string relativeAmdRootPath = "";
             if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
@@ -138,16 +178,16 @@ namespace Chutzpah
 
             foreach (var referencedFile in referencedFiles)
             {
-                referencedFile.AmdFilePath = GetAmdPath(testHarnessDirectory, referencedFile.Path, relativeAmdRootPath);
+                referencedFile.AmdFilePath = GetLegacyAmdPath(testHarnessDirectory, referencedFile.Path, relativeAmdRootPath);
 
                 if (!string.IsNullOrEmpty(referencedFile.GeneratedFilePath))
                 {
-                    referencedFile.AmdGeneratedFilePath = GetAmdPath(testHarnessDirectory, referencedFile.GeneratedFilePath, relativeAmdRootPath);
+                    referencedFile.AmdGeneratedFilePath = GetLegacyAmdPath(testHarnessDirectory, referencedFile.GeneratedFilePath, relativeAmdRootPath);
                 }
             }
         }
 
-        private static string GetAmdPath(string testHarnessDirectory, string filePath, string relativeAmdRootPath)
+        private static string GetLegacyAmdPath(string testHarnessDirectory, string filePath, string relativeAmdRootPath)
         {
             string amdModulePath = FileProbe.GetRelativePath(testHarnessDirectory, filePath);
 

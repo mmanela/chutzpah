@@ -49,7 +49,38 @@ namespace Chutzpah.Facts
             }
 
             [Fact]
-            public void Will_make_amd_path_relative_to_amdbaseurl()
+            public void Will_make_amd_path_relative_to_amdbaseurl_if_no_amdappdirectory_if_given()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\path";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { AMDBaseUrl = @"C:\some\other" };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../path/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+            [Fact]
+            public void Will_make_amd_path_relative_to_amdappdirectory_if_given()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\path";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { AMDAppDirectory = @"C:\some\other" };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../path/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
+            public void Will_make_amd_path_relative_to_amdbasepath_with_legacy_setting()
             {
                 var processor = new TestableReferenceProcessor();
                 var testHarnessDirectory = @"c:\some\path";
@@ -121,7 +152,6 @@ namespace Chutzpah.Facts
                 processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal("code/test", referencedFile.AmdFilePath);
-                Assert.Equal("code/_Chutzpah.1.test", referencedFile.AmdGeneratedFilePath);
             }  
         }
 

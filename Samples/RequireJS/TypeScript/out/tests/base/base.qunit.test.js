@@ -1,4 +1,4 @@
-﻿define(["require", "exports", 'base/core'], function(require, exports, core) {
+define(["require", "exports", 'base/core'], function (require, exports, core) {
     QUnit.module("base/core");
     test("will return correct version from core", function () {
         var version = core.version;
