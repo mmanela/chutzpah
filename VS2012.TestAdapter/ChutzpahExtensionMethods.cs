@@ -42,7 +42,8 @@ namespace Chutzpah.VS2012.TestAdapter
                         Duration = TimeSpan.FromMilliseconds(test.TimeTaken),
                         DisplayName = testCase.DisplayName,
                         ErrorMessage = GetTestFailureMessage(failureResult),
-                        Outcome = ToVsTestOutcome(false)
+                        Outcome = ToVsTestOutcome(false),
+                        ErrorStackTrace = BuildVirtualStackTrace(test)
                     };
             }
 
@@ -70,5 +71,15 @@ namespace Chutzpah.VS2012.TestAdapter
             if (result == null) return "";
             return result.GetFailureMessage();
         }
+
+        /// <summary>
+        /// Builds an artifical stack trace so that errors coming from test adapter contains a reference to the file and test name
+        /// without needing to read the whole log
+        /// </summary>
+        private static string BuildVirtualStackTrace(Models.TestCase testCase)
+        {
+            return string.Format("at {0} in {1}:line {2}{3}", GetTestDisplayText(testCase), testCase.InputTestFile, testCase.Line, Environment.NewLine);
+        }
+
     }
 }
