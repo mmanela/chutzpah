@@ -186,5 +186,9 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         page.settings.userAgent = userAgent;
     }
 
+	page.onCallback = function(data) {
+		eval(data);
+	}
+	
     page.open(testFile, pageOpenHandler);
 };
