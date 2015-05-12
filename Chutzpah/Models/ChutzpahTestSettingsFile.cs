@@ -142,10 +142,8 @@ namespace Chutzpah.Models
 
 
         /// <summary>
-        /// This property allow you to tell Chutzpah to set the AMD - BaseUrl without having it try to do the file path
-        /// remapping that it does when you use the AMDBasePath property. This is helpful only in special situations where you need this control
-        /// 
-        /// Defaults to the test harness directory if not set
+        /// Set the baseurl for Chutzpah to use when generating the test harness. 
+        ///  Defaults to the test harness directory if not set.
         /// </summary>
         public string AMDBaseUrl { get; set; }
 

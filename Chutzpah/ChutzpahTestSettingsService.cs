@@ -113,7 +113,7 @@ namespace Chutzpah
 
                     ProcessPathSettings(settings, chutzpahVariables);
 
-                    ProcessInheritance(environment, settings);
+                    ProcessInheritance(environment, settings, chutzpahVariables);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
                     ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
@@ -128,7 +128,7 @@ namespace Chutzpah
             return settings;
         }
 
-        private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings)
+        private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.InheritFromParent || !string.IsNullOrEmpty(settings.InheritFromPath))
             {
@@ -142,7 +142,7 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Searching for Chutzpah.json to inherit from at {0}", settings.InheritFromPath);
 
-                    string settingsToInherit = settings.InheritFromPath;
+                    string settingsToInherit = ExpandVariable(chutzpahVariables, settings.InheritFromPath);
                     if (settingsToInherit.EndsWith(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase))
                     {
                         settingsToInherit = Path.GetDirectoryName(settingsToInherit);
