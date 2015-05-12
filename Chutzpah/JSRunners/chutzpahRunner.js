@@ -186,9 +186,20 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         page.settings.userAgent = userAgent;
     }
 
-	page.onCallback = function(data) {
-		eval(data);
-	}
-	
+    // Setup callback to be invoked from client using window.callPhantom
+    page.onCallback = function(data) {
+
+        if (!data || typeof data.Type !== "string") return null;
+
+        switch (data.Type) {
+            case "Eval":
+            {
+                if (typeof data.Data === "string")
+                    return eval(data.Data);
+                return null;
+            }
+        }
+    }
+
     page.open(testFile, pageOpenHandler);
 };
