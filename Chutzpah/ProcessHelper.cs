@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
+using Microsoft.Win32;
 
 namespace Chutzpah
 {
@@ -104,12 +107,24 @@ namespace Chutzpah
 
         }
 
-        public void LaunchFileInBrowser(string file)
+        public void LaunchFileInBrowser(string file, string browserName)
         {
+            var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
+
             var startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.Verb = "Open";
-            startInfo.FileName = file;
+            if (!string.IsNullOrEmpty(browserAppPath))
+            {
+                startInfo.UseShellExecute = true;
+                startInfo.FileName = browserAppPath;
+                startInfo.Arguments = file;
+            }
+            else
+            {
+                startInfo.UseShellExecute = true;
+                startInfo.Verb = "Open";
+                startInfo.FileName = file;
+            }
+
             Process.Start(startInfo);
         }
     }

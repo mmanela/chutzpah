@@ -24,10 +24,15 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Whether or not to launch the tests in the default browser
+        /// Whether or not to launch the tests in the browser
         /// </summary>
         public bool OpenInBrowser { get; set; }
 
+        /// <summary>
+        /// The name of browser which will be opened when OpenInBrowser is enabled, this value is optional
+        /// </summary>
+        public string BrowserName { get; set; }
+        
         /// <summary>
         /// The time to wait for the tests to compelte in milliseconds
         /// </summary>

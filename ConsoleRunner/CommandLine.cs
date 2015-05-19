@@ -61,6 +61,8 @@ namespace Chutzpah
         
         public string CoverageExcludePatterns { get; protected set; }
 
+        public string BrowserName { get; protected set; }
+
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
             if (option.Value != null)
@@ -115,7 +117,7 @@ namespace Chutzpah
                 }
                 else if (optionName == "/openinbrowser")
                 {
-                    GuardNoOptionValue(option);
+                    AddBrowserName(option.Value);
                     OpenInBrowser = true;
                 }
                 else if (optionName == "/silent")
@@ -235,6 +237,23 @@ namespace Chutzpah
             }
 
             TimeOutMilliseconds = timeout;
+        }
+
+        private void AddBrowserName(string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (value.Equals("ie", StringComparison.InvariantCultureIgnoreCase) ||
+                    value.Equals("chrome", StringComparison.InvariantCultureIgnoreCase) ||
+                    value.Equals("firefox", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    BrowserName = value;
+                }
+                else
+                {
+                    throw new ArgumentException("invalid browser name, expecting either ie, chrome or firefox");
+                }
+            }
         }
 
         private void AddFileOption(string file)
