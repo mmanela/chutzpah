@@ -107,7 +107,7 @@ namespace Chutzpah
 
         }
 
-        public void LaunchFileInBrowser(string file, string browserName)
+        public void LaunchFileInBrowser(string file, string browserName = null)
         {
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
 
