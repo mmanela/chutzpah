@@ -5,7 +5,7 @@ namespace Chutzpah
 {
     public interface IProcessHelper
     {
-        void LaunchFileInBrowser(string file);
+        void LaunchFileInBrowser(string file, string browserName);
         ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<ProcessStream, T> streamProcessor) where T : class;
         BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration);
     }

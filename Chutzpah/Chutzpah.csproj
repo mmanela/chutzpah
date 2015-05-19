@@ -163,6 +163,7 @@
     <Compile Include="Transformers\SummaryTransformerProvider.cs" />
     <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Transformers\TrxXmlTransformer.cs" />
+    <Compile Include="Utility\BrowserPathHelper.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
