@@ -89,7 +89,9 @@ namespace Chutzpah
             Console.WriteLine("  /failOnError                 : Return a non-zero exit code if any script errors or timeouts occurs");
             Console.WriteLine("  /debug                       : Print debugging information and tracing to console");
             Console.WriteLine("  /trace                       : Logs tracing information to chutzpah.log");
-            Console.WriteLine("  /openInBrowser               : Launch the tests in the default browser");
+            Console.WriteLine("  /openInBrowser [name]        : Launch the tests in a browser.");
+            Console.WriteLine("                               : If optional name is provided will try to launch in that browser.");
+            Console.WriteLine("                               : Name can be IE, FireFox, Chrome.");
             Console.WriteLine("  /parallelism [n]             : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
             Console.WriteLine("                               : If you specify more than 1 the test output may be a bit jumbled");
             Console.WriteLine("  /path path                   : Adds a path to a folder or file to the list of test paths to run.");
