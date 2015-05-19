@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Configuration;
 using Microsoft.Win32;
 
@@ -15,14 +16,21 @@ namespace Chutzpah.Utility
         {
             var browserPath = string.Empty;
 
-            if (!string.IsNullOrEmpty(browserName))
+            try
             {
-                browserPath = GetBrowserPathFromRegistry(browserName);
-            }
+                if (!string.IsNullOrEmpty(browserName))
+                {
+                    browserPath = GetBrowserPathFromRegistry(browserName);
+                }
 
-            if (string.IsNullOrEmpty(browserPath))
+                if (string.IsNullOrEmpty(browserPath))
+                {
+                    browserPath = GetSystemDefaultBrowser();
+                }
+            }
+            catch (Exception e)
             {
-                browserPath = GetSystemDefaultBrowser();
+                ChutzpahTracer.TraceError(e, "Unable to read browser path from registry");
             }
 
             return browserPath;
