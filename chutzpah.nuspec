@@ -14,9 +14,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Fix concurency issue in code coverage
-* Make better error messages for test adapter
-* Improved AMD settings
+* Expose call phantom from test scripts
+* Allow user to choose browse to open with from command line
         </releaseNotes>
     </metadata>
 </package>
