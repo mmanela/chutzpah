@@ -109,6 +109,7 @@ namespace Chutzpah
 
         public void LaunchFileInBrowser(string file, string browserName = null)
         {
+            file = FileProbe.GenerateFileUrl(file);
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
 
             var startInfo = new ProcessStartInfo();
