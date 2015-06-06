@@ -14,8 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Expose call phantom from test scripts
-* Allow user to choose browse to open with from command line
+* Fix bug when opening file in a browser
         </releaseNotes>
     </metadata>
 </package>
