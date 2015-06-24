@@ -57,7 +57,7 @@ namespace Chutzpah.Coverage
                 {
                     foreach (var match in matches)
                     {
-                        if (match.File != fileSystem.GetFileName(referencedFile.Path)) continue;
+                        if (match.File.ToLower() != fileSystem.GetFileName(referencedFile.Path.ToLower())) continue;
 
                         accumulated[match.LineNumber] = (accumulated[match.LineNumber] ?? 0) + generatedCount.Value;
                     }
