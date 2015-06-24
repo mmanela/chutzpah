@@ -8,6 +8,6 @@ namespace Chutzpah.Coverage
 {
     public interface ILineCoverageMapper
     {
-        int?[] GetOriginalFileLineExecutionCounts(int?[] generatedSourceLineExecutionCounts, int sourceLineCount, string mapFile);
+        int?[] GetOriginalFileLineExecutionCounts(int?[] generatedSourceLineExecutionCounts, int sourceLineCount, ReferencedFile referencedFile);
     }
 }

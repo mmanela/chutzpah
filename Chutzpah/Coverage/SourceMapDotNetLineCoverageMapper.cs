@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Chutzpah.Models;
 
 namespace Chutzpah.Coverage
 {
@@ -21,22 +22,26 @@ namespace Chutzpah.Coverage
             this.fileSystem = fileSystem;
         }
 
-        public int?[] GetOriginalFileLineExecutionCounts(int?[] generatedSourceLineExecutionCounts, int sourceLineCount, string mapFilePath)
+        public int?[] GetOriginalFileLineExecutionCounts(int?[] generatedSourceLineExecutionCounts, int sourceLineCount, ReferencedFile referencedFile)
         {
             if (generatedSourceLineExecutionCounts == null)
             {
                 throw new ArgumentNullException("generatedSourceLineExecutionCounts");
             }
-            else if (string.IsNullOrWhiteSpace(mapFilePath)) 
+            if (referencedFile == null)
+            {
+                throw new ArgumentNullException("referencedFile");
+            }
+            else if (string.IsNullOrWhiteSpace(referencedFile.SourceMapFilePath)) 
             {
                 return generatedSourceLineExecutionCounts;
             }
-            else if (!fileSystem.FileExists(mapFilePath)) 
+            else if (!fileSystem.FileExists(referencedFile.SourceMapFilePath)) 
             {
-                throw new ArgumentException("mapFilePath", string.Format("Cannot find map file '{0}'", mapFilePath));
+                throw new ArgumentException("mapFilePath", string.Format("Cannot find map file '{0}'", referencedFile.SourceMapFilePath));
             }
 
-            var consumer = this.GetConsumer(fileSystem.GetText(mapFilePath));
+            var consumer = this.GetConsumer(fileSystem.GetText(referencedFile.SourceMapFilePath));
 
             var accumulated = new List<int?>(new int?[sourceLineCount + 1]);
             for (var i = 1; i < generatedSourceLineExecutionCounts.Length; i++)
@@ -52,6 +57,8 @@ namespace Chutzpah.Coverage
                 {
                     foreach (var match in matches)
                     {
+                        if (match.File != fileSystem.GetFileName(referencedFile.Path)) continue;
+
                         accumulated[match.LineNumber] = (accumulated[match.LineNumber] ?? 0) + generatedCount.Value;
                     }
                 }
