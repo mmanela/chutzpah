@@ -61,7 +61,7 @@ namespace Chutzpah
 
             var amdBasePathUrl = "";
 
-            if(!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
+            if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
                 amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
             }
@@ -84,7 +84,7 @@ namespace Chutzpah
             };
 
             var testHtmlStringBuilder = new StringBuilder(testHtmlTemplate);
-            
+
             foreach (var replacement in replacements.Union(frameworkReplacements))
             {
                 testHtmlStringBuilder.Replace("@@" + replacement.Key + "@@", replacement.Value);
@@ -127,7 +127,7 @@ namespace Chutzpah
             }
 
             return builder.ToString();
-        }
+        } 
 
         private void BuildTags(IEnumerable<ReferencedFile> referencedFilePaths)
         {
@@ -142,6 +142,7 @@ namespace Chutzpah
                 string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
                                         ? referencedFile.Path
                                         : referencedFile.GeneratedFilePath;
+                 
                 IList<TestHarnessItem> refList = ChooseRefList(referencedFile, referencePath);
                 if (refList == null) continue;
 
@@ -158,7 +159,8 @@ namespace Chutzpah
                     refList.Add(new Script(referencedFile));
                 }
                 else if (referencePath.EndsWith(Constants.HtmlScriptExtension, StringComparison.OrdinalIgnoreCase) ||
-                         referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase))
+                         referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase) ||
+                         referencePath.EndsWith(Constants.CSHtmlScriptExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     refList.Add(new Html(referencedFile, fileSystem));
                 }
@@ -191,10 +193,10 @@ namespace Chutzpah
             else if (referencePath.EndsWith(Constants.JavaScriptExtension, StringComparison.OrdinalIgnoreCase))
             {
                 list = ReferencedScripts;
-
             }
             else if (referencePath.EndsWith(Constants.HtmlScriptExtension, StringComparison.OrdinalIgnoreCase) ||
-                     referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase))
+                     referencePath.EndsWith(Constants.HtmScriptExtension, StringComparison.OrdinalIgnoreCase) ||
+                     referencePath.EndsWith(Constants.CSHtmlScriptExtension, StringComparison.OrdinalIgnoreCase))
             {
                 list = ReferencedHtmlTemplates;
             }
