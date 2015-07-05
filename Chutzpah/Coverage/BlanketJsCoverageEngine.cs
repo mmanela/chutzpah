@@ -171,7 +171,7 @@ namespace Chutzpah.Coverage
 
                     if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile != null && referencedFile.SourceMapFilePath != null)
                     {
-                        lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile.SourceMapFilePath);
+                        lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
                     }
 
                     coverageData.Add(newKey, new CoverageFileData

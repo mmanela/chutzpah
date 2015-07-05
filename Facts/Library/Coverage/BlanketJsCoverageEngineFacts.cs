@@ -31,7 +31,7 @@ namespace Chutzpah.Facts.Library.Coverage
                     .Returns(coverageObject);
 
                 Mock<ILineCoverageMapper>()
-                    .Setup(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<string>()))
+                    .Setup(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<ReferencedFile>()))
                     .Returns(mapperOutput ?? new int?[0]);
 
                 Mock<IFileSystemWrapper>()
@@ -78,7 +78,7 @@ namespace Chutzpah.Facts.Library.Coverage
             var underTest = new TestableCoverageEngine(GetLineExecutions());
             underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
 
-            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<ReferencedFile>()), Times.Once());
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Chutzpah.Facts.Library.Coverage
 
             var file = testContext.ReferencedFiles.Single(x => x.Path == @"X:\file1.ts");
 
-            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(coverageDict[file.GeneratedFilePath], 1, file.SourceMapFilePath), Times.Once());
+            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(coverageDict[file.GeneratedFilePath], 1, file), Times.Once());
         }
         
         [Fact]
@@ -156,7 +156,7 @@ namespace Chutzpah.Facts.Library.Coverage
             var underTest = new TestableCoverageEngine(GetLineExecutions());
             underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
 
-            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never());
+            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<ReferencedFile>()), Times.Never());
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace Chutzpah.Facts.Library.Coverage
             var underTest = new TestableCoverageEngine(GetLineExecutions());
             underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
 
-            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never());
+            underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<ReferencedFile>()), Times.Never());
         }
     }
 }
