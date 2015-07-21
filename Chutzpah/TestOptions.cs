@@ -24,12 +24,12 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Whether or not to launch the tests in the browser
+        /// Describes the ways in which the test is to be launched.
         /// </summary>
-        public bool OpenInBrowser { get; set; }
+        public TestLaunchMode TestLaunchMode { get; set; }
 
         /// <summary>
-        /// The name of browser which will be opened when OpenInBrowser is enabled, this value is optional
+        /// The name of browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional
         /// </summary>
         public string BrowserName { get; set; }
         

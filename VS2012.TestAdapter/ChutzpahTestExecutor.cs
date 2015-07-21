@@ -38,8 +38,11 @@ namespace Chutzpah.VS2012.TestAdapter
 
             var testOptions = new TestOptions
                 {
-                    OpenInBrowser = settings.OpenInBrowser,
-                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
+                    TestLaunchMode =
+                        settings.OpenInBrowser ? TestLaunchMode.FullBrowser:
+                        runContext.IsBeingDebugged ? TestLaunchMode.ScriptDebugger:
+                        TestLaunchMode.HeadlessBrowser,
+                    MaxDegreeOfParallelism = runContext.IsBeingDebugged ? 1 : settings.MaxDegreeOfParallelism,
                     ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };
 

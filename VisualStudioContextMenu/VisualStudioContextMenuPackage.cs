@@ -367,7 +367,7 @@ namespace Chutzpah.VisualStudioContextMenu
                                                           {
                                                               Enabled = withCodeCoverage
                                                           },
-                                                          OpenInBrowser = openInBrowser,
+                                                          TestLaunchMode = openInBrowser ? TestLaunchMode.FullBrowser : TestLaunchMode.HeadlessBrowser,
                                                           ChutzpahSettingsFileEnvironments = settingsEnvironments
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);

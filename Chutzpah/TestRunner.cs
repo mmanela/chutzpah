@@ -136,7 +136,7 @@ namespace Chutzpah
                                         TestOptions options,
                                         ITestMethodRunnerCallback callback = null)
         {
-            callback = options.OpenInBrowser || callback == null ? RunnerCallback.Empty : callback;
+            callback = options.TestLaunchMode == TestLaunchMode.FullBrowser || callback == null ? RunnerCallback.Empty : callback;
             callback.TestSuiteStarted();
 
             var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
@@ -290,7 +290,7 @@ namespace Chutzpah
                     {
                         testHarnessBuilder.CreateTestHarness(testContext, options);
 
-                        if (options.OpenInBrowser)
+                        if (options.TestLaunchMode == TestLaunchMode.FullBrowser)
                         {
                             ChutzpahTracer.TraceInformation(
                                 "Launching test harness '{0}' for file '{1}' in a browser",
@@ -356,7 +356,7 @@ namespace Chutzpah
             foreach (var testContext in testContexts)
             {
                 // Don't clean up context if in debug mode
-                if (!m_debugEnabled && !options.OpenInBrowser)
+                if (!m_debugEnabled && options.TestLaunchMode != TestLaunchMode.FullBrowser)
                 {
                     try
                     {
