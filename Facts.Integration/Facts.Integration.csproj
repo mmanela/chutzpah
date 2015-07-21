@@ -758,7 +758,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>robocopy $(SolutionDir)Samples $(TargetDir)Samples /MIR /MT /purge /NP /NJH
+    <PreBuildEvent>%25SystemRoot%25\system32\robocopy $(SolutionDir)Samples $(TargetDir)Samples /MIR /MT /purge /NP /NJH
 if errorlevel 4 goto BuildEventFailed
 if errorlevel 0 goto end
 
