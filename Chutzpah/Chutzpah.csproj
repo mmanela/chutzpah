@@ -40,6 +40,12 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>True</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -86,6 +92,7 @@
     <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
+    <Compile Include="Models\TestLaunchMode.cs" />
     <Compile Include="Models\TransformConfig.cs" />
     <Compile Include="Models\vstsModel\vstst.cs">
       <DependentUpon>vstst.xsd</DependentUpon>
@@ -164,8 +171,11 @@
     <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Transformers\TrxXmlTransformer.cs" />
     <Compile Include="Utility\BrowserPathHelper.cs" />
+    <Compile Include="Utility\ComHelpers.cs" />
+    <Compile Include="Utility\DteHelpers.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
+    <Compile Include="Utility\ProcessExtensions.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />

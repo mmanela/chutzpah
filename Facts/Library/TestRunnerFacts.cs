@@ -351,7 +351,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
 
-                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { OpenInBrowser = true });
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestLaunchMode = TestLaunchMode.FullBrowser });
 
                 runner.Mock<IProcessHelper>().Verify(x => x.LaunchFileInBrowser(@"D:\harnessPath.html", null));
             }
@@ -484,7 +484,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
 
-                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { OpenInBrowser = true });
+                TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestLaunchMode = TestLaunchMode.FullBrowser });
 
                 runner.Mock<ITestContextBuilder>().Verify(x => x.CleanupContext(context), Times.Never());
             }
