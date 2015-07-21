@@ -156,6 +156,7 @@
     <Compile Include="ChutzpahTracer.cs" />
     <Compile Include="Transformers\ISummaryTransformerProvider.cs" />
     <Compile Include="Transformers\ITransformProcessor.cs" />
+    <Compile Include="Transformers\NUnitXmlTransformer.cs" />
     <Compile Include="Transformers\LcovTransformer.cs" />
     <Compile Include="Transformers\SummaryTransformer.cs" />
     <Compile Include="Transformers\JUnitXmlTransformer.cs" />
