@@ -298,7 +298,7 @@ namespace Chutzpah
                                 testContext.FirstInputTestFile);
                             process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName);
                         }
-                        else
+                        else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
                             ChutzpahTracer.TraceInformation(
                                 "Invoking headless browser on test harness '{0}' for file '{1}'",
@@ -331,6 +331,16 @@ namespace Chutzpah
                                 testFileSummaries.Enqueue(testSummary);
                             }
                         }
+                        else if (options.TestLaunchMode == TestLaunchMode.ScriptDebugger)
+                        {
+                            ChutzpahTracer.TraceInformation(
+                                "Debugging test harness '{0}' for file '{1}'",
+                                testContext.TestHarnessPath,
+                                testContext.FirstInputTestFile);
+                            process.LaunchScriptDebugger(testContext.TestHarnessPath);
+                        }
+                        else {
+                            Debug.Assert(false); }
                     }
                     catch (Exception e)
                     {
@@ -356,7 +366,9 @@ namespace Chutzpah
             foreach (var testContext in testContexts)
             {
                 // Don't clean up context if in debug mode
-                if (!m_debugEnabled && options.TestLaunchMode != TestLaunchMode.FullBrowser)
+                if (!m_debugEnabled 
+                    && options.TestLaunchMode != TestLaunchMode.FullBrowser
+                    && options.TestLaunchMode != TestLaunchMode.ScriptDebugger)
                 {
                     try
                     {
