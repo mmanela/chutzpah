@@ -95,7 +95,7 @@ namespace Chutzpah.Transformers
             var testSuite = document.CreateElement("test-suite");
             testSuite.SetAttribute("type", "JavaScript");
             testSuite.SetAttribute("name", name);
-            testSuite.SetAttribute("succcess", passedCount.ToString());
+            testSuite.SetAttribute("success", passedCount.ToString());
             testSuite.SetAttribute("time", elapsedSeconds.ToString());
             testSuite.SetAttribute("executed", executed ? "True" : "False");
             testSuite.SetAttribute("asserts", "0");
