@@ -72,7 +72,7 @@ namespace Chutzpah.Transformers
             }
         }
 
-        private XmlElement AddTestCase(TestCase test, XmlElement results, XmlDocument document)
+        private XmlElement AddTestCase(TestCase test, XmlNode results, XmlDocument document)
         {
             var testCase = document.CreateElement("test-case");
             testCase.SetAttribute("name", test.TestName);
@@ -90,6 +90,39 @@ namespace Chutzpah.Transformers
             return testCase;
         }
 
+        private XmlElement AddTestSuite(XmlDocument document, XmlNode testResults, string name, int passedCount, decimal elapsedSeconds, bool executed, bool successful)
+        {
+            var testSuite = document.CreateElement("test-suite");
+            testSuite.SetAttribute("type", "JavaScript");
+            testSuite.SetAttribute("name", name);
+            testSuite.SetAttribute("succcess", passedCount.ToString());
+            testSuite.SetAttribute("time", elapsedSeconds.ToString());
+            testSuite.SetAttribute("executed", executed ? "True" : "False");
+            testSuite.SetAttribute("asserts", "0");
+            testSuite.SetAttribute("result", successful ? "Success" : "Failed");
+            testResults.AppendChild(testSuite);
+
+            var results = document.CreateElement("results");
+            testSuite.AppendChild(results);
+
+            return testSuite;
+        }
+
+        private string GenerateReportXml(XmlDocument document)
+        {
+            // Careful, if you use a StringBuilder with StringWriter it overrides the encoding as utf-16.
+            // Then System.Xml can't read it in the future without the BOM.
+            var stream = new MemoryStream();
+            var xmlWriter = XmlTextWriter.Create(stream, new XmlWriterSettings 
+            { 
+                Indent = true, 
+                Encoding = System.Text.ASCIIEncoding.ASCII 
+            });
+
+            document.Save(xmlWriter);
+            return Encoding.ASCII.GetString(stream.ToArray());
+        }
+
         public override string Transform(TestCaseSummary testFileSummary)
         {
             if (testFileSummary == null) throw new ArgumentNullException("testFileSummary");
@@ -99,30 +132,28 @@ namespace Chutzpah.Transformers
         
             foreach (var testFile in testFileSummary.TestFileSummaries)
             {
-                var testSuite = document.CreateElement("test-suite");
-                testSuite.SetAttribute("type", "JavaScript");
-                testSuite.SetAttribute("name", testFile.Path);
-                testSuite.SetAttribute("succcess", testFile.PassedCount.ToString());
-                testSuite.SetAttribute("time", (testFile.TimeTaken / 1000m).ToString());
-                testSuite.SetAttribute("executed", testFile.PassedCount + testFile.FailedCount == testFile.TotalCount ? "True" : "False");
-                testSuite.SetAttribute("asserts", "0");
-                testSuite.SetAttribute("result", testFile.PassedCount == testFile.TotalCount ? "Success" : "Failed");
-                testResults.AppendChild(testSuite);
+                var testSuite = AddTestSuite(document, testResults, testFile.Path,
+                    testFile.PassedCount,
+                    testFile.TimeTaken / 1000m,
+                    testFile.PassedCount + testFile.FailedCount == testFile.TotalCount,
+                    testFile.PassedCount == testFile.TotalCount);
+                var results = testSuite.FirstChild;
 
-                var results = document.CreateElement("results");
-                testSuite.AppendChild(results);
-
-                foreach (var test in testFile.Tests)
+                foreach (var group in testFile.TestGroups)
                 {
-                    AddTestCase(test, results, document);
+                    Int32 total = group.Value.Count;
+                    Int32 passed = group.Value.Count(t => t.Passed);
+                    decimal time = group.Value.Sum(t => t.TimeTaken) / 1000m;
+
+                    var groupSuite = AddTestSuite(document, results, group.Key, passed, time, total > 0, total == passed);
+                    foreach (var test in group.Value)
+                    {
+                        AddTestCase(test, groupSuite.FirstChild, document);
+                    }
                 }
             }
 
-            var stream = new MemoryStream();
-            var xmlWriter = XmlTextWriter.Create(stream, new XmlWriterSettings { Indent = true, Encoding = System.Text.ASCIIEncoding.ASCII });
-
-            document.Save(xmlWriter);
-            return Encoding.ASCII.GetString(stream.ToArray());
+            return GenerateReportXml(document);
         }
 
         private static string Encode(string str)
