@@ -87,6 +87,7 @@
     </Compile>
     <Compile Include="SolutionEventsListener.cs" />
     <Compile Include="SolutionEventsListenerEventArgs.cs" />
+    <Compile Include="VsDebuggerTestLauncher.cs" />
     <Compile Include="VsSolutionHelper.cs" />
   </ItemGroup>
   <ItemGroup>

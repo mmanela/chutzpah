@@ -81,6 +81,7 @@
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
     <Compile Include="FileProcessors\MochaInterfaceDetectionProcessor.cs" />
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
+    <Compile Include="ITestLauncher.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
