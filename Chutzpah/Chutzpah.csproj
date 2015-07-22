@@ -87,6 +87,7 @@
     <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
+    <Compile Include="Models\TestLaunchMode.cs" />
     <Compile Include="Models\TransformConfig.cs" />
     <Compile Include="Models\vstsModel\vstst.cs">
       <DependentUpon>vstst.xsd</DependentUpon>
