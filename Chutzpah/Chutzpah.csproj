@@ -164,8 +164,10 @@
     <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Transformers\TrxXmlTransformer.cs" />
     <Compile Include="Utility\BrowserPathHelper.cs" />
+    <Compile Include="Utility\ComHelpers.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
+    <Compile Include="Utility\ProcessExtensions.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
