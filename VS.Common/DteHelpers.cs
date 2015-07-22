@@ -103,7 +103,6 @@ namespace Chutzpah.VS.Common
         /// </summary>
         /// <param name="subjectProcessId">Id of the process to be debugged.</param>
         /// <param name="debugEngine">Name of the debugger script engine to use e.g. "script" or "native" or "managed".</param>
-/*
         public static void DebugAttachToProcess(int subjectProcessId, string debugEngine)
         {
             // Register COM message filter on this thd to enforce a call retry policy
@@ -128,6 +127,5 @@ namespace Chutzpah.VS.Common
                 }
             }
         }
- */
     }
 }

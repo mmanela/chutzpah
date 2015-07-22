@@ -45,7 +45,7 @@ namespace Chutzpah.VS.Common
             }
                            
             // Debug the script in that tab process.
-            //DteHelpers.DebugAttachToProcess(ieTabProcess.Id, "script");
+            DteHelpers.DebugAttachToProcess(ieTabProcess.Id, "script");
 
             // Resume the threads in the IE process which where started off suspended.
             ieTabProcess.Resume();
