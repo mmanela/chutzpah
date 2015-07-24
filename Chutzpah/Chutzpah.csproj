@@ -81,11 +81,13 @@
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
     <Compile Include="FileProcessors\MochaInterfaceDetectionProcessor.cs" />
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
+    <Compile Include="ITestLauncher.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
     <Compile Include="Models\SettingsFilePath.cs" />
     <Compile Include="Models\SettingsFileTestPath.cs" />
+    <Compile Include="Models\TestLaunchMode.cs" />
     <Compile Include="Models\TransformConfig.cs" />
     <Compile Include="Models\vstsModel\vstst.cs">
       <DependentUpon>vstst.xsd</DependentUpon>
@@ -164,8 +166,10 @@
     <Compile Include="Transformers\TransformProcessor.cs" />
     <Compile Include="Transformers\TrxXmlTransformer.cs" />
     <Compile Include="Utility\BrowserPathHelper.cs" />
+    <Compile Include="Utility\ComHelpers.cs" />
     <Compile Include="Utility\Hasher.cs" />
     <Compile Include="Utility\IHasher.cs" />
+    <Compile Include="Utility\ProcessExtensions.cs" />
     <Compile Include="Wrappers\EnvironmentWrapper.cs" />
     <Compile Include="Wrappers\FileSystemWrapper.cs" />
     <Compile Include="Wrappers\HtmlUtility.cs" />
