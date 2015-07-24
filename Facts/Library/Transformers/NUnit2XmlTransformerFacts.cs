@@ -73,8 +73,6 @@ namespace Chutzpah.Facts.Library.Transformers
             var summary = BuildTestCaseSummary();
             var result = transformer.Transform(summary);
 
-            System.IO.File.WriteAllText(@"C:\Development\results.xml", result);
-
             return XDocument.Parse(result);
         }
 
