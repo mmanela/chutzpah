@@ -11,7 +11,8 @@ namespace Chutzpah.Transformers
             {
                 new JUnitXmlTransformer(fileSystem),
                 new LcovTransformer(fileSystem),
-                new TrxXmlTransformer(fileSystem), 
+                new TrxXmlTransformer(fileSystem),
+                new NUnit2XmlTransformer(fileSystem)
             };
         }
     }
