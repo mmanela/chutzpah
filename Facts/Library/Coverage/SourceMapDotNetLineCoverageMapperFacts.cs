@@ -74,7 +74,7 @@ namespace Chutzpah.Facts.Library.Coverage
                 .Returns(true);
 
             var mapper = new TestableSourceMapDotNetLineCoverageMapper(mockFileSystem.Object, GetFakeMappings());
-            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 1 }, 3, new ReferencedFile() { SourceMapFilePath = sourceMapFilePath });
+            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 1 }, 3, new ReferencedFile() { SourceMapFilePath = sourceMapFilePath, Path = sourceMapFilePath });
 
             mockFileSystem.Verify(x => x.GetText(sourceMapFilePath), Times.Once());
             Assert.Equal("contents", mapper.LastConsumerFileContents);
