@@ -127,15 +127,17 @@ namespace Chutzpah.Coverage
             foreach (var entry in data)
             {
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
-                if (uri.Scheme != "file")
-                    continue;
-
+              
                 if (!uri.IsAbsoluteUri)
                 {
                     // Resolve against the test file path.
                     string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
                     uri = new Uri(Path.Combine(basePath, entry.Key));
                 }
+
+                if (uri.Scheme != "file")
+                    continue;
+
 
                 string filePath = uri.LocalPath;
 
