@@ -50,10 +50,5 @@ namespace Chutzpah.VS.Common
             // Resume the threads in the IE process which where started off suspended.
             ieTabProcess.Resume();
         }
-
-        public void CleanupTest(TestContext testContext)
-        {
-            //TODO
-        }
     }
 }

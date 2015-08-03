@@ -333,16 +333,20 @@ namespace Chutzpah
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.Custom)
                         {
-                            if (options.CustomTestLauncher == null) {
-                                throw new ArgumentNullException("TestOptions.CustomTestLauncher"); }
+                            if (options.CustomTestLauncher == null)
+                            {
+                                throw new ArgumentNullException("TestOptions.CustomTestLauncher");
+                            }
                             ChutzpahTracer.TraceInformation(
                                 "Launching custom test on test harness '{0}' for file '{1}'",
                                 testContext.TestHarnessPath,
                                 testContext.FirstInputTestFile);
                             options.CustomTestLauncher.LaunchTest(testContext);
                         }
-                        else {
-                            Debug.Assert(false); }
+                        else
+                        {
+                            Debug.Assert(false);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -368,20 +372,15 @@ namespace Chutzpah
             foreach (var testContext in testContexts)
             {
                 // Don't clean up context if in debug mode
-                if (!m_debugEnabled 
-                    && options.TestLaunchMode != TestLaunchMode.FullBrowser)
+                if (!m_debugEnabled
+                    && options.TestLaunchMode != TestLaunchMode.FullBrowser
+                    && options.TestLaunchMode != TestLaunchMode.Custom)
                 {
                     try
                     {
-                        if (options.TestLaunchMode == TestLaunchMode.Custom)
-                        {
-                            options.CustomTestLauncher.CleanupTest(testContext);
-                        }
-                        else
-                        {
-                            ChutzpahTracer.TraceInformation("Cleaning up test context for {0}", testContext.FirstInputTestFile);
-                            testContextBuilder.CleanupContext(testContext);
-                        }
+                        ChutzpahTracer.TraceInformation("Cleaning up test context for {0}", testContext.FirstInputTestFile);
+                        testContextBuilder.CleanupContext(testContext);
+
                     }
                     catch (Exception e)
                     {

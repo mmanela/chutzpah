@@ -12,6 +12,5 @@ namespace Chutzpah
     public interface ITestLauncher
     {
         void LaunchTest(TestContext testContext);
-        void CleanupTest(TestContext testContext);
     }
 }
