@@ -257,7 +257,7 @@ function Update-AssemblyInfoFiles ([string] $version, [string] $commit) {
 
 function Update-OtherFiles ([string] $version) {
 
-    $chutzpahVersionPattern = 'public const string ChutzpahVersion = "([0-9]*?)"'
+    $chutzpahVersionPattern = 'public const string ChutzpahVersion = "(([0-9]\.?)*?)"'
     $chutzpahVersion = 'public const string ChutzpahVersion = "'+$version+'"'
     
     $contantsFile = Join-Path $baseDir "Chutzpah\Constants.cs"

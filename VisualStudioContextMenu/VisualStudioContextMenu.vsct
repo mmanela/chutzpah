@@ -38,10 +38,25 @@
          group as the part of a menu contained between two lines. The parent of a group 
          must be a menu. -->
         <Groups>
-            <Group guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0600">
-            </Group>
-        </Groups>
+          <Group guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0600">
+          </Group>
 
+          <Group guid="guidChutzpahCmdSetString" id="ChutzpahSubMenuGroup" priority="0x0000">
+            <Parent guid="guidChutzpahCmdSetString" id="cmdidChutzpahSubMenu" />
+          </Group>
+        </Groups>
+      
+      <Menus>
+        <Menu guid="guidChutzpahCmdSetString" id="cmdidChutzpahSubMenu" type="Menu" priority="0x1000">
+          <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
+          <CommandFlag>IconAndText</CommandFlag>
+          <Strings>
+            <ButtonText>Chutzpah</ButtonText>
+            <CommandName>Run Chutzpah With</CommandName>
+          </Strings>
+        </Menu>  
+      </Menus>
+      
         <!--Buttons section. -->
         <!--This section defines the elements the user can interact with, like a menu command or a button 
         or combo box in a toolbar. -->
@@ -77,13 +92,24 @@
             </Button>
           
           <Button guid="guidChutzpahCmdSetString" id="cmdidRunCodeCoverage" priority="0x0000" type="Button">
-            <Parent guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" />
+            <Parent guid="guidChutzpahCmdSetString" id="ChutzpahSubMenuGroup" />
             <Icon guid="guidImages" id="chet1" />
             <CommandFlag>DynamicVisibility</CommandFlag>
             <CommandFlag>DefaultInvisible</CommandFlag>
             <Strings>
-              <CommandName>RunInBrowser</CommandName>
-              <ButtonText>Show Code Coverage</ButtonText>
+              <CommandName>RunCodeCoverage</CommandName>
+              <ButtonText>Coverage</ButtonText>
+            </Strings>
+          </Button>
+
+          <Button guid="guidChutzpahCmdSetString" id="cmdidDebugTests" priority="0x0000" type="Button">
+            <Parent guid="guidChutzpahCmdSetString" id="ChutzpahSubMenuGroup" />
+            <Icon guid="guidImages" id="chet1" />
+            <CommandFlag>DynamicVisibility</CommandFlag>
+            <CommandFlag>DefaultInvisible</CommandFlag>
+            <Strings>
+              <CommandName>RunInDebugger</CommandName>
+              <ButtonText>Debugger</ButtonText>
             </Strings>
           </Button>
         </Buttons>
@@ -140,9 +166,12 @@
         <!-- This is the guid used to group the commands together -->
         <GuidSymbol name="guidChutzpahCmdSetString" value="{F0D5D16A-56CE-40A2-9C34-B890D6961CF2}">
             <IDSymbol name="ChutzpahMenuGroup" value="0x1020" />
-            <IDSymbol name="cmdidRunJSTests" value="0x0100" />
+          <IDSymbol name="ChutzpahSubMenuGroup" value="0x1021" />
+          <IDSymbol name="cmdidRunJSTests" value="0x0100" />
             <IDSymbol name="cmdidRunInBrowser" value="0x0101" />
-            <IDSymbol name="cmdidRunCodeCoverage" value="0x0102" />
+          <IDSymbol name="cmdidRunCodeCoverage" value="0x0102" />
+          <IDSymbol name="cmdidChutzpahSubMenu" value="0x0103" />
+          <IDSymbol name="cmdidDebugTests" value="0x0104" />
         </GuidSymbol>
 
         <GuidSymbol name="guidCssEdGrp" value="{A764E896-518D-11d2-9A89-00C04F79EFC3}">

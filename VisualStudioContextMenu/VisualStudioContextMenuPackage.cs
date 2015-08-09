@@ -37,8 +37,8 @@ namespace Chutzpah.VisualStudioContextMenu
     [PackageRegistration(UseManagedResourcesOnly = true)]
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
-    [InstalledProductRegistration("#110", "#112",  Constants.ChutzpahVersion, IconResourceID = 400)]
-    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 110, 113, true)]
+    [InstalledProductRegistration("#110", "#112", Constants.ChutzpahVersion, IconResourceID = 400)]
+    [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 111, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
@@ -116,11 +116,17 @@ namespace Chutzpah.VisualStudioContextMenu
                 runJsTestInBrowserMenuCmd.BeforeQueryStatus += RunJSTestsInBrowserCmdQueryStatus;
                 mcs.AddCommand(runJsTestInBrowserMenuCmd);
 
-                // Command - Run JS tests in browser
+                // Command - Run Code Coverage
                 var runJsTestCodeCoverageCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidRunCodeCoverage);
                 var runJsTestCodeCoverageMenuCmd = new OleMenuCommand(RunCodeCoverageCmdCallback, runJsTestCodeCoverageCmd);
                 runJsTestCodeCoverageMenuCmd.BeforeQueryStatus += RunCodeCoverageCmdQueryStatus;
                 mcs.AddCommand(runJsTestCodeCoverageMenuCmd);
+
+
+                var runJsTestDebuggerCmd = new CommandID(GuidList.guidChutzpahCmdSet, (int)PkgCmdIDList.cmdidDebugTests);
+                var runJsTestDebuggerMenuCmd = new OleMenuCommand(RunDebuggerCmdCallback, runJsTestDebuggerCmd);
+                runJsTestDebuggerMenuCmd.BeforeQueryStatus += RunDebuggerCmdQueryStatus;
+                mcs.AddCommand(runJsTestDebuggerMenuCmd);
 
             }
 
@@ -129,7 +135,7 @@ namespace Chutzpah.VisualStudioContextMenu
             this.solutionListener.SolutionUnloaded += OnSolutionUnloaded;
             this.solutionListener.SolutionProjectChanged += OnSolutionProjectChanged;
             this.solutionListener.StartListeningForChanges();
-                
+
         }
 
         private void InitializeSettingsFileEnvironments()
@@ -218,7 +224,7 @@ namespace Chutzpah.VisualStudioContextMenu
                 selectedFiles = new List<string> { CurrentDocumentPath };
             }
 
-            RunTests(selectedFiles, false, true);
+            RunTests(selectedFiles, openInBrowser: true);
         }
 
         private void RunJSTestCmdCallback(object sender, EventArgs e)
@@ -228,11 +234,11 @@ namespace Chutzpah.VisualStudioContextMenu
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
-                RunTestsInSolutionFolderNodeCallback(sender, e, false);
+                RunTestsInSolutionFolderNodeCallback(sender, e);
             }
             else if (activeWindow.Kind == "Document")
             {
-                RunTestsFromEditorCallback(sender, e, false);
+                RunTestsFromEditorCallback(sender, e);
             }
         }
 
@@ -243,13 +249,30 @@ namespace Chutzpah.VisualStudioContextMenu
             var activeWindow = dte.ActiveWindow;
             if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
             {
-                RunTestsInSolutionFolderNodeCallback(sender, e, true);
+                RunTestsInSolutionFolderNodeCallback(sender, e, withCodeCoverage: true);
             }
             else if (activeWindow.Kind == "Document")
             {
-                RunTestsFromEditorCallback(sender, e, true);
+                RunTestsFromEditorCallback(sender, e, withCodeCoverage: true);
             }
         }
+
+
+        private void RunDebuggerCmdCallback(object sender, EventArgs e)
+        {
+            CheckTracing();
+
+            var activeWindow = dte.ActiveWindow;
+            if (activeWindow.ObjectKind == DTEConstants.vsWindowKindSolutionExplorer)
+            {
+                RunTestsInSolutionFolderNodeCallback(sender, e, withDebugger: true);
+            }
+            else if (activeWindow.Kind == "Document")
+            {
+                RunTestsFromEditorCallback(sender, e, withDebugger: true);
+            }
+        }
+
 
 
         private void RunJSTestsCmdQueryStatus(object sender, EventArgs e)
@@ -275,6 +298,14 @@ namespace Chutzpah.VisualStudioContextMenu
 
             SetCommandVisibility(menuCommand, TestFileType.Folder, TestFileType.JS);
         }
+        private void RunDebuggerCmdQueryStatus(object sender, EventArgs e)
+        {
+            var menuCommand = sender as OleMenuCommand;
+            if (menuCommand == null) return;
+
+            SetCommandVisibility(menuCommand, TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
+        }
+
 
         private void SetCommandVisibility(OleMenuCommand menuCommand, params TestFileType[] allowedTypes)
         {
@@ -317,27 +348,27 @@ namespace Chutzpah.VisualStudioContextMenu
             menuCommand.Visible = true;
         }
 
-        private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e, bool withCodeCoverage)
+        private void RunTestsInSolutionFolderNodeCallback(object sender, EventArgs e, bool withCodeCoverage = false, bool withDebugger = false)
         {
             var filePaths = GetSelectedFilesAndFolders(TestFileType.Folder, TestFileType.HTML, TestFileType.JS);
-            RunTests(filePaths, withCodeCoverage, false);
+            RunTests(filePaths, withCodeCoverage: withCodeCoverage, withDebugger: withDebugger);
         }
 
-        private void RunTestsFromEditorCallback(object sender, EventArgs e, bool withCodeCoverage)
+        private void RunTestsFromEditorCallback(object sender, EventArgs e, bool withCodeCoverage = false, bool withDebugger = false)
         {
             string filePath = CurrentDocumentPath;
-            RunTests(filePath, withCodeCoverage);
+            RunTests(filePath, withCodeCoverage:withCodeCoverage, withDebugger:withDebugger);
         }
 
-        private void RunTests(string filePath, bool withCodeCoverage)
+        private void RunTests(string filePath, bool openInBrowser = false, bool withCodeCoverage = false, bool withDebugger = false)
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                RunTests(new[] { filePath }, withCodeCoverage, false);
+                RunTests(new[] { filePath }, openInBrowser: openInBrowser, withCodeCoverage: withCodeCoverage, withDebugger: withDebugger);
             }
         }
 
-        private void RunTests(IEnumerable<string> filePaths, bool withCodeCoverage, bool openInBrowser)
+        private void RunTests(IEnumerable<string> filePaths, bool openInBrowser = false, bool withCodeCoverage = false, bool withDebugger = false)
         {
             if (!testingInProgress)
             {
@@ -367,11 +398,13 @@ namespace Chutzpah.VisualStudioContextMenu
                                                           {
                                                               Enabled = withCodeCoverage
                                                           },
-                                                          TestLaunchMode = openInBrowser ? TestLaunchMode.FullBrowser : TestLaunchMode.HeadlessBrowser,
+
+                                                          CustomTestLauncher = withDebugger ? new VsDebuggerTestLauncher() : null,
+                                                          TestLaunchMode = GetTestLaunchMode(openInBrowser, withDebugger),
                                                           ChutzpahSettingsFileEnvironments = settingsEnvironments
                                                       };
                                     var result = testRunner.RunTests(filePaths, options, runnerCallback);
- 
+
                                     if (result.CoverageObject != null)
                                     {
                                         var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result.CoverageObject);
@@ -389,6 +422,22 @@ namespace Chutzpah.VisualStudioContextMenu
                             });
                     }
                 }
+            }
+        }
+
+        private static TestLaunchMode GetTestLaunchMode(bool openInBrowser, bool withDebugger)
+        {
+            if (openInBrowser)
+            {
+                return TestLaunchMode.FullBrowser;
+            }
+            else if (withDebugger)
+            {
+                return TestLaunchMode.Custom;
+            }
+            else
+            {
+                return TestLaunchMode.HeadlessBrowser;
             }
         }
 

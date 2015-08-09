@@ -4,6 +4,7 @@ using System.Linq;
 using Chutzpah.Callbacks;
 using Chutzpah.Coverage;
 using Chutzpah.Models;
+using Chutzpah.VS.Common;
 using Chutzpah.Wrappers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -42,7 +43,7 @@ namespace Chutzpah.VS2012.TestAdapter
                         runContext.IsBeingDebugged ? TestLaunchMode.Custom:
                         settings.OpenInBrowser ? TestLaunchMode.FullBrowser:
                         TestLaunchMode.HeadlessBrowser,
-                    CustomTestLauncher     = runContext.IsBeingDebugged ? new Chutzpah.VS.Common.VsDebuggerTestLauncher() : null,
+                    CustomTestLauncher     = runContext.IsBeingDebugged ? new VsDebuggerTestLauncher() : null,
                     MaxDegreeOfParallelism = runContext.IsBeingDebugged ? 1 : settings.MaxDegreeOfParallelism,
                     ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };
