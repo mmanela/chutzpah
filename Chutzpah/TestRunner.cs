@@ -229,7 +229,7 @@ namespace Chutzpah
             // Then group files by their respective settings file
             var testGroups = new List<List<PathInfo>>();
             var fileSettingGroups = from path in scriptPaths
-                                    let settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(path.FullPath), testOptions.ChutzpahSettingsFileEnvironments)
+                                    let settingsFile = testSettingsService.FindSettingsFile(path.FullPath, testOptions.ChutzpahSettingsFileEnvironments)
                                     group path by settingsFile;
 
             // Scan over the grouped test files and if this file is set up for batching we add those files
@@ -466,9 +466,7 @@ namespace Chutzpah
                         ChutzpahTracer.TraceWarning("Supplied chutzpah.json path {0} does not exist", path);
                     }
 
-                    // The FindSettingsFile api takes the directory of the file since it caches this for use in later test runs
-                    // this could be cleaned up to have two APIS one which lets you give the direct file
-                    var settingsFile = testSettingsService.FindSettingsFile(Path.GetDirectoryName(chutzpahJsonPath), options.ChutzpahSettingsFileEnvironments);
+                    var settingsFile = testSettingsService.FindSettingsFile(chutzpahJsonPath, options.ChutzpahSettingsFileEnvironments);
                     var pathInfos = fileProbe.FindScriptFiles(settingsFile);
                     scriptPaths = scriptPaths.Concat(pathInfos);
                 }

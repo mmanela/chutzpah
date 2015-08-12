@@ -32,7 +32,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir");
 
             Assert.Equal(@"C:\settingsDir", settings.SettingsFileDirectory);
         }
@@ -46,7 +46,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir2\custom")).Returns(@"customPath");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir2");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir2");
 
             Assert.Equal(@"customPath", settings.TestHarnessDirectory);
         }
@@ -60,7 +60,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir6\custom")).Returns(@"customPath");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir6");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir6");
 
             Assert.Equal(@"customPath", settings.AMDBasePath);
         }
@@ -72,9 +72,9 @@ namespace Chutzpah.Facts.Library.Models
             var settings = new ChutzpahTestSettingsFile();
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile("dir3")).Returns(@"C:\settingsDir3\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
-            service.ClassUnderTest.FindSettingsFile("dir3");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir3");
 
-            var cached = service.ClassUnderTest.FindSettingsFile("dir3");
+            var cached = service.ClassUnderTest.FindSettingsFileFromDirectory("dir3");
 
             Assert.Equal(@"C:\settingsDir3", cached.SettingsFileDirectory);
         }
@@ -86,9 +86,9 @@ namespace Chutzpah.Facts.Library.Models
             var settings = new ChutzpahTestSettingsFile();
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile("dir4")).Returns(@"C:\settingsDir4\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
-            service.ClassUnderTest.FindSettingsFile("dir4");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir4");
 
-            var cached = service.ClassUnderTest.FindSettingsFile(@"C:\settingsDir4\");
+            var cached = service.ClassUnderTest.FindSettingsFileFromDirectory(@"C:\settingsDir4\");
 
             Assert.Equal(@"C:\settingsDir4", cached.SettingsFileDirectory);
         }
@@ -98,9 +98,9 @@ namespace Chutzpah.Facts.Library.Models
         {
             var service = new TestableChutzpahTestSettingsService();
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile("dir5")).Returns((string)null);
-            service.ClassUnderTest.FindSettingsFile(@"dir5");
+            service.ClassUnderTest.FindSettingsFileFromDirectory(@"dir5");
 
-            var cached = service.ClassUnderTest.FindSettingsFile(@"dir5");
+            var cached = service.ClassUnderTest.FindSettingsFileFromDirectory(@"dir5");
 
             service.Mock<IFileProbe>().Verify(x => x.FindTestSettingsFile("dir5"), Times.Once());
         }
@@ -126,7 +126,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\out")).Returns(@"customPath4");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir7");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
 
             Assert.Equal(@"customPath1", settings.Compile.Executable);
             Assert.Equal(@"customPath2", settings.Compile.WorkingDirectory);
@@ -152,7 +152,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\out")).Returns<string>(null);
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir7");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
 
             service.Mock<IFileSystemWrapper>().Verify(x => x.CreateDirectory(@"C:\settingsDir7\out"));
         }
@@ -182,7 +182,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir7");
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
 
             Assert.Equal(result, settings.Compile.Executable.Contains(varStr));
             Assert.Equal(result, settings.Compile.Arguments.Contains(varStr));
@@ -214,7 +214,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
-            service.ClassUnderTest.FindSettingsFile("dir7", new ChutzpahSettingsFileEnvironments(new []{environment}));
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7", new ChutzpahSettingsFileEnvironments(new []{environment}));
 
             Assert.True(settings.Compile.Executable.Contains("SomeValue"));
             Assert.True(settings.Compile.Arguments.Contains("SomeValue"));
@@ -267,7 +267,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsDir\settingsFile.json")).Returns(childSettings);
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsFile.json")).Returns(parentSettings);
 
-            service.ClassUnderTest.FindSettingsFile(@"C:\settingsDir");
+            service.ClassUnderTest.FindSettingsFileFromDirectory(@"C:\settingsDir");
 
 
             // Tests to run are not inherited
@@ -323,7 +323,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsDir\settingsFile.json")).Returns(childSettings);
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsFile.json")).Returns(parentSettings);
 
-            service.ClassUnderTest.FindSettingsFile(@"C:\settingsDir");
+            service.ClassUnderTest.FindSettingsFileFromDirectory(@"C:\settingsDir");
 
             // Tests to run are not inherited
             Assert.Equal(1, childSettings.Tests.Count);
@@ -392,7 +392,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsDir\settingsFile.json")).Returns(childSettings);
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsFile.json")).Returns(parentSettings);
 
-            service.ClassUnderTest.FindSettingsFile(@"C:\settingsDir");
+            service.ClassUnderTest.FindSettingsFileFromDirectory(@"C:\settingsDir");
 
             Assert.Equal(@"C:\settingsDir", childSettings.SettingsFileDirectory);
 
@@ -433,7 +433,7 @@ namespace Chutzpah.Facts.Library.Models
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsDir\settingsFile.json")).Returns(childSettings);
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(@"C:\settingsFile.json")).Returns(parentSettings);
 
-            service.ClassUnderTest.FindSettingsFile(@"C:\settingsDir");
+            service.ClassUnderTest.FindSettingsFileFromDirectory(@"C:\settingsDir");
 
             Assert.Equal(@"C:\settingsDir", childSettings.SettingsFileDirectory);
             Assert.Equal(@"C:\", childSettings.TestHarnessDirectory);

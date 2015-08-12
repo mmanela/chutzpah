@@ -203,18 +203,25 @@ namespace Chutzpah.VS2012.TestAdapter
             ChutzpahTracer.TraceInformation("Begin UpdateTestContainersAndFileWatchers");
             Parallel.ForEach(files, file =>
             {
-                if (isAdd)
+                try
                 {
+                    if (isAdd)
+                    {
 
-                    ChutzpahTracer.TraceInformation("Adding watch on {0}", file.Path);
-                    testFilesUpdateWatcher.AddWatch(file.Path);
-                    AddTestContainerIfTestFile(file);
+                        ChutzpahTracer.TraceInformation("Adding watch on {0}", file.Path);
+                        testFilesUpdateWatcher.AddWatch(file.Path);
+                        AddTestContainerIfTestFile(file);
+                    }
+                    else
+                    {
+                        ChutzpahTracer.TraceInformation("Removing watch on {0}", file.Path);
+                        testFilesUpdateWatcher.RemoveWatch(file.Path);
+                        RemoveTestContainer(file);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    ChutzpahTracer.TraceInformation("Removing watch on {0}", file.Path);
-                    testFilesUpdateWatcher.RemoveWatch(file.Path);
-                    RemoveTestContainer(file);
+                    ChutzpahTracer.TraceError(e, "Failed in UpdateTestContainersAndFileWatchers");
                 }
             });
 

@@ -66,17 +66,6 @@ namespace Chutzpah.Facts
                 Assert.False(result);
             }
 
-            [Fact]
-            public void Will_return_false_test_file_is_not_a_valid_file_file()
-            {
-                var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.blah")).Returns(new PathInfo { Type = PathType.Other });
-
-                var result = creator.ClassUnderTest.IsTestFile("test.blah");
-
-                Assert.False(result);
-            }
-
             [Theory]
             [InlineData("test.ts", PathType.TypeScript)]
             [InlineData("test.coffee", PathType.CoffeeScript)]
@@ -97,7 +86,7 @@ namespace Chutzpah.Facts
             public void Will_return_false_if_test_file_does_not_exist()
             {
                 var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns((string)null);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
 
@@ -108,7 +97,7 @@ namespace Chutzpah.Facts
             public void Will_return_false_if_test_framework_not_detected()
             {
                 var creator = new TestableTestContextBuilder();
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = null });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns("test.js");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(false);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -126,7 +115,7 @@ namespace Chutzpah.Facts
                     new SettingsFileTestPath{ Include = "*test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"c:\settingspath")).Returns(@"c:\settingspath");
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns( @"C:\settingsPath\path\test.js" );
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -144,7 +133,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Include = "*test.js", Exclude = "*path/test.js"} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"C:\settingsPath\path\test.js");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -162,7 +151,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Exclude = "*path2/test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"C:\settingsPathpath\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"C:\settingsPathpath\test.js");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -178,7 +167,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Path = "path/test.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"settingsPath\path\test.js");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
 
                 var result = creator.ClassUnderTest.IsTestFile("test.js");
@@ -194,7 +183,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Path = "path/", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"settingsPath\path\test.js");
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath("settingsPath\\path\\")).Returns(@"settingsPath\path");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -212,7 +201,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Path = "path/", Include = "*.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"settingsPath\path\test.js");
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath("settingsPath\\path\\")).Returns(@"settingsPath\path");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -230,7 +219,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Path = "path/", Include = "*.ts", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"settingsPath\path\test.js");
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath("settingsPath\\path\\")).Returns(@"settingsPath\path");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);
@@ -248,7 +237,7 @@ namespace Chutzpah.Facts
                 {
                     new SettingsFileTestPath{ Path = "path/", Exclude = "*.js", SettingsFileDirectory = creator.ChutzpahTestSettingsFile.SettingsFileDirectory} 
                 };
-                creator.Mock<IFileProbe>().Setup(x => x.GetPathInfo("test.js")).Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"settingsPath\path\test.js" });
+                creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("test.js")).Returns(@"settingsPath\path\test.js");
                 creator.Mock<IFileProbe>().Setup(x => x.FindFilePath("settingsPath\\path\\")).Returns((string)null);
                 creator.Mock<IFileProbe>().Setup(x => x.FindFolderPath("settingsPath\\path\\")).Returns(@"settingsPath\path");
                 creator.Mock<IFrameworkDefinition>().Setup(x => x.FileUsesFramework(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<PathType>())).Returns(true);

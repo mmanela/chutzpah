@@ -413,8 +413,8 @@ namespace Chutzpah.Facts
                     });
                 var settingsForPath = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path", EnableTestFileBatching = true }.InheritFromDefault();
                 var settingsForPath2 = new ChutzpahTestSettingsFile { SettingsFileDirectory = "path2", EnableTestFileBatching = true }.InheritFromDefault();
-                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path", It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath);
-                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(@"path2", It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath2);
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(It.Is<string>(p => p.Contains(@"path\")), It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath);
+                runner.Mock<IChutzpahTestSettingsService>().Setup(x => x.FindSettingsFile(It.Is<string>(p => p.Contains(@"path2\")), It.IsAny<ChutzpahSettingsFileEnvironments>())).Returns(settingsForPath2);
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" });
 

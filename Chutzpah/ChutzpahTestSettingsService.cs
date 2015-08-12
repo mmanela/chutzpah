@@ -17,7 +17,15 @@ namespace Chutzpah
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
-        ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments = null);
+        ChutzpahTestSettingsFile FindSettingsFileFromDirectory(string directory, ChutzpahSettingsFileEnvironments environments = null);
+
+
+        /// <summary>
+        /// Find and reads a chutzpah test settings file given a path to a the file. If none is found a default settings object is created
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        ChutzpahTestSettingsFile FindSettingsFile(string filePath, ChutzpahSettingsFileEnvironments environments = null);
 
         void ClearCache();
     }
@@ -43,13 +51,22 @@ namespace Chutzpah
 
         }
 
+
+        public ChutzpahTestSettingsFile FindSettingsFile(string filePath, ChutzpahSettingsFileEnvironments environments = null)
+        {
+            if (string.IsNullOrEmpty(filePath)) return ChutzpahTestSettingsFile.Default;
+
+            var directory = Path.GetDirectoryName(filePath);
+            return FindSettingsFileFromDirectory(directory, environments);
+        }
+
         /// <summary>
         /// Find and reads a chutzpah test settings file given a direcotry. If none is found a default settings object is created
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
         /// 
-        public ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironments environments = null)
+        public ChutzpahTestSettingsFile FindSettingsFileFromDirectory(string directory, ChutzpahSettingsFileEnvironments environments = null)
         {
             if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
@@ -380,5 +397,6 @@ namespace Chutzpah
             name = string.Format("%{0}%", name);
             chutzpahCompileVariables[name] = value;
         }
+
     }
 }
