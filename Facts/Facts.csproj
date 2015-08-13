@@ -101,8 +101,6 @@
     <Compile Include="Library\Transformers\NUnit2XmlTransformerFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
     <Compile Include="Library\Transformers\LcovTransformerFacts.cs" />
-    <Compile Include="Library\Transformers\SummaryTransformerFacts.cs" />
-    <Compile Include="Library\Transformers\SummaryTransformerProviderFacts.cs" />
     <Compile Include="Library\Transformers\TransformProcessorFacts.cs" />
     <Compile Include="Library\Transformers\TrxTransformerFacts.cs" />
     <Compile Include="Mocks\MockTestMethodRunnerCallback.cs" />

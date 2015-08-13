@@ -10,6 +10,26 @@ namespace Chutzpah.Facts.Integration
 {
     public class Transforms : CoverageBase
     {
+
+        [Fact]
+        public void Will_generate_coverage_HTML()
+        {
+            var expectedHtmlPath = @"JS\Test\TestSettings\CodeCoverage\myCoverage.html";
+
+            if (File.Exists(expectedHtmlPath))
+            {
+                File.Delete(expectedHtmlPath);
+                Assert.False(File.Exists(expectedHtmlPath), "Didn't manage to delete left-over HTML file from " + expectedHtmlPath);
+            }
+
+            var scriptPath = @"JS\Test\TestSettings\CodeCoverage\cc.js";
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.True(File.Exists(expectedHtmlPath), "HTML output wasn't generated");
+        }
+
         [Fact]
         public void Will_generate_LCOV_output_when_configured_and_coverage_enabled()
         {

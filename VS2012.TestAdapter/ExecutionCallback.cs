@@ -79,8 +79,7 @@ namespace Chutzpah.VS2012.TestAdapter
                     ChutzpahTracer.TraceInformation("Chutzpah runs in TFSBuild, writing coverage file to {0}", runContext.TestRunDirectory);
 
                     var directory = runContext.TestRunDirectory;
-                    CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
-                    CoverageOutputGenerator.WriteJsonFile(directory, testResultsSummary.CoverageObject);
+                    CoverageOutputGenerator.WriteHtmlFile(Path.Combine(directory, Constants.CoverageHtmlFileName), testResultsSummary.CoverageObject);
 
                 }
                 else
@@ -88,7 +87,7 @@ namespace Chutzpah.VS2012.TestAdapter
                     ChutzpahTracer.TraceInformation("Chutzpah runs not in TFSBuild opening coverage file in browser");
 
                     var directory = runContext.SolutionDirectory;
-                    var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(directory, testResultsSummary.CoverageObject);
+                    var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(Path.Combine(directory, Constants.CoverageHtmlFileName), testResultsSummary.CoverageObject);
                     var processHelper = new ProcessHelper();
 
                     processHelper.LaunchFileInBrowser(coverageHtmlFile);

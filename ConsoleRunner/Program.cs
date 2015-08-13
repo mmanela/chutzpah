@@ -104,10 +104,10 @@ namespace Chutzpah
             Console.WriteLine("  /settingsFileEnvironment     : Sets the environment properties for a chutzpah.json settings file.");
             Console.WriteLine("                               : Specify more than one to add multiple environments.");
             Console.WriteLine("                               : (e.g. settingsFilePath;prop1=val1;prop2=val2).");
-                
 
 
-            foreach (var transformer in SummaryTransformerFactory.GetTransformers(new FileSystemWrapper()))
+
+            foreach (var transformer in new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper()))
             {
                 Console.WriteLine("  /{0} filename              : {1}", transformer.Name, transformer.Description);
             }
@@ -187,7 +187,7 @@ namespace Chutzpah
 
         private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
         {
-            var transformers = SummaryTransformerFactory.GetTransformers(new FileSystemWrapper());
+            var transformers = new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper());
             foreach (var transformer in transformers.Where(x => commandLine.UnmatchedArguments.ContainsKey(x.Name)))
             {
                 var path = commandLine.UnmatchedArguments[transformer.Name];

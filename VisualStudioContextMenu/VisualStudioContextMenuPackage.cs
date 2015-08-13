@@ -407,7 +407,7 @@ namespace Chutzpah.VisualStudioContextMenu
 
                                     if (result.CoverageObject != null)
                                     {
-                                        var path = CoverageOutputGenerator.WriteHtmlFile(solutionDir, result.CoverageObject);
+                                        var path = CoverageOutputGenerator.WriteHtmlFile(Path.Combine(solutionDir, Constants.CoverageHtmlFileName), result.CoverageObject);
                                         processHelper.LaunchFileInBrowser(path);
                                     }
                                 }

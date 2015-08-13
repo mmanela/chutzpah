@@ -53,5 +53,7 @@ namespace Chutzpah
         public const string MochaTddInterface = "tdd";
         public const string MochaExportsInterface = "exports";
 
+        public const string DefaultCoverageHtmlTransform = "coveragehtml";
+
     }
 }

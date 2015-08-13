@@ -75,5 +75,7 @@ namespace Chutzpah.Models
         {
             TotalRuntime = timeMs;
         }
+
+        public Transformers.TransformResult TransformResult { get; set; }
     }
 }

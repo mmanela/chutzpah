@@ -10,7 +10,14 @@ namespace Chutzpah.Transformers
     {
         public IEnumerable<SummaryTransformer> GetTransformers(IFileSystemWrapper fileSystem)
         {
-            return SummaryTransformerFactory.GetTransformers(fileSystem);
+            return new SummaryTransformer[] 
+            {
+                new JUnitXmlTransformer(fileSystem),
+                new LcovTransformer(fileSystem),
+                new TrxXmlTransformer(fileSystem),
+                new NUnit2XmlTransformer(fileSystem),
+                new CoverageHtmlTransformer(fileSystem)
+            };
         }
     }
 }

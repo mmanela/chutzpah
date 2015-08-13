@@ -33,8 +33,7 @@ namespace Chutzpah.RunnerCallbacks
         public void WriteCoverageFiles(CoverageData coverage)
         {
             var currentDirectory = Environment.CurrentDirectory;
-            CoverageOutputGenerator.WriteHtmlFile(currentDirectory, coverage);
-            CoverageOutputGenerator.WriteJsonFile(currentDirectory, coverage);
+            CoverageOutputGenerator.WriteHtmlFile(Path.Combine(currentDirectory, Constants.CoverageHtmlFileName), coverage);
         }
     }
 }

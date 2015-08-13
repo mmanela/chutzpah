@@ -207,7 +207,7 @@ namespace Chutzpah
             stopWatch.Stop();
             overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
 
-            transformProcessor.ProcessTransforms(testContexts, overallSummary);
+            overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
 
             // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
             // If we don't clear then the user can never update the file.

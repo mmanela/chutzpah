@@ -19,20 +19,23 @@ namespace Chutzpah.Transformers
             this.fileSystem = fileSystem;
         }
 
-        public void ProcessTransforms(IEnumerable<TestContext> testContexts, TestCaseSummary overallSummary)
+        public TransformResult ProcessTransforms(IEnumerable<TestContext> testContexts, TestCaseSummary overallSummary)
         {
+            var results = new TransformResult();
             var allTestSettings = testContexts.Select(x => x.TestFileSettings).Distinct();
 
             foreach (var settings in allTestSettings)
             {
                 if (settings.Transforms != null && settings.Transforms.Any())
                 {
-                    ProcessTransforms(settings, overallSummary);
+                    ProcessTransforms(settings, overallSummary, results);
                 }
             }
+
+            return results;
         }
 
-        private void ProcessTransforms(ChutzpahTestSettingsFile settings, TestCaseSummary overallSummary)
+        private void ProcessTransforms(ChutzpahTestSettingsFile settings, TestCaseSummary overallSummary, TransformResult results)
         {
             // Do this here per settings file in case an individual transformer has any associated state
             // - we want them fresh
@@ -55,6 +58,8 @@ namespace Chutzpah.Transformers
                     // TODO: In future, this would ideally split out the summary to just those parts
                     // relevant to the files associated with the settings file being handled
                     transform.Transform(overallSummary, outputPath);
+
+                    results.AddResult(transform.Name, outputPath);
                 }
             }
         }

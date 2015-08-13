@@ -11,10 +11,8 @@ namespace Chutzpah.Coverage
 {
     public static class CoverageOutputGenerator
     {
-        public static string WriteHtmlFile(string directory, CoverageData coverage)
+        public static string WriteHtmlFile(string path, CoverageData coverage)
         {
-            var path = Path.Combine(directory, Constants.CoverageHtmlFileName);
-
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
                 GenerateHtml(coverage, fileStream);
@@ -22,18 +20,6 @@ namespace Chutzpah.Coverage
 
             return path;
         }
-
-
-        public static string WriteJsonFile(string directory, CoverageData coverage)
-        {
-            var path = Path.Combine(directory, Constants.CoverageJsonFileName);
-
-            var serializer = new JsonSerializer();
-            File.WriteAllText(path, serializer.Serialize(coverage));
-             
-            return path;
-        }
-
 
         public static void GenerateHtml(CoverageData coverage, Stream stream)
         {

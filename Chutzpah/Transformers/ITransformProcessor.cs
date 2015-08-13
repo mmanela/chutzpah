@@ -8,6 +8,6 @@ namespace Chutzpah.Transformers
 {
     public interface ITransformProcessor
     {
-        void ProcessTransforms(IEnumerable<TestContext> testContexts, TestCaseSummary overallSummary);
+        TransformResult ProcessTransforms(IEnumerable<TestContext> testContexts, TestCaseSummary overallSummary);
     }
 }

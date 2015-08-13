@@ -1,3 +1,6 @@
 {
-  "EnableCodeCoverage": "true"
+    "EnableCodeCoverage": "true",
+    "Transforms": [
+        { "Name":  "coveragehtml", "Path":  "myCoverage.html" }
+    ]
 }
