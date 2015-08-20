@@ -13,7 +13,7 @@ namespace Chutzpah.Coverage
         /// <param name="testSettings"></param>
         IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettings);
 
-
+        
         /// <summary>
         /// Modifies the test harness for coverage instrumentation and collection. This method is
         /// also expected to inject some script code that sets a variable in JavaScripts top-level

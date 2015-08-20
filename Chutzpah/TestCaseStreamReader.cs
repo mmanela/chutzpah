@@ -47,7 +47,18 @@ namespace Chutzpah
 
             lastTestEvent = DateTime.Now;
             var timeout = (testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500; // Add buffer to timeout to account for serialization
-            var readerTask = Task<IList<TestFileSummary>>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, testOptions, callback, debugEnabled));
+
+            var codeCoverageEnabled = (!testContext.TestFileSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
+                              || (testContext.TestFileSettings.EnableCodeCoverage.HasValue && testContext.TestFileSettings.EnableCodeCoverage.Value);
+
+            var streamingTestFileContexts = testContext.ReferencedFiles
+                                              .Where(x => x.IsFileUnderTest)
+                                              .Select(x => new StreamingTestFileContext(x, testContext, codeCoverageEnabled))
+                                              .ToList();
+
+            var deferredEvents = new List<Action<StreamingTestFileContext>>();
+
+            var readerTask = Task<IList<TestFileSummary>>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, testOptions, streamingTestFileContexts, deferredEvents, callback, debugEnabled));
             while (readerTask.Status == TaskStatus.WaitingToRun
                || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))
             {
@@ -61,6 +72,12 @@ namespace Chutzpah
             }
             else
             {
+
+                // Since we times out make sure we play the deferred events so we do not lose errors
+                // We will just attach these events to the first test context at this point since we do
+                // not know where they belong
+                PlayDeferredEvents(streamingTestFileContexts.FirstOrDefault(), deferredEvents);
+
                 // We timed out so kill the process and return an empty test file summary
                 ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.FirstInputTestFile, (DateTime.Now - lastTestEvent).TotalMilliseconds);
 
@@ -70,7 +87,7 @@ namespace Chutzpah
             }
         }
 
-        class TestFileContext
+        class StreamingTestFileContext
         {
             public ReferencedFile ReferencedFile { get; set; }
             public TestFileSummary TestFileSummary { get; set; }
@@ -81,7 +98,7 @@ namespace Chutzpah
 
             public HashSet<Tuple<string, string>> SeenTests { get; set; }
 
-            public TestFileContext(ReferencedFile referencedFile, TestContext testContext, bool coverageEnabled)
+            public StreamingTestFileContext(ReferencedFile referencedFile, TestContext testContext, bool coverageEnabled)
             {
                 SeenTests = new HashSet<Tuple<string, string>>();
                 ReferencedFile = referencedFile;
@@ -106,7 +123,7 @@ namespace Chutzpah
             }
         }
 
-        private void FireTestFinished(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
+        private void FireTestFinished(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
         {
             var jsTestCase = jsRunnerOutput as JsTestCase;
             jsTestCase.TestCase.InputTestFile = testFileContext.ReferencedFile.Path;
@@ -120,13 +137,13 @@ namespace Chutzpah
             callback.FileStarted(testContext.InputTestFilesString);
         }
 
-        private void FireCoverageObject(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireCoverageObject(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var jsCov = jsRunnerOutput as JsCoverage;
             testFileContext.TestFileSummary.CoverageObject = coverageEngine.DeserializeCoverageObject(jsCov.Object, testFileContext.TestContext);
         }
 
-        private void FireFileFinished(ITestMethodRunnerCallback callback, string testFilesString, IEnumerable<TestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
+        private void FireFileFinished(ITestMethodRunnerCallback callback, string testFilesString, IEnumerable<StreamingTestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
         {
             var jsFileDone = jsRunnerOutput as JsFileDone;
 
@@ -143,7 +160,7 @@ namespace Chutzpah
             callback.FileFinished(testFilesString, testFileSummary);
         }
 
-        private void FireLogOutput(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireLogOutput(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var log = jsRunnerOutput as JsLog;
 
@@ -159,7 +176,7 @@ namespace Chutzpah
             testFileContext.TestFileSummary.Logs.Add(log.Log);
         }
 
-        private void FireErrorOutput(ITestMethodRunnerCallback callback, TestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireErrorOutput(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var error = jsRunnerOutput as JsError;
 
@@ -170,28 +187,18 @@ namespace Chutzpah
             ChutzpahTracer.TraceError("Eror recieved from Phantom {0}", error.Error.Message);
         }
 
-        private IList<TestFileSummary> ReadFromStream(StreamReader stream, TestContext testContext, TestOptions testOptions, ITestMethodRunnerCallback callback, bool debugEnabled)
+        private IList<TestFileSummary> ReadFromStream(StreamReader stream, TestContext testContext, TestOptions testOptions, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
-            var codeCoverageEnabled = (!testContext.TestFileSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
-                                      || (testContext.TestFileSettings.EnableCodeCoverage.HasValue && testContext.TestFileSettings.EnableCodeCoverage.Value);
-
-            var testFileContexts = testContext.ReferencedFiles
-                                              .Where(x => x.IsFileUnderTest)
-                                              .Select(x => new TestFileContext(x, testContext, codeCoverageEnabled))
-                                              .ToList();
-
-
             var testIndex = 0;
 
             string line;
-            TestFileContext currentTestFileContext = null;
+            StreamingTestFileContext currentTestFileContext = null;
 
-            if (testFileContexts.Count == 1)
+            if (streamingTestFileContexts.Count == 1)
             {
-                currentTestFileContext = testFileContexts.First();
+                currentTestFileContext = streamingTestFileContexts.First();
             }
 
-            var deferredEvents = new List<Action<TestFileContext>>();
 
             while ((line = stream.ReadLine()) != null)
             {
@@ -226,7 +233,7 @@ namespace Chutzpah
 
                             if (currentTestFileContext == null)
                             {
-                                deferredEvents.Add((fileContext) => FireCoverageObject(callback, fileContext, jsCov));
+                                AddDeferredEvent((fileContext) => FireCoverageObject(callback, fileContext, jsCov), deferredEvents);
                             }
                             else
                             {
@@ -238,23 +245,23 @@ namespace Chutzpah
                         case "FileDone":
 
                             var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
-                            FireFileFinished(callback, testContext.InputTestFilesString, testFileContexts, jsFileDone);
+                            FireFileFinished(callback, testContext.InputTestFilesString, streamingTestFileContexts, jsFileDone);
 
                             break;
 
                         case "TestStart":
                             var jsTestCaseStart = jsonSerializer.Deserialize<JsTestCase>(json);
-                            TestFileContext newContext = null;
+                            StreamingTestFileContext newContext = null;
                             var testName = jsTestCaseStart.TestCase.TestName.Trim();
                             var moduleName = (jsTestCaseStart.TestCase.ModuleName ?? "").Trim();
                             
                             
-                            var fileContexts = GetFileMatches(testName, testFileContexts);
+                            var fileContexts = GetFileMatches(testName, streamingTestFileContexts);
                             if (fileContexts.Count == 0 && currentTestFileContext == null)
                             {
                                 // If there are no matches and not file context has been used yet
                                 // then just choose the first context
-                                newContext = testFileContexts[0];
+                                newContext = streamingTestFileContexts[0];
 
                             }
                             else if (fileContexts.Count == 0)
@@ -266,7 +273,7 @@ namespace Chutzpah
                                 var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
                                 if (testAlreadySeenInCurrentContext)
                                 {
-                                    newContext = testFileContexts.FirstOrDefault(x => !x.HasTestBeenSeen(moduleName, testName)) ?? currentTestFileContext;
+                                    newContext = streamingTestFileContexts.FirstOrDefault(x => !x.HasTestBeenSeen(moduleName, testName)) ?? currentTestFileContext;
                                 }
 
                             }
@@ -345,7 +352,7 @@ namespace Chutzpah
                             }
                             else
                             {
-                                deferredEvents.Add((fileContext) => FireLogOutput(callback, fileContext, log));
+                                AddDeferredEvent((fileContext) => FireLogOutput(callback, fileContext, log), deferredEvents);
                             }
                             break;
 
@@ -357,7 +364,7 @@ namespace Chutzpah
                             }
                             else
                             {
-                                deferredEvents.Add((fileContext) => FireErrorOutput(callback, fileContext, error));
+                                AddDeferredEvent((fileContext) => FireErrorOutput(callback, fileContext, error), deferredEvents);
                             }
 
                             break;
@@ -370,22 +377,47 @@ namespace Chutzpah
                 }
             }
 
-            return testFileContexts.Select(x => x.TestFileSummary).ToList();
+            return streamingTestFileContexts.Select(x => x.TestFileSummary).ToList();
         }
 
-        private static void PlayDeferredEvents(TestFileContext currentTestFileContext, List<Action<TestFileContext>> deferredEvents)
+
+        private static void AddDeferredEvent(Action<StreamingTestFileContext> deferredEvent, IList<Action<StreamingTestFileContext>> deferredEvents)
         {
-            // Since we found a unique match we need to reply and log the events that came before this 
-            // using this file context
-            foreach (var deferredEvent in deferredEvents)
+            lock (deferredEvents)
             {
-                deferredEvent(currentTestFileContext);
+                deferredEvents.Add(deferredEvent);
             }
-
-            deferredEvents.Clear();
         }
 
-        private static IList<TestFileContext> GetFileMatches(string testName, IEnumerable<TestFileContext> testFileContexts)
+        private static void PlayDeferredEvents(StreamingTestFileContext currentTestFileContext, IList<Action<StreamingTestFileContext>> deferredEvents)
+        {
+            try
+            {
+                if (currentTestFileContext == null)
+                {
+                    return;
+                }
+
+                // Since we found a unique match we need to reply and log the events that came before this 
+                // using this file context
+
+                // We lock here since in the event of a timeout this may be run from the timeout handler while the phantom
+                // process is still running
+                lock (deferredEvents)
+                {
+                    foreach (var deferredEvent in deferredEvents)
+                    {
+                        deferredEvent(currentTestFileContext);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ChutzpahTracer.TraceError(e, "Unable to play deferred events");
+            }
+        }
+
+        private static IList<StreamingTestFileContext> GetFileMatches(string testName, IEnumerable<StreamingTestFileContext> testFileContexts)
         {
             var contextMatches = testFileContexts.Where(x => x.ReferencedFile.FilePositions.Contains(testName)).ToList();
             return contextMatches;

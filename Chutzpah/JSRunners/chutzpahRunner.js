@@ -170,7 +170,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         if (!ignoreResourceLoadingError) {
             onError(res.errorString);
         }
-        rawLog("!!_!! Resource Error: " + res.url);
+        rawLog("!!_!! Resource Error for " +res.url + " with error " + res.errorString);
     }
 
     // Since tests run inside of Phantom are not part of your websites domain
