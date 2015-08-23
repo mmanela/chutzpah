@@ -64,23 +64,7 @@ namespace Chutzpah
 
         public static string FormatFileErrorMessage(TestError error)
         {
-            var stack = "";
-            foreach (var item in error.Stack)
-            {
-                if (!string.IsNullOrEmpty(item.Function))
-                {
-                    stack += "at " + item.Function + " ";
-                }
-                if (!string.IsNullOrEmpty(item.File))
-                {
-                    stack += "in " + item.File;
-                }
-                if (!string.IsNullOrEmpty(item.Line))
-                {
-                    stack += string.Format(" (line {0})", item.Line);
-                }
-                stack += "\n";
-            }
+            var stack = error.GetFormattedStackTrace();
 
             return string.Format("Error: {0}\n{1}While Running:{2}\n", error.Message, stack, error.InputTestFile);
         }

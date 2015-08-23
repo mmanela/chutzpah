@@ -26,6 +26,7 @@
     function onMochaLoaded() {
         console.log("!!_!! onMochaLoaded");
         
+
         function log(obj) {
             console.log(JSON.stringify(obj));
         }
@@ -119,13 +120,19 @@
             });
 
             runner.on('fail', function (test, err) {
-                failed++;
 
-                activeTestCase.testResults.push({
-                    passed: false,
-                    stackTrace: err.stack ? err.stack.split("\n").slice(1).join("\n") : null,
-                    message: err.message
-                });
+                if ('hook' == test.type) {
+                    log({ type: 'Error', error: { message: test.title, StackAsString: err.stack } });
+                }
+                else {
+                    failed++;
+
+                    activeTestCase.testResults.push({
+                        passed: false,
+                        stackTrace: err.stack ? err.stack : null,
+                        message: err.message
+                    });
+                }
             });
 
             runner.on('pending', function (test) {
