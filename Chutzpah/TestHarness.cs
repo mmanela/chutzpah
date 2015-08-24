@@ -172,9 +172,12 @@ namespace Chutzpah
             var codeCoverageEnabled = (!chutzpahTestSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
                                       || (chutzpahTestSettings.EnableCodeCoverage.HasValue && chutzpahTestSettings.EnableCodeCoverage.Value);
 
+
             // If CodeCoverage is enabled and we are in Execution mode make sure we load requirejs before the code coverage files
+            var referencedFileName = Path.GetFileName(referencedFile.Path);
             var amdLoader = codeCoverageEnabled
-                            && RegexPatterns.IsRequireJsFileName.IsMatch(Path.GetFileName(referencedFile.Path))
+                            && !string.IsNullOrEmpty(referencedFileName)
+                            && RegexPatterns.IsRequireJsFileName.IsMatch(referencedFileName)
                             && testOptions.TestExecutionMode == TestExecutionMode.Execution;
 
             IList<TestHarnessItem> list = null;
