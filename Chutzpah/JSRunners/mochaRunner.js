@@ -138,6 +138,16 @@
             runner.on('pending', function (test) {
                 skipped++;
 
+                activeTestCase = {
+                    moduleName: chutzpah.currentModule,
+                    testName: test.title,
+                    testResults: [],
+                    skipped: true
+                };
+                chutzpah.testCases.push(activeTestCase);
+                log({ type: "TestStart", testCase: activeTestCase });
+                log({ type: "TestDone", testCase: activeTestCase });
+
             });
         };
 

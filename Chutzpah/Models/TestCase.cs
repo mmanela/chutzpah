@@ -3,6 +3,14 @@ using System.Linq;
 
 namespace Chutzpah.Models
 {
+    public enum TestOutcome
+    {
+        None,
+        Passed,
+        Failed,
+        Skipped
+    }
+
     public class TestCase
     {
         public TestCase()
@@ -16,6 +24,7 @@ namespace Chutzpah.Models
         public string TestName { get; set; }
         public int Line { get; set; }
         public int Column { get; set; }
+        public bool Skipped { get; set; }
         public IList<TestResult> TestResults { get; set; }
 
 
@@ -24,7 +33,26 @@ namespace Chutzpah.Models
         /// </summary>
         public int TimeTaken { get; set; }
 
-        public bool Passed { get { return TestResults.All(x => x.Passed); }}
+        public bool ResultsAllPassed { get { return TestResults.All(x => x.Passed); }}
+
+        public TestOutcome TestOutcome
+        {
+            get
+            {
+                if (Skipped)
+                {
+                    return TestOutcome.Skipped;
+                }
+                else if (ResultsAllPassed)
+                {
+                    return TestOutcome.Passed;
+                }
+                else
+                {
+                    return TestOutcome.Failed;
+                }
+            }
+        }
 
         public string GetDisplayName()
         {

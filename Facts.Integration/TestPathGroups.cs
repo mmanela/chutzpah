@@ -4,6 +4,18 @@ namespace Chutzpah.Facts.Integration
 {
     public static class TestPathGroups
     {
+        public static IEnumerable<object[]> SkippedTests
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Test\Skipped\skippedQunit.js"},
+                        new object[] {@"JS\Test\Skipped\skippedMocha.js"},
+                        new object[] {@"JS\Test\Skipped\skippedJasmine.js"},
+                    };
+            }
+        }
         public static IEnumerable<object[]> ChutzpahSamples
         {
             get

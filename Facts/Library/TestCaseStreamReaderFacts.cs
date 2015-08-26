@@ -327,7 +327,7 @@ namespace Chutzpah.Facts
                 Assert.Equal("file", summary.Tests[0].InputTestFile);
                 Assert.Equal("module", summary.Tests[0].ModuleName);
                 Assert.Equal("test", summary.Tests[0].TestName);
-                Assert.False(summary.Tests[0].Passed);
+                Assert.False(summary.Tests[0].ResultsAllPassed);
                 Assert.False(summary.Tests[0].TestResults[0].Passed);
                 Assert.Equal("4", summary.Tests[0].TestResults[0].Actual);
                 Assert.Equal("5", summary.Tests[0].TestResults[0].Expected);

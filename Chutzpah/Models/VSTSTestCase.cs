@@ -13,7 +13,7 @@ namespace Chutzpah.Models
 
         public Exception exception { get; set; }
 
-        public new bool Passed { get; set; }
+        public bool Passed { get; set; }
 
         public VSTSTestCase()
         {
@@ -28,7 +28,7 @@ namespace Chutzpah.Models
             this.InputTestFile = that.InputTestFile;
             this.Line = that.Line;
             this.ModuleName = that.ModuleName;
-            this.Passed = that.Passed;
+            this.Passed = that.ResultsAllPassed;
             this.TestName = that.TestName;
             this.TestResults = that.TestResults;
             this.TimeTaken = that.TimeTaken;

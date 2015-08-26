@@ -110,7 +110,7 @@ namespace Chutzpah.Facts.Library.Transformers
                 var testSummary = summary.Tests[i];
 
                 Assert.Equal(vststUnitTestResult.testName,testSummary.TestName);
-                Assert.Equal(vststUnitTestResult.outcome,testSummary.Passed ? "Passed":"Failed");
+                Assert.Equal(vststUnitTestResult.outcome,testSummary.ResultsAllPassed ? "Passed":"Failed");
                 if (vststUnitTestResult.Items != null && vststUnitTestResult.Items.Any())
                     Assert.Equal(((OutputType)vststUnitTestResult.Items[0]).ErrorInfo.Message, testSummary.TestResults[0].Message);
             }

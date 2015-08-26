@@ -52,7 +52,7 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             var testCase = test.ToVsTestCase();
             var result = test.ToVsTestResult();
-            var outcome = ChutzpahExtensionMethods.ToVsTestOutcome(test.Passed);
+            var outcome = ChutzpahExtensionMethods.ToVsTestOutcome(test.TestOutcome);
 
 
             frameworkHandle.RecordResult(result);

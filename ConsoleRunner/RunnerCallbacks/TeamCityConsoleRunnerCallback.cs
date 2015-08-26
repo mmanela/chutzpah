@@ -53,6 +53,13 @@ namespace Chutzpah.RunnerCallbacks
             WriteOutput(testCase.GetDisplayName(), CombineWithTestCaseMessages("Passed"));
         }
 
+        protected override void TestSkipped(TestCase testCase)
+        {
+            Console.WriteLine(
+                "##teamcity[testIgnored name='{0}']", Escape(testCase.GetDisplayName()));
+        }
+
+
         public override void TestStarted(TestCase testCase)
         {
             _testCaseMessages.Clear();

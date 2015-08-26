@@ -63,7 +63,7 @@ namespace Chutzpah.Models
         /// </summary>
         public int PassedCount
         {
-            get { return Tests.Count(x => x.Passed); }
+            get { return Tests.Count(x => x.TestOutcome == TestOutcome.Passed); }
         }
 
         /// <summary>
@@ -71,7 +71,15 @@ namespace Chutzpah.Models
         /// </summary>
         public int FailedCount
         {
-            get { return Tests.Count(x => !x.Passed); }
+            get { return Tests.Count(x => x.TestOutcome == TestOutcome.Failed); }
+        }
+
+        /// <summary>
+        /// Number of tests which skipped
+        /// </summary>
+        public int SkippedCount
+        {
+            get { return Tests.Count(x => x.TestOutcome == TestOutcome.Skipped); }
         }
 
         /// <summary>

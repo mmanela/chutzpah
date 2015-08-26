@@ -25,13 +25,13 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             var testCase = test.ToVsTestCase();
             TestResult result;
-            if (test.Passed)
+            if (test.ResultsAllPassed)
             {
                 result = new TestResult(testCase)
                     {
                         Duration = TimeSpan.FromMilliseconds(test.TimeTaken),
                         DisplayName = testCase.DisplayName,
-                        Outcome = ToVsTestOutcome(true)
+                        Outcome = ToVsTestOutcome(test.TestOutcome)
                     };
             }
             else
@@ -42,7 +42,7 @@ namespace Chutzpah.VS2012.TestAdapter
                         Duration = TimeSpan.FromMilliseconds(test.TimeTaken),
                         DisplayName = testCase.DisplayName,
                         ErrorMessage = GetTestFailureMessage(failureResult),
-                        Outcome = ToVsTestOutcome(false),
+                        Outcome = ToVsTestOutcome(test.TestOutcome),
                         ErrorStackTrace = BuildVirtualStackTrace(test)
                     };
             }
@@ -50,9 +50,19 @@ namespace Chutzpah.VS2012.TestAdapter
             return result;
         }
 
-        public static TestOutcome ToVsTestOutcome(bool passed)
+        public static TestOutcome ToVsTestOutcome(Chutzpah.Models.TestOutcome outcome)
         {
-            return passed ? TestOutcome.Passed : TestOutcome.Failed;
+            switch (outcome)
+            {
+                case Chutzpah.Models.TestOutcome.Passed:
+                    return TestOutcome.Passed;
+                case Chutzpah.Models.TestOutcome.Failed:
+                    return TestOutcome.Failed;
+                case Chutzpah.Models.TestOutcome.Skipped:
+                    return TestOutcome.Skipped;
+                default:
+                    return TestOutcome.None;
+            }
         }
 
         private static string BuildFullyQualifiedName(Models.TestCase testCase)

@@ -21,16 +21,22 @@ namespace Chutzpah
         public virtual void FileLog(TestLog log) { }
         public virtual void TestFinished(TestCase testCase)
         {
-            if (testCase.Passed)
+            switch (testCase.TestOutcome)
             {
-                ChutzpahTracer.TraceInformation("File {0}, Test {1} passed", testCase.InputTestFile, testCase.TestName);
-                TestPassed(testCase);
-            }
-
-            if (!testCase.Passed)
-            {
-                ChutzpahTracer.TraceInformation("File {0}, Test {1} failed", testCase.InputTestFile, testCase.TestName);
-                TestFailed(testCase);
+                case TestOutcome.Passed:
+                    ChutzpahTracer.TraceInformation("File {0}, Test {1} passed", testCase.InputTestFile, testCase.TestName);
+                    TestPassed(testCase);
+                    break;
+                case TestOutcome.Failed: 
+                    ChutzpahTracer.TraceInformation("File {0}, Test {1} failed", testCase.InputTestFile, testCase.TestName);
+                    TestFailed(testCase);
+                    break;
+                case TestOutcome.Skipped:
+                    ChutzpahTracer.TraceInformation("File {0}, Test {1} skipped", testCase.InputTestFile, testCase.TestName);
+                    TestSkipped(testCase);
+                    break;
+                default:
+                    break;
             }
 
             TestComplete(testCase);
@@ -39,6 +45,7 @@ namespace Chutzpah
         protected virtual void TestComplete(TestCase testCase) { }
         protected virtual void TestFailed(TestCase testCase) { }
         protected virtual void TestPassed(TestCase testCase) { }
+        protected virtual void TestSkipped(TestCase testCase) { }
 
         protected virtual string GetCodeCoverageMessage(CoverageData coverageData)
         {

@@ -130,6 +130,11 @@
 
         callback.testDone = function (info) {
             if (info.name === 'global failure') return;
+
+            if (info.skipped) {
+                activeTestCase.skipped = info.skipped;
+            }
+
             // Log test case when done. This will get picked up by phantom and streamed to chutzpah
             var timetaken = new Date().getTime() - testStartTime;
             activeTestCase.timetaken = timetaken;

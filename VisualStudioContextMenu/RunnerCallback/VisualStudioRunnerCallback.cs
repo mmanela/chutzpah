@@ -33,8 +33,17 @@ namespace Chutzpah.VisualStudio.Callback
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
-            var statusBarText = string.Format("{0} passed, {1} failed, {2} total", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
-            var text = string.Format("========== Total Tests: {0} passed, {1} failed, {2} total ==========\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
+            var statusBarText = "";
+            if (testResultsSummary.SkippedCount > 0)
+            {
+                statusBarText = string.Format("{0} passed, {1} failed, {2} skipped, {3} total", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.SkippedCount, testResultsSummary.TotalCount);
+            }
+            else
+            {
+                statusBarText = string.Format("{0} passed, {1} failed, {2} total", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
+            }
+
+            var text = string.Format("========== Total Tests: {0} ==========\n", statusBarText);
             testPane.OutputString(text);
             SetStatusBarMessage(statusBarText);
         }
@@ -47,7 +56,16 @@ namespace Chutzpah.VisualStudio.Callback
 
         public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
         {
-            var text = string.Format("{0} passed, {1} failed, {2} total (chutzpah).\n\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
+            var text = "";
+
+            if (testResultsSummary.SkippedCount <= 0)
+            {
+                text = string.Format("{0} passed, {1} failed, {2} total (chutzpah).\n\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.TotalCount);
+            }
+            else
+            {
+                text = string.Format("{0} passed, {1} failed, {2} skipped, {3} total (chutzpah).\n\n", testResultsSummary.PassedCount, testResultsSummary.FailedCount, testResultsSummary.SkippedCount, testResultsSummary.TotalCount);
+            }
             testPane.OutputString(text);
         }
 
@@ -59,6 +77,11 @@ namespace Chutzpah.VisualStudio.Callback
         }
 
         protected override void TestPassed(TestCase result)
+        {
+            SetStatusBarMessage(GetStatusBarMessage(result));
+        }
+
+        protected override void TestSkipped(TestCase result)
         {
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
@@ -81,7 +104,8 @@ namespace Chutzpah.VisualStudio.Callback
         protected string GetStatusBarMessage(TestCase result)
         {
             var title = result.GetDisplayName();
-            return string.Format("{0} ({1})", title, result.Passed ? "passed" : "failed");
+            var status = result.TestOutcome == TestOutcome.Skipped ? "skipped" : (result.TestOutcome == TestOutcome.Passed ? "passed" : "failed");
+            return string.Format("{0} ({1})", title, status);
         }
 
         private OutputWindowPane GetOutputPane(string title)

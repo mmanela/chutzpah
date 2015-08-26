@@ -61,6 +61,7 @@
     <Compile Include="Discovery.cs" />
     <Compile Include="ExceptionThrowingRunnerCallback.cs" />
     <Compile Include="Execution.cs" />
+    <Compile Include="TestUtils.cs" />
     <Compile Include="Transforms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestPathGroups.cs" />
@@ -262,6 +263,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\PathEncoding\With Space+\pathEncoding.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\Skipped\skippedMocha.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\Skipped\skippedJasmine.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="JS\Test\Skipped\skippedQunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="JS\Test\SubFolder\SubSubFolder\test-qunit2.js">

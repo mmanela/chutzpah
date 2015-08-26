@@ -60,6 +60,11 @@ namespace Chutzpah.Facts.Integration
             get { return TestPathGroups.ChutzpahSamples; }
         }
 
+        public static IEnumerable<object[]> SkippedTests
+        {
+            get { return TestPathGroups.SkippedTests; }
+        }
+
 
         public Discovery()
         {
@@ -114,6 +119,17 @@ namespace Chutzpah.Facts.Integration
             var result = testRunner.DiscoverTests(scriptPath);
 
             Assert.Equal(1, result.Count());
+        }
+
+        [Theory]
+        [PropertyData("SkippedTests")]
+        public void Will_discover_skipped_tests(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.DiscoverTests(scriptPath);
+
+            Assert.Equal(3, result.Count());
         }
 
         [Fact]

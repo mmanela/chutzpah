@@ -49,7 +49,7 @@ namespace Chutzpah.Transformers
 
         private void AddFailureToTestCase(TestCase test, XmlElement testCaseElement, XmlDocument document)
         {
-            if (test.Passed == false)
+            if (test.ResultsAllPassed == false)
             {
                 var failure = document.CreateElement("failure");
                 var failureMessage = document.CreateElement("message");
@@ -77,11 +77,11 @@ namespace Chutzpah.Transformers
             var testCase = document.CreateElement("test-case");
             testCase.SetAttribute("name", test.TestName);
             testCase.SetAttribute("description", test.GetDisplayName());
-            testCase.SetAttribute("success", test.Passed ? "True" : "False");
+            testCase.SetAttribute("success", test.ResultsAllPassed ? "True" : "False");
             testCase.SetAttribute("time", (test.TimeTaken / 1000m).ToString());
             testCase.SetAttribute("executed", "True");
             testCase.SetAttribute("asserts", "0");
-            testCase.SetAttribute("result", test.Passed ? "Success" : "Fail");
+            testCase.SetAttribute("result", test.ResultsAllPassed ? "Success" : "Fail");
 
             AddFailureToTestCase(test, testCase, document);
 
@@ -142,7 +142,7 @@ namespace Chutzpah.Transformers
                 foreach (var group in testFile.TestGroups)
                 {
                     Int32 total = group.Value.Count;
-                    Int32 passed = group.Value.Count(t => t.Passed);
+                    Int32 passed = group.Value.Count(t => t.ResultsAllPassed);
                     decimal time = group.Value.Sum(t => t.TimeTaken) / 1000m;
 
                     var groupSuite = AddTestSuite(document, results, group.Key, passed, time, total > 0, total == passed);

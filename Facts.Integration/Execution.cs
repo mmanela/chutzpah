@@ -63,6 +63,12 @@ namespace Chutzpah.Facts.Integration
             get { return TestPathGroups.ChutzpahSamples; }
         }
 
+        public static IEnumerable<object[]> SkippedTests
+        {
+            get { return TestPathGroups.SkippedTests; }
+        }
+
+       
 
         public Execution()
         {
@@ -94,6 +100,20 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.FailedCount);
             Assert.Equal(3, result.PassedCount);
             Assert.Equal(4, result.TotalCount);
+        }
+
+        [Theory]
+        [PropertyData("SkippedTests")]
+        public void Will_report_skipped_tests(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(1, result.PassedCount);
+            Assert.Equal(1, result.SkippedCount);
+            Assert.Equal(3, result.TotalCount);
         }
 
         [Fact]
@@ -515,9 +535,12 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_test_which_logs_object_to_jasmine_log()
         {
             var testRunner = TestRunner.Create();
-            ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
-
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+            
+            TestCaseSummary result = null;
+            TestUtils.RunAsJasmineVersionOne(() =>
+            {
+                result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+            });
 
             Assert.Equal(0, result.FailedCount);
             Assert.Equal(1, result.PassedCount);
@@ -538,9 +561,12 @@ namespace Chutzpah.Facts.Integration
         public void Will_capture_message_logged_via_jasmine_log()
         {
             var testRunner = TestRunner.Create();
-            ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
 
-            TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+            TestCaseSummary result = null;
+            TestUtils.RunAsJasmineVersionOne(() =>
+            {
+                result = testRunner.RunTests(@"JS\Test\jasmineLog.js", new ExceptionThrowingRunnerCallback());
+            });
 
             Assert.Equal("hello", result.Logs.Single().Message);
         }
@@ -654,11 +680,14 @@ namespace Chutzpah.Facts.Integration
 
         }
 
-        public class JasmineDdescribeIit
+        public class JasmineDdescribeIit : IDisposable
         {
+            string version;
+
             public JasmineDdescribeIit()
             {
                 ChutzpahTracer.Enabled = false;
+                version = ChutzpahTestSettingsFile.Default.FrameworkVersion;
                 ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
             }
 
@@ -719,6 +748,12 @@ namespace Chutzpah.Facts.Integration
 
                 Assert.Equal(0, result.TotalCount);
             }
+
+            public void Dispose()
+            {
+                ChutzpahTestSettingsFile.Default.FrameworkVersion = version;
+            }
+
         }
 
         public class AMD
@@ -790,9 +825,12 @@ namespace Chutzpah.Facts.Integration
             public void Will_run_jasmine_require_html_test_where_test_file_uses_requirejs_command()
             {
                 var testRunner = TestRunner.Create();
-                ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html", new ExceptionThrowingRunnerCallback());
+                
+                TestCaseSummary result = null;
+                TestUtils.RunAsJasmineVersionOne(() =>
+                {
+                    result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html", new ExceptionThrowingRunnerCallback());
+                });
 
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(2, result.PassedCount);

@@ -56,6 +56,7 @@
 
             var passedCount = 0;
             var failedCount = 0;
+            var skippedCount = 0;
 
             this.jasmineStarted = function () {
 
@@ -103,7 +104,12 @@
 
                 if (result.status === "failed") {
                     failedCount++;
-                } else {
+                }
+                else if (result.status === "pending") {
+                    skippedCount++;
+                    activeTestCase.skipped = true;
+                }
+                else {
                     passedCount++;
                 }
 

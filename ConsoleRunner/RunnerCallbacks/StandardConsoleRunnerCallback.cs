@@ -63,7 +63,15 @@ namespace Chutzpah.RunnerCallbacks
 
             Console.WriteLine();
             var seconds = testResultsSummary.TotalRuntime / 1000.0;
-            Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
+
+            if (testResultsSummary.SkippedCount > 0)
+            {
+                Console.WriteLine("=== {0} total, {1} failed, {2} skipped, took {3:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, testResultsSummary.SkippedCount, seconds);
+            }
+            else
+            {
+                Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
+            }
 
             base.TestSuiteFinished(testResultsSummary);
         }
@@ -71,7 +79,7 @@ namespace Chutzpah.RunnerCallbacks
         private void PrintErrorReport(TestCaseSummary testResultsSummary)
         {
             var failedTests = (from testResult in testResultsSummary.Tests 
-                              where !testResult.Passed
+                              where !testResult.ResultsAllPassed
                               select testResult).ToList();
 
             var fileErrors = testResultsSummary.Errors;
