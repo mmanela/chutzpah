@@ -166,7 +166,7 @@ namespace Chutzpah.Coverage
                     }
                 }
 
-                if (IsFileEligibleForInstrumentation(newKey))
+                if (IsFileEligibleForInstrumentation(newKey) && fileSystem.FileExists(filePath))
                 {
                     string[] sourceLines = fileSystem.GetLines(filePath);
                     int?[] lineExecutionCounts = entry.Value;
