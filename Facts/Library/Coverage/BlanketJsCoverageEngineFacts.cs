@@ -41,6 +41,12 @@ namespace Chutzpah.Facts.Library.Coverage
                 Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetLines(@"X:\file1.ts"))
                     .Returns(new[] { "typescript" });
+
+
+
+                Mock<IFileSystemWrapper>()
+                    .Setup(x => x.FileExists(It.IsAny<string>()))
+                    .Returns(true);
             }
         }
 
