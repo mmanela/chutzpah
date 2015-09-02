@@ -14,7 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Fix bug when opening file in a browser
+* Integrated debugging in Visual Studio
+* Support for Skipped tests
+* Customize code coverage output location
+* Added NUnitXml result transformer
         </releaseNotes>
     </metadata>
 </package>
