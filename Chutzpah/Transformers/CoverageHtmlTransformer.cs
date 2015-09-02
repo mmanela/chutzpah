@@ -15,7 +15,7 @@ namespace Chutzpah.Transformers
 
         public override string Description
         {
-            get { return "Outputs default Chutzpah coverage HTML"; }
+            get { return "Outputs the default Chutzpah coverage HTML"; }
         }
 
         public CoverageHtmlTransformer(IFileSystemWrapper fileSystem)
