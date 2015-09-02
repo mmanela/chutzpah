@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Chutzpah.Models;
 
 namespace Chutzpah
 {
@@ -27,5 +28,22 @@ namespace Chutzpah
         /// If specified, pattern of files to exclude from the instrumentation phase.
         /// </summary>
         public ICollection<string> ExcludePatterns { get; set; }
+
+        public bool ShouldRunCoverage(CodeCoverageExecutionMode? coverageExecutionModeSetting)
+        {
+            // If not set or set to manual honor the passed in value from the user
+            if (!coverageExecutionModeSetting.HasValue || coverageExecutionModeSetting.Value == CodeCoverageExecutionMode.Manual)
+            {
+                return Enabled;
+            }
+            else if (coverageExecutionModeSetting.HasValue && coverageExecutionModeSetting.Value == CodeCoverageExecutionMode.Always)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

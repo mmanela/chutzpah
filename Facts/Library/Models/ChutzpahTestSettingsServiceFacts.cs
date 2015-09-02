@@ -245,7 +245,7 @@ namespace Chutzpah.Facts.Library.Models
                 Compile = new BatchCompileConfiguration{ Mode = BatchCompileMode.External},
                 
                 AMDBasePath = "parentAmdBasePath",
-                EnableCodeCoverage = true,
+                CodeCoverageExecutionMode = CodeCoverageExecutionMode.Always,
                 Framework = "parentFramework",
                 FrameworkVersion = "parentVersion",
                 TestHarnessDirectory = "parentHarnessDirectory",
@@ -281,7 +281,7 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(parentSettings.Compile, childSettings.Compile);
             Assert.Equal(@"C:\settingsDir", childSettings.SettingsFileDirectory);
             Assert.Equal(@"C:\parentAmdBasePath", childSettings.AMDBasePath);
-            Assert.Equal(true, childSettings.EnableCodeCoverage);
+            Assert.Equal(CodeCoverageExecutionMode.Always, childSettings.CodeCoverageExecutionMode);
             Assert.Equal(@"parentFramework", childSettings.Framework);
             Assert.Equal(@"parentVersion", childSettings.FrameworkVersion);
             Assert.Equal(@"C:\parentHarnessDirectory", childSettings.TestHarnessDirectory);
@@ -359,7 +359,7 @@ namespace Chutzpah.Facts.Library.Models
             {
                 // Parent Only
                 AMDBasePath = "parentAmdBasePath",
-                EnableCodeCoverage = true,
+                CodeCoverageExecutionMode = CodeCoverageExecutionMode.Always,
                 Framework = "parentFramework",
 
                 // Both parent and child
@@ -397,7 +397,7 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(@"C:\settingsDir", childSettings.SettingsFileDirectory);
 
             Assert.Equal(@"C:\parentAmdBasePath", childSettings.AMDBasePath);
-            Assert.Equal(true, childSettings.EnableCodeCoverage);
+            Assert.Equal(CodeCoverageExecutionMode.Always, childSettings.CodeCoverageExecutionMode);
             Assert.Equal(@"parentFramework", childSettings.Framework);
 
             Assert.NotEqual(parentSettings.Compile, childSettings.Compile);

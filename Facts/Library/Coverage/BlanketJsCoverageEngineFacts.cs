@@ -24,6 +24,7 @@ namespace Chutzpah.Facts.Library.Coverage
                 foreach (var kvp in coverage)
                 {
                     coverageObject[kvp.Key] = kvp.Value;
+
                 }
 
                 Mock<IJsonSerializer>()

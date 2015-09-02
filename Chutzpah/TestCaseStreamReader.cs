@@ -48,8 +48,7 @@ namespace Chutzpah
             lastTestEvent = DateTime.Now;
             var timeout = (testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500; // Add buffer to timeout to account for serialization
 
-            var codeCoverageEnabled = (!testContext.TestFileSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
-                              || (testContext.TestFileSettings.EnableCodeCoverage.HasValue && testContext.TestFileSettings.EnableCodeCoverage.Value);
+            var codeCoverageEnabled = testOptions.CoverageOptions.ShouldRunCoverage(testContext.TestFileSettings.CodeCoverageExecutionMode);
 
             var streamingTestFileContexts = testContext.ReferencedFiles
                                               .Where(x => x.IsFileUnderTest)

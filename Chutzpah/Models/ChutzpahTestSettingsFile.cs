@@ -25,6 +25,23 @@ namespace Chutzpah.Models
         SettingsFileDirectory
     }
 
+    public enum CodeCoverageExecutionMode
+    {
+        /// <summary>
+        /// Run code coverage when the user asks
+        /// </summary>
+        Manual,
+
+        /// <summary>
+        /// Always run code coverage
+        /// </summary>
+        Always,
+
+        /// <summary>
+        /// Never run code coverage
+        /// </summary>
+        Never
+    }
 
     /// <summary>
     /// Represents the Chutzpah Test Settings file (chutzpah.json)
@@ -169,12 +186,13 @@ namespace Chutzpah.Models
         /// </summary>
         public RootReferencePathMode? RootReferencePathMode { get; set; }
 
+
         /// <summary>
-        /// If True, forces code coverage to run always
-        /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
-        /// If False, forces code coverage to never run. 
+        /// Manual - Run code coverage when user asks
+        /// Always - Run code coverage always
+        /// Never  - Never run code coverage, ignore if user asks
         /// </summary>
-        public bool? EnableCodeCoverage { get; set; }
+        public CodeCoverageExecutionMode? CodeCoverageExecutionMode { get; set; }
 
         /// <summary>
         /// The percentage of lines should be covered to show the coverage output as success or failure. By default, this is 60.
@@ -224,6 +242,30 @@ namespace Chutzpah.Models
         /// Maps the names of transforms to run after testing with their corresponding output paths.
         /// </summary>
         public ICollection<TransformConfig> Transforms { get; set; }
+
+        /// <summary>
+        /// This is depeprecated and only here for back compat for now
+        /// If True, forces code coverage to run always
+        /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
+        /// If False, forces code coverage to never run. 
+        /// </summary>
+        public bool? EnableCodeCoverage
+        {
+            set
+            {
+                if (!CodeCoverageExecutionMode.HasValue)
+                {
+                    if (value.HasValue && value.Value)
+                    {
+                        CodeCoverageExecutionMode = Chutzpah.Models.CodeCoverageExecutionMode.Always;
+                    }
+                    else if (value.HasValue && !value.Value)
+                    {
+                        CodeCoverageExecutionMode = Chutzpah.Models.CodeCoverageExecutionMode.Never;
+                    }
+                }
+            }
+        }
 
 
         public string SettingsFileName
@@ -311,7 +353,7 @@ namespace Chutzpah.Models
             this.AMDAppDirectory = this.AMDAppDirectory == null ? parent.AMDAppDirectory : this.AMDAppDirectory;            
             this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage == null ? parent.CodeCoverageSuccessPercentage : this.CodeCoverageSuccessPercentage;
             this.CustomTestHarnessPath = this.CustomTestHarnessPath == null ? parent.CustomTestHarnessPath : this.CustomTestHarnessPath;
-            this.EnableCodeCoverage = this.EnableCodeCoverage == null ? parent.EnableCodeCoverage : this.EnableCodeCoverage;
+            this.CodeCoverageExecutionMode = this.CodeCoverageExecutionMode == null ? parent.CodeCoverageExecutionMode : this.CodeCoverageExecutionMode;
             this.Framework = this.Framework == null ? parent.Framework : this.Framework;
             this.FrameworkVersion = this.FrameworkVersion == null ? parent.FrameworkVersion : this.FrameworkVersion;
             this.MochaInterface = this.MochaInterface == null ? parent.MochaInterface : this.MochaInterface;

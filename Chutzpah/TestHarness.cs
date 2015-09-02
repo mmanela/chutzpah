@@ -169,9 +169,7 @@ namespace Chutzpah
 
         private IList<TestHarnessItem> ChooseRefList(ReferencedFile referencedFile, string referencePath)
         {
-            var codeCoverageEnabled = (!chutzpahTestSettings.EnableCodeCoverage.HasValue && testOptions.CoverageOptions.Enabled)
-                                      || (chutzpahTestSettings.EnableCodeCoverage.HasValue && chutzpahTestSettings.EnableCodeCoverage.Value);
-
+            var codeCoverageEnabled = testOptions.CoverageOptions.ShouldRunCoverage(chutzpahTestSettings.CodeCoverageExecutionMode);
 
             // If CodeCoverage is enabled and we are in Execution mode make sure we load requirejs before the code coverage files
             var referencedFileName = Path.GetFileName(referencedFile.Path);
