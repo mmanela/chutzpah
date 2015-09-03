@@ -104,7 +104,7 @@ namespace Chutzpah
                     ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directoy {0}", directory);
                     settings = ChutzpahTestSettingsFile.Default;
                 }
-                else if (!ChutzpahSettingsFileCache.TryGetValue(testSettingsFilePath, out settings))
+                else if (!ChutzpahSettingsFileCache.TryGetValue(Path.GetDirectoryName(testSettingsFilePath), out settings))
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);

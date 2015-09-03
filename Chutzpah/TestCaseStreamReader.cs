@@ -408,6 +408,8 @@ namespace Chutzpah
                     {
                         deferredEvent(currentTestFileContext);
                     }
+
+                    deferredEvents.Clear();
                 }
             }
             catch (Exception e)

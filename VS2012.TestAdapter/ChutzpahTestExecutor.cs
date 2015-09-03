@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Chutzpah.Callbacks;
@@ -30,7 +31,6 @@ namespace Chutzpah.VS2012.TestAdapter
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             ChutzpahTracer.TraceInformation("Begin Test Adapter Run Tests");
-
 
             var settingsProvider = runContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsProvider;
             var settings = settingsProvider != null ? settingsProvider.Settings : new ChutzpahAdapterSettings();
