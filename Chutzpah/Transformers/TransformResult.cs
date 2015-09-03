@@ -13,7 +13,6 @@ namespace Chutzpah.Transformers
     {
         public void AddResult(string transform, string path)
         {
-            IList<string> results;
             if (!this.ContainsKey(transform))
             {
                 this[transform] = new HashSet<string>();

@@ -91,7 +91,7 @@ namespace Chutzpah
             Console.WriteLine("  /trace                       : Logs tracing information to chutzpah.log");
             Console.WriteLine("  /openInBrowser [name]        : Launch the tests in a browser.");
             Console.WriteLine("                               : If optional name is provided will try to launch in that browser.");
-            Console.WriteLine("                               : Name can be IE, FireFox, Chrome.");
+            Console.WriteLine("                               : Name can be IE, Firefox, Chrome.");
             Console.WriteLine("  /parallelism [n]             : Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1");
             Console.WriteLine("                               : If you specify more than 1 the test output may be a bit jumbled");
             Console.WriteLine("  /path path                   : Adds a path to a folder or file to the list of test paths to run.");

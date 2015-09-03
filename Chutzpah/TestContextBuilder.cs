@@ -111,32 +111,26 @@ namespace Chutzpah
             var chutzpahTestSettings = settingsService.FindSettingsFile(firstFilePath, options.ChutzpahSettingsFileEnvironments);
 
             // Exclude any files that are not included based on the settings file
-            var testedPaths = files.Select(f => new { File = f, IsIncluded = IsTestPathIncluded(f.FullPath, chutzpahTestSettings) }).ToList();
+            SettingsFileTestPath matchingTestSettingsPath;
+            var testedPaths = files.Select(f => new PathWithTestSetting { 
+                                                    File = f, 
+                                                    IsIncluded = IsTestPathIncluded(f.FullPath, chutzpahTestSettings, out matchingTestSettingsPath), 
+                                                    MatchingTestSetting = matchingTestSettingsPath }).ToList();
             if (testedPaths.Any(x => !x.IsIncluded))
             {
                 var pathString = string.Join(",", testedPaths.Where(x => !x.IsIncluded).Select(x => x.File.FullPath));
                 ChutzpahTracer.TraceInformation("Excluding test files {0} given chutzpah.json settings", pathString);
-                files = testedPaths.Where(x => x.IsIncluded).Select(x => x.File).ToList();
+                testedPaths = testedPaths.Where(x => x.IsIncluded).ToList();
 
-                if (!files.Any())
+                if (!testedPaths.Any())
                 {
                     return null;
                 }
             }
 
-            string firstTestFileText;
-            if (firstFileKind == PathType.Url)
-            {
-                firstTestFileText = httpClient.GetContent(firstFilePath);
-            }
-            else
-            {
-                firstTestFileText = fileSystem.GetText(firstFilePath);
-            }
-
             IFrameworkDefinition definition;
 
-            if (TryDetectFramework(firstTestFileText, firstFileKind, chutzpahTestSettings, out definition))
+            if (TryDetectFramework(testedPaths.First().File, chutzpahTestSettings, out definition))
             {
                 // For HTML test files we don't need to create a test harness to just return this file
                 if (firstFileKind == PathType.Html || firstFileKind == PathType.Url)
@@ -160,7 +154,7 @@ namespace Chutzpah
                 string firstInputTestFileDir = Path.GetDirectoryName(firstFilePath);
                 var testHarnessDirectory = GetTestHarnessDirectory(chutzpahTestSettings, firstInputTestFileDir);
 
-                var referencedFiles = GetFilesUnderTest(files, chutzpahTestSettings).ToList();
+                var referencedFiles = GetFilesUnderTest(testedPaths, chutzpahTestSettings).ToList();
 
                 referenceProcessor.GetReferencedFiles(referencedFiles, definition, chutzpahTestSettings);
 
@@ -250,7 +244,8 @@ namespace Chutzpah
                 string testFileText = fileSystem.GetText(testFilePath);
 
                 IFrameworkDefinition definition;
-                var frameworkDetetected = TryDetectFramework(testFileText, FileProbe.GetFilePathType(testFilePath), chutzpahTestSettings, out definition);
+                var info = new PathInfo { Path = file, FullPath = testFilePath, Type = FileProbe.GetFilePathType(testFilePath) };
+                var frameworkDetetected = TryDetectFramework(info, chutzpahTestSettings, out definition);
 
                 if (frameworkDetetected)
                 {
@@ -278,14 +273,19 @@ namespace Chutzpah
             }
         }
 
+        private bool IsTestPathIncluded(string testFilePath, ChutzpahTestSettingsFile chutzpahTestSettings)
+        {
+            SettingsFileTestPath ignored;
+            return IsTestPathIncluded(testFilePath, chutzpahTestSettings, out ignored);
+        }
+
         /// <summary>
         /// Matches the current test path against the Tests settings. The first setting to accept a file wins.
         /// </summary>
-        /// <param name="testFilePath"></param>
-        /// <param name="chutzpahTestSettings"></param>
-        /// <returns></returns>
-        private bool IsTestPathIncluded(string testFilePath, ChutzpahTestSettingsFile chutzpahTestSettings)
+        private bool IsTestPathIncluded(string testFilePath, ChutzpahTestSettingsFile chutzpahTestSettings, out SettingsFileTestPath matchingTestPath)
         {
+            matchingTestPath = null;
+
             // If those test filters are given then accept the test path
             if (!chutzpahTestSettings.Tests.Any())
             {
@@ -310,6 +310,7 @@ namespace Chutzpah
                 {
                     if (filePath.Equals(testFilePath, StringComparison.OrdinalIgnoreCase))
                     {
+                        matchingTestPath = pathSettings;
                         ChutzpahTracer.TraceInformation("Test file {0} matched test file path from settings file", testFilePath);
                         return true;
                     }
@@ -332,6 +333,9 @@ namespace Chutzpah
                                 folderPath,
                                 string.Join(",", includePatterns),
                                 string.Join(",", excludePatterns));
+
+
+                            matchingTestPath = pathSettings;
                             return true;
                         }
                         else
@@ -416,29 +420,48 @@ namespace Chutzpah
             return coverageEngine;
         }
 
-        private IEnumerable<ReferencedFile> GetFilesUnderTest(IEnumerable<PathInfo> testFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
+        private IEnumerable<ReferencedFile> GetFilesUnderTest(IEnumerable<PathWithTestSetting> testFiles, ChutzpahTestSettingsFile chutzpahTestSettings)
         {
             return testFiles.Select(f => new ReferencedFile
             {
-                Path = f.FullPath,
+                Path = f.File.FullPath,
                 IsLocal = true,
                 IsFileUnderTest = true,
+                // Expand reference comments if we either do not have a matching test path setting or the user explictly asked to do it
+                ExpandReferenceComments = f.MatchingTestSetting == null || f.MatchingTestSetting.ExpandReferenceComments,
                 IncludeInTestHarness = chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
             });
         }
 
-        private bool TryDetectFramework(string content, PathType pathType, ChutzpahTestSettingsFile chutzpahTestSettings, out IFrameworkDefinition definition)
+        private bool TryDetectFramework(PathInfo path, ChutzpahTestSettingsFile chutzpahTestSettings, out IFrameworkDefinition definition)
         {
+            // TODO: Deprecate the fallback approach
+            Lazy<string> fileText = new Lazy<string>(() =>
+            {
+                string firstTestFileText;
+                if (path.Type == PathType.Url)
+                {
+                    firstTestFileText = httpClient.GetContent(path.FullPath);
+                }
+                else
+                {
+                    firstTestFileText = fileSystem.GetText(path.FullPath);
+                }
+
+                return firstTestFileText;
+            });
+
+
             var strategies = new Func<IFrameworkDefinition>[]
             {
                 // Check chutzpah settings
                 () => frameworkDefinitions.FirstOrDefault(x => x.FrameworkKey.Equals(chutzpahTestSettings.Framework, StringComparison.OrdinalIgnoreCase)),
 
                 // Check if we see an explicit reference to a framework file (e.g. <reference path="qunit.js" />)
-                () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, false, pathType)),
+                () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(fileText.Value, false, path.Type)),
 
                 // Check using basic heuristic like looking for test( or module( for QUnit
-                () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(content, true, pathType))
+                () => frameworkDefinitions.FirstOrDefault(x => x.FileUsesFramework(fileText.Value, true, path.Type))
             };
 
             definition = strategies.Select(x => x()).FirstOrDefault(x => x != null);
@@ -464,6 +487,13 @@ namespace Chutzpah
                     throw new ArgumentOutOfRangeException("chutzpahTestSettings");
             }
             return testHarnessDirectory;
+        }
+
+        private class PathWithTestSetting
+        {
+            public PathInfo File { get; set; }
+            public SettingsFilePath MatchingTestSetting { get; set; }
+            public bool IsIncluded { get; set; }
         }
     }
 }

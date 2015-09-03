@@ -8,6 +8,7 @@ namespace Chutzpah.Models
         {
             Includes = new List<string>();
             Excludes = new List<string>();
+            ExpandReferenceComments = false;
         }
 
         /// <summary>
@@ -54,5 +55,10 @@ namespace Chutzpah.Models
         /// The settings file directory that this batch compile configuration came from
         /// </summary>
         public string SettingsFileDirectory { get; set; }
+
+        /// <summary>
+        /// Determines if we should expand references to other files found as reference comments inside the text of the file
+        /// </summary>
+        public bool ExpandReferenceComments { get; set; }
     }
 }

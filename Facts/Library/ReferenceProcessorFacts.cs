@@ -163,7 +163,7 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableReferenceProcessor();
                 var settings = new ChutzpahTestSettingsFile { }.InheritFromDefault();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
@@ -179,8 +179,8 @@ namespace Chutzpah.Facts
                 var processor = new TestableReferenceProcessor();
                 var settings = new ChutzpahTestSettingsFile { }.InheritFromDefault();
                 var referenceFiles = new List<ReferencedFile> { 
-                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test1.js" },
-                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test2.js" }};
+                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test1.js", ExpandReferenceComments = true },
+                    new ReferencedFile { IsFileUnderTest = true, Path = @"path\test2.js", ExpandReferenceComments = true }};
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test1.js")).Returns(text);
@@ -197,7 +197,7 @@ namespace Chutzpah.Facts
                 var processor = new TestableReferenceProcessor();
                 var settings = new ChutzpahTestSettingsFile { }.InheritFromDefault();
                 settings.TestHarnessReferenceMode = TestHarnessReferenceMode.AMD;
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
                 processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
@@ -211,7 +211,7 @@ namespace Chutzpah.Facts
             public void Will_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile
                 {
                     RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory,
@@ -231,7 +231,7 @@ namespace Chutzpah.Facts
             public void Will_change_path_root_given_even_if_has_tilde()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile
                 {
                     RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory,
@@ -251,7 +251,7 @@ namespace Chutzpah.Facts
             public void Will_not_change_path_root_given_SettingsFileDirectory_RootReferencePathMode()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {RootReferencePathMode = RootReferencePathMode.DriveRoot, SettingsFileDirectory = @"C:\root"};
                 var text = @"/// <reference path=""/this/file.js"" />
                         some javascript code
@@ -267,7 +267,7 @@ namespace Chutzpah.Facts
             public void Will_change_path_root_given_SettingsFileDirectory_RootReferencePathMode_for_html_file()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile
                 {
                     RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory,
@@ -287,7 +287,7 @@ namespace Chutzpah.Facts
             public void Will_not_add_referenced_file_if_it_is_excluded()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path1\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = @"/// <reference path=""lib.js"" />
                         /// <reference path=""../../js/excluded.js"" chutzpah-exclude=""true"" />
@@ -308,7 +308,7 @@ namespace Chutzpah.Facts
             public void Will_put_recursively_referenced_files_before_parent_file()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 processor.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/references.js")))
@@ -334,7 +334,7 @@ namespace Chutzpah.Facts
             public void Will_stop_infinite_loop_when_processing_referenced_files()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = @"/// <reference path=""../../js/references.js"" />
                         some javascript code
@@ -358,7 +358,7 @@ namespace Chutzpah.Facts
             public void Will_process_all_files_in_folder_references()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 processor.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/somefolder")))
@@ -383,7 +383,7 @@ namespace Chutzpah.Facts
             public void Will_skip_chutzpah_temporary_files_in_folder_references()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 processor.Mock<IFileProbe>()
                     .Setup(x => x.FindFilePath(Path.Combine(@"path\", @"../../js/somefolder")))
@@ -409,7 +409,7 @@ namespace Chutzpah.Facts
             public void Will_only_include_one_reference_with_mulitple_references_in_html_template()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = (@"/// <template path=""../../templates/file.html"" />
                         /// <template path=""../../templates/file.html"" />
@@ -425,7 +425,7 @@ namespace Chutzpah.Facts
             public void Will_add_reference_url_to_referenced_files()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = (@"/// <reference path=""http://a.com/lib.js"" />
                         some javascript code");
@@ -440,7 +440,7 @@ namespace Chutzpah.Facts
             public void Will_add_chutzpah_reference_to_referenced_files()
             {
                 var processor = new TestableReferenceProcessor();
-                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js" } };
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = (@"/// <chutzpah_reference path=""lib.js"" />
                         some javascript code");

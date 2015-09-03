@@ -34,16 +34,15 @@
             {
                 var processor = new TestableJasmineLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "//js file",
-                    "describe ('module1', function(){",
-                    "  it('test1', function(){});",
-                    "    it('test2', function(){});",
-                    "});"
-                });
+                var text =
+@"//js file
+describe ('module1', function(){
+  it('test1', function(){});
+    it('test2', function(){});
+});";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(3, file.FilePositions[0].Line);
                 Assert.Equal(7, file.FilePositions[0].Column);
@@ -56,14 +55,12 @@
             {
                 var processor = new TestableJasmineLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path.coffee" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path.coffee")).Returns(new string[] 
-                {
-                    "//CoffeeScript file",
-                    "describe 'module1', ->",
-                    "  it 'test1', ->"
-                });
+                var text =
+@"//CoffeeScript file
+describe 'module1', ->;
+  it 'test1', ->";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(3, file.FilePositions[0].Line);
                 Assert.Equal(7, file.FilePositions[0].Column);
@@ -74,14 +71,13 @@
             {
                 var processor = new TestableJasmineLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "describe ( 'modu\"le\\'1', function () {",
-                    " it (\'t\"e\\'st1\', function(){}); ",
-                    "};"
-                });
+                var text =
+@"describe ( 'modu""le\'1', function () {
+ it ('t""e\'st1', function(){});
+};";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(7, file.FilePositions[0].Column);

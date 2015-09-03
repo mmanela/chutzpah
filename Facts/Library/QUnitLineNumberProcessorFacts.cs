@@ -35,12 +35,14 @@ namespace Chutzpah.Facts
                 var processor = new TestableQUnitLineNumberProcessor();
                 var pattern = @"((?<!\.)\b(?:QUnit\.)?(coolTest)[\t ]*\([\t ]*[""'](?<TestName>.*)[""'])";
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "//js file", "coolTest (\"test1\", function(){}); ", "module ( \"module1\");", "  test('test2', function(){});"
-                });
+                var text =
+@"//js file
+coolTest (""test1"", function(){});
+module ( ""module1"");
+    test('test2', function(){});";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile { TestPattern = pattern });
+
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile { TestPattern = pattern });
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(12, file.FilePositions[0].Column);
@@ -53,12 +55,14 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "//js file", "test (\"test1\", function(){}); ", "module ( \"module1\");", "  asyncTest('test2', function(){});"
-                });
+                var text =
+@"//js file
+test (""test1"", function(){});
+module ( ""module1"");
+  asyncTest('test2', function(){});";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(8, file.FilePositions[0].Column);
@@ -71,13 +75,11 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path.coffee" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path.coffee")).Returns(new string[] 
-                {
-                    "//CoffeeScript file",
-                    "  test \"test1\", ->"
-                });
+                var text =
+@"//CoffeeScript file
+  test ""test1"", ->";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(9, file.FilePositions[0].Column);
@@ -88,12 +90,11 @@ namespace Chutzpah.Facts
             {
                 var processor = new TestableQUnitLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "module ( \"modu\"le'1\");", " test (\"t\"e'st1\", function(){}); "
-                });
+                var text =
+@"module ( ""modu""le'1"");
+ test (""t""e'st1"", function(){}); ";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(9, file.FilePositions[0].Column);

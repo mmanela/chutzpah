@@ -69,7 +69,6 @@ namespace Chutzpah.Facts.Integration
         }
 
        
-
         public Execution()
         {
             ChutzpahTracer.Enabled = false;

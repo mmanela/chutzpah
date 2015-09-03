@@ -61,6 +61,12 @@ namespace Chutzpah.Models
         /// </summary>
         public string AmdGeneratedFilePath { get; set; }
 
+
+        /// <summary>
+        /// Determines if we should expand references to other files found as reference comments
+        /// </summary>
+        public bool ExpandReferenceComments { get; set; }
+
         public override int GetHashCode()
         {
             return Path.ToLowerInvariant().GetHashCode();

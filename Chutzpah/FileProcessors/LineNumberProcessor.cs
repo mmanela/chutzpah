@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
@@ -26,29 +27,32 @@ namespace Chutzpah.FileProcessors
                 return;
             }
 
-            var regExp = settings.TestPatternRegex ?? GetTestPattern(referencedFile,testFileText, settings);
+            var regExp = settings.TestPatternRegex ?? GetTestPattern(referencedFile, testFileText, settings);
 
-            var lines = fileSystem.GetLines(referencedFile.Path);
+
             int lineNum = 1;
-
-            foreach (var line in lines)
+            using (var reader = new StringReader(testFileText))
             {
-                var match = regExp.Match(line);
-
-                while (match.Success)
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    var testNameGroup = match.Groups["TestName"];
-                    var testName = testNameGroup.Value;
+                    var match = regExp.Match(line);
 
-                    if (!string.IsNullOrWhiteSpace(testName))
+                    while (match.Success)
                     {
-                        referencedFile.FilePositions.Add(lineNum, testNameGroup.Index + 1, testName);
+                        var testNameGroup = match.Groups["TestName"];
+                        var testName = testNameGroup.Value;
+
+                        if (!string.IsNullOrWhiteSpace(testName))
+                        {
+                            referencedFile.FilePositions.Add(lineNum, testNameGroup.Index + 1, testName);
+                        }
+
+                        match = match.NextMatch();
                     }
 
-                    match = match.NextMatch();
+                    lineNum++;
                 }
-
-                lineNum++;
             }
 
         }

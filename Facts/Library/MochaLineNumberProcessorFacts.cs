@@ -227,14 +227,12 @@ namespace Chutzpah.Facts.Library
             {
                 var processor = new TestableMochaLineNumberProcessor();
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = "path" };
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines("path")).Returns(new string[] 
-                {
-                    "describe ( 'modu\"le\\'1', function () {",
-                    " it (\'t\"e\\'st1\', function(){}); ",
-                    "};"
-                });
+                var text = 
+@"describe ( 'modu\""le\'1', function () {
+ it ('t\""e\'st1', function(){});
+};";
 
-                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, "", new ChutzpahTestSettingsFile().InheritFromDefault());
+                processor.ClassUnderTest.Process(new Mock<IFrameworkDefinition>().Object, file, text, new ChutzpahTestSettingsFile().InheritFromDefault());
 
                 Assert.Equal(2, file.FilePositions[0].Line);
                 Assert.Equal(7, file.FilePositions[0].Column);
@@ -244,7 +242,6 @@ namespace Chutzpah.Facts.Library
             {
                 var path = coffeeScript ? "path.coffee" : "path";
                 var processor = new TestableMochaLineNumberProcessor();
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetLines(It.IsAny<string>())).Returns(lines);
 
                 var file = new ReferencedFile { IsLocal = true, IsFileUnderTest = true, Path = path };
 

@@ -14,14 +14,14 @@ namespace Chutzpah
     {
         public ReferencePathSettings()
         {
-            ExpandNestedReferences = true;
+            ExpandReferenceComments = true;
             Includes = new List<string>();
             Excludes = new List<string>();
         }
 
         public ReferencePathSettings(SettingsFileReference settingsFileReference)
         {
-            ExpandNestedReferences = false;
+            ExpandReferenceComments = settingsFileReference.ExpandReferenceComments;
 
             Includes = settingsFileReference.Includes;
             Excludes = settingsFileReference.Excludes;
@@ -34,7 +34,7 @@ namespace Chutzpah
         /// to find more references. This is set to false when the reference comes from chutzpah.json file since at that point
         /// the user is able to specify whatever they want
         /// </summary>
-        public bool ExpandNestedReferences { get; set; }
+        public bool ExpandReferenceComments { get; set; }
 
         public ICollection<string> Includes { get; set; }
         public ICollection<string> Excludes { get; set; }
@@ -105,19 +105,22 @@ namespace Chutzpah
 
                 definition.Process(fileUnderTest, testFileText, chutzpahTestSettings);
 
-                var result = GetReferencedFiles(
-                    referencePathSet,
-                    definition,
-                    testFileText,
-                    fileUnderTest.Path,
-                    chutzpahTestSettings);
+                if (fileUnderTest.ExpandReferenceComments)
+                {
+                    var result = GetReferencedFiles(
+                        referencePathSet,
+                        definition,
+                        testFileText,
+                        fileUnderTest.Path,
+                        chutzpahTestSettings);
 
 
-                var flattenedReferenceTree = from root in result
-                                             from flattened in FlattenReferenceGraph(root)
-                                             select flattened;
+                    var flattenedReferenceTree = from root in result
+                                                 from flattened in FlattenReferenceGraph(root)
+                                                 select flattened;
 
-                referencedFiles.AddRange(flattenedReferenceTree);
+                    referencedFiles.AddRange(flattenedReferenceTree);
+                }
             }
         }
 
@@ -382,7 +385,7 @@ namespace Chutzpah
 
 
             ChutzpahTracer.TraceInformation("Processing referenced file '{0}' for expanded references", absoluteFilePath);
-            if (pathSettings.ExpandNestedReferences)
+            if (pathSettings.ExpandReferenceComments)
             {
                 referencedFile.ReferencedFiles = ExpandNestedReferences(discoveredPaths, definition, absoluteFilePath, chutzpahTestSettings);
             }
