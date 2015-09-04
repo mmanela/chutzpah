@@ -50,7 +50,7 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 
 * Right click menu to run tests
   
- ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/contextmenu.png)
+ ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/contextmenu_debugger.png)
 
 
 * Shows test results in Error window
