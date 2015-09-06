@@ -9,7 +9,7 @@ Chutzpah supports the [QUnit](http://docs.jquery.com/QUnit), [Jasmine](http://pi
 Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run your tests.
 
 
-**Notice**: [Known issue and workaround](https://code.google.com/p/phantomjs/issues/detail?id=845) if you have both NVidia and Intel video drivers
+**Notice**: [Version 4.1: Breaking change to how reference comments are processed](https://github.com/mmanela/chutzpah/wiki/Breaking-change-to-nested-reference-comments-in-version-4.1)
 
 
 
