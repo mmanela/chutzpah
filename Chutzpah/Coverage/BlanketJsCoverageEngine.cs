@@ -25,6 +25,7 @@ namespace Chutzpah.Coverage
 
         private List<string> includePatterns { get; set; }
         private List<string> excludePatterns { get; set; }
+        private List<string> ignorePatterns { get; set; }
 
         public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper)
         {
@@ -34,6 +35,7 @@ namespace Chutzpah.Coverage
 
             includePatterns = new List<string>();
             excludePatterns = new List<string>();
+            ignorePatterns = new List<string>();
         }
 
         public IEnumerable<string> GetFileDependencies(IFrameworkDefinition definition, ChutzpahTestSettingsFile testSettingsFile)
@@ -166,7 +168,7 @@ namespace Chutzpah.Coverage
                     }
                 }
 
-                if (IsFileEligibleForInstrumentation(newKey) && fileSystem.FileExists(filePath))
+                if (!(testContext.CoverageEngine != null && testContext.CoverageEngine.IsIgnored(newKey)) && fileSystem.FileExists(filePath))
                 {
                     string[] sourceLines = fileSystem.GetLines(filePath);
                     int?[] lineExecutionCounts = entry.Value;
@@ -191,6 +193,7 @@ namespace Chutzpah.Coverage
         {
             includePatterns.Clear();
             excludePatterns.Clear();
+            ignorePatterns.Clear();
         }
 
         public void AddIncludePatterns(IEnumerable<string> patterns)
@@ -209,6 +212,14 @@ namespace Chutzpah.Coverage
             }
         }
 
+        public void AddIgnorePatterns(IEnumerable<string> patterns)
+        {
+            foreach (var pattern in patterns)
+            {
+                ignorePatterns.Add(pattern);
+            }
+        }
+
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
@@ -224,6 +235,17 @@ namespace Chutzpah.Coverage
             }
 
             return true;
+        }
+
+        public bool IsIgnored(string filePath)
+        {
+            // If no ignore pattern is given then include all files. Otherwise ignore the ones that match an ignore pattern
+            if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(ignorePattern))))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private string GetBlanketScriptName(IFrameworkDefinition def, ChutzpahTestSettingsFile settingsFile)

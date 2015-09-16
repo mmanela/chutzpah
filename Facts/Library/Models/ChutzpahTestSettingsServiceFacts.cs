@@ -241,7 +241,8 @@ namespace Chutzpah.Facts.Library.Models
                 References = new List<SettingsFileReference> { new SettingsFileReference { Path = "parentReferencePath" } },
                 Transforms = new List<TransformConfig>{ new TransformConfig{ Path = "parentTransformPath"}},
                 CodeCoverageExcludes = new List<string>{"parentCodeCoverageExcludePath"},
-                CodeCoverageIncludes = new List<string>{"parentCodeCoverageIncludePath"},
+                CodeCoverageIncludes = new List<string> { "parentCodeCoverageIncludePath" },
+                CodeCoverageIgnores = new List<string> { "parentCodeCoverageIgnorePath" },
                 Compile = new BatchCompileConfiguration{ Mode = BatchCompileMode.External},
                 
                 AMDBasePath = "parentAmdBasePath",
@@ -277,6 +278,7 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(1, childSettings.Transforms.Count);
             Assert.Equal(1, childSettings.CodeCoverageIncludes.Count);
             Assert.Equal(1, childSettings.CodeCoverageExcludes.Count);
+            Assert.Equal(1, childSettings.CodeCoverageIgnores.Count);
 
             Assert.Equal(parentSettings.Compile, childSettings.Compile);
             Assert.Equal(@"C:\settingsDir", childSettings.SettingsFileDirectory);
@@ -305,7 +307,8 @@ namespace Chutzpah.Facts.Library.Models
                 References = new List<SettingsFileReference> { new SettingsFileReference { Path = "parentReferencePath" } },
                 Transforms = new List<TransformConfig> { new TransformConfig { Path = "parentTransformPath" } },
                 CodeCoverageExcludes = new List<string> { "parentCodeCoverageExcludePath" },
-                CodeCoverageIncludes = new List<string> { "parentCodeCoverageIncludePath" }
+                CodeCoverageIncludes = new List<string> { "parentCodeCoverageIncludePath" },
+                CodeCoverageIgnores = new List<string> { "parentCodeCoverageIgnorePath" }
             };
 
             var childSettings = new ChutzpahTestSettingsFile
@@ -315,7 +318,8 @@ namespace Chutzpah.Facts.Library.Models
                 References = new List<SettingsFileReference> { new SettingsFileReference { Path = "childReferencePath" } },
                 Transforms = new List<TransformConfig> { new TransformConfig { Path = "childTransformPath" } },
                 CodeCoverageExcludes = new List<string> { "childCodeCoverageExcludePath" },
-                CodeCoverageIncludes = new List<string> { "childCodeCoverageIncludePath" }
+                CodeCoverageIncludes = new List<string> { "childCodeCoverageIncludePath" },
+                CodeCoverageIgnores = new List<string> { "childCodeCoverageIgnorePath" }
             };
 
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(@"C:\settingsDir")).Returns(@"C:\settingsDir\settingsFile.json");
@@ -348,6 +352,9 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(2, childSettings.CodeCoverageExcludes.Count);
             Assert.Equal("parentCodeCoverageExcludePath", childSettings.CodeCoverageExcludes.ElementAt(0));
             Assert.Equal("childCodeCoverageExcludePath", childSettings.CodeCoverageExcludes.ElementAt(1));
+            Assert.Equal(2, childSettings.CodeCoverageIgnores.Count);
+            Assert.Equal("parentCodeCoverageIgnorePath", childSettings.CodeCoverageIgnores.ElementAt(0));
+            Assert.Equal("childCodeCoverageIgnorePath", childSettings.CodeCoverageIgnores.ElementAt(1));
         }
 
         [Fact]

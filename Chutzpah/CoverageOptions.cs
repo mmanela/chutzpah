@@ -12,6 +12,7 @@ namespace Chutzpah
         {
             IncludePatterns = new List<string>();
             ExcludePatterns = new List<string>();
+            IgnorePatterns = new List<string>();
         }
 
         /// <summary>
@@ -28,6 +29,11 @@ namespace Chutzpah
         /// If specified, pattern of files to exclude from the instrumentation phase.
         /// </summary>
         public ICollection<string> ExcludePatterns { get; set; }
+
+        /// <summary>
+        /// If specified, pattern of files to exclude from the results phase.
+        /// </summary>
+        public ICollection<string> IgnorePatterns { get; set; }
 
         public bool ShouldRunCoverage(CodeCoverageExecutionMode? coverageExecutionModeSetting)
         {

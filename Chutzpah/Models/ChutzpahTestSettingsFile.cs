@@ -56,6 +56,7 @@ namespace Chutzpah.Models
         {
             CodeCoverageIncludes = new List<string>();
             CodeCoverageExcludes = new List<string>();
+            CodeCoverageIgnores = new List<string>();
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             Transforms = new List<TransformConfig>();
@@ -210,6 +211,11 @@ namespace Chutzpah.Models
         public ICollection<string> CodeCoverageExcludes { get; set; }
 
         /// <summary>
+        /// The collection code coverage file patterns to ignore in coverage. These are in glob format. If you specify none no files are excluded.
+        /// </summary>
+        public ICollection<string> CodeCoverageIgnores { get; set; }
+
+        /// <summary>
         /// The collection of test files. These can list individual tests or folders scanned recursively. This setting can work in two ways:
         /// 1. If you run tests normally by specifying folders/files then this settings will filter the sets of those files.
         /// 2. If you run tests by running a specific chutzpah.json file then this settings will select the test files you choose.
@@ -341,6 +347,7 @@ namespace Chutzpah.Models
             this.References = parent.References.Concat(this.References).ToList();
             this.CodeCoverageIncludes = parent.CodeCoverageIncludes.Concat(this.CodeCoverageIncludes).ToList();
             this.CodeCoverageExcludes = parent.CodeCoverageExcludes.Concat(this.CodeCoverageExcludes).ToList();
+            this.CodeCoverageIgnores = parent.CodeCoverageIgnores.Concat(this.CodeCoverageIgnores).ToList();
             this.Transforms = parent.Transforms.Concat(this.Transforms).ToList();
 
             if (this.Compile == null)
