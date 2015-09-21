@@ -36,14 +36,14 @@ namespace Chutzpah.Transformers
             {
                 builder.AppendLine(
                     string.Format(@"  <testsuite name=""{0}"" tests=""{1}"" failures=""{2}"" time=""{3}"">",
-                                  Encode(file.Path), file.Tests.Count, file.Tests.Count(x => !x.ResultsAllPassed), file.TimeTaken));
+                                  Encode(file.Path), file.Tests.Count, file.Tests.Count(x => !x.ResultsAllPassed), ConvertMillisecondsToSeconds(file.TimeTaken)));
                 ;
                 foreach (TestCase test in file.Tests)
                 {
                     if (test.ResultsAllPassed)
                     {
                         builder.AppendLine(string.Format(@"    <testcase name=""{0}"" time=""{1}"" />",
-                                           Encode(test.GetDisplayName()), test.TimeTaken));
+                                           Encode(test.GetDisplayName()), ConvertMillisecondsToSeconds(test.TimeTaken)));
                     }
                     else
                     {
@@ -52,7 +52,7 @@ namespace Chutzpah.Transformers
                         {
                             string failureMessage = failureCase.GetFailureMessage();
                             builder.AppendLine(string.Format(@"    <testcase name=""{0}"" time=""{1}"">",
-                                                             Encode(test.GetDisplayName()), test.TimeTaken));
+                                                             Encode(test.GetDisplayName()), ConvertMillisecondsToSeconds(test.TimeTaken)));
                             builder.AppendLine(string.Format(@"      <failure message=""{0}""></failure>",
                                                              Encode(failureMessage)));
                             builder.AppendLine(string.Format(@"    </testcase>"));

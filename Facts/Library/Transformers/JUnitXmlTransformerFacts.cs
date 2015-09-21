@@ -71,15 +71,15 @@ namespace Chutzpah.Facts.Library.Transformers
             var expected =
                 @"<?xml version=""1.0"" encoding=""UTF-8"" ?>
 <testsuites>
-  <testsuite name=""path1"" tests=""2"" failures=""1"" time=""1500"">
-    <testcase name=""module1:test1"" time=""1000"">
+  <testsuite name=""path1"" tests=""2"" failures=""1"" time=""1.5"">
+    <testcase name=""module1:test1"" time=""1"">
       <failure message=""some failure""></failure>
     </testcase>
-    <testcase name=""module1:test2"" time=""500"" />
+    <testcase name=""module1:test2"" time=""0.5"" />
   </testsuite>
-  <testsuite name=""path&gt;2"" tests=""2"" failures=""1"" time=""2000"">
-    <testcase name=""test3"" time=""1000"" />
-    <testcase name=""test&lt;4"" time=""1000"">
+  <testsuite name=""path&gt;2"" tests=""2"" failures=""1"" time=""2"">
+    <testcase name=""test3"" time=""1"" />
+    <testcase name=""test&lt;4"" time=""1"">
       <failure message=""bad&lt;failure""></failure>
     </testcase>
   </testsuite>

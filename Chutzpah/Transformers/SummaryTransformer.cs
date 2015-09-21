@@ -40,7 +40,12 @@ namespace Chutzpah.Transformers
             }
 
             var result = Transform(testFileSummary);
-            fileSystem.WriteAllText(outFile, result,Encoding);
+            fileSystem.WriteAllText(outFile, result, Encoding);
         }
+
+		protected decimal ConvertMillisecondsToSeconds(long millis)
+		{
+			return millis / 1000m;
+		}
     }
 }
