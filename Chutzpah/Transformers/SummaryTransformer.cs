@@ -11,11 +11,15 @@ namespace Chutzpah.Transformers
     /// </summary>
     public abstract class SummaryTransformer
     {
+        // Encoding for UTF-8 that will not output a byte-order mark
+        private static readonly Encoding UTF8NoIdentifier = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         /// <summary>
         /// The encoding used to write the string response from Transform.
         /// </summary>
-        public virtual Encoding Encoding {
-            get { return Encoding.UTF8; }
+        public virtual Encoding Encoding
+        {
+            get { return UTF8NoIdentifier; }
         }
         public abstract string Name { get; }
         public abstract string Description { get; }
