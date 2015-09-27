@@ -10,13 +10,13 @@ properties {
 
 # Aliases
 task Default -depends Build
-task Package -depends Clean-Solution,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution, Package-Files, Package-NuGet, Package-Chocolatey
-task Clean -depends Clean-Solution
+task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
+task Clean -depends Clean-Solution-NoVS
 task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
 
 # Build Tasks
-task Build -depends  Clean-Solution, Build-Solution, Run-UnitTests, Run-IntegrationTests
-task Build-2013 -depends  Clean-Solution-2013, Build-Solution-2013, Run-UnitTests, Run-IntegrationTests
+task Build -depends  Clean-Solution-NoVS, Build-Solution-NoVS, Run-UnitTests, Run-IntegrationTests
+task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, Run-IntegrationTests
 
 task Set-Version {
   
@@ -70,11 +70,12 @@ task Clean-TeamCitySolution {
     exec { msbuild TeamCity.CodeBetter.sln /t:Clean /v:quiet }
 
 }
-
-task Clean-Solution -depends Clean-Solution-2013
-
-task Clean-Solution-2013 {
+task Clean-Solution-VS {
     exec { msbuild Chutzpah.VS2013.sln /t:Clean /v:quiet }
+}
+
+task Clean-Solution-NoVS {
+    exec { msbuild Chutzpah.NoVS.sln /t:Clean /v:quiet }
 }
 
 # CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
@@ -83,10 +84,12 @@ task Build-TeamCitySolution {
     exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
-task Build-Solution -depends Build-Solution-2013
-
-task Build-Solution-2013 {
+task Build-Solution-VS {
     exec { msbuild Chutzpah.VS2013.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+}
+
+task Build-Solution-NoVS {
+    exec { msbuild Chutzpah.NoVS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Run-PerfTester {
