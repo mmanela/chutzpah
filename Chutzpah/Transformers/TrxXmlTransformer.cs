@@ -205,9 +205,12 @@ namespace Chutzpah.Transformers
             testRun.Items.GetInstance<ResultsType>(VSTSExtensions.TestRunItemType.Results).ItemsElementName =
                 testsHelper.Select(testCase => ItemsChoiceType3.UnitTestResult).ToArray();
 
+            var ns = new XmlSerializerNamespaces();
+            ns.Add("", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
+
             var stringStream = new StringWriter();
             var xs = new XmlSerializer(typeof(TestRunType));
-            xs.Serialize(stringStream,testRun);
+            xs.Serialize(stringStream,testRun,ns);
 
             return stringStream.ToString();
         }
