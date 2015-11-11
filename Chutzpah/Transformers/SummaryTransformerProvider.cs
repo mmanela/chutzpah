@@ -16,7 +16,8 @@ namespace Chutzpah.Transformers
                 new LcovTransformer(fileSystem),
                 new TrxXmlTransformer(fileSystem),
                 new NUnit2XmlTransformer(fileSystem),
-                new CoverageHtmlTransformer(fileSystem)
+                new CoverageHtmlTransformer(fileSystem),
+                new CoverageJsonTransformer(fileSystem)
             };
         }
     }

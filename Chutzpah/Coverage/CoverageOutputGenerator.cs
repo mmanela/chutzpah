@@ -21,10 +21,23 @@ namespace Chutzpah.Coverage
             return path;
         }
 
+        public static string WriteJsonFile(string path, CoverageData coverage)
+        {
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            using (var writer = new StreamWriter(fileStream))
+            {
+                var serializer = new JsonSerializer();
+                writer.Write(serializer.Serialize(coverage));
+            }
+
+
+            return path;
+        }
+
         public static void GenerateHtml(CoverageData coverage, Stream stream)
         {
             var successPercentage = coverage.SuccessPercentage.HasValue ? coverage.SuccessPercentage.Value : Constants.DefaultCodeCoverageSuccessPercentage;
-           
+
             using (var writer = new StreamWriter(stream))
             {
                 writer.WriteLine(HtmlFragments.BodyContentStartFormat, HtmlFragments.Js, HtmlFragments.Css);
@@ -45,7 +58,7 @@ namespace Chutzpah.Coverage
                     var maxLineNumberLength = fileData.SourceLines.Length.ToString(CultureInfo.InvariantCulture).Length;
                     for (var i = 0; i < fileData.SourceLines.Length; i++)
                     {
-                        var lineNumber = (i+1).ToString(CultureInfo.InvariantCulture).PadLeft(maxLineNumberLength);
+                        var lineNumber = (i + 1).ToString(CultureInfo.InvariantCulture).PadLeft(maxLineNumberLength);
                         lineNumber = lineNumber.Replace(" ", "&nbsp;&nbsp;");
                         var line = HttpUtility.HtmlEncode(fileData.SourceLines[i]).Replace(" ", "&nbsp;");
                         markup[i + 1] = "<div class='{{executed}}'><span class=''>" + lineNumber + "</span>" + line +

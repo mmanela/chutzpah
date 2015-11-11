@@ -29,8 +29,7 @@ namespace Chutzpah
         // Coffee script to JS
         public const string ChutzpahTemporaryFilePrefix = "_Chutzpah.";
         public const string ChutzpahTemporaryFileFormat = ChutzpahTemporaryFilePrefix + "{0}.{1}";
-
-        public const string CoverageJsonFileName = ChutzpahTemporaryFilePrefix + "coverage.json";
+        
         public const string CoverageHtmlFileName = ChutzpahTemporaryFilePrefix + "coverage.html";
 
         // Used to communicate between the coverage engine and the JS runner, for Chutzpah
@@ -54,6 +53,7 @@ namespace Chutzpah
         public const string MochaExportsInterface = "exports";
 
         public const string DefaultCoverageHtmlTransform = "coveragehtml";
+        public const string DefaultCoverageJsonTransform = "coveragejson";
 
     }
 }

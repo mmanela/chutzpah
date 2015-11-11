@@ -31,6 +31,25 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
+        public void Will_generate_coverage_JSON()
+        {
+            var expectedHtmlPath = @"JS\Test\TestSettings\CodeCoverage\myCoverage.json";
+
+            if (File.Exists(expectedHtmlPath))
+            {
+                File.Delete(expectedHtmlPath);
+                Assert.False(File.Exists(expectedHtmlPath), "Didn't manage to delete left-over JSON file from " + expectedHtmlPath);
+            }
+
+            var scriptPath = @"JS\Test\TestSettings\CodeCoverage\cc.js";
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.True(File.Exists(expectedHtmlPath), "JSON output wasn't generated");
+        }
+
+        [Fact]
         public void Will_generate_LCOV_output_when_configured_and_coverage_enabled()
         {
             var expectedLcovPath = @"JS\Test\TestSettings\Lcov\lcov.dat";

@@ -54,7 +54,6 @@ namespace Chutzpah.Facts.Library.Transformers
             public Mock<SummaryTransformer> Transformer2 { get; private set; }
 
             public TestableTransformProcessor()
-                : base()
             {
                 this.Transformer1 = GetSummaryTransformer("testtransform1");
                 this.Transformer2 = GetSummaryTransformer("testtransform2");
