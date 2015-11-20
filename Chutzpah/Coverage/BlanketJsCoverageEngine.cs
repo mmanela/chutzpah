@@ -168,7 +168,9 @@ namespace Chutzpah.Coverage
                     }
                 }
 
-                if (!(testContext.CoverageEngine != null && testContext.CoverageEngine.IsIgnored(newKey)) && fileSystem.FileExists(filePath))
+                if (IsFileEligibleForInstrumentation(newKey) &&
+                    !(testContext.CoverageEngine != null && testContext.CoverageEngine.IsIgnored(newKey)) &&
+                    fileSystem.FileExists(filePath))
                 {
                     string[] sourceLines = fileSystem.GetLines(filePath);
                     int?[] lineExecutionCounts = entry.Value;
