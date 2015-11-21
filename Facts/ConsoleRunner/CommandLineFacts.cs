@@ -591,6 +591,16 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
 
             [Fact]
+            public void CoverageExclude_Option_Not_Passed_CoverageIgnorePattern_Null()
+            {
+                var arguments = new[] { "test.html" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Null(commandLine.CoverageIgnorePatterns);
+            }
+
+            [Fact]
             public void CoverageInclude_Option_With_Value_CoverageIncludePattern_Set()
             {
                 var arguments = new[] { "test.html", "/coverageIncludes", "*.js" };
@@ -608,6 +618,16 @@ namespace Chutzpah.Facts.ConsoleRunner
                 var commandLine = TestableCommandLine.Create(arguments);
 
                 Assert.Equal("*.coffee", commandLine.CoverageExcludePatterns);
+            }
+
+            [Fact]
+            public void CoverageExclude_Option_With_Value_CoverageIgnorePattern_Set()
+            {
+                var arguments = new[] { "test.html", "/coverageIgnores", "*.ts" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+
+                Assert.Equal("*.ts", commandLine.CoverageIgnorePatterns);
             }
 
             [Fact]

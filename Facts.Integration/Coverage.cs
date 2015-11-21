@@ -440,6 +440,21 @@ namespace Chutzpah.Facts.Integration
 
         [Theory]
         [PropertyData("AmdTestScriptWithForcedRequire")]
+        public void Will_ignore_only_given_file_patterns(string scriptPath)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => { co.IncludePatterns = new[] { "*\\ui\\*", "*core.js" }; co.IgnorePatterns = new[] { "tests\\*" }; }), new ExceptionThrowingRunnerCallback());
+
+            ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
+                               new[]
+                                   {
+                                      "\\base\\core.js", "ui\\screen.js"
+                                   });
+        }
+
+        [Theory]
+        [PropertyData("AmdTestScriptWithForcedRequire")]
         public void Will_resolve_requirejs_required_files_correctly(string scriptPath)
         {
             var testRunner = TestRunner.Create();

@@ -58,8 +58,10 @@ namespace Chutzpah
         public bool Coverage { get; protected set; }
 
         public string CoverageIncludePatterns { get; protected set; }
-        
+
         public string CoverageExcludePatterns { get; protected set; }
+
+        public string CoverageIgnorePatterns { get; protected set; }
 
         public string BrowserName { get; protected set; }
 
@@ -165,6 +167,10 @@ namespace Chutzpah
                 {
                     AddCoverageExcludeOption(option.Value);
                 }
+                else if (optionName == "/coverageignores")
+                {
+                    AddCoverageIgnoreOption(option.Value);
+                }
                 else if (optionName == "/showfailurereport")
                 {
                     GuardNoOptionValue(option);
@@ -205,6 +211,16 @@ namespace Chutzpah
                     "invalid or missing argument for /coverageExcludes.  Expecting a list of comma separated file name patterns");
             }
             CoverageExcludePatterns = value;
+        }
+
+        private void AddCoverageIgnoreOption(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException(
+                    "invalid or missing argument for /coverageIgnores.  Expecting a list of comma separated file name patterns");
+            }
+            CoverageIgnorePatterns = value;
         }
 
         private void AddParallelismOption(string value)

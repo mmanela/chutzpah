@@ -148,7 +148,8 @@ namespace Chutzpah
                                               {
                                                   Enabled = commandLine.Coverage,
                                                   IncludePatterns = (commandLine.CoverageIncludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries),
-                                                  ExcludePatterns = (commandLine.CoverageExcludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries)
+                                                  ExcludePatterns = (commandLine.CoverageExcludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries),
+                                                  IgnorePatterns = (commandLine.CoverageIgnorePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries)
                                               }
                     };
 

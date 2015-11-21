@@ -46,6 +46,19 @@ namespace Chutzpah.Coverage
         void AddExcludePatterns(IEnumerable<string> excludePatterns);
 
         /// <summary>
+        /// Add file name pattern that, if set, a file must NOT match to be included in results. Pattern matching
+        /// is done with the <c>PathMatchSpec</c> Windows function.
+        /// </summary>
+        void AddIgnorePatterns(IEnumerable<string> ignorePatterns);
+
+        /// <summary>
+        /// Returns true if the path should not be included in results, false otherwise.
+        /// </summary>
+        /// <param name="filePath">The path to test.</param>
+        /// <returns></returns>
+        bool IsIgnored(string filePath);
+
+        /// <summary>
         /// Reset patterns between runs, this is to prevent caching old configurations
         /// </summary>
         void ClearPatterns();

@@ -417,6 +417,7 @@ namespace Chutzpah
             coverageEngine.ClearPatterns();
             coverageEngine.AddIncludePatterns(chutzpahTestSettings.CodeCoverageIncludes.Concat(options.CoverageOptions.IncludePatterns));
             coverageEngine.AddExcludePatterns(chutzpahTestSettings.CodeCoverageExcludes.Concat(options.CoverageOptions.ExcludePatterns));
+            coverageEngine.AddIgnorePatterns(chutzpahTestSettings.CodeCoverageIgnores.Concat(options.CoverageOptions.IgnorePatterns));
             return coverageEngine;
         }
 
