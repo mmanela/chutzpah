@@ -444,7 +444,7 @@ namespace Chutzpah.Facts.Integration
         {
             var testRunner = TestRunner.Create();
 
-            var result = testRunner.RunTests(scriptPath, WithCoverage(co => { co.IncludePatterns = new[] { "*\\ui\\*", "*core.js" }; co.IgnorePatterns = new[] { "tests\\*" }; }), new ExceptionThrowingRunnerCallback());
+            var result = testRunner.RunTests(scriptPath, WithCoverage(co => { co.IncludePatterns = new[] { "*\\ui\\*", "*core.js" }; co.IgnorePatterns = new[] { "*\\tests\\*" }; }), new ExceptionThrowingRunnerCallback());
 
             ExpectKeysMatching(result.TestFileSummaries.Single().CoverageObject,
                                new[]

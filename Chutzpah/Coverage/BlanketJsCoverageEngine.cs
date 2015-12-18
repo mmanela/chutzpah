@@ -169,7 +169,7 @@ namespace Chutzpah.Coverage
                 }
 
                 if (IsFileEligibleForInstrumentation(newKey) &&
-                    !(testContext.CoverageEngine != null && testContext.CoverageEngine.IsIgnored(newKey)) &&
+                    !IsIgnored(newKey) &&
                     fileSystem.FileExists(filePath))
                 {
                     string[] sourceLines = fileSystem.GetLines(filePath);

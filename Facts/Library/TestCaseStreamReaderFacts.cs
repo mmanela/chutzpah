@@ -410,15 +410,15 @@ namespace Chutzpah.Facts
             public void Will_put_coverage_object_in_summary()
             {
                 var reader = new TestableTestCaseStreamReader();
-
-                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.CoverageEventJson;
                 var context = reader.BuildContext("file");
+                var coverageEngine = new Mock<ICoverageEngine>();
+                coverageEngine.Setup(ce => ce.DeserializeCoverageObject(It.IsAny<string>(), context))
+                              .Returns(new CoverageData());
+                context.CoverageEngine = coverageEngine.Object;
+                var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.CoverageEventJson;
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
                 var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
-
-                reader.Mock<ICoverageEngine>().Setup(ce => ce.DeserializeCoverageObject(It.IsAny<string>(), context)).
-                    Returns(new CoverageData());
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
 

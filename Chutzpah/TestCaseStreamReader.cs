@@ -31,12 +31,10 @@ namespace Chutzpah
 
         // Tracks the last time we got an event/update from phantom. 
         private DateTime lastTestEvent;
-        private readonly ICoverageEngine coverageEngine;
 
-        public TestCaseStreamReader(ICoverageEngine coverageEngine)
+        public TestCaseStreamReader()
         {
             jsonSerializer = new JsonSerializer();
-            this.coverageEngine = coverageEngine;
         }
 
         public IList<TestFileSummary> Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
@@ -139,7 +137,7 @@ namespace Chutzpah
         private void FireCoverageObject(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var jsCov = jsRunnerOutput as JsCoverage;
-            testFileContext.TestFileSummary.CoverageObject = coverageEngine.DeserializeCoverageObject(jsCov.Object, testFileContext.TestContext);
+            testFileContext.TestFileSummary.CoverageObject = testFileContext.TestContext.CoverageEngine.DeserializeCoverageObject(jsCov.Object, testFileContext.TestContext);
         }
 
         private void FireFileFinished(ITestMethodRunnerCallback callback, string testFilesString, IEnumerable<StreamingTestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
