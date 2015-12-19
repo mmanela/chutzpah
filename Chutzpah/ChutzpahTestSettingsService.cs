@@ -317,7 +317,13 @@ namespace Chutzpah
                 }
 
                 // These settings might be needed in either External
-                settings.Compile.SourceDirectory = ResolveFolderPath(settings, settings.Compile.SourceDirectory);
+                var sourceDir = settings.Compile.SourceDirectory;
+                settings.Compile.SourceDirectory = ResolveFolderPath(settings, sourceDir);
+                if(settings.Compile.SourceDirectory == null)
+                {
+                    throw new DirectoryNotFoundException("Unable to find directory specified by Compile SourceDirectory setting of " + (sourceDir ?? ""));
+                }
+
                 settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.Compile.OutDirectory), true);
             }
         }
