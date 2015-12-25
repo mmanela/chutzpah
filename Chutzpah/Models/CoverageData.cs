@@ -219,6 +219,9 @@ namespace Chutzpah.Models
                     }
                 }
             }
+
+            // After update LineExecutionCounts we need recalculate CoveragePercentage
+            this.coveragePercentage = null;
         }
     }
 }
