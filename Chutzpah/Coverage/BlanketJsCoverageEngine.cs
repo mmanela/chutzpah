@@ -180,12 +180,22 @@ namespace Chutzpah.Coverage
                         lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
                     }
 
-                    coverageData.Add(newKey, new CoverageFileData
+                    var coverageFileData = new CoverageFileData
+                                               {
+                                                   LineExecutionCounts = lineExecutionCounts,
+                                                   FilePath = newKey,
+                                                   SourceLines = sourceLines
+                                               };
+                    
+                    // If some AMD modules has different "non canonical" references (like "../../module" and "./../../module"). Coverage trying to add files many times
+                    if (coverageData.ContainsKey(newKey))
                     {
-                        LineExecutionCounts = lineExecutionCounts,
-                        FilePath = newKey,
-                        SourceLines = sourceLines
-                    });
+                        coverageData[newKey].Merge(coverageFileData);
+                    }
+                    else
+                    {
+                        coverageData.Add(newKey, coverageFileData);
+                    }
                 }
             }
             return coverageData;
