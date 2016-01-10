@@ -12,7 +12,7 @@ namespace Chutzpah.Facts.Library.Coverage
 {
     public class BlanketJsCoverageEngineFacts
     {
-        class TestableCoverageEngine : Testable<BlanketJsCoverageEngine> 
+        class TestableCoverageEngine : Testable<BlanketJsCoverageEngine>
         {
             IDictionary<string, int?[]> coverage;
 
@@ -70,8 +70,8 @@ namespace Chutzpah.Facts.Library.Coverage
                         UseSourceMaps = true,
                     }
                 }.InheritFromDefault(),
-                ReferencedFiles = new[] 
-                { 
+                ReferencedFiles = new[]
+                {
                     new ReferencedFile { Path = @"X:\file1.ts", GeneratedFilePath = @"X:\file1.js", SourceMapFilePath = @"X:\file1.map" }
                 }
             };
@@ -100,16 +100,16 @@ namespace Chutzpah.Facts.Library.Coverage
 
             underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(coverageDict[file.GeneratedFilePath], 1, file), Times.Once());
         }
-        
+
         [Fact]
         public void DeserializeCoverageObject_UsesOriginalSource_WhenSourceMapsEnabled()
         {
             var testContext = GetContext();
             var coverageDict = GetLineExecutions();
-            var mapperOutput = new int?[]{ 1, null };
+            var mapperOutput = new int?[] { 1, null };
             var underTest = new TestableCoverageEngine(coverageDict, mapperOutput);
             var file = testContext.ReferencedFiles.Single(x => x.Path == @"X:\file1.ts");
-            
+
             var result = underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
 
             Assert.True(result.ContainsKey(@"X:\file1.ts"));
@@ -123,7 +123,7 @@ namespace Chutzpah.Facts.Library.Coverage
         {
             var testContext = GetContext();
             var coverageDict = GetLineExecutions();
-            
+
             // Add in a file we didn't know about
             coverageDict[@"X:\file3.js"] = new int?[0];
 
@@ -179,6 +179,44 @@ namespace Chutzpah.Facts.Library.Coverage
             underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
 
             underTest.Mock<ILineCoverageMapper>().Verify(x => x.GetOriginalFileLineExecutionCounts(It.IsAny<int?[]>(), It.IsAny<int>(), It.IsAny<ReferencedFile>()), Times.Never());
+        }
+
+
+        [Fact]
+        public void DeserializeCoverageObject_NonCanonicalReferences_MergeCoverage()
+        {
+            var testContext = new TestContext
+            {
+                TestFileSettings = new ChutzpahTestSettingsFile
+                {
+                    Compile = new BatchCompileConfiguration
+                    {
+                        UseSourceMaps = false,
+                    }
+                }.InheritFromDefault(),
+                ReferencedFiles = new[]
+               {
+                    new ReferencedFile
+                        {
+                            Path = @"X:\file1.ts", GeneratedFilePath = @"X:\file1.js"
+                        },
+
+                    new ReferencedFile
+                        {
+                            Path = @"X:\1\..\file1.ts", GeneratedFilePath = @"X:\1\..\file1.js"
+                        },
+                }
+            };
+            var lineExecutions =  new Dictionary<string, int?[]>
+            {
+                { @"X:\file1.js", new int?[]{ null, null, 4, 4 } },
+                { @"X:\1\..\file1.js", new int?[]{ 1, 2, null, null } }
+            };
+
+            var underTest = new TestableCoverageEngine(lineExecutions);
+            var coverage = underTest.ClassUnderTest.DeserializeCoverageObject("the json", testContext);
+            
+            Assert.Equal(1, coverage.CoveragePercentage, 2);
         }
     }
 }
