@@ -99,16 +99,16 @@ namespace Chutzpah.Facts.Library.Transformers
             var document = GetTransformedResults();
 
             var suites = document.Element("test-results").Elements("test-suite").ToDictionary(ts => ts.Attribute("name").Value, ts => ts);
-            
+
             Assert.Contains("path1", suites.Keys);
             Assert.Contains("path>2", suites.Keys);
-            
-            Assert.Equal("1", suites["path1"].Attribute("success").Value);
+
+            Assert.Equal("False", suites["path1"].Attribute("success").Value);
             Assert.Equal("1.5", suites["path1"].Attribute("time").Value);
             Assert.Equal("True", suites["path1"].Attribute("executed").Value);
             Assert.Equal("Failed", suites["path1"].Attribute("result").Value);
 
-            Assert.Equal("1", suites["path>2"].Attribute("success").Value);
+            Assert.Equal("False", suites["path>2"].Attribute("success").Value);
             Assert.Equal("2", suites["path>2"].Attribute("time").Value);
             Assert.Equal("True", suites["path>2"].Attribute("executed").Value);
             Assert.Equal("Failed", suites["path>2"].Attribute("result").Value);
