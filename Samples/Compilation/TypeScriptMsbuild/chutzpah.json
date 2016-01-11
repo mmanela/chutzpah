@@ -4,7 +4,7 @@
     "ExtensionsWithNoOutput": [".d.ts"],
     "Executable": "%msbuildexe%",
     "Arguments": "/t:CompileTS ",
-    "OutDirectory": "out"
+    "OutDirectory": "_out"
    },
   "References": [
     {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }

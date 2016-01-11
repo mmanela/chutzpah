@@ -115,27 +115,28 @@ namespace Chutzpah.Facts.Library.Models
                 {
                     Executable = "executable",
                     WorkingDirectory = "work",
-                    SourceDirectory = "source",
-                    OutDirectory = "out",
+                    Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = "source", OutputPath = "out" } }
                 }
             };
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
             service.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\settingsDir7\executable")).Returns(@"customPath1");
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\work")).Returns(@"customPath2");
+            service.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\settingsDir7\source")).Returns<string>(null);
             service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\source")).Returns(@"customPath3");
-            service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\out")).Returns(@"customPath4");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
             service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
 
             Assert.Equal(@"customPath1", settings.Compile.Executable);
             Assert.Equal(@"customPath2", settings.Compile.WorkingDirectory);
-            Assert.Equal(@"customPath3", settings.Compile.SourceDirectory);
-            Assert.Equal(@"customPath4", settings.Compile.OutDirectory);
+            Assert.Equal(@"customPath3", settings.Compile.Paths.First().SourcePath);
+            Assert.False(settings.Compile.Paths.First().SourcePathIsFile);
+            Assert.Equal(@"c:\settingsdir7\out", settings.Compile.Paths.First().OutputPath);
+            Assert.False(settings.Compile.Paths.First().OutputPathIsFile);
         }
 
         [Fact]
-        public void Will_create_compile_out_dir_if_does_not_exist()
+        public void Will_set_isFile_for_source_path()
         {
             var service = new TestableChutzpahTestSettingsService();
             var settings = new ChutzpahTestSettingsFile
@@ -144,19 +145,64 @@ namespace Chutzpah.Facts.Library.Models
                 {
                     Executable = "executable",
                     WorkingDirectory = "work",
-                    SourceDirectory = "source",
-                    OutDirectory = "out",
+                    Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = "source", OutputPath = "out" } }
                 }
             };
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
-            service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\out")).Returns<string>(null);
+            service.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\settingsDir7\source")).Returns(@"customPath3");
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
+            
+            Assert.Equal(@"customPath3", settings.Compile.Paths.First().SourcePath);
+            Assert.True(settings.Compile.Paths.First().SourcePathIsFile);
+            Assert.False(settings.Compile.Paths.First().OutputPathIsFile);
+        }
+
+        [Fact]
+        public void Will_set_isFile_for_output_if_path_type_is_file()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            var settings = new ChutzpahTestSettingsFile
+            {
+                Compile = new BatchCompileConfiguration
+                {
+                    Executable = "executable",
+                    WorkingDirectory = "work",
+                    Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = "source", OutputPath = "out", OutputPathType = CompilePathType.File } }
+                }
+            };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
+            
+            Assert.Equal(@"c:\settingsdir7\out", settings.Compile.Paths.First().OutputPath);
+            Assert.True(settings.Compile.Paths.First().OutputPathIsFile);
+        }
+
+
+        [Fact]
+        public void Will_set_isFile_for_output_if_path_ends_in_js()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            var settings = new ChutzpahTestSettingsFile
+            {
+                Compile = new BatchCompileConfiguration
+                {
+                    Executable = "executable",
+                    WorkingDirectory = "work",
+                    Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = "source", OutputPath = "out.js", OutputPathType = null } }
+                }
+            };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
             service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
 
             service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
 
-            service.Mock<IFileSystemWrapper>().Verify(x => x.CreateDirectory(@"C:\settingsDir7\out"));
+            Assert.Equal(@"c:\settingsdir7\out.js", settings.Compile.Paths.First().OutputPath);
+            Assert.True(settings.Compile.Paths.First().OutputPathIsFile);
         }
-
 
         [Theory]
         [InlineData("clrdir", false)]
@@ -176,7 +222,8 @@ namespace Chutzpah.Facts.Library.Models
                 {
                     Executable = string.Format("path {0} ok", varStr),
                     Arguments = string.Format("path {0} ok", varStr),
-                    OutDirectory = string.Format("path {0} ok", varStr),
+
+                    Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = "source", OutputPath = string.Format("path {0} ok", varStr) } }
                 }
             };
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
@@ -186,7 +233,7 @@ namespace Chutzpah.Facts.Library.Models
 
             Assert.Equal(result, settings.Compile.Executable.Contains(varStr));
             Assert.Equal(result, settings.Compile.Arguments.Contains(varStr));
-            Assert.Equal(result, settings.Compile.OutDirectory.Contains(varStr));
+            Assert.Equal(result, settings.Compile.Paths.First().OutputPath.Contains(varStr));
         }
 
         [Fact]
@@ -203,7 +250,7 @@ namespace Chutzpah.Facts.Library.Models
                 {
                     Executable = string.Format("path {0} ok", varStr),
                     Arguments = string.Format("path {0} ok", varStr),
-                    OutDirectory = string.Format("path {0} ok", varStr),
+                    Paths = new List<CompilePathMap> { new CompilePathMap { OutputPath = string.Format("path {0} ok", varStr) } },
                 },
                 References = new []{new SettingsFileReference{ Path = varStr, Include = varStr, Exclude = varStr}},
                 Tests = new []{new SettingsFileTestPath{ Path = varStr, Include = varStr, Exclude = varStr}},
@@ -218,7 +265,7 @@ namespace Chutzpah.Facts.Library.Models
 
             Assert.True(settings.Compile.Executable.Contains("SomeValue"));
             Assert.True(settings.Compile.Arguments.Contains("SomeValue"));
-            Assert.True(settings.Compile.OutDirectory.Contains("SomeValue"));
+            Assert.True(settings.Compile.Paths.First().OutputPath.Contains("somevalue"));
             Assert.True(settings.References.ElementAt(0).Path.Contains("SomeValue"));
             Assert.True(settings.References.ElementAt(0).Includes[0].Contains("SomeValue"));
             Assert.True(settings.References.ElementAt(0).Excludes[0].Contains("SomeValue"));
@@ -446,6 +493,32 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(@"C:\", childSettings.TestHarnessDirectory);
             Assert.Equal(TestHarnessLocationMode.Custom, childSettings.TestHarnessLocationMode);
     
+        }
+
+        [Fact]
+        public void Will_map_deprecated_sourcedirectory_and_outdirectory_to_paths_setting()
+        {
+            var service = new TestableChutzpahTestSettingsService();
+            var settings = new ChutzpahTestSettingsFile
+            {
+                Compile = new BatchCompileConfiguration
+                {
+                    Executable = "executable",
+                    WorkingDirectory = "work",
+                    SourceDirectory = "source",
+                    OutDirectory = "out",
+                }
+            };
+            service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(It.IsAny<string>())).Returns(@"C:\settingsDir7\settingsFile.json");
+
+            service.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"C:\settingsDir7\source")).Returns((string)null);
+            service.Mock<IFileProbe>().Setup(x => x.FindFolderPath(@"C:\settingsDir7\source")).Returns(@"customPath3");
+            service.Mock<IJsonSerializer>().Setup(x => x.DeserializeFromFile<ChutzpahTestSettingsFile>(It.IsAny<string>())).Returns(settings);
+
+            service.ClassUnderTest.FindSettingsFileFromDirectory("dir7");
+            
+            Assert.Equal(@"customPath3", settings.Compile.Paths.First().SourcePath);
+            Assert.Equal(@"c:\settingsdir7\out", settings.Compile.Paths.First().OutputPath);
         }
     }
 }

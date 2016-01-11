@@ -2,7 +2,7 @@
   "Compile": {
     "Extensions": [".ts"],
     "ExtensionsWithNoOutput": [".d.ts"],
-    "OutDirectory": "out",
+    "OutDirectory": "_out",
     "Executable": "%powershellexe%",
     "Arguments": "-NoProfile %chutzpahsettingsdir%\\compile.ps1"
    },

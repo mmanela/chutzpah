@@ -93,7 +93,6 @@ namespace Chutzpah
                     outputWaitHandle.WaitOne(timeout) &&
                     errorWaitHandle.WaitOne(timeout))
                 {
-
                     ChutzpahTracer.TraceInformation("Finished batch compile with exit code {0} using {1} with args {2}", p.ExitCode, compileConfiguration.Executable, compileConfiguration.Arguments);
                 }
                 else

@@ -1,0 +1,22 @@
+{
+  // Batching is required to make this work if you are included your test files in the 
+  // merged js file. Otherwise, Chutzpah will double count tests
+  "EnableTestFileBatching": true,
+  "Compile": {
+    "Extensions": [".ts"],
+    "ExtensionsWithNoOutput": [".d.ts"],
+    "Executable": "compile.bat",
+    "UseSourceMaps": true,
+    "Paths" : [
+
+      // Map all source files to the single merged output file
+      { "OutputPath": "_out/merged.js" }
+    ]
+   },
+  "References": [
+    {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }
+  ],
+  "Tests": [
+    { "Includes": ["*/test/*.ts"], "Excludes": ["*/test/*.d.ts"] }
+  ]
+}

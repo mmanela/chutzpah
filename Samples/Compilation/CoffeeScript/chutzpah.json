@@ -4,7 +4,7 @@
     "Executable": "compile.bat",
     "SourceDirectory": "code",
     "WorkingDirectory": "code",
-    "OutDirectory": "out",
+    "OutDirectory": "_out",
     "SkipIfUnchanged": false
   },
   "References" : [

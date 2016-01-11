@@ -1,0 +1,27 @@
+{  
+
+  // Batching is *not* required to make this work since we are not merging all tests into a single file
+  // In this case we are just merging the source files together. However, it is still a good idea to enable
+  // test batching since it improves performance this sample is meant to show that it is not required 
+  // to be functional as it is required in the TypeScriptSingleFile sample
+  "EnableTestFileBatching": false,
+  "Compile": {
+    "Extensions": [".ts"],
+    "ExtensionsWithNoOutput": [".d.ts"],
+    "Executable": "compile.bat",
+    "Paths" : [
+
+      // Merge all files in the source folder to a single merged js file
+      { "SourcePath": "src", "OutputPath": "_out/merged.js" },
+
+      // Map all test files in the test folder 1-1 to their corresponding js files
+      { "SourcePath": "test", "OutputPath": "test" }
+    ]
+   },
+  "References": [
+    {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }
+  ],
+  "Tests": [
+    { "Includes": ["*/test/*.ts"], "Excludes": ["*/test/*.d.ts"] }
+  ]
+}

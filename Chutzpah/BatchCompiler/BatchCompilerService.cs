@@ -62,7 +62,7 @@ namespace Chutzpah.BatchProcessor
                     }
                     else if(testSettings.Compile.Mode == BatchCompileMode.External)
                     {
-                        ChutzpahTracer.TraceError("Chutzpah determined generated .js files are missing but the compile mode is External so Chutzpah can't compile them. Test results may be wrong.");
+                        ChutzpahTracer.TraceWarning("Chutzpah determined generated .js files are missing but the compile mode is External so Chutzpah can't compile them. Test results may be wrong.");
                     }
                 }
                 else
@@ -84,7 +84,11 @@ namespace Chutzpah.BatchProcessor
                     }
                     else
                     {
-                        ChutzpahTracer.TraceWarning("Couldn't find generated path for {0} at {1}", file.Path, outputPath);
+                        var error = string.Format("Couldn't find generated path for {0} at {1}", file.Path, outputPath);
+                        ChutzpahTracer.TraceError(error);
+
+                        // Throw and fail here since if we cant find the file we cannot be sure anything will run
+                        throw new FileNotFoundException(error, outputPath);
                     }
 
                     if (!string.IsNullOrWhiteSpace(file.GeneratedFilePath))
@@ -102,7 +106,7 @@ namespace Chutzpah.BatchProcessor
                 var result = processHelper.RunBatchCompileProcess(testSettings.Compile);
                 if (result.ExitCode > 0)
                 {
-                    throw new ChutzpahCompilationFailedException(result.StandardError, testSettings.SettingsFileName);
+                    throw new ChutzpahCompilationFailedException(result.StandardOutput + Environment.NewLine + result.StandardError, testSettings.SettingsFileName);
                 }
             }
             catch (Exception e)
@@ -168,22 +172,31 @@ namespace Chutzpah.BatchProcessor
             return true;
         }
 
-        private string GetOutputPath(string sourcePath, BatchCompileConfiguration compileConfiguration)
+        private string GetOutputPath(string filePath, BatchCompileConfiguration compileConfiguration)
         {
-            if (sourcePath.IndexOf(compileConfiguration.SourceDirectory, StringComparison.OrdinalIgnoreCase) >= 0)
+            foreach (var pathMap in compileConfiguration.Paths)
             {
-                var relativePath = FileProbe.GetRelativePath(compileConfiguration.SourceDirectory, sourcePath);
-                var outputPath = Path.Combine(compileConfiguration.OutDirectory, relativePath);
-                outputPath = Path.ChangeExtension(outputPath, ".js");
-                return outputPath;
+                if (filePath.IndexOf(pathMap.SourcePath, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    // If the configured sourcePath is a full file path we just assume the fileName is the relative name
+                    // Otherwise we calculate the relative path from the configured sourcePath to the current file
+                    var relativePath = pathMap.SourcePathIsFile ? Path.GetFileName(pathMap.SourcePath) : FileProbe.GetRelativePath(pathMap.SourcePath, filePath);
+
+                    string outputPath = pathMap.OutputPath;
+                    if (!pathMap.OutputPathIsFile)
+                    {
+                        // If output path is not a file we calculate the file path using the input filePath's relative location compared
+                        // to the output directory
+                        outputPath = Path.Combine(outputPath, relativePath);
+                        outputPath = Path.ChangeExtension(outputPath, ".js");
+
+                    }
+
+                    return outputPath;
+                }
             }
-            else
-            {
-                ChutzpahTracer.TraceWarning(
-                    "Can't find location for generated path on {0} since it is not inside of configured source dir {1}",
-                    sourcePath,
-                    compileConfiguration.SourceDirectory);
-            }
+
+            ChutzpahTracer.TraceError("Can't find location for generated path on {0}",filePath);
 
             return null;
         }

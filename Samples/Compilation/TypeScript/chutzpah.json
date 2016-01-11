@@ -2,7 +2,8 @@
   "Compile": {
     "Extensions": [".ts"],
     "ExtensionsWithNoOutput": [".d.ts"],
-    "Executable": "compile.bat"
+    "Executable": "compile.bat",
+    "UseSourceMaps": true
    },
   "References": [
     {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }

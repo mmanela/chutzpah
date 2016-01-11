@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Chutzpah.Models;
+using System.IO;
 
 namespace Chutzpah.Coverage
 {
@@ -40,9 +41,9 @@ namespace Chutzpah.Coverage
             {
                 throw new ArgumentException("mapFilePath", string.Format("Cannot find map file '{0}'", referencedFile.SourceMapFilePath));
             }
-
+            
             var consumer = this.GetConsumer(fileSystem.GetText(referencedFile.SourceMapFilePath));
-
+            
             var accumulated = new List<int?>(new int?[sourceLineCount + 1]);
             for (var i = 1; i < generatedSourceLineExecutionCounts.Length; i++)
             {
@@ -57,7 +58,7 @@ namespace Chutzpah.Coverage
                 {
                     foreach (var match in matches)
                     {
-                        if (match.File.ToLower() != fileSystem.GetFileName(referencedFile.Path.ToLower())) continue;
+                        if (!IsCurrentFile(match.File, referencedFile)) { continue; }
 
                         accumulated[match.LineNumber] = (accumulated[match.LineNumber] ?? 0) + generatedCount.Value;
                     }
@@ -65,6 +66,16 @@ namespace Chutzpah.Coverage
             }
 
             return accumulated.ToArray();
+        }
+
+        /// <summary>
+        /// Is this a source mapping for the current referenced file
+        /// </summary>
+        private bool IsCurrentFile(string relativePath, ReferencedFile referencedFile)
+        {
+            
+            var candidatePath = FileProbe.NormalizeFilePath(new Uri(Path.Combine(Path.GetDirectoryName(referencedFile.SourceMapFilePath), relativePath)).AbsolutePath);
+            return referencedFile.Path.Equals(candidatePath, StringComparison.OrdinalIgnoreCase);
         }
 
         protected virtual ISourceMapConsumer GetConsumer(string mapFileContents)

@@ -31,11 +31,16 @@ namespace Chutzpah.Facts.Integration
                     new object[] {@"Samples\RequireJS\CustomBaseUrlAndCustomHarnessLocation\QUnit\chutzpah.json",2},
                     new object[] {@"Samples\RequireJS\CustomHarnessLocation\QUnit\chutzpah.json",2},
                     
+                    // Compilation Tests
                     new object[] {@"Samples\Compilation\ExternalCompile\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScript\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\CoffeeScript\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScriptMsbuild\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScriptPowershell\chutzpah.json",2},
+
+
+                    new object[] { @"Samples\Compilation\TypeScriptToSingleFile\chutzpah.json", 2},
+                    new object[] { @"Samples\Compilation\TypeScriptToSingleFileExceptForTests\chutzpah.json", 2},
 
 
                     // Batching Tests

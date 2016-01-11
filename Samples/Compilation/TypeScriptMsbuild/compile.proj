@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <Target Name="CompileTS">
-    <Exec Command="$(TscExe) src/code.ts test/test.ts --declaration --sourcemap --outdir out" />
+    <Exec Command="$(TscExe) src/code.ts test/test.ts --declaration --sourcemap --outdir _out" />
   </Target>
   
 

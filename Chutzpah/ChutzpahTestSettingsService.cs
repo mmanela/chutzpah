@@ -316,33 +316,86 @@ namespace Chutzpah
                     settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
                 }
 
-                // These settings might be needed in either External
-                var sourceDir = settings.Compile.SourceDirectory;
-                settings.Compile.SourceDirectory = ResolveFolderPath(settings, sourceDir);
-                if(settings.Compile.SourceDirectory == null)
+
+
+                // If Paths are not given 
+                if (!settings.Compile.Paths.Any())
                 {
-                    throw new DirectoryNotFoundException("Unable to find directory specified by Compile SourceDirectory setting of " + (sourceDir ?? ""));
+                    // If not Paths are given handle backcompat and look at sourcedirectory and outdirectory.
+                    // This will also handle the empty case in general since it will set empty values which will get resolved to the Chutzpah Settings file directory
+                    settings.Compile.Paths.Add(new CompilePathMap { SourcePath = settings.Compile.SourceDirectory, OutputPath = settings.Compile.OutDirectory });
                 }
 
-                settings.Compile.OutDirectory = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, settings.Compile.OutDirectory), true);
+                foreach (var pathMap in settings.Compile.Paths)
+                {
+                    ResolveCompilePathMap(settings, chutzpahVariables, pathMap);
+                }
+            }
+        }
+
+        private void ResolveCompilePathMap(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables, CompilePathMap pathMap)
+        {
+            var sourcePath = pathMap.SourcePath;
+            bool? sourcePathIsFile;
+            pathMap.SourcePath = ResolvePath(settings, sourcePath, out sourcePathIsFile);
+            if (pathMap.SourcePath == null)
+            {
+                throw new FileNotFoundException("Unable to find file/directory specified by SourcePath of {0}", (sourcePath ?? ""));
+            }
+            pathMap.SourcePathIsFile = sourcePathIsFile.HasValue ? sourcePathIsFile.Value : false;
+
+            // We do not use the resolvePath method here since the path may not exist yet
+            pathMap.OutputPath = FileProbe.NormalizeFilePath(Path.Combine(settings.SettingsFileDirectory, ExpandVariable(chutzpahVariables, pathMap.OutputPath)));
+            if (pathMap.OutputPath == null)
+            {
+                throw new FileNotFoundException("Unable to find file/directory specified by OutputPath of {0}", (pathMap.OutputPath ?? ""));
+            }
+
+            // Since the output path might not exist yet we need a more complicated way to 
+            // determine if it is a file or folder
+            // 1. If the user explicitly told us what it should be using OutputPathType use that
+            // 2. Assume it is a file if it has a .js extension
+            if (pathMap.OutputPathType.HasValue)
+            {
+                pathMap.OutputPathIsFile = pathMap.OutputPathType == CompilePathType.File;
+            }
+            else
+            {
+                pathMap.OutputPathIsFile = pathMap.OutputPath.EndsWith(".js", StringComparison.OrdinalIgnoreCase);
             }
         }
 
 
+        private string ResolvePath(ChutzpahTestSettingsFile settings, string path, out bool? isFile)
+        {
+            isFile = null;
+
+            var filePath = ResolveFilePath(settings, path);
+            if(filePath == null)
+            {
+                filePath = ResolveFolderPath(settings, path);
+                if(filePath != null)
+                {
+                    isFile = false;
+                }
+            }
+            else
+            {
+                isFile = true;
+            }
+
+            return filePath;
+        }
+
         /// <summary>
         /// Resolved a path relative to the settings file if it is not absolute
         /// </summary>
-        private string ResolveFolderPath(ChutzpahTestSettingsFile settings, string path, bool createIfNeeded = false)
+        private string ResolveFolderPath(ChutzpahTestSettingsFile settings, string path)
         {
             string relativeLocationPath = Path.Combine(settings.SettingsFileDirectory, path ?? "");
             string absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
-            if (createIfNeeded && absoluteFilePath == null)
-            {
-                fileSystem.CreateDirectory(relativeLocationPath);
-                absoluteFilePath = fileProbe.FindFolderPath(relativeLocationPath);
-            }
 
-            return absoluteFilePath;
+            return absoluteFilePath ?? relativeLocationPath;
         }
 
         private string ResolveFilePath(ChutzpahTestSettingsFile settings, string path)
@@ -351,6 +404,7 @@ namespace Chutzpah
             string absoluteFilePath = fileProbe.FindFilePath(relativeLocationPath);
             return absoluteFilePath;
         }
+        
 
         private string ExpandVariable(IDictionary<string, string> chutzpahCompileVariables, string str)
         {

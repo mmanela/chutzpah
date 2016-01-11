@@ -1,3 +1,3 @@
 @echo off
 
-coffee -b -c -m -o ..\out .
+coffee -b -c -m -o ../_out .

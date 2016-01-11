@@ -136,12 +136,23 @@ namespace Chutzpah
             ReferencedStyles = new List<TestHarnessItem>();
             TestFrameworkDependencies = new List<TestHarnessItem>();
             CodeCoverageDependencies = new List<TestHarnessItem>();
+            var seenPathSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ReferencedFile referencedFile in referencedFilePaths)
             {
                 string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
                                         ? referencedFile.Path
                                         : referencedFile.GeneratedFilePath;
+
+                // Skip paths we processed already
+                if (seenPathSet.Contains(referencePath))
+                {
+                    continue;
+                }
+                else
+                {
+                    seenPathSet.Add(referencePath);
+                }
                  
                 IList<TestHarnessItem> refList = ChooseRefList(referencedFile, referencePath);
                 if (refList == null) continue;

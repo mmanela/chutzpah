@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Chutzpah.Models
@@ -8,6 +10,40 @@ namespace Chutzpah.Models
         External
     }
 
+
+    public enum CompilePathType
+    {
+        File,
+        Folder
+    }
+
+    public class CompilePathMap
+    {
+        /// <summary>
+        /// The source file/directory 
+        /// </summary>
+        public string SourcePath { get; set; }
+
+        [JsonIgnore]
+        public bool SourcePathIsFile { get; set; }
+        
+        /// <summary>
+        /// The file/directory that source file/directory is mapped to 
+        /// Specifying a file OutputPath and a directory for SourcePath
+        /// indicated the files are being concatentated into one large file
+        /// </summary>
+        public string OutputPath { get; set; }
+
+        [JsonIgnore]
+        public bool OutputPathIsFile { get; set; }
+
+        /// <summary>
+        /// The type (file or folder) that the output path refers to. If not specified 
+        /// Chutzpah will try to take a best guess by assuming it is a file if it has a .js extension
+        /// </summary>
+        public CompilePathType? OutputPathType { get; set; }
+    }
+
     public class BatchCompileConfiguration
     {
         public BatchCompileConfiguration()
@@ -16,6 +52,7 @@ namespace Chutzpah.Models
             ExtensionsWithNoOutput = new List<string>();
             SkipIfUnchanged = true;
             Mode = BatchCompileMode.Executable;
+            Paths = new List<CompilePathMap>();
         }
 
         /// <summary>
@@ -44,15 +81,22 @@ namespace Chutzpah.Models
         public string WorkingDirectory { get; set; }
 
         /// <summary>
+        /// Deprecated in favor of Paths element
         /// The root directory where all the sources the command compiles are below.
         /// This lets Chutzpah know where in the out dir it should find each reference file
         /// </summary>
-        /// 
         public string SourceDirectory { get; set; }
+
         /// <summary>
+        /// Deprecated in favor of Paths element
         /// The directory where the compiled files are output to
         /// </summary>
         public string OutDirectory { get; set; }
+
+        /// <summary>
+        /// The collection of path mapping from source directory/file to output directory/file
+        /// </summary>
+        public ICollection<CompilePathMap> Paths { get; set; }
 
         /// <summary>
         /// The full path to an executable which Chutzpah executes to perform the batch compilation

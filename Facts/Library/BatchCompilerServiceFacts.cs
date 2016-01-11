@@ -8,6 +8,7 @@ using Chutzpah.Wrappers;
 using Moq;
 using Xunit;
 using Chutzpah.FileProcessors;
+using System.IO;
 
 namespace Chutzpah.Facts
 {
@@ -32,8 +33,10 @@ namespace Chutzpah.Facts
                     {
                         SkipIfUnchanged = true,
                         WorkingDirectory = @"C:\src",
-                        SourceDirectory = @"C:\src",
-                        OutDirectory = @"C:\src",
+                        Paths = new List<CompilePathMap>
+                        {
+                            new CompilePathMap { SourcePath = @"C:\src", OutputPath = @"C:\src" }
+                        }
                     }
                 }.InheritFromDefault();
 
@@ -73,7 +76,7 @@ namespace Chutzpah.Facts
                 .Returns(true);
             service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f.EndsWith(".ts")))).Returns(true);
 
-            service.ClassUnderTest.Compile(new[] {context});
+            service.ClassUnderTest.Compile(new[] { context });
 
             service.Mock<IProcessHelper>().Verify(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>()));
             Assert.Equal(@"C:\src\a.js", context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
@@ -82,7 +85,7 @@ namespace Chutzpah.Facts
         }
 
         [Fact]
-        public void Will_not_compile_if_compile_mode_is_external()
+        public void Will_throw_if_file_is_missing()
         {
             var service = new TestableBatchCompilerService();
             var context = service.BuildContext();
@@ -98,12 +101,10 @@ namespace Chutzpah.Facts
                 .Returns(true);
             service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f.EndsWith(".ts")))).Returns(true);
 
-            service.ClassUnderTest.Compile(new[] { context });
+            var ex  = Record.Exception( () => service.ClassUnderTest.Compile(new[] { context }));
 
-            service.Mock<IProcessHelper>().Verify(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>()),Times.Never());
-            Assert.Null(context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
-            Assert.Equal(@"C:\src\b.js", context.ReferencedFiles.ElementAt(1).GeneratedFilePath);
-            Assert.Null(context.ReferencedFiles.ElementAt(2).GeneratedFilePath);
+            Assert.IsType<FileNotFoundException>(ex);
+            service.Mock<IProcessHelper>().Verify(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>()), Times.Never());
         }
 
         [Fact]
@@ -112,7 +113,7 @@ namespace Chutzpah.Facts
             var service = new TestableBatchCompilerService();
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
-            context.TestFileSettings.Compile.OutDirectory = @"C:\out";
+            context.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\src", OutputPath = @"C:\out" } };
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\a.ts" });
             service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f.EndsWith(".js"))))
                 .Returns(false)
@@ -130,18 +131,15 @@ namespace Chutzpah.Facts
             var service = new TestableBatchCompilerService();
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
-            context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\other", OutputPath = @"C:\src" } };
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\b.ts" });
-            service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
-                .Returns(false)
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
                 .Returns(true);
             service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".ts")))).Returns(true);
 
             service.ClassUnderTest.Compile(new[] { context });
 
             Assert.Equal(@"C:\src\a.js", context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
-            Assert.Null(context.ReferencedFiles.ElementAt(1).GeneratedFilePath);
         }
 
         [Fact]
@@ -150,7 +148,7 @@ namespace Chutzpah.Facts
             var service = new TestableBatchCompilerService();
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
-            context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\other", OutputPath = @"C:\src" } };
             context.TestFileSettings.Compile.UseSourceMaps = true;
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
             service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
@@ -169,7 +167,7 @@ namespace Chutzpah.Facts
             var service = new TestableBatchCompilerService();
             var context = service.BuildContext();
             context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
-            context.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\other", OutputPath = @"C:\src" } };
             context.TestFileSettings.Compile.UseSourceMaps = false;
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
             service.Mock<IFileSystemWrapper>().SetupSequence(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
@@ -195,7 +193,7 @@ namespace Chutzpah.Facts
 
             service.ClassUnderTest.Compile(new[] { context });
 
-            service.Mock<IFileSystemWrapper>().Verify(x => x.FileExists(It.Is<string>(f => f.EndsWith(".js"))),Times.Never());
+            service.Mock<IFileSystemWrapper>().Verify(x => x.FileExists(It.Is<string>(f => f.EndsWith(".js"))), Times.Never());
             Assert.Null(context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
         }
 
@@ -349,8 +347,7 @@ namespace Chutzpah.Facts
             context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\src\b.ts" });
             var context2 = service.BuildContext();
             context2.TestFileSettings.SettingsFileDirectory = @"C:\other";
-            context2.TestFileSettings.Compile.OutDirectory = @"C:\other";
-            context2.TestFileSettings.Compile.SourceDirectory = @"C:\other";
+            context2.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\other", OutputPath = @"C:\other" } };
             context2.TestFileSettings.Compile.Extensions = new[] { ".ts" };
             context2.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\a.ts" });
             context2.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\other\d.ts" });

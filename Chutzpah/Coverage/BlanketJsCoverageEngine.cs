@@ -50,18 +50,13 @@ namespace Chutzpah.Coverage
             string blanketScriptName = GetBlanketScriptName(definition, testSettingsFile);
 
             // Construct array of scripts to exclude from instrumentation/coverage collection.
-            var filesToExcludeFromCoverage =
-                harness.TestFrameworkDependencies.Concat(harness.CodeCoverageDependencies)
-                .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
-                .Select(dep => dep.Attributes["src"])
-                .Concat(excludePatterns.Select(ToRegex))
-                .ToList();
-
-            var filesToIncludeInCoverage = includePatterns.Select(ToRegex).ToList();
+            var filesToExcludeFromCoverage = new List<string>();
+            var filesToIncludeInCoverage = new List<string>();
+            var extensionMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (TestHarnessItem refScript in harness.ReferencedScripts.Where(rs => rs.HasFile))
             {
-                // Exclude files which the user is asking us to ignores
+                // Skip files which the user is asking us to exclude
                 if (!IsFileEligibleForInstrumentation(refScript.ReferencedFile.Path))
                 {
                     filesToExcludeFromCoverage.Add(refScript.Attributes["src"]);
@@ -70,7 +65,24 @@ namespace Chutzpah.Coverage
                 {
                     refScript.Attributes["type"] = "text/blanket"; // prevent Phantom/browser parsing
                 }
+
+
+                // Build extension map for when we conver to regex the include/exclude patterns
+                if (!string.IsNullOrEmpty(refScript.ReferencedFile.GeneratedFilePath))
+                {
+                    var sourceExtension = Path.GetExtension(refScript.ReferencedFile.Path);
+                    extensionMap[sourceExtension] = ".js";
+                }
             }
+
+            // Construct array of scripts to exclude from instrumentation/coverage collection.
+            filesToExcludeFromCoverage.AddRange(
+                 harness.TestFrameworkDependencies.Concat(harness.CodeCoverageDependencies)
+                 .Where(dep => dep.HasFile && IsScriptFile(dep.ReferencedFile))
+                 .Select(dep => dep.Attributes["src"])
+                 .Concat(excludePatterns.Select(f => ToRegex(f, extensionMap))));
+
+            filesToIncludeInCoverage.AddRange(includePatterns.Select(f => ToRegex(f, extensionMap)));
 
             // Name the coverage object so that the JS runner can pick it up.
             harness.ReferencedScripts.Add(new Script(string.Format("window.{0}='_$blanket';", Constants.ChutzpahCoverageObjectReference)));
@@ -79,6 +91,7 @@ namespace Chutzpah.Coverage
             TestHarnessItem blanketMain = harness.CodeCoverageDependencies.Single(
                                             d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(blanketScriptName));
 
+            
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
 
             string dataCoverOnly = filesToIncludeInCoverage.Any()
@@ -98,14 +111,22 @@ namespace Chutzpah.Coverage
         /// </summary>
         /// <param name="globPath">A filepath in the glob format</param>
         /// <returns>Regular expression</returns>
-        private string ToRegex(string globPath)
+        private string ToRegex(string globPath, IDictionary<string, string> extensionMap)
         {
+            // 0) If that path ends with an extension replace with the result of the extension map
             // 1) Change all backslashes to forward slashes first
             // 2) Escape . (by \\) (NOTE: we are skipping this since blanket has a bug with us using \.
             // 3) Replace * with the regex part ".*" (multiple characters)
             // 4) Replace ? with the regex part "." (single character)
             // 5) Replace [!] with the regex part "[^]" (negative character class)
             // 6) Surround the regex with // and /, and add the modifier i (case insensitive)
+            var extension = Path.GetExtension(globPath);
+            string mappedExtension;
+            if(!string.IsNullOrEmpty(extension) && extensionMap.TryGetValue(extension, out mappedExtension))
+            {
+                globPath = globPath.Substring(0, globPath.Length - extension.Length) + mappedExtension;
+            }
+
             return string.Format("//{0}/i", globPath.Replace("\\", "/").Replace("*", ".*").Replace("[!", "[^"));
         }
 
@@ -118,8 +139,8 @@ namespace Chutzpah.Coverage
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
             var data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
-            IDictionary<string, ReferencedFile> generatedToReferencedFile =
-                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToDictionary(rf => rf.GeneratedFilePath, rf => rf);
+            var generatedToReferencedFile =
+                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToLookup(rf => rf.GeneratedFilePath, rf => rf);
 
             var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage.Value);
 
@@ -129,7 +150,7 @@ namespace Chutzpah.Coverage
             foreach (var entry in data)
             {
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
-              
+
                 if (!uri.IsAbsoluteUri)
                 {
                     // Resolve against the test file path.
@@ -141,52 +162,63 @@ namespace Chutzpah.Coverage
                     continue;
 
 
-                string filePath = uri.LocalPath;
+                string executedFilePath = uri.LocalPath;
 
                 // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
                 // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
-                filePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(filePath, "$1");
+                executedFilePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(executedFilePath, "$1");
 
                 //REMOVE URI Query part from filepath like ?ver=1233123
-                filePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(filePath, "$1");
+                executedFilePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(executedFilePath, "$1");
 
-                var fileUri = new Uri(filePath, UriKind.RelativeOrAbsolute);
-                filePath = fileUri.LocalPath;
+                var fileUri = new Uri(executedFilePath, UriKind.RelativeOrAbsolute);
+                executedFilePath = fileUri.LocalPath;
+                var referencedFiles = new List<ReferencedFile>();
 
-                ReferencedFile referencedFile;
-                string newKey;
-                if (!generatedToReferencedFile.TryGetValue(filePath, out referencedFile))
+                if (!generatedToReferencedFile.Contains(executedFilePath))
                 {
-                    newKey = filePath;
+                    // This does not appear to be a compiled file so just created a referencedFile with the path
+                    referencedFiles.Add(new ReferencedFile { Path = executedFilePath });
                 }
                 else
                 {
-                    newKey = referencedFile.Path;
-                    if (referencedFile.SourceMapFilePath != null && testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps)
-                    {
-                        filePath = referencedFile.Path;
-                    }
+                    referencedFiles = generatedToReferencedFile[executedFilePath].ToList();
                 }
 
-                if (IsFileEligibleForInstrumentation(newKey) &&
-                    !IsIgnored(newKey) &&
-                    fileSystem.FileExists(filePath))
+                referencedFiles = referencedFiles.Where(file => IsFileEligibleForInstrumentation(file.Path) 
+                                                                && !IsIgnored(file.Path)).ToList();
+
+                foreach(var referencedFile in referencedFiles)
                 {
-                    string[] sourceLines = fileSystem.GetLines(filePath);
-                    int?[] lineExecutionCounts = entry.Value;
+                    // The coveredPath is the file which we have coverage lines for. We assume generated if it exsits otherwise the file path
+                    var coveredPath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
 
-                    if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile != null && referencedFile.SourceMapFilePath != null)
+                    // If the user is using source maps then always take sourcePath and not generates. 
+                    if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile.SourceMapFilePath != null)
                     {
-                        lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
+                        coveredPath = referencedFile.Path;
                     }
 
-                    coverageData.Add(newKey, new CoverageFileData
+                    if (fileSystem.FileExists(coveredPath))
                     {
-                        LineExecutionCounts = lineExecutionCounts,
-                        FilePath = newKey,
-                        SourceLines = sourceLines
-                    });
+                        string[] sourceLines = fileSystem.GetLines(coveredPath);
+                        int?[] lineExecutionCounts = entry.Value;
+
+                        if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile.SourceMapFilePath != null)
+                        {
+                            lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
+                        }
+
+                        coverageData.Add(referencedFile.Path, new CoverageFileData
+                        {
+                            LineExecutionCounts = lineExecutionCounts,
+                            FilePath = referencedFile.Path,
+                            SourceLines = sourceLines
+                        });
+                    }
                 }
+
+                
             }
             return coverageData;
         }
