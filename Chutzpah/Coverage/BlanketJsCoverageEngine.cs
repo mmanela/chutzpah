@@ -91,7 +91,7 @@ namespace Chutzpah.Coverage
             TestHarnessItem blanketMain = harness.CodeCoverageDependencies.Single(
                                             d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(blanketScriptName));
 
-            
+
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
 
             string dataCoverOnly = filesToIncludeInCoverage.Any()
@@ -122,7 +122,7 @@ namespace Chutzpah.Coverage
             // 6) Surround the regex with // and /, and add the modifier i (case insensitive)
             var extension = Path.GetExtension(globPath);
             string mappedExtension;
-            if(!string.IsNullOrEmpty(extension) && extensionMap.TryGetValue(extension, out mappedExtension))
+            if (!string.IsNullOrEmpty(extension) && extensionMap.TryGetValue(extension, out mappedExtension))
             {
                 globPath = globPath.Substring(0, globPath.Length - extension.Length) + mappedExtension;
             }
@@ -185,10 +185,10 @@ namespace Chutzpah.Coverage
                     referencedFiles = generatedToReferencedFile[executedFilePath].ToList();
                 }
 
-                referencedFiles = referencedFiles.Where(file => IsFileEligibleForInstrumentation(file.Path) 
+                referencedFiles = referencedFiles.Where(file => IsFileEligibleForInstrumentation(file.Path)
                                                                 && !IsIgnored(file.Path)).ToList();
 
-                foreach(var referencedFile in referencedFiles)
+                foreach (var referencedFile in referencedFiles)
                 {
                     // The coveredPath is the file which we have coverage lines for. We assume generated if it exsits otherwise the file path
                     var coveredPath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
@@ -209,16 +209,28 @@ namespace Chutzpah.Coverage
                             lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
                         }
 
-                        coverageData.Add(referencedFile.Path, new CoverageFileData
+
+                        var coverageFileData = new CoverageFileData
                         {
                             LineExecutionCounts = lineExecutionCounts,
                             FilePath = referencedFile.Path,
                             SourceLines = sourceLines
-                        });
+                        };
+
+                        // If some AMD modules has different "non canonical" references (like "../../module" and "./../../module"). Coverage trying to add files many times
+                        if (coverageData.ContainsKey(referencedFile.Path))
+                        {
+                            coverageData[referencedFile.Path].Merge(coverageFileData);
+                        }
+                        else
+                        {
+                            coverageData.Add(referencedFile.Path, coverageFileData);
+                        }
+
                     }
                 }
 
-                
+
             }
             return coverageData;
         }

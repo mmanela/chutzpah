@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Coverage.cs" />
     <Compile Include="CoverageBase.cs" />
+    <Compile Include="CoverageFileDataFacts.cs" />
     <Compile Include="Discovery.cs" />
     <Compile Include="ExceptionThrowingRunnerCallback.cs" />
     <Compile Include="Execution.cs" />
