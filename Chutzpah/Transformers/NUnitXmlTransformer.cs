@@ -90,12 +90,12 @@ namespace Chutzpah.Transformers
             return testCase;
         }
 
-        private XmlElement AddTestSuite(XmlDocument document, XmlNode testResults, string name, int passedCount, decimal elapsedSeconds, bool executed, bool successful)
+        private XmlElement AddTestSuite(XmlDocument document, XmlNode testResults, string name, decimal elapsedSeconds, bool executed, bool successful)
         {
             var testSuite = document.CreateElement("test-suite");
             testSuite.SetAttribute("type", "JavaScript");
             testSuite.SetAttribute("name", name);
-            testSuite.SetAttribute("success", passedCount.ToString());
+            testSuite.SetAttribute("success", successful ? "True" : "False");
             testSuite.SetAttribute("time", elapsedSeconds.ToString());
             testSuite.SetAttribute("executed", executed ? "True" : "False");
             testSuite.SetAttribute("asserts", "0");
@@ -113,10 +113,10 @@ namespace Chutzpah.Transformers
             // Careful, if you use a StringBuilder with StringWriter it overrides the encoding as utf-16.
             // Then System.Xml can't read it in the future without the BOM.
             var stream = new MemoryStream();
-            var xmlWriter = XmlTextWriter.Create(stream, new XmlWriterSettings 
-            { 
-                Indent = true, 
-                Encoding = System.Text.ASCIIEncoding.ASCII 
+            var xmlWriter = XmlTextWriter.Create(stream, new XmlWriterSettings
+            {
+                Indent = true,
+                Encoding = System.Text.ASCIIEncoding.ASCII
             });
 
             document.Save(xmlWriter);
@@ -129,11 +129,10 @@ namespace Chutzpah.Transformers
 
             var document = new System.Xml.XmlDocument();
             var testResults = AddTestResultsRoot(testFileSummary, document);
-        
+
             foreach (var testFile in testFileSummary.TestFileSummaries)
             {
                 var testSuite = AddTestSuite(document, testResults, testFile.Path,
-                    testFile.PassedCount,
                     testFile.TimeTaken / 1000m,
                     testFile.PassedCount + testFile.FailedCount == testFile.TotalCount,
                     testFile.PassedCount == testFile.TotalCount);
@@ -145,7 +144,7 @@ namespace Chutzpah.Transformers
                     Int32 passed = group.Value.Count(t => t.ResultsAllPassed);
                     decimal time = group.Value.Sum(t => t.TimeTaken) / 1000m;
 
-                    var groupSuite = AddTestSuite(document, results, group.Key, passed, time, total > 0, total == passed);
+                    var groupSuite = AddTestSuite(document, results, group.Key, time, total > 0, total == passed);
                     foreach (var test in group.Value)
                     {
                         AddTestCase(test, groupSuite.FirstChild, document);
