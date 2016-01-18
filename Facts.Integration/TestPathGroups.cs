@@ -54,6 +54,10 @@ namespace Chutzpah.Facts.Integration
                     new object[] {@"Samples\Settings\Inheritance\PathInheritance\Multiplication\chutzpah.json",2},
                     new object[] {@"Samples\Settings\Inheritance\PathInheritance\Power\chutzpah.json",2},
 
+
+                    // Angular Samples
+                    new object[] {@"Samples\Angular\BasicAngular\tests\chutzpah.json",1},
+
                 };
             }
         }

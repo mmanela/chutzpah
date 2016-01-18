@@ -42,6 +42,15 @@ UpgradeLog.*
 Chutzpah.sln.DotSettings.user
 *.orig
 lcov.dat
+
+Samples/Angular/BasicAngular/src/Controller*.js
+Samples/Angular/BasicAngular/src/Controller*.map
+Samples/Angular/BasicAngular/src/Controller*.d.ts
+Samples/Angular/BasicAngular/tests/Controller*.js
+Samples/Angular/BasicAngular/tests/Controller*.map
+Samples/Angular/BasicAngular/tests/Controller*.d.ts
+!Samples/Angular/BasicAngular/src/Controller.ts
+!Samples/Angular/BasicAngular/tests/ControllerTests.ts
 Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.js
 Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.d.ts
 Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.map
