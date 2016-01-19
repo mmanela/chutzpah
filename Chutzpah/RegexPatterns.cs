@@ -9,7 +9,7 @@
         RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static Regex JsTemplatePathRegex =
-            new Regex(@"^\s*(///|##)\s*<\s*template\s+path\s*=\s*[""'](~?)(?<Path>[^""<>|]+)[""']\s*/>",
+            new Regex(@"^\s*(///|##)\s*<\s*template\s+((?<PropName>path|id|type|mode)\s*=\s*[""'](~?)(?<PropValue>[^""<>|]+)[""']\s*)+/>",
                 RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static Regex QUnitTestRegexJavaScript = new Regex(@"((?<!\.)\b(?:QUnit\.)?(test|asyncTest)[\t ]*\([\t ]*[""'](?<TestName>.*)[""'])", RegexOptions.Compiled);

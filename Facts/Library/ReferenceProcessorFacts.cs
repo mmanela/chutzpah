@@ -421,6 +421,45 @@ namespace Chutzpah.Facts
                 Assert.Equal(1, referenceFiles.Count(x => x.Path.EndsWith("file.html")));
             }
 
+
+            [Fact]
+            public void Will_parse_html_template_in_script_mode()
+            {
+                var processor = new TestableReferenceProcessor();
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
+                var settings = new ChutzpahTestSettingsFile { };
+                var text = (@"/// <template mode=""script"" id=""my.Id"" path=""../../templates/file.html"" type=""My/Type""/>
+                        some javascript code");
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
+
+                var file = referenceFiles.FirstOrDefault(x => x.Path.EndsWith("file.html"));
+                Assert.NotNull(file);
+                Assert.Equal(TemplateMode.Script, file.TemplateOptions.Mode);
+                Assert.Equal("my.Id", file.TemplateOptions.Id);
+                Assert.Equal("My/Type", file.TemplateOptions.Type);
+            }
+
+            [Fact]
+            public void Will_parse_html_template_in_raw_mode()
+            {
+                var processor = new TestableReferenceProcessor();
+                var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
+                var settings = new ChutzpahTestSettingsFile { };
+                var text = (@"/// <template path=""../../templates/file.html"" />
+                        some javascript code");
+                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+
+                processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
+
+                var file = referenceFiles.FirstOrDefault(x => x.Path.EndsWith("file.html"));
+                Assert.NotNull(file);
+                Assert.Equal(TemplateMode.Raw, file.TemplateOptions.Mode);
+                Assert.Null(file.TemplateOptions.Id);
+                Assert.Null(file.TemplateOptions.Type);
+            }
+
             [Fact]
             public void Will_add_reference_url_to_referenced_files()
             {

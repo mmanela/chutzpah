@@ -239,10 +239,12 @@ namespace Chutzpah
                     referenceJsReplacement.AppendLine(item.ToString());
                 }
             }
+
             foreach (TestHarnessItem item in ReferencedStyles)
             {
                 referenceCssReplacement.AppendLine(item.ToString());
             }
+
             foreach (TestHarnessItem item in ReferencedHtmlTemplates)
             {
                 referenceHtmlTemplateReplacement.AppendLine(item.ToString());
@@ -381,12 +383,19 @@ namespace Chutzpah
 
     public class Html : TestHarnessItem
     {
+        const string scriptTagWrapper = @"<script id=""{0}"" type=""{1}"">{2}</script>";
+
         private readonly string contents;
 
         public Html(ReferencedFile referencedFile, IFileSystemWrapper fileSystem)
             : base(referencedFile, null, false)
         {
             contents = fileSystem.GetText(referencedFile.Path);
+
+            if(referencedFile.TemplateOptions.Mode == TemplateMode.Script)
+            {
+                contents = string.Format(scriptTagWrapper, referencedFile.TemplateOptions.Id, referencedFile.TemplateOptions.Type, contents);
+            }
         }
 
         public override string ToString()

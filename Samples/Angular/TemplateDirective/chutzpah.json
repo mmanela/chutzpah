@@ -1,0 +1,11 @@
+﻿{
+  "Framework": "jasmine",
+  "References": [
+    { "Path": "../libs/angular.min.js" },
+    { "Path": "../libs/angular-mocks.js" },
+    { "Path": "script.js" },
+    { "Path": "directiveTemplate_json.html", 
+      "TemplateOptions": {"Mode": "Script", "Id": "template_json", "Type": "text/ng-template"}}
+  ],
+  "Tests": [{ "Path": "test.js", "ExpandReferenceComments": true }]
+}

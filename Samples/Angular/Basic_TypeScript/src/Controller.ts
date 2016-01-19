@@ -1,5 +1,5 @@
-﻿/// <reference path="scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="scripts/typings/angularjs/angular.d.ts" />
+﻿/// <reference path="../../libs/typings/angularjs/angular-mocks.d.ts" />
+/// <reference path="../../libs/typings/angularjs/angular.d.ts" />
 
 namespace Example {
     export class Controller {

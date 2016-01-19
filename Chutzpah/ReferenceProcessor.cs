@@ -17,6 +17,7 @@ namespace Chutzpah
             ExpandReferenceComments = true;
             Includes = new List<string>();
             Excludes = new List<string>();
+            TemplateOptions = new TemplateOptions();
         }
 
         public ReferencePathSettings(SettingsFileReference settingsFileReference)
@@ -27,6 +28,7 @@ namespace Chutzpah
             Excludes = settingsFileReference.Excludes;
             IncludeInTestHarness = settingsFileReference.IncludeInTestHarness;
             IsTestFrameworkFile = settingsFileReference.IsTestFrameworkFile;
+            TemplateOptions = settingsFileReference.TemplateOptions;
         }
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace Chutzpah
         public ICollection<string> Excludes { get; set; }
         public bool IncludeInTestHarness { get; set; }
         public bool IsTestFrameworkFile { get; set; }
+        public TemplateOptions TemplateOptions { get; set; }
     }
 
     public interface IReferenceProcessor
@@ -231,7 +234,35 @@ namespace Chutzpah
 
             foreach (Match match in RegexPatterns.JsTemplatePathRegex.Matches(textToParse))
             {
-                string referencePath = match.Groups["Path"].Value;
+                string referencePath = null, templateId = null, templateType = null;
+                TemplateMode templateMode = TemplateMode.Raw;
+
+                for (var i = 0; i < match.Groups["PropName"].Captures.Count; i++)
+                {
+                    var propName = match.Groups["PropName"].Captures[i].Value.ToLowerInvariant();
+                    var propValue = match.Groups["PropValue"].Captures[i].Value;
+
+                    switch (propName)
+                    {
+                        case "path":
+                            referencePath = propValue;
+                            break;
+                        case "id":
+                            templateId = propValue;
+                            break;
+                        case "type":
+                            templateType = propValue;
+                            break;
+                        case "mode":
+                            if(propValue.Equals("script", StringComparison.OrdinalIgnoreCase))
+                            {
+                                templateMode = TemplateMode.Script;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 referencePath = AdjustPathIfRooted(chutzpahTestSettings, referencePath);
                 string relativeReferencePath = Path.Combine(Path.GetDirectoryName(currentFilePath), referencePath);
@@ -239,7 +270,18 @@ namespace Chutzpah
                 if (referencedFiles.All(r => r.Path != absoluteFilePath))
                 {
                     ChutzpahTracer.TraceInformation("Added html template '{0}' to referenced files", absoluteFilePath);
-                    referencedFiles.Add(new ReferencedFile {Path = absoluteFilePath, IsLocal = false, IncludeInTestHarness = true});
+                    referencedFiles.Add(new ReferencedFile
+                    {
+                        Path = absoluteFilePath,
+                        IsLocal = false,
+                        IncludeInTestHarness = true,
+                        TemplateOptions = new TemplateOptions
+                        {
+                            Mode = templateMode,
+                            Id = templateId,
+                            Type = templateType
+                        }
+                    });
                 }
             }
 
@@ -324,6 +366,7 @@ namespace Chutzpah
                     IsLocal = false,
                     IncludeInTestHarness = true,
                     IsTestFrameworkFile = pathSettings.IsTestFrameworkFile,
+                    TemplateOptions = pathSettings.TemplateOptions
                 };
 
                 ChutzpahTracer.TraceInformation(
@@ -371,7 +414,8 @@ namespace Chutzpah
                 Path = absoluteFilePath,
                 IsLocal = true,
                 IsTestFrameworkFile = pathSettings.IsTestFrameworkFile,
-                IncludeInTestHarness = pathSettings.IncludeInTestHarness || chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
+                IncludeInTestHarness = pathSettings.IncludeInTestHarness || chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal,
+                TemplateOptions = pathSettings.TemplateOptions
             };
 
             ChutzpahTracer.TraceInformation(

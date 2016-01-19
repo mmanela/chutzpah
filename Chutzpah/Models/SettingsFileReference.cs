@@ -5,6 +5,7 @@ namespace Chutzpah.Models
         public SettingsFileReference()
         {
             IncludeInTestHarness = true;
+            TemplateOptions = new TemplateOptions();
         }
 
         /// <summary>
@@ -19,5 +20,10 @@ namespace Chutzpah.Models
         /// along with the test framework reference 
         /// </summary>
         public bool IsTestFrameworkFile { get; set; }
+
+        /// <summary>
+        /// Additional options to specify if this reference is an HTML file
+        /// </summary>
+        public TemplateOptions TemplateOptions { get; set; }
     }
 }
