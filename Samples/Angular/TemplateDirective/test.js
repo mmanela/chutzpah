@@ -17,8 +17,8 @@ describe("Unit Tests for the Template Direktive ", function() {
         beforeEach(function () {
             inject(function ($templateCache) {
                 //Find The Template in the current Unit Test HTML
-                var templateFromComment = document.getElementById("template_comment").outerHTML;
-                var templateFromJson = document.getElementById("template_json").outerHTML;
+                var templateFromComment = document.getElementById("template_comment").innerHTML;
+                var templateFromJson = document.getElementById("template_json").innerHTML;
                 //Set TemplateURL here and add the Template
                 $templateCache.put("directiveTemplate_comment.html", templateFromComment);
                 $templateCache.put("directiveTemplate_json.html", templateFromJson);
