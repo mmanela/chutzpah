@@ -6,8 +6,9 @@
     "Extensions": [ ".ts" ],
     "ExtensionsWithNoOutput": [ ".d.ts" ],
     "UseSourceMaps": true,
-    "SourceDirectory": "../",
-    "OutDirectory": "../"
+    "Paths" : [
+      { "SourcePath": "../", "OutputPath": "../" }
+    ]
   },
   "References": [
     { "Path": "../src/Scripts/angular.min.js" },
