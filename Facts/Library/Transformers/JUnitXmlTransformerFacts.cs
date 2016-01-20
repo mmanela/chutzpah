@@ -68,14 +68,14 @@ namespace Chutzpah.Facts.Library.Transformers
         {
             var transformer = new JUnitXmlTransformer(GetFileSystemWrapper());
             var summary = BuildTestCaseSummary();
-            var expected =
+            var expectedFormat =
                 @"<?xml version=""1.0"" encoding=""UTF-8"" ?>
 <testsuites>
-  <testsuite name=""path1"" tests=""2"" failures=""1"" time=""1.5"">
+  <testsuite name=""path1"" tests=""2"" failures=""1"" time=""{0}"">
     <testcase name=""module1:test1"" time=""1"">
       <failure message=""some failure""></failure>
     </testcase>
-    <testcase name=""module1:test2"" time=""0.5"" />
+    <testcase name=""module1:test2"" time=""{1}"" />
   </testsuite>
   <testsuite name=""path&gt;2"" tests=""2"" failures=""1"" time=""2"">
     <testcase name=""test3"" time=""1"" />
@@ -88,6 +88,7 @@ namespace Chutzpah.Facts.Library.Transformers
 
             var result = transformer.Transform(summary);
 
+            var expected = string.Format(expectedFormat, 1.5.ToString(), 0.5.ToString());
             Assert.Equal(expected, result);
         }
     }
