@@ -106,7 +106,7 @@ namespace Chutzpah
 
         }
 
-        public void LaunchFileInBrowser(string file, string browserName = null)
+        public void LaunchFileInBrowser(string file, string browserName = null, string browserArgs = null)
         {
             file = FileProbe.GenerateFileUrl(file);
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
@@ -116,7 +116,10 @@ namespace Chutzpah
             {
                 startInfo.UseShellExecute = true;
                 startInfo.FileName = browserAppPath;
-                startInfo.Arguments = file;
+                startInfo.Arguments = 
+                    string.IsNullOrWhiteSpace(browserArgs)
+                        ? file
+                        : browserArgs + " " + file;
             }
             else
             {

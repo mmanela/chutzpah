@@ -296,7 +296,7 @@ namespace Chutzpah
                                 "Launching test harness '{0}' for file '{1}' in a browser",
                                 testContext.TestHarnessPath,
                                 testContext.FirstInputTestFile);
-                            process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName);
+                            process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName, options.BrowserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {

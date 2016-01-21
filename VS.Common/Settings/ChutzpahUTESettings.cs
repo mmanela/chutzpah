@@ -21,6 +21,7 @@ namespace Chutzpah.VS.Common.Settings
 
         private int maxDegreeOfParallelism;
         private bool enableTracing;
+        private string browserArguments;
 
 
         [Browsable(true)]
@@ -52,10 +53,25 @@ namespace Chutzpah.VS.Common.Settings
             }
         }
 
+        [Browsable(true)]
+        [Category("UTE")]
+        [DisplayName("Browser Arguments")]
+        [Description("The arguments used to pass to the browser being used for the execution of the test.")]
+        public string BrowserArguments
+        {
+            get { return browserArguments; }
+            set
+            {
+                browserArguments = value;
+                OnPropertyChanged("BrowserArguments");
+            }
+        }
+
         public override void ResetSettings()
         {
             EnabledTracing = false;
             MaxDegreeOfParallelism = Environment.ProcessorCount;
+            BrowserArguments = null;
             base.ResetSettings();
         }
 

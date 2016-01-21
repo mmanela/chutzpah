@@ -38,6 +38,11 @@ namespace Chutzpah.VS2012.TestAdapter
         /// </summary>
         public bool OpenInBrowser { get; set; }
 
+        /// <summary>
+        /// The arguments for the corresponding browser if running in browser.
+        /// </summary>
+        public string BrowserArgs { get; set; }
+
         public Collection<ChutzpahSettingsFileEnvironment> ChutzpahSettingsFileEnvironments { get; set; }
 
         [XmlIgnore]
