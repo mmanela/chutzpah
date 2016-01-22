@@ -22,7 +22,6 @@ namespace Chutzpah.VS2012.TestAdapter
         {
             Settings.MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism;
             Settings.EnabledTracing = settings.EnabledTracing;
-            Settings.BrowserArgs = settings.BrowserArguments;
         }
 
         public IXPathNavigable AddRunSettings(IXPathNavigable inputRunSettingDocument, IRunSettingsConfigurationInfo configurationInfo, ILogger log)

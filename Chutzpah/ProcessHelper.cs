@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -106,7 +107,7 @@ namespace Chutzpah
 
         }
 
-        public void LaunchFileInBrowser(string file, string browserName = null, string browserArgs = null)
+        public void LaunchFileInBrowser(string file, string browserName = null, IDictionary<string, string> browserArgs = null)
         {
             file = FileProbe.GenerateFileUrl(file);
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
@@ -116,10 +117,10 @@ namespace Chutzpah
             {
                 startInfo.UseShellExecute = true;
                 startInfo.FileName = browserAppPath;
-                startInfo.Arguments = 
-                    string.IsNullOrWhiteSpace(browserArgs)
-                        ? file
-                        : browserArgs + " " + file;
+                startInfo.Arguments =
+                    GetArguments(browserName ?? Path.GetFileNameWithoutExtension(browserAppPath),
+                                 file,
+                                 browserArgs);
             }
             else
             {
@@ -129,6 +130,22 @@ namespace Chutzpah
             }
 
             Process.Start(startInfo);
+        }
+
+        static string GetArguments(string browser, string file, IDictionary<string, string> browserArgs)
+        {
+            if (string.IsNullOrWhiteSpace(browser) || browserArgs == null)
+            {
+                return file;
+            }
+
+            string args;
+            if (browserArgs.TryGetValue(browser, out args) && !string.IsNullOrWhiteSpace(args))
+            {
+                return $"{args} {file}";
+            }
+
+            return file;
         }
     }
 }

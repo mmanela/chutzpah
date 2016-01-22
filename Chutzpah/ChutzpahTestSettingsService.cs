@@ -13,7 +13,7 @@ namespace Chutzpah
     public interface IChutzpahTestSettingsService
     {
         /// <summary>
-        /// Find and reads a chutzpah test settings file given a direcotry. If none is found a default settings object is created
+        /// Find and reads a chutzpah test settings file given a directory. If none is found a default settings object is created
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
@@ -61,7 +61,7 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Find and reads a chutzpah test settings file given a direcotry. If none is found a default settings object is created
+        /// Find and reads a chutzpah test settings file given a directory. If none is found a default settings object is created
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
@@ -101,12 +101,12 @@ namespace Chutzpah
                 var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
                 if (string.IsNullOrEmpty(testSettingsFilePath))
                 {
-                    ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directoy {0}", directory);
+                    ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directory {0}", directory);
                     settings = ChutzpahTestSettingsFile.Default;
                 }
                 else if (!ChutzpahSettingsFileCache.TryGetValue(Path.GetDirectoryName(testSettingsFilePath), out settings))
                 {
-                    ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directoy {1}", testSettingsFilePath, directory);
+                    ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directory {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
 
                     if (settings == null)
