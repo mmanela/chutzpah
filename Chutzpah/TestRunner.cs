@@ -295,8 +295,20 @@ namespace Chutzpah
                             ChutzpahTracer.TraceInformation(
                                 "Launching test harness '{0}' for file '{1}' in a browser",
                                 testContext.TestHarnessPath,
-                                testContext.FirstInputTestFile);                            
-                            process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName, testContext.TestFileSettings.BrowserArguments);
+                                testContext.FirstInputTestFile);
+
+                            // Allow override from command line.
+                            var browserArgs = testContext.TestFileSettings.BrowserArguments;
+                            if (!string.IsNullOrWhiteSpace(options.BrowserArgs))
+                            {
+                                var path = BrowserPathHelper.GetBrowserPath(options.BrowserName);
+                                browserArgs = new Dictionary<string, string>
+                                {
+                                    { Path.GetFileNameWithoutExtension(path), options.BrowserArgs }
+                                };
+                            }
+                                                   
+                            process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName, browserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
