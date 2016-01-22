@@ -358,6 +358,12 @@ namespace Chutzpah.Models
 
             foreach (var browserArgument in parent.BrowserArguments)
             {
+                // We should only override the child if the child does not already define a value for a key
+                if (this.BrowserArguments.ContainsKey(browserArgument.Key))
+                {
+                    continue;
+                }
+
                 this.BrowserArguments[browserArgument.Key] = browserArgument.Value;
             }
 
