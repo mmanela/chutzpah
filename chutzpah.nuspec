@@ -14,10 +14,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Integrated debugging in Visual Studio
-* Support for Skipped tests
-* Customize code coverage output location
-* Added NUnitXml result transformer
+* Upgraded to QUnit 1.20 and Jasmine 2.4
+* Improved support for AngularJS Templates
+* Support for compilation to merged output file
         </releaseNotes>
     </metadata>
 </package>
