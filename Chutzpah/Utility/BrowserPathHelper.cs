@@ -12,6 +12,10 @@ namespace Chutzpah.Utility
         private const string BrowserFirefoxRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Firefox.exe";
         private const string DefaultBrowserProdIdPath = "Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice";
 
+        /// <summary>
+        /// Performs a registry lookup, attempting to find the corresponding install path of the provided browser name. If no browser name is given
+        /// it will look at the HKEY_CURRENT_USER defined default browser.
+        /// </summary>
         public static string GetBrowserPath(string browserName)
         {
             var browserPath = string.Empty;
