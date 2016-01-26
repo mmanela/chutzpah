@@ -353,7 +353,7 @@ namespace Chutzpah.Facts
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestLaunchMode = TestLaunchMode.FullBrowser });
 
-                runner.Mock<IProcessHelper>().Verify(x => x.LaunchFileInBrowser(@"D:\harnessPath.html", null));
+                runner.Mock<IProcessHelper>().Verify(x => x.LaunchFileInBrowser(@"D:\harnessPath.html", It.IsAny<string>(), It.IsAny<IDictionary<string,string>>()));
             }
 
             [Fact]

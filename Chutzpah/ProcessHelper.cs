@@ -142,7 +142,7 @@ namespace Chutzpah
             string args;
             if (browserArgs.TryGetValue(browser, out args) && !string.IsNullOrWhiteSpace(args))
             {
-                return $"{args} {file}";
+                return string.Format("{0} {1}", args, file);
             }
 
             return file;
