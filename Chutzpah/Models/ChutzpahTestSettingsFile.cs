@@ -57,6 +57,7 @@ namespace Chutzpah.Models
             CodeCoverageIncludes = new List<string>();
             CodeCoverageExcludes = new List<string>();
             CodeCoverageIgnores = new List<string>();
+            BrowserArguments = new Dictionary<string, string>();
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             Transforms = new List<TransformConfig>();
@@ -98,7 +99,7 @@ namespace Chutzpah.Models
         public bool? EnableTestFileBatching { get; set; }
 
         /// <summary>
-        /// The time to wait for the tests to compelte in milliseconds
+        /// The time to wait for the tests to complete in milliseconds
         /// </summary>
         public int? TestFileTimeout { get; set; }
 
@@ -216,6 +217,11 @@ namespace Chutzpah.Models
         public ICollection<string> CodeCoverageIgnores { get; set; }
 
         /// <summary>
+        /// The dictionary of browser name (keys) to corresponding browser arguments (values), i.e.; { 'chrome': '--allow-file-access-from-files' }.
+        /// </summary>
+        public IDictionary<string, string> BrowserArguments { get; set; }
+
+        /// <summary>
         /// The collection of test files. These can list individual tests or folders scanned recursively. This setting can work in two ways:
         /// 1. If you run tests normally by specifying folders/files then this settings will filter the sets of those files.
         /// 2. If you run tests by running a specific chutzpah.json file then this settings will select the test files you choose.
@@ -250,7 +256,7 @@ namespace Chutzpah.Models
         public ICollection<TransformConfig> Transforms { get; set; }
 
         /// <summary>
-        /// This is depeprecated and only here for back compat for now
+        /// This is deprecated and only here for back compat for now
         /// If True, forces code coverage to run always
         /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
         /// If False, forces code coverage to never run. 
@@ -350,35 +356,46 @@ namespace Chutzpah.Models
             this.CodeCoverageIgnores = parent.CodeCoverageIgnores.Concat(this.CodeCoverageIgnores).ToList();
             this.Transforms = parent.Transforms.Concat(this.Transforms).ToList();
 
+            foreach (var browserArgument in parent.BrowserArguments)
+            {
+                // We should only override the child if the child does not already define a value for a key
+                if (this.BrowserArguments.ContainsKey(browserArgument.Key))
+                {
+                    continue;
+                }
+
+                this.BrowserArguments[browserArgument.Key] = browserArgument.Value;
+            }
+
             if (this.Compile == null)
             {
                 this.Compile = parent.Compile;
             }
 
 
-            this.AMDBaseUrl = this.AMDBaseUrl == null ? parent.AMDBaseUrl : this.AMDBaseUrl;
-            this.AMDAppDirectory = this.AMDAppDirectory == null ? parent.AMDAppDirectory : this.AMDAppDirectory;            
-            this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage == null ? parent.CodeCoverageSuccessPercentage : this.CodeCoverageSuccessPercentage;
-            this.CustomTestHarnessPath = this.CustomTestHarnessPath == null ? parent.CustomTestHarnessPath : this.CustomTestHarnessPath;
-            this.CodeCoverageExecutionMode = this.CodeCoverageExecutionMode == null ? parent.CodeCoverageExecutionMode : this.CodeCoverageExecutionMode;
-            this.Framework = this.Framework == null ? parent.Framework : this.Framework;
-            this.FrameworkVersion = this.FrameworkVersion == null ? parent.FrameworkVersion : this.FrameworkVersion;
-            this.MochaInterface = this.MochaInterface == null ? parent.MochaInterface : this.MochaInterface;
-            this.RootReferencePathMode = this.RootReferencePathMode == null ? parent.RootReferencePathMode : this.RootReferencePathMode;
-            this.TestFileTimeout = this.TestFileTimeout == null ? parent.TestFileTimeout : this.TestFileTimeout;
-            this.TestHarnessReferenceMode = this.TestHarnessReferenceMode == null ? parent.TestHarnessReferenceMode : this.TestHarnessReferenceMode;
-            this.TestPattern = this.TestPattern == null ? parent.TestPattern : this.TestPattern;
-            this.UserAgent = this.UserAgent == null ? parent.UserAgent : this.UserAgent;
-            this.EnableTestFileBatching = this.EnableTestFileBatching == null ? parent.EnableTestFileBatching : this.EnableTestFileBatching;
-            this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors == null ? parent.IgnoreResourceLoadingErrors : this.IgnoreResourceLoadingErrors;
+            this.AMDBaseUrl = this.AMDBaseUrl ?? parent.AMDBaseUrl;
+            this.AMDAppDirectory = this.AMDAppDirectory ?? parent.AMDAppDirectory;            
+            this.CodeCoverageSuccessPercentage = this.CodeCoverageSuccessPercentage ?? parent.CodeCoverageSuccessPercentage;
+            this.CustomTestHarnessPath = this.CustomTestHarnessPath ?? parent.CustomTestHarnessPath;
+            this.CodeCoverageExecutionMode = this.CodeCoverageExecutionMode ?? parent.CodeCoverageExecutionMode;
+            this.Framework = this.Framework ?? parent.Framework;
+            this.FrameworkVersion = this.FrameworkVersion ?? parent.FrameworkVersion;
+            this.MochaInterface = this.MochaInterface ?? parent.MochaInterface;
+            this.RootReferencePathMode = this.RootReferencePathMode ?? parent.RootReferencePathMode;
+            this.TestFileTimeout = this.TestFileTimeout ?? parent.TestFileTimeout;
+            this.TestHarnessReferenceMode = this.TestHarnessReferenceMode ?? parent.TestHarnessReferenceMode;
+            this.TestPattern = this.TestPattern ?? parent.TestPattern;
+            this.UserAgent = this.UserAgent ?? parent.UserAgent;
+            this.EnableTestFileBatching = this.EnableTestFileBatching ?? parent.EnableTestFileBatching;
+            this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors ?? parent.IgnoreResourceLoadingErrors;
 
             // Deprecated
-            this.AMDBasePath = this.AMDBasePath == null ? parent.AMDBasePath : this.AMDBasePath;
+            this.AMDBasePath = this.AMDBasePath ?? parent.AMDBasePath;
 
 
             // We need to handle an inherited test harness location mode specially
             // If the parent set their mode to SettingsFileAdjacent and the current file has it set to null 
-            // Then we make the curent file have a Custom mode with the parent files settings directory
+            // Then we make the current file have a Custom mode with the parent files settings directory
             if (this.TestHarnessLocationMode == null)
             {
                 if (parent.TestHarnessLocationMode == Chutzpah.Models.TestHarnessLocationMode.SettingsFileAdjacent && !parent.IsDefaultSettings)

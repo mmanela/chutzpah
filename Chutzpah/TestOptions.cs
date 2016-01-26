@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Chutzpah.Models;
 
 namespace Chutzpah
@@ -32,7 +31,12 @@ namespace Chutzpah
         /// The name of browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional
         /// </summary>
         public string BrowserName { get; set; }
-        
+
+        /// <summary>
+        /// The arguments for the corresponding browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional
+        /// </summary>
+        public string BrowserArgs { get; set; }
+
         /// <summary>
         /// Test launch object implementing the Custom test launch logic.
         /// Required when TestLaunchMode == TestLaunchMode.Custom.
