@@ -98,6 +98,7 @@
     <Compile Include="Library\TestHarnessBuilderFacts.cs" />
     <Compile Include="Library\TestHarnessFacts.cs" />
     <Compile Include="Library\TestingModeExtensionsFacts.cs" />
+    <Compile Include="Library\Transformers\EmmaXmlTransformerFacts.cs" />
     <Compile Include="Library\Transformers\SummaryTransformerFacts.cs" />
     <Compile Include="Library\Transformers\NUnit2XmlTransformerFacts.cs" />
     <Compile Include="Library\Transformers\JUnitXmlTransformerFacts.cs" />
