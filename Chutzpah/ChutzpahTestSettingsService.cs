@@ -130,6 +130,8 @@ namespace Chutzpah
 
                     ProcessPathSettings(settings, chutzpahVariables);
 
+                    ProcessTraceFilePath(settings, chutzpahVariables);
+
                     ProcessInheritance(environment, settings, chutzpahVariables);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
@@ -143,6 +145,15 @@ namespace Chutzpah
 
 
             return settings;
+        }
+
+        private void ProcessTraceFilePath(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
+        {
+            if (!string.IsNullOrEmpty(settings.TraceFilePath))
+            {
+                var path = Path.Combine(settings.SettingsFileDirectory, ExpandVariable(chutzpahVariables, settings.TraceFilePath));
+                settings.TraceFilePath = path;
+            }
         }
 
         private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)

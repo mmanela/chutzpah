@@ -7,6 +7,11 @@ namespace Chutzpah
 {
     public class ChutzpahTracer
     {
+        /// <summary>
+        /// By default this is always true and we determine if we should actually log based on active
+        /// listeners. However, in the integrations tests we will force this off to prevent any logging
+        /// since some test runner adds listeners always
+        /// </summary>
         public static bool Enabled { get; set; }
         
         static ChutzpahTracer()
@@ -36,7 +41,10 @@ namespace Chutzpah
         public static void RemoveFileListener(string path = null)
         {
             var logPath = string.IsNullOrEmpty(path) ? Constants.LogFileName : path;
-            Trace.Listeners.Remove(logPath);
+            if (Trace.Listeners[logPath] != null)
+            {
+                Trace.Listeners.Remove(logPath);
+            }
         }
 
         public static void TraceInformation(string messageFormat, params object[] args)

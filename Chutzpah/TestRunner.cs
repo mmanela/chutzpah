@@ -151,8 +151,6 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
 
-            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, options.MaxDegreeOfParallelism);
-
             options.TestExecutionMode = testExecutionMode;
 
             stopWatch.Start();
@@ -173,7 +171,6 @@ namespace Chutzpah
             var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
             var resultCount = 0;
             var cancellationSource = new CancellationTokenSource();
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = cancellationSource.Token };
 
 
             // Given the input paths discover the potential test files
@@ -182,10 +179,20 @@ namespace Chutzpah
             // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
             // If so, we keep those tests in a group together to be used in one context
             // Otherwise, we put each file in its own test group so each get their own context
-            var testGroups = BuildTestingGroups(scriptPaths, options);
+            var testRunConfiguration = BuildTestRunConfiguration(scriptPaths, options);
+
+            ConfigureTracing(testRunConfiguration);
+
+            var parallelism = testRunConfiguration.MaxDegreeOfParallelism.HasValue
+                                ? Math.Min(options.MaxDegreeOfParallelism, testRunConfiguration.MaxDegreeOfParallelism.Value)
+                                : options.MaxDegreeOfParallelism;
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = parallelism, CancellationToken = cancellationSource.Token };
+            
+            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, parallelOptions.MaxDegreeOfParallelism);
 
             // Build test contexts in parallel given a list of files each
-            BuildTestContexts(options, testGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
+            BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
 
 
             // Compile the test contexts
@@ -223,8 +230,26 @@ namespace Chutzpah
             return overallSummary;
         }
 
-        private List<List<PathInfo>> BuildTestingGroups(IEnumerable<PathInfo> scriptPaths, TestOptions testOptions)
+        private void ConfigureTracing(TestRunConfiguration testRunConfiguration)
         {
+            var path = testRunConfiguration.TraceFilePath;
+            if (testRunConfiguration.EnableTracing)
+            {
+                ChutzpahTracer.AddFileListener(path);
+            }
+            else
+            {
+                // TODO (mmanela): There is a known issue with this if the user is running chutzpah in VS and changes their trace path
+                // This will result in that path not getting removed until the VS is restarted. To fix this we need to keep trace of previous paths 
+                // and clear them all out.
+                ChutzpahTracer.RemoveFileListener(path);
+            }
+        }
+
+        private TestRunConfiguration BuildTestRunConfiguration(IEnumerable<PathInfo> scriptPaths, TestOptions testOptions)
+        {
+            var testRunConfiguration = new TestRunConfiguration();
+
             // Find all chutzpah.json files for the input files
             // Then group files by their respective settings file
             var testGroups = new List<List<PathInfo>>();
@@ -249,7 +274,18 @@ namespace Chutzpah
                     }
                 }
             }
-            return testGroups;
+
+            testRunConfiguration.TestGroups = testGroups;
+
+            // Take the parallelism degree to be the minimum of any non-null setting in chutzpah.json 
+            testRunConfiguration.MaxDegreeOfParallelism = fileSettingGroups.Min(x => x.Key.MaxDegreeOfParallelism);
+
+            // Enable tracing if any setting is true
+            testRunConfiguration.EnableTracing = fileSettingGroups.Any(x => x.Key.EnableTracing.HasValue && x.Key.EnableTracing.Value);
+
+            testRunConfiguration.TraceFilePath = fileSettingGroups.Select(x => x.Key.TraceFilePath).FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? testRunConfiguration.TraceFilePath;
+
+            return testRunConfiguration;
         }
 
         private bool PerformBatchCompile(ITestMethodRunnerCallback callback, IEnumerable<TestContext> testContexts)

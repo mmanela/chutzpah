@@ -256,6 +256,22 @@ namespace Chutzpah.Models
         public ICollection<TransformConfig> Transforms { get; set; }
 
         /// <summary>
+        /// Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1
+        ///  If you specify more than 1 the test output may be a bit jumbled
+        /// </summary>
+        public int? MaxDegreeOfParallelism { get; set; }
+
+        /// <summary>
+        /// Logs tracing information to a chutzpah.log file
+        /// </summary>
+        public bool? EnableTracing { get; set; }
+
+        /// <summary>
+        /// The path to write the trace file to. Defaults tp %temp%/chutzpah.log
+        /// </summary>
+        public string TraceFilePath { get; set; }
+
+        /// <summary>
         /// This is deprecated and only here for back compat for now
         /// If True, forces code coverage to run always
         /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
@@ -388,6 +404,9 @@ namespace Chutzpah.Models
             this.UserAgent = this.UserAgent ?? parent.UserAgent;
             this.EnableTestFileBatching = this.EnableTestFileBatching ?? parent.EnableTestFileBatching;
             this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors ?? parent.IgnoreResourceLoadingErrors;
+            this.MaxDegreeOfParallelism = this.MaxDegreeOfParallelism ?? parent.MaxDegreeOfParallelism;
+            this.EnableTracing = this.EnableTracing ?? parent.EnableTracing;
+            this.TraceFilePath = this.TraceFilePath ?? parent.TraceFilePath;
 
             // Deprecated
             this.AMDBasePath = this.AMDBasePath ?? parent.AMDBasePath;

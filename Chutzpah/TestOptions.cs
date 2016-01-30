@@ -7,14 +7,12 @@ namespace Chutzpah
     {
         private int testFileTimeoutMilliseconds;
         private int maxDegreeOfParallelism;
-        private readonly int defaultParallelism;
 
         public TestOptions()
         {
             FileSearchLimit = Constants.DefaultFileSeachLimit;
             TestFileTimeoutMilliseconds = Constants.DefaultTestFileTimeout;
-            defaultParallelism = Environment.ProcessorCount;
-            MaxDegreeOfParallelism = defaultParallelism;
+            MaxDegreeOfParallelism = Environment.ProcessorCount;
             CoverageOptions = new CoverageOptions();
             TestExecutionMode = TestExecutionMode.Execution;
 
