@@ -278,7 +278,7 @@ namespace Chutzpah
             testRunConfiguration.TestGroups = testGroups;
 
             // Take the parallelism degree to be the minimum of any non-null setting in chutzpah.json 
-            testRunConfiguration.MaxDegreeOfParallelism = fileSettingGroups.Min(x => x.Key.MaxDegreeOfParallelism);
+            testRunConfiguration.MaxDegreeOfParallelism = fileSettingGroups.Min(x => x.Key.Parallelism);
 
             // Enable tracing if any setting is true
             testRunConfiguration.EnableTracing = fileSettingGroups.Any(x => x.Key.EnableTracing.HasValue && x.Key.EnableTracing.Value);

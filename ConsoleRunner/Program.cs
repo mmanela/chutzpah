@@ -144,7 +144,6 @@ namespace Chutzpah
                         BrowserName = commandLine.BrowserName,
                         BrowserArgs = commandLine.BrowserArgs,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
-                        MaxDegreeOfParallelism = commandLine.Parallelism,
                         ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
                         CoverageOptions = new CoverageOptions
                                               {
@@ -154,6 +153,11 @@ namespace Chutzpah
                                                   IgnorePatterns = (commandLine.CoverageIgnorePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries)
                                               }
                     };
+
+                if(commandLine.Parallelism > 0)
+                {
+                    testOptions.MaxDegreeOfParallelism = commandLine.Parallelism;
+                }
 
                 if (!commandLine.Discovery)
                 {

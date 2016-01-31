@@ -259,7 +259,7 @@ namespace Chutzpah.Models
         /// Max degree of parallelism for Chutzpah. Defaults to number of CPUs + 1
         ///  If you specify more than 1 the test output may be a bit jumbled
         /// </summary>
-        public int? MaxDegreeOfParallelism { get; set; }
+        public int? Parallelism { get; set; }
 
         /// <summary>
         /// Logs tracing information to a chutzpah.log file
@@ -404,7 +404,7 @@ namespace Chutzpah.Models
             this.UserAgent = this.UserAgent ?? parent.UserAgent;
             this.EnableTestFileBatching = this.EnableTestFileBatching ?? parent.EnableTestFileBatching;
             this.IgnoreResourceLoadingErrors = this.IgnoreResourceLoadingErrors ?? parent.IgnoreResourceLoadingErrors;
-            this.MaxDegreeOfParallelism = this.MaxDegreeOfParallelism ?? parent.MaxDegreeOfParallelism;
+            this.Parallelism = this.Parallelism ?? parent.Parallelism;
             this.EnableTracing = this.EnableTracing ?? parent.EnableTracing;
             this.TraceFilePath = this.TraceFilePath ?? parent.TraceFilePath;
 
