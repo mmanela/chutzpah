@@ -1,15 +1,13 @@
 ﻿using Chutzpah.Models;
 using Chutzpah.Wrappers;
 using System;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Web.UI;
 
 namespace Chutzpah.Transformers
 {
     /// <summary>
-    /// Outputs an XML file with a schema similar to the one found at http://emma.sourceforge.net/coverage_sample_c/coverage.xml
+    /// Outputs an XML file with code coverage results.
+    /// Schema used: http://emma.sourceforge.net/coverage_sample_c/coverage.xml
     /// </summary>
     public class EmmaXmlTransformer : SummaryTransformer
     {
@@ -26,7 +24,7 @@ namespace Chutzpah.Transformers
 
         public override string Description
         {
-            get { return "output results to Emma-style XML file"; }
+            get { return "output coverage results to an Emma-style XML file"; }
         }
 
         public EmmaXmlTransformer(IFileSystemWrapper fileSystem)
@@ -60,8 +58,8 @@ namespace Chutzpah.Transformers
         private void AppendOverallStats(StringBuilder builder, CoverageData coverage)
         {
             builder.AppendLine(@" <stats>");
-            builder.AppendLine(String.Format(@"  <srcfiles value=""{0}"" />", this.TotalSourceFiles));
-            builder.AppendLine(String.Format(@"  <srclines value=""{0}"" />", this.TotalSourceLines));
+            builder.AppendLine(string.Format(@"  <srcfiles value=""{0}"" />", this.TotalSourceFiles));
+            builder.AppendLine(string.Format(@"  <srclines value=""{0}"" />", this.TotalSourceLines));
             builder.AppendLine(@" </stats>");
         }
 
@@ -85,7 +83,7 @@ namespace Chutzpah.Transformers
         {
             var totalStatements = 0;
             var statementsCovered = 0;
-            builder.AppendLine(String.Format(@"   <srcfile name=""{0}"">", fileName));
+            builder.AppendLine(string.Format(@"   <srcfile name=""{0}"">", fileName));
 
             for (var i = 1; i < fileData.LineExecutionCounts.Length; i++)
             {
@@ -110,7 +108,7 @@ namespace Chutzpah.Transformers
             {
                 this.TotalSourceFiles += 1;
                 var fileData = pair.Value;
-                var totalSmts = 0;
+                var totalStatements = 0;
                 if (fileData.LineExecutionCounts == null)
                 {
                     continue;
@@ -121,7 +119,7 @@ namespace Chutzpah.Transformers
                     var lineExecution = fileData.LineExecutionCounts[i];
                     if (lineExecution.HasValue)
                     {
-                        totalSmts++;
+                        totalStatements++;
 
                         if (lineExecution > 0)
                         {
@@ -129,13 +127,13 @@ namespace Chutzpah.Transformers
                         }
                     }
                 }
-                this.TotalSourceLines += totalSmts;
+                this.TotalSourceLines += totalStatements;
             }
         }
 
         private void AppendLineCoverageForSourceFile(StringBuilder builder, int statementsCovered, int totalStatements)
         {
-            var lineCoverage = String.Format(
+            var lineCoverage = string.Format(
                 @"    <coverage type=""line, %"" value=""{0}% ({1}/{2})"" />",
                 FormatPercentage(statementsCovered, totalStatements),
                 statementsCovered,
@@ -145,7 +143,7 @@ namespace Chutzpah.Transformers
 
         private void AppendOverallCoverage(StringBuilder builder)
         {
-            var overall = String.Format(
+            var overall = string.Format(
                 @"   <coverage type=""line, %"" value=""{0}% ({1}/{2})"" />",
                 FormatPercentage(this.TotalSourceLinesCovered, this.TotalSourceLines),
                 this.TotalSourceLinesCovered,
