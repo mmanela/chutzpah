@@ -158,6 +158,7 @@
     <Compile Include="TestCaseStreamReader.cs" />
     <Compile Include="EmbeddedManifestResourceReader.cs" />
     <Compile Include="ChutzpahTracer.cs" />
+    <Compile Include="Transformers\EmmaXmlTransformer.cs" />
     <Compile Include="Transformers\CoverageJsonTransformer.cs" />
     <Compile Include="Transformers\ISummaryTransformerProvider.cs" />
     <Compile Include="Transformers\ITransformProcessor.cs" />
