@@ -93,7 +93,7 @@ namespace Chutzpah.Facts.Library.Transformers
 
             var result = transformer.Transform(summary);
 
-            Assert.Equal(expected, result);
+            Assert.Equal(expected.Replace("\r", "").Replace("\n",""), result.Replace("\r", "").Replace("\n", ""));
         }
     }
 }
