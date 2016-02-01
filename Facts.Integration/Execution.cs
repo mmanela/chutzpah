@@ -1033,6 +1033,14 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
             }
+
+            [Fact]
+            public void Will_throw_if_malformed_json()
+            {
+                var testRunner = TestRunner.Create();
+
+                Assert.Throws<ChutzpahException>(() => testRunner.RunTests(@"JS\Test\TestSettings\Malformed\ReferencesTests.js", new ExceptionThrowingRunnerCallback()));
+            }
         }
     }
 }
