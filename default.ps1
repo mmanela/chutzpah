@@ -71,7 +71,7 @@ task Clean-TeamCitySolution {
 
 }
 task Clean-Solution-VS {
-    exec { msbuild Chutzpah.VS2013.sln /t:Clean /v:quiet }
+    exec { msbuild Chutzpah.VS.sln /t:Clean /v:quiet }
 }
 
 task Clean-Solution-NoVS {
@@ -85,7 +85,7 @@ task Build-TeamCitySolution {
 }
 
 task Build-Solution-VS {
-    exec { msbuild Chutzpah.VS2013.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+    exec { msbuild Chutzpah.VS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Build-Solution-NoVS {
