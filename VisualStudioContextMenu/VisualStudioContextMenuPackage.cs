@@ -194,6 +194,7 @@ namespace Chutzpah.VisualStudioContextMenu
             if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
                 || filename.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase)
                 || filename.EndsWith(".ts", StringComparison.OrdinalIgnoreCase)
+                || filename.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
                 )
             {
                 return TestFileType.JS;

@@ -60,12 +60,23 @@ namespace VS11.Plugin
 			while (childId != VSConstants.VSITEMID_NIL)
 			{
 				string childPath = GetCanonicalName(childId, project);
-				yield return childPath;
 
-				foreach (var childNodePath in GetProjectItems(project, childId)) yield return childNodePath;
+                if (!string.IsNullOrEmpty(childPath))
+                {
+                    yield return childPath;
 
-				pVar = GetPropertyValue((int)__VSHPROPID.VSHPROPID_NextSibling, childId, project);
-				childId = GetItemId(pVar);
+                    foreach (var childNodePath in GetProjectItems(project, childId))
+                    {
+                        if (!string.IsNullOrEmpty(childNodePath))
+                        {
+                            yield return childNodePath;
+                        }
+                    }
+                }
+
+                pVar = GetPropertyValue((int)__VSHPROPID.VSHPROPID_NextSibling, childId, project);
+                childId = GetItemId(pVar);
+                
 			}
 		}
 
