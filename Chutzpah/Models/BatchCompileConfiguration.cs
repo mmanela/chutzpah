@@ -6,8 +6,8 @@ namespace Chutzpah.Models
 {
     public enum BatchCompileMode
     {
-        Executable,
-        External
+        External,
+        Executable
     }
 
 
@@ -51,7 +51,6 @@ namespace Chutzpah.Models
             Extensions = new List<string>();
             ExtensionsWithNoOutput = new List<string>();
             SkipIfUnchanged = true;
-            Mode = BatchCompileMode.Executable;
             Paths = new List<CompilePathMap>();
         }
 
@@ -59,7 +58,7 @@ namespace Chutzpah.Models
         /// Determines the mode of the compile setting. By default it is to run the executable but if you set it to External
         /// then Chutzpah assumes some external force will compile and Chutzpah will just look for generated JS files
         /// </summary>
-        public BatchCompileMode Mode { get; set; }
+        public BatchCompileMode? Mode { get; set; }
 
         /// <summary>
         /// The extension of the files which are getting compiled
@@ -118,17 +117,24 @@ namespace Chutzpah.Models
         /// This is defaulted to true but if you hit issues since it is possible chutzpah might not know about all the files your compilation
         /// code is using then you can turn this off. Ideally you can tell Chutzpah about these and then set this to be more performant
         /// </summary>
-        public bool SkipIfUnchanged { get; set; }
+        public bool? SkipIfUnchanged { get; set; }
 
         /// <summary>
         /// Configures whether .map files should be loaded (if available) to convert under-test JS
         /// line numbers to those of their original source files.
         /// </summary>
-        public bool UseSourceMaps { get; set; }
+        public bool? UseSourceMaps { get; set; }
+
+        /// <summary>
+        /// Should Chutzpah ignore files it expects to find compiled. If set
+        /// to true Chutzpah will log an error otherwise it will throw
+        /// </summary>
+        public bool? IgnoreMissingFiles{ get; set; }
 
         /// <summary>
         /// The settings file directory that this batch compile configuration came from
         /// </summary>
+        [JsonIgnore]
         public string SettingsFileDirectory { get; set; }
     }
 }

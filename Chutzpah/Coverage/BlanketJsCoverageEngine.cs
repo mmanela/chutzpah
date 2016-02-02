@@ -194,7 +194,7 @@ namespace Chutzpah.Coverage
                     var coveredPath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
 
                     // If the user is using source maps then always take sourcePath and not generates. 
-                    if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile.SourceMapFilePath != null)
+                    if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps.GetValueOrDefault() && referencedFile.SourceMapFilePath != null)
                     {
                         coveredPath = referencedFile.Path;
                     }
@@ -204,7 +204,7 @@ namespace Chutzpah.Coverage
                         string[] sourceLines = fileSystem.GetLines(coveredPath);
                         int?[] lineExecutionCounts = entry.Value;
 
-                        if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps && referencedFile.SourceMapFilePath != null)
+                        if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps.GetValueOrDefault() && referencedFile.SourceMapFilePath != null)
                         {
                             lineExecutionCounts = this.lineCoverageMapper.GetOriginalFileLineExecutionCounts(entry.Value, sourceLines.Length, referencedFile);
                         }

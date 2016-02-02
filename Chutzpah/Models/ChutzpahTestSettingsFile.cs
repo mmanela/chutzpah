@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Chutzpah.Models
 {
@@ -238,6 +239,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// The path to the settings file
         /// </summary>
+        [JsonIgnore]
         public string SettingsFileDirectory { get; set; }
 
         /// <summary>
@@ -386,6 +388,20 @@ namespace Chutzpah.Models
             if (this.Compile == null)
             {
                 this.Compile = parent.Compile;
+            }
+            else if(this.Compile != null && parent.Compile != null)
+            {
+                this.Compile.Arguments = this.Compile.Arguments ?? parent.Compile.Arguments;
+                this.Compile.Executable = this.Compile.Executable ?? parent.Compile.Executable;
+                this.Compile.Extensions = this.Compile.Extensions.Any() ? this.Compile.Extensions : parent.Compile.Extensions;
+                this.Compile.ExtensionsWithNoOutput = this.Compile.ExtensionsWithNoOutput.Any() ? this.Compile.ExtensionsWithNoOutput : parent.Compile.ExtensionsWithNoOutput;
+                this.Compile.Mode = this.Compile.Mode ?? parent.Compile.Mode;
+                this.Compile.IgnoreMissingFiles = this.Compile.IgnoreMissingFiles ?? parent.Compile.IgnoreMissingFiles;
+                this.Compile.UseSourceMaps = this.Compile.UseSourceMaps ?? parent.Compile.UseSourceMaps;
+                this.Compile.SkipIfUnchanged = this.Compile.SkipIfUnchanged ?? parent.Compile.SkipIfUnchanged;
+                this.Compile.WorkingDirectory = this.Compile.WorkingDirectory ?? parent.Compile.WorkingDirectory;
+                this.Compile.Timeout = this.Compile.Timeout ?? parent.Compile.Timeout;
+                this.Compile.Paths = this.Compile.Paths.Concat(parent.Compile.Paths).ToList();
             }
 
 

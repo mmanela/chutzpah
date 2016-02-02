@@ -31,6 +31,8 @@ namespace Chutzpah.Facts
                     SettingsFileDirectory = @"C:\src",
                     Compile = new BatchCompileConfiguration
                     {
+                        Mode = BatchCompileMode.Executable,
+                        Executable = "compile.bat",
                         SkipIfUnchanged = true,
                         WorkingDirectory = @"C:\src",
                         Paths = new List<CompilePathMap>

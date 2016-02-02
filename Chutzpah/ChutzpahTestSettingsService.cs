@@ -313,18 +313,24 @@ namespace Chutzpah
 
 
                 // If the mode is executable then set its properties
-                if (settings.Compile.Mode == BatchCompileMode.Executable)
+                if (settings.Compile.Mode == BatchCompileMode.Executable || (settings.Compile.Mode == null && !string.IsNullOrEmpty(settings.Compile.Executable)))
                 {
                     if (string.IsNullOrEmpty(settings.Compile.Executable))
                     {
                         throw new ArgumentException("Executable path must be passed for compile setting");
                     }
+
+                    settings.Compile.Mode = BatchCompileMode.Executable;
                     settings.Compile.Executable = ResolveFilePath(settings, ExpandVariable(chutzpahVariables, settings.Compile.Executable));
                     settings.Compile.Arguments = ExpandVariable(chutzpahVariables, settings.Compile.Arguments);
                     settings.Compile.WorkingDirectory = ResolveFolderPath(settings, settings.Compile.WorkingDirectory);
 
                     // Default timeout to 5 minutes if missing
                     settings.Compile.Timeout = settings.Compile.Timeout.HasValue ? settings.Compile.Timeout.Value : 1000 * 60 * 5;
+                }
+                else
+                {
+                    settings.Compile.Mode = BatchCompileMode.External;
                 }
 
 
@@ -347,15 +353,21 @@ namespace Chutzpah
         private void ResolveCompilePathMap(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables, CompilePathMap pathMap)
         {
             var sourcePath = pathMap.SourcePath;
-            bool? sourcePathIsFile;
+            bool? sourcePathIsFile = false;
+
+            // If SourcePath is null then we will assume later on this is the current settings directory
             pathMap.SourcePath = ResolvePath(settings, sourcePath, out sourcePathIsFile);
             if (pathMap.SourcePath == null)
             {
                 throw new FileNotFoundException("Unable to find file/directory specified by SourcePath of {0}", (sourcePath ?? ""));
             }
+
+
             pathMap.SourcePathIsFile = sourcePathIsFile.HasValue ? sourcePathIsFile.Value : false;
 
+            // If OutputPath is null then we will assume later on this is the current settings directory
             // We do not use the resolvePath method here since the path may not exist yet
+
             pathMap.OutputPath = FileProbe.NormalizeFilePath(Path.Combine(settings.SettingsFileDirectory, ExpandVariable(chutzpahVariables, pathMap.OutputPath)));
             if (pathMap.OutputPath == null)
             {
@@ -374,6 +386,7 @@ namespace Chutzpah
             {
                 pathMap.OutputPathIsFile = pathMap.OutputPath.EndsWith(".js", StringComparison.OrdinalIgnoreCase);
             }
+
         }
 
 
@@ -382,10 +395,10 @@ namespace Chutzpah
             isFile = null;
 
             var filePath = ResolveFilePath(settings, path);
-            if(filePath == null)
+            if (filePath == null)
             {
                 filePath = ResolveFolderPath(settings, path);
-                if(filePath != null)
+                if (filePath != null)
                 {
                     isFile = false;
                 }
@@ -415,7 +428,7 @@ namespace Chutzpah
             string absoluteFilePath = fileProbe.FindFilePath(relativeLocationPath);
             return absoluteFilePath;
         }
-        
+
 
         private string ExpandVariable(IDictionary<string, string> chutzpahCompileVariables, string str)
         {

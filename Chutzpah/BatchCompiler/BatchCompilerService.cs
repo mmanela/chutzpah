@@ -60,7 +60,7 @@ namespace Chutzpah.BatchProcessor
                     {
                         RunBatchCompile(testSettings);
                     }
-                    else if(testSettings.Compile.Mode == BatchCompileMode.External)
+                    else 
                     {
                         ChutzpahTracer.TraceWarning("Chutzpah determined generated .js files are missing but the compile mode is External so Chutzpah can't compile them. Test results may be wrong.");
                     }
@@ -87,13 +87,16 @@ namespace Chutzpah.BatchProcessor
                         var error = string.Format("Couldn't find generated path for {0} at {1}", file.Path, outputPath);
                         ChutzpahTracer.TraceError(error);
 
-                        // Throw and fail here since if we cant find the file we cannot be sure anything will run
-                        throw new FileNotFoundException(error, outputPath);
+                        if (!testSettings.Compile.IgnoreMissingFiles.GetValueOrDefault())
+                        {
+                            // Throw and fail here since if we cant find the file we cannot be sure anything will run
+                            throw new FileNotFoundException(error, outputPath);
+                        }
                     }
 
                     if (!string.IsNullOrWhiteSpace(file.GeneratedFilePath))
                     {
-                        file.SourceMapFilePath = testSettings.Compile.UseSourceMaps ? sourceMapDiscoverer.FindSourceMap(file.GeneratedFilePath) : null;
+                        file.SourceMapFilePath = testSettings.Compile.UseSourceMaps.GetValueOrDefault() ? sourceMapDiscoverer.FindSourceMap(file.GeneratedFilePath) : null;
                     }
                 }
             }
@@ -133,7 +136,7 @@ namespace Chutzpah.BatchProcessor
 
             // If SkipIfUnchanged is true then we check if all the output files are newer than the input files
             // we will only run the compile if this fails
-            if (testSettings.Compile.SkipIfUnchanged)
+            if (testSettings.Compile.SkipIfUnchanged.GetValueOrDefault())
             {
                 var hasMissingOutput = filePropeties
                     .Where(x => x.SourceHasOutput)
