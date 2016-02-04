@@ -2,9 +2,10 @@
   "Compile": {
     "Extensions": [".coffee"],
     "Executable": "compile.bat",
-    "SourceDirectory": "code",
     "WorkingDirectory": "code",
-    "OutDirectory": "_out",
+    "Paths": [
+       { "SourcePath": "code", "OutputPath": "_out" } 
+    ],
     "SkipIfUnchanged": false
   },
   "References" : [
