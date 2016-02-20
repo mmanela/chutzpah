@@ -11,19 +11,22 @@
     @@TestJSFile@@
 
     <script>
+
         var amdTestPaths = [@@AMDTestPath@@];
-        if (window.require && typeof window.require === "function" && amdTestPaths.length > 0) {
+        window.chutzpah.boot(amdTestPaths);
+
+        if (window.chutzpah.usingModuleLoader) {
             if (window.chutzpah) {
                 window.chutzpah.usingModuleLoader = true;
             }
 
             if("@@AMDBasePath@@") {
-                require.config({
+                window.chutzpah.amdConfig({
                     baseUrl: "@@AMDBasePath@@"
                 });
             }
 
-            require.config({
+            window.chutzpah.amdConfig({
                 map: {
                     '*': {
                         @@AMDModuleMap@@
@@ -32,7 +35,7 @@
             });
 
             window.QUnit.config.autostart = false;
-            window.require(amdTestPaths, function () {
+            window.chutzpah.amdImport(amdTestPaths, function () {
                 console.log("!!_!! Starting QUnit from inline AMD call...");
                 if (!window._Chutzpah_covobj_name) {
                     window.QUnit.start();

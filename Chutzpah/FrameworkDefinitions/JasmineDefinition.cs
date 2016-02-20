@@ -24,6 +24,7 @@ namespace Chutzpah.FrameworkDefinitions
             this.fileProcessors = fileProcessors;
             fileDependencies["1"] = new[]
                 {
+                    "chutzpah_boot.js",
                     @"jasmine\v1\jasmine.css", 
                     @"jasmine\v1\jasmine.js", 
                     @"jasmine\v1\jasmine-html.js", 
@@ -33,6 +34,7 @@ namespace Chutzpah.FrameworkDefinitions
 
             fileDependencies["2"] = new[]
                 {
+                    "chutzpah_boot.js",
                     @"jasmine\v2\jasmine.css", 
                     @"jasmine\v2\jasmine.js", 
                     @"jasmine\v2\jasmine-html.js", 

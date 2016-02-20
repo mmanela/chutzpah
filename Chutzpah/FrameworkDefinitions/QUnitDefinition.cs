@@ -22,6 +22,7 @@ namespace Chutzpah.FrameworkDefinitions
             this.fileProcessors = fileProcessors; 
             this.fileDependencies = new[]
                 {
+                    "chutzpah_boot.js",
                     "QUnit\\qunit.css", 
                     "QUnit\\qunit.js"
                 };

@@ -12,6 +12,7 @@
     <script type="text/javascript">
 
         (function () {
+
             var jasmineEnv = jasmine.getEnv();
             jasmineEnv.updateInterval = 1000;
 
@@ -26,20 +27,19 @@
             if (ddescribeIitSupport) {
                 ddescribeIitSupport.patch(jasmineEnv);
             }
-            
+
             var amdTestPaths = [@@AMDTestPath@@];
-            if (window.require && typeof window.require === "function" && amdTestPaths.length > 0) {
-                if (window.chutzpah) {
-                    window.chutzpah.usingModuleLoader = true;
-                }
+            window.chutzpah.boot(amdTestPaths);
+
+            if (window.chutzpah.usingModuleLoader) {
 
                 if("@@AMDBasePath@@") {
-                    require.config({
+                    window.chutzpah.amdConfig({
                         baseUrl: "@@AMDBasePath@@"
                     });
                 }
 
-                require.config({
+                window.chutzpah.amdConfig({
                     map: {
                         '*': {
                             @@AMDModuleMap@@
@@ -47,7 +47,7 @@
                     }
                 });
 
-                window.require(amdTestPaths, function () {
+                window.chutzpah.amdImport(amdTestPaths, function () {
 
                     console.log("!!_!! Stating Jasmine from AMD callback...");
                     jasmineEnv.execute();

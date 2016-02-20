@@ -17,22 +17,19 @@
     @@TestHtmlTemplateFiles@@
     <div id="mocha"></div>
     <script type="text/javascript">
-        var requireExists = window.require && typeof window.require === "function";
-        var amdTestPaths = [@@AMDTestPath@@];
-        if (requireExists && amdTestPaths.length > 0) {
-            if (window.chutzpah) {
 
-                console.log("!!_!! Test file is using module loader.");
-                window.chutzpah.usingModuleLoader = true;
-            }
+        var amdTestPaths = [@@AMDTestPath@@];
+        window.chutzpah.boot(amdTestPaths);
+
+        if (window.chutzpah.usingModuleLoader) {
 
             if("@@AMDBasePath@@") {
-                require.config({
+                window.chutzpah.amdConfig({
                     baseUrl: "@@AMDBasePath@@"
                 });
             }
 
-            require.config({
+            window.chutzpah.amdConfig({
                 map: {
                     '*': {
                         @@AMDModuleMap@@
@@ -40,7 +37,7 @@
                 }
             });
 
-            window.require(amdTestPaths, function () {
+            window.chutzpah.amdImport(amdTestPaths, function () {
                 mocha.run();
             });
 
@@ -55,7 +52,7 @@
                     currentWindowOnload();
                 }
 
-                if (!window._Chutzpah_covobj_name || requireExists) {
+                if (!window._Chutzpah_covobj_name || window.chutzpah.usingModuleLoader) {
                     mocha.run();
                 }
             };

@@ -31,6 +31,7 @@ namespace Chutzpah.FrameworkDefinitions
             this.fileProcessors = fileProcessors;
             this.fileDependencies = new[]
                 {
+                    "chutzpah_boot.js",
                     "mocha\\mocha.css", 
                     "mocha\\mocha.js", 
                 };

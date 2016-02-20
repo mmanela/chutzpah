@@ -9,7 +9,7 @@ namespace Chutzpah.Models
         }
 
         /// <summary>
-        /// Inidcate this file should be included in the test harness. When running Chutzpah with
+        /// Indicate if this file should be included in the test harness. When running Chutzpah with
         /// TestHarnessReferenceMode set to AMD by default Chutzpah will not add references from reference comments
         /// but will add referenced from reference settings unless you set this to false
         /// </summary>

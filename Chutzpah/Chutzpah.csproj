@@ -205,6 +205,9 @@
     <Content Include="JSRunners\mochaRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestFiles\chutzpah_boot.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestFiles\Coverage\blanket_jasmine_v2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
