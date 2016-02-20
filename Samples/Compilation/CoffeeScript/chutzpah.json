@@ -1,4 +1,5 @@
 {
+  "Framework": "qunit",
   "Compile": {
     "Extensions": [".coffee"],
     "Executable": "compile.bat",
