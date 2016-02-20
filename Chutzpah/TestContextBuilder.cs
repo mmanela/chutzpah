@@ -95,7 +95,7 @@ namespace Chutzpah
             // Make sure all test paths have a valid file type
             if (!files.Select(x => x.Type).All(IsValidTestPathType))
             {
-                throw new ArgumentException("Expecting a .js, .ts, .coffee or .html file or a url");
+                throw new ArgumentException("Expecting valid file or a url");
             }
 
             if (fileCount > 1 && files.Any(x => x.Type == PathType.Url || x.Type == PathType.Html))
@@ -398,8 +398,6 @@ namespace Chutzpah
         private static bool IsValidTestPathType(PathType testFileKind)
         {
             return testFileKind == PathType.JavaScript
-                   || testFileKind == PathType.TypeScript
-                   || testFileKind == PathType.CoffeeScript
                    || testFileKind == PathType.Url
                    || testFileKind == PathType.Html;
         }

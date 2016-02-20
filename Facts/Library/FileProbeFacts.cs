@@ -233,27 +233,27 @@ namespace Chutzpah.Facts
 
 
             [Fact]
-            public void Will_return_CoffeeScript_type_for_coffee_file()
+            public void Will_return_JavaScript_type_for_coffee_file()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.coffee")).Returns(true);
 
                 var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.coffee");
 
-                Assert.Equal(PathType.CoffeeScript, info.Type);
+                Assert.Equal(PathType.JavaScript, info.Type);
                 Assert.Equal(@"C:\someFolder\a.coffee", info.FullPath);
             }
 
 
             [Fact]
-            public void Will_return_TypeScript_type_for_typescript_file()
+            public void Will_return_JavaScript_type_for_typescript_file()
             {
                 var probe = new TestableFileProbe();
                 probe.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(@"C:\someFolder\a.ts")).Returns(true);
 
                 var info = probe.ClassUnderTest.GetPathInfo(@"C:\someFolder\a.ts");
 
-                Assert.Equal(PathType.TypeScript, info.Type);
+                Assert.Equal(PathType.JavaScript, info.Type);
                 Assert.Equal(@"C:\someFolder\a.ts", info.FullPath);
             }
 

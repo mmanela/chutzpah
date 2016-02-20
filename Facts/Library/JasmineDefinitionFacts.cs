@@ -51,22 +51,6 @@ namespace Chutzpah.Facts.Library
                 Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuite, true, PathType.JavaScript));
             }
 
-            [Fact]
-            public void ReturnsTrue_WithCoffeeScriptJasmineSuiteAndDefinitiveDetection()
-            {
-                var creator = new JasmineDefinitionCreator();
-
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuiteCoffee, false, PathType.CoffeeScript));
-            }
-
-            [Fact]
-            public void ReturnsTrue_WithCoffeeScriptJasmineSuiteAndBestGuessDetection()
-            {
-                var creator = new JasmineDefinitionCreator();
-
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.JasmineSuiteCoffee, true, PathType.CoffeeScript));
-            }
-
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)

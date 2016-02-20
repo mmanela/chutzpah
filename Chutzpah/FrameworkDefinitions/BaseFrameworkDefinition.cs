@@ -74,7 +74,7 @@ namespace Chutzpah.FrameworkDefinitions
         {
             if (bestGuess)
             {
-                var regex = pathType == PathType.CoffeeScript ? FrameworkSignatureCoffeeScript : FrameworkSignatureJavaScript;
+                var regex = FrameworkSignatureJavaScript;
                 return regex != null && regex.IsMatch(fileContents);
             }
 

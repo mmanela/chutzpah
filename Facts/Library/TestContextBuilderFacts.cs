@@ -67,8 +67,8 @@ namespace Chutzpah.Facts
             }
 
             [Theory]
-            [InlineData("test.ts", PathType.TypeScript)]
-            [InlineData("test.coffee", PathType.CoffeeScript)]
+            [InlineData("test.ts", PathType.JavaScript)]
+            [InlineData("test.coffee", PathType.JavaScript)]
             [InlineData("test.js", PathType.JavaScript)]
             [InlineData("test.html", PathType.Html)]
             public void Will_return_true_for_valid_files(string path, PathType type)

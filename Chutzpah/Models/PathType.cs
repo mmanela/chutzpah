@@ -6,9 +6,6 @@
         JavaScript,
         Html,
         Folder,
-        CoffeeScript,
-        TypeScript,
-        TypeScriptDef,
         Url
     }
 }

@@ -48,21 +48,6 @@
                 Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuite, true, PathType.JavaScript));
             }
 
-
-            [Fact]
-            public void ReturnsTrue_GivenCoffeeScriptQUnitSuiteAndDefinitiveDetection()
-            {
-                var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuiteCoffee, false, PathType.CoffeeScript));
-            }
-
-            [Fact]
-            public void ReturnsTrue_GivenCoffeeScriptQUnitSuiteAndBestGuessDetection()
-            {
-                var creator = new QUnitDefinitionCreator();
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.QUnitSuiteCoffee, true, PathType.CoffeeScript));
-            }
-
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)

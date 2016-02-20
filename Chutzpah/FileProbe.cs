@@ -18,13 +18,15 @@ namespace Chutzpah
         private static readonly Dictionary<string, PathType> ExtensionToPathTypeMap =
             new Dictionary<string, PathType>
             {
-                {Constants.TypeScriptExtension,PathType.TypeScript},
-                {Constants.TypeScriptDefExtension,PathType.TypeScriptDef},
-                {Constants.CoffeeScriptExtension,PathType.CoffeeScript},
+                {Constants.TypeScriptExtension,PathType.JavaScript},
+                {Constants.TypeScriptReactExtension,PathType.JavaScript},
+                {Constants.TypeScriptDefExtension,PathType.JavaScript},
+                {Constants.CoffeeScriptExtension,PathType.JavaScript},
                 {Constants.JavaScriptExtension,PathType.JavaScript},
+                {Constants.JavaScriptReactExtension,PathType.JavaScript},
                 {Constants.HtmlScriptExtension,PathType.Html},
                 {Constants.HtmScriptExtension,PathType.Html},
-                {Constants.CSHtmlScriptExtension,PathType.Html}
+                {Constants.CSHtmlScriptExtension,PathType.Html},
             };
 
         public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem)
@@ -114,9 +116,6 @@ namespace Chutzpah
                         break;
                     case PathType.Html:
                     case PathType.JavaScript:
-                    case PathType.CoffeeScript:
-                    case PathType.TypeScript:
-                    case PathType.TypeScriptDef:
                         yield return pathInfo;
                         break;
                     case PathType.Folder:

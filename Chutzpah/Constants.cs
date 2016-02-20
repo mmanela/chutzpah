@@ -39,7 +39,9 @@ namespace Chutzpah
         public const string PngExtension = ".png";
         public const string CssExtension = ".css";
         public const string JavaScriptExtension = ".js";
+        public const string JavaScriptReactExtension = ".jsx";
         public const string TypeScriptExtension = ".ts";
+        public const string TypeScriptReactExtension = ".tsx";
         public const string TypeScriptDefExtension = ".d.ts";
         public const string CoffeeScriptExtension = ".coffee";
         public const string HtmScriptExtension = ".htm";

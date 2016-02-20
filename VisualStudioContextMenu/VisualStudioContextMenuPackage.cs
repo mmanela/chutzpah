@@ -192,8 +192,10 @@ namespace Chutzpah.VisualStudioContextMenu
         private TestFileType GetFileType(string filename)
         {
             if (filename.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
+                || filename.EndsWith(".jsx", StringComparison.OrdinalIgnoreCase)
                 || filename.EndsWith(".coffee", StringComparison.OrdinalIgnoreCase)
                 || filename.EndsWith(".ts", StringComparison.OrdinalIgnoreCase)
+                || filename.EndsWith(".tsx", StringComparison.OrdinalIgnoreCase)
                 || filename.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
                 )
             {

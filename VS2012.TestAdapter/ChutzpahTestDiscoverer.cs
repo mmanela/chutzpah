@@ -12,7 +12,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 namespace Chutzpah.VS2012.TestAdapter
 {
     [FileExtension(Chutzpah.Constants.CoffeeScriptExtension)]
+    [FileExtension(Chutzpah.Constants.TypeScriptReactExtension)]
     [FileExtension(Chutzpah.Constants.TypeScriptExtension)]
+    [FileExtension(Chutzpah.Constants.JavaScriptReactExtension)]
     [FileExtension(Chutzpah.Constants.JavaScriptExtension)]
     [FileExtension(Chutzpah.Constants.HtmlScriptExtension)]
     [FileExtension(Chutzpah.Constants.HtmScriptExtension)]

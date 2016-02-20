@@ -13,9 +13,9 @@ namespace Chutzpah.Extensions
         static TestingModeExtensions()
         {
             ExtensionMap = new Dictionary<TestingMode,List<string>>();
-            ExtensionMap[TestingMode.JavaScript] = new  List<string>{Constants.JavaScriptExtension};
+            ExtensionMap[TestingMode.JavaScript] = new  List<string>{ Constants.JavaScriptExtension , Constants.JavaScriptReactExtension };
             ExtensionMap[TestingMode.CoffeeScript] = new  List<string>{Constants.CoffeeScriptExtension};
-            ExtensionMap[TestingMode.TypeScript] = new  List<string>{Constants.TypeScriptExtension};
+            ExtensionMap[TestingMode.TypeScript] = new  List<string>{ Constants.TypeScriptExtension, Constants.TypeScriptReactExtension };
             ExtensionMap[TestingMode.HTML] = new  List<string>{Constants.HtmlScriptExtension, Constants.HtmScriptExtension};
 
             ExtensionMap[TestingMode.All] = new List<string>();

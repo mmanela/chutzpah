@@ -50,22 +50,6 @@
                 Assert.False(creator.ClassUnderTest.FileUsesFramework(Resources.MochaSuite, true, PathType.JavaScript));
             }
 
-            [Fact]
-            public void ReturnsTrue_WithCoffeeScriptMochaSuiteAndDefinitiveDetection()
-            {
-                var creator = new MochaDefinitionCreator();
-
-                Assert.True(creator.ClassUnderTest.FileUsesFramework(Resources.MochaSuiteCoffee, false, PathType.CoffeeScript));
-            }
-
-            [Fact]
-            public void ReturnsFalse_WithCoffeeScriptMochaSuiteAndBestGuessDetection()
-            {
-                var creator = new MochaDefinitionCreator();
-
-                Assert.False(creator.ClassUnderTest.FileUsesFramework(Resources.MochaSuiteCoffee, true, PathType.CoffeeScript));
-            }
-
             [Theory]
             [PropertyData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
