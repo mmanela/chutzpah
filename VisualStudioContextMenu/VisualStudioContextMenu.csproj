@@ -154,6 +154,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <None Include="app.config" />
     <None Include="Resources\chetRod.pdn" />
     <None Include="Resources\chetTimes.pdn" />
     <None Include="Resources\ChutzpahStrip.pdn" />
