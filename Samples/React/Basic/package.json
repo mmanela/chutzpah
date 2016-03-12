@@ -1,0 +1,19 @@
+{
+  "name": "reactjs.chutzpah.sample",
+  "version": "1.0.0",
+  "description": "A sample of using react with chutzpah",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+     "babel-cli": "^6.5.0",
+      "babel-preset-react": "^6.5.0",
+      "babel-preset-es2015": "^6.5.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

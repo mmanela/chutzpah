@@ -59,6 +59,10 @@ namespace Chutzpah.Facts.Integration
                     new object[] { @"Samples\Angular\Basic_TypeScript\tests\chutzpah.json", 1},
                     new object[] { @"Samples\Angular\TemplateDirective\chutzpah.json", 2},
 
+                    // React Samples
+                    
+                    new object[] { @"Samples\React\Basic\chutzpah.json", 1},
+
                 };
             }
         }

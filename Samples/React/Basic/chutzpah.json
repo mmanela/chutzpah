@@ -1,0 +1,18 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "Compile": {
+        "Mode": "Executable",
+        "Executable": "compile.bat",
+        "Extensions": [".jsx"]
+    },
+    "Tests": [
+        { "Path": "test/example.test.jsx" }
+    ],
+    "References": [
+        { "Path": "lib/react/react.js" },
+        { "Path": "lib/react/react-dom.js" },
+        { "Path": "lib/react/react-with-addons.js" },
+        { "Path": "src/example.jsx" }
+    ]
+}
