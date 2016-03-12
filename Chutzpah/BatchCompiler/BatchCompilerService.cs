@@ -179,24 +179,22 @@ namespace Chutzpah.BatchProcessor
         {
             foreach (var pathMap in compileConfiguration.Paths)
             {
-                if (filePath.IndexOf(pathMap.SourcePath, StringComparison.OrdinalIgnoreCase) >= 0)
+                // If the configured sourcePath is a full file path we just assume the fileName is the relative name
+                // Otherwise we calculate the relative path from the configured sourcePath to the current file
+                var relativePath = pathMap.SourcePathIsFile ? Path.GetFileName(pathMap.SourcePath) : FileProbe.GetRelativePath(pathMap.SourcePath, filePath);
+
+                string outputPath = pathMap.OutputPath;
+                if (!pathMap.OutputPathIsFile)
                 {
-                    // If the configured sourcePath is a full file path we just assume the fileName is the relative name
-                    // Otherwise we calculate the relative path from the configured sourcePath to the current file
-                    var relativePath = pathMap.SourcePathIsFile ? Path.GetFileName(pathMap.SourcePath) : FileProbe.GetRelativePath(pathMap.SourcePath, filePath);
+                    // If output path is not a file we calculate the file path using the input filePath's relative location compared
+                    // to the output directory
+                    outputPath = Path.Combine(outputPath, relativePath);
+                    outputPath = Path.ChangeExtension(outputPath, ".js");
+                    outputPath = Path.GetFullPath(outputPath);
 
-                    string outputPath = pathMap.OutputPath;
-                    if (!pathMap.OutputPathIsFile)
-                    {
-                        // If output path is not a file we calculate the file path using the input filePath's relative location compared
-                        // to the output directory
-                        outputPath = Path.Combine(outputPath, relativePath);
-                        outputPath = Path.ChangeExtension(outputPath, ".js");
-
-                    }
-
-                    return outputPath;
                 }
+
+                return outputPath;
             }
 
             ChutzpahTracer.TraceError("Can't find location for generated path on {0}",filePath);
