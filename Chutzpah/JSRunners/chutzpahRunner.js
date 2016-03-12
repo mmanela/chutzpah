@@ -173,6 +173,42 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         rawLog("!!_!! Resource Error for " +res.url + " with error " + res.errorString);
     }
 
+
+    page.onResourceTimeout = function (res) {
+        if (!ignoreResourceLoadingError) {
+            onError(res.errorString);
+        }
+        rawLog("!!_!! Resource Timeout for " + res.url + " with error " + res.errorString);
+    }
+
+    page.onAlert = function (msg) {
+        rawLog("!!_!! Alert raised with message " + msg);
+    };
+
+    page.onConfirm = function (msg) {
+        rawLog("!!_!! Confirm raised with message " + msg);
+        return true;
+    };
+
+
+    page.onPrompt = function (msg, defaultVal) {
+        rawLog("!!_!! Prompt raised with message " + msg);
+        return defaultVal;
+    };
+
+    page.onClosing = function (closingPage) {
+        rawLog("!!_!! Closing raised " + closingPage.url);
+    };
+
+    page.onUrlChanged = function (targetUrl) {
+        rawLog("!!_!! Url Change " + targetUrl);
+    };
+
+    page.onFilePicker = function (oldFile) {
+        rawLog("!!_!! File Picker raised " + oldFile);
+        return oldFile;
+    };
+
     // Since tests run inside of Phantom are not part of your websites domain
     // lets loosen remote resource security restrictions to help with some testing scenarios
 
