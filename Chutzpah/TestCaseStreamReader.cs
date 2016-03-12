@@ -122,11 +122,16 @@ namespace Chutzpah
 
         private void FireTestFinished(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
         {
+
             var jsTestCase = jsRunnerOutput as JsTestCase;
             jsTestCase.TestCase.InputTestFile = testFileContext.ReferencedFile.Path;
             AddLineNumber(testFileContext.ReferencedFile, testIndex, jsTestCase);
             callback.TestFinished(jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
+
+
+            ChutzpahTracer.TraceInformation("Test Case Finished:'{0}'", jsTestCase.TestCase.GetDisplayName());
+            
         }
 
         private void FireFileStarted(ITestMethodRunnerCallback callback, TestContext testContext)
@@ -327,6 +332,9 @@ namespace Chutzpah
 
                             jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
                             callback.TestStarted(jsTestCaseStart.TestCase);
+
+
+                            ChutzpahTracer.TraceInformation("Test Case Started:'{0}'", jsTestCaseStart.TestCase.GetDisplayName());
 
                             break;
 
