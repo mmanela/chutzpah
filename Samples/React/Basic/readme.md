@@ -2,6 +2,4 @@ A basic example of using Chutzpah with React. This sample assumes you already co
 
 To run
 
-1. npm install
-2. compile.bat
-3. chutzpah.console.exe chutzpah.json
+chutzpah.console.exe chutzpah.json
