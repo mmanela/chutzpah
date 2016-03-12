@@ -112,9 +112,15 @@
 
   // [Chutzpah]: Wrapping the onload code in a new function to be called  and extracted a separate function for the starting Jasmine
 
-    window.initializeJasmine = function() {
-        htmlReporter.initialize();
-        env.execute();
+    var initialized = false;
+    window.initializeJasmine = function () {
+
+        // [Chutzpah]: Guard against multiple initializations when running blanket
+        if (!initialized) {
+            htmlReporter.initialize();
+            env.execute();
+            initialized = true;
+        }
     };
 
 
