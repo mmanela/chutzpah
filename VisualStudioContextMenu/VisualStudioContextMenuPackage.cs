@@ -75,7 +75,7 @@ namespace Chutzpah.VisualStudioContextMenu
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
-        /// where you can put all the initilaization code that rely on services provided by VisualStudio.
+        /// where you can put all the initialization code that rely on services provided by Visual Studio.
         /// </summary>
         protected override void Initialize()
         {
@@ -85,7 +85,7 @@ namespace Chutzpah.VisualStudioContextMenu
             dte = (DTE2)GetService(typeof(DTE));
             if (dte == null)
             {
-                //if dte is null then we throw a excpetion
+                //if dte is null then we throw a exception
                 //this is a fatal error
                 throw new ArgumentNullException("dte");
             }
@@ -318,6 +318,7 @@ namespace Chutzpah.VisualStudioContextMenu
                 Array activeItems = SolutionExplorerItems;
                 foreach (UIHierarchyItem item in activeItems)
                 {
+                    var solutionItem = (item).Object as EnvDTE.Solution;
                     var projectItem = (item).Object as EnvDTE.ProjectItem;
                     var projectNode = (item).Object as EnvDTE.Project;
 
@@ -327,6 +328,10 @@ namespace Chutzpah.VisualStudioContextMenu
                         fileType = GetFileType(projectItem);
                     }
                     else if (projectNode != null)
+                    {
+                        fileType = TestFileType.Folder;
+                    }
+                    else if (solutionItem != null)
                     {
                         fileType = TestFileType.Folder;
                     }
@@ -388,7 +393,7 @@ namespace Chutzpah.VisualStudioContextMenu
                             {
                                 try
                                 {
-                                    // If setttings file environments have not yet been initialized, do so here.
+                                    // If settings file environments have not yet been initialized, do so here.
                                     if (settingsEnvironments == null || settingsEnvironments.Count == 0)
                                     {
                                         InitializeSettingsFileEnvironments();
@@ -444,16 +449,26 @@ namespace Chutzpah.VisualStudioContextMenu
             }
         }
 
-
         private List<string> GetSelectedFilesAndFolders(params TestFileType[] allowedTypes)
         {
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
+                var solutionItem = ((UIHierarchyItem)item).Object as EnvDTE.SolutionClass;
                 var projectItem = ((UIHierarchyItem)item).Object as EnvDTE.ProjectItem;
                 var projectNode = ((UIHierarchyItem)item).Object as EnvDTE.Project;
 
-                if (projectItem != null)
+                if (solutionItem != null)
+                {
+                    foreach (EnvDTE.Project subItem in solutionItem.Projects)
+                    {
+                        if (!string.IsNullOrEmpty(subItem.FullName))
+                        {
+                            filePaths.Add(Path.GetDirectoryName(subItem.FullName));
+                        }
+                    }
+                }
+                else if (projectItem != null)
                 {
                     string filePath = projectItem.FileNames[0];
                     var type = GetFileType(projectItem);
@@ -553,7 +568,7 @@ namespace Chutzpah.VisualStudioContextMenu
 
         /// <summary>
         /// get the current text document
-        /// if current documents isnt a text doc return null
+        /// if current documents isn't a text doc return null
         /// </summary>
         internal TextDocument CurrentTextDocument
         {
@@ -599,7 +614,7 @@ namespace Chutzpah.VisualStudioContextMenu
                 }
                 catch (ArgumentException)
                 {
-                    return null; //error occured return null
+                    return null; //error occurred return null
                 }
 
                 if (doc != null)

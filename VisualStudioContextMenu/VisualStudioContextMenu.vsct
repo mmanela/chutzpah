@@ -160,6 +160,9 @@
     <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0100">
       <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
     </CommandPlacement>
+    <CommandPlacement guid="guidChutzpahCmdSetString" id="ChutzpahMenuGroup" priority="0x0100">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_SOLNNODE" />
+    </CommandPlacement>
   </CommandPlacements>
 
 
