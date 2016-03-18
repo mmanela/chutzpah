@@ -26,6 +26,7 @@
    * Create the Jasmine environment. This is used to run all specs in a project.
    */
   var env = jasmine.getEnv();
+  var originalExecute = env.execute;
 
   /**
    * ## The Global Interface
@@ -116,7 +117,7 @@
     window.initializeJasmine = function () {
 
         // [Chutzpah]: Guard against multiple initializations when running blanket
-        if (!initialized) {
+        if (!initialized && originalExecute == env.execute) {
             htmlReporter.initialize();
             env.execute();
             initialized = true;
