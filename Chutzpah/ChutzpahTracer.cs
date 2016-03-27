@@ -50,9 +50,20 @@ namespace Chutzpah
         public static void TraceInformation(string messageFormat, params object[] args)
         {
             if (!Enabled || Trace.Listeners.Count <= 0) return;
-
+            
             var message = BuildTraceMessage(messageFormat, args);
-            Trace.TraceInformation(message);
+            try
+            {
+                Trace.TraceInformation(message);
+            }
+            catch
+            {
+                // Surpress all errors when tracing
+                // Do not fail the application on tracing errors which can 
+                // happen because of a test explorer bug that
+                // runs chutzpah in parallel on the same files
+                // TODO(mmanela): Remove once TestExplorer bug is resolved
+            }
         }
 
         public static void TraceWarning(string messageFormat, params object[] args)
@@ -60,7 +71,18 @@ namespace Chutzpah
             if (!Enabled || Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, args);
-            Trace.TraceWarning(message);
+            try
+            {
+                Trace.TraceWarning(message);
+            }
+            catch
+            {
+                // Surpress all errors when tracing
+                // Do not fail the application on tracing errors which can 
+                // happen because of a test explorer bug that
+                // runs chutzpah in parallel on the same files
+                // TODO(mmanela): Remove once TestExplorer bug is resolved
+            }
         }
 
         public static void TraceError(string messageFormat, params object[] args)
@@ -68,7 +90,18 @@ namespace Chutzpah
             if (!Enabled || Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, args);
-            Trace.TraceError(message);
+            try
+            {
+                Trace.TraceError(message);
+            }
+            catch
+            {
+                // Surpress all errors when tracing
+                // Do not fail the application on tracing errors which can 
+                // happen because of a test explorer bug that
+                // runs chutzpah in parallel on the same files
+                // TODO(mmanela): Remove once TestExplorer bug is resolved
+            }
         }
 
         public static void TraceError(Exception exception, string messageFormat, params object[] args)
@@ -76,7 +109,18 @@ namespace Chutzpah
             if (Trace.Listeners.Count <= 0) return;
 
             var message = BuildTraceMessage(messageFormat, exception, args);
-            Trace.TraceError(message);
+            try
+            {
+                Trace.TraceError(message);
+            }
+            catch
+            {
+                // Surpress all errors when tracing
+                // Do not fail the application on tracing errors which can 
+                // happen because of a test explorer bug that
+                // runs chutzpah in parallel on the same files
+                // TODO(mmanela): Remove once TestExplorer bug is resolved
+            }
         }
 
         private static string BuildTraceMessage(string innerMessageFormat, object[] args = null)

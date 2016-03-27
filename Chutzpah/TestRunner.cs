@@ -324,7 +324,20 @@ namespace Chutzpah
 
                     try
                     {
-                        testHarnessBuilder.CreateTestHarness(testContext, options);
+                        try
+                        {
+                            testHarnessBuilder.CreateTestHarness(testContext, options);
+                        }
+                        catch(IOException)
+                        {
+                            // Mark this creation failed so we do not try to clean it up later
+                            // This is to work around a bug in TestExplorer that runs chutzpah in parallel on 
+                            // the same files
+                            // TODO(mmanela): Re-evalute if this is needed once they fix that bug
+                            testContext.TestHarnessCreationFailed = true;
+                            ChutzpahTracer.TraceWarning("Marking test harness creation failed for harness {0} and test file {1}", testContext.TestHarnessPath, testContext.FirstInputTestFile);
+                            throw;
+                        }
 
                         if (options.TestLaunchMode == TestLaunchMode.FullBrowser)
                         {
@@ -421,6 +434,7 @@ namespace Chutzpah
             {
                 // Don't clean up context if in debug mode
                 if (!m_debugEnabled
+                    && !testContext.TestHarnessCreationFailed
                     && options.TestLaunchMode != TestLaunchMode.FullBrowser
                     && options.TestLaunchMode != TestLaunchMode.Custom)
                 {
