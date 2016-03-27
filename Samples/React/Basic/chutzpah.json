@@ -10,9 +10,9 @@
         { "Path": "test/example.test.jsx" }
     ],
     "References": [
-        { "Path": "lib/react/react.js" },
-        { "Path": "lib/react/react-dom.js" },
-        { "Path": "lib/react/react-with-addons.js" },
+        { "Path": "lib/react/react.js", "IsTestFrameworkFile": true },
+        { "Path": "lib/react/react-dom.js", "IsTestFrameworkFile": true },
+        { "Path": "lib/react/react-with-addons.js", "IsTestFrameworkFile": true },
         { "Path": "src/example.jsx" }
     ]
 }
