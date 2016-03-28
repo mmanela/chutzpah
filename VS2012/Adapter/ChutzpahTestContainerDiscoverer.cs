@@ -456,9 +456,10 @@ namespace Chutzpah.VS2012.TestAdapter
             {
                 return HasTestFileExtension(path) && testRunner.IsTestFile(path, settingsMapper.Settings.ChutzpahSettingsFileEnvironmentsWrapper);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                logger.Log("IO error when detecting a test file", "ChutzpahTestContainerDiscoverer", e);
+                ChutzpahTracer.TraceError(e, "ChutzpahTestContainerDiscoverer::Error when detecting a test file");
+                logger.Log("Error when detecting a test file", "ChutzpahTestContainerDiscoverer", e);
             }
 
             return false;
