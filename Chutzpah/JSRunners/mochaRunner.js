@@ -20,7 +20,7 @@
     function isMochaLoaded() {
         console.log("!!_!! isMochaLoaded");
         
-        return typeof global != 'undefined' && typeof global.mocha != 'undefined';
+        return window.mocha;
     }
 
     function onMochaLoaded() {
@@ -151,7 +151,7 @@
             });
         };
 
-        window.mocha.setup({ reporter: chutzpahMochaReporter });
+        window.mocha.reporter(chutzpahMochaReporter);
     }
 
     function isTestingDone() {

@@ -14,12 +14,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Upgraded to QUnit 1.20 and Jasmine 2.4
-* Improved support for AngularJS Templates
-* Support for compilation to merged output file
-* Emma code coverage output support
-* Support running tests from chutzpah.json file in VS
-* Added tracing and parallelism settings to chutzpah.json
+* Upgraded to Mocha to 2.4.5
+* Added support for .jsx and .tsx files
+* Added React/Babel sample
         </releaseNotes>
     </metadata>
 </package>
