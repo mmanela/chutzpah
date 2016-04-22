@@ -11,8 +11,8 @@
     ]
   },
   "References": [
-    { "Path": "../../libs/angular.min.js" },
-    { "Path": "../../libs/angular-mocks.js" },
+    { "Path": "../../libs/angular.min.js", "IsTestFrameworkFile": true },
+    { "Path": "../../libs/angular-mocks.js", "IsTestFrameworkFile": true },
     { "Path": "../src", "Includes": [ "*.ts" ], "Excludes": ["*.d.ts"] }
   ],
   "Tests": [{ "Include": "*Tests.ts" }]
