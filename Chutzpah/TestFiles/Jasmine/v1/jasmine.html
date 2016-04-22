@@ -54,18 +54,20 @@
                 });
             }
             else {
-                // If we are not running in chutzpah then run the tests onload
-                if (!window.chutzpah) {
-                    var currentWindowOnload = window.onload;
+                var currentWindowOnload = window.onload;
+                
+                var jasmineEnv = jasmine.getEnv();
+                var runner = jasmineEnv.currentRunner();
 
-                    window.onload = function() {
-                        if (currentWindowOnload) {
-                            currentWindowOnload();
-                        }
+                window.onload = function() {
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
 
+                    if (!runner.queue.running && runner.queue.index <= 0) {
                         jasmineEnv.execute();
-                    };
-                }
+                    }
+                };
             }
 
         })();
