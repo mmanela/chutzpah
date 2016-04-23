@@ -14,9 +14,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Upgraded to Mocha to 2.4.5
-* Added support for .jsx and .tsx files
-* Added React/Babel sample
+* Upgraded to PhantomJS 2.1.1
+* Fixed Jasmine v1 bug
+* Added manual AMD start functionality
         </releaseNotes>
     </metadata>
 </package>
