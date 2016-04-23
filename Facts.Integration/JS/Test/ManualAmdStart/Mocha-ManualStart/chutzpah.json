@@ -1,0 +1,15 @@
+﻿{
+    "Framework": "mocha",
+    "MochaInterface": "qunit",
+    "TestHarnessReferenceMode": "AMD",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "EnableTestFileBatching": true,
+    "References" : [
+        {"Path" : "require-2.1.8.js" }, 
+        { "Path": "chai.js", "IsTestFrameworkFile": "true" },
+        {"Path" : "config.js" }
+    ],
+    "Tests" : [
+      {"Path": "tests"}
+    ]
+}

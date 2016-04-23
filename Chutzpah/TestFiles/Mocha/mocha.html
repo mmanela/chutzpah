@@ -37,9 +37,16 @@
                 }
             });
 
-            window.chutzpah.amdImport(amdTestPaths, function () {
-                mocha.run();
-            });
+            window.chutzpah.amdStart = function() {
+                window.chutzpah.amdImport(amdTestPaths, function () {
+                    mocha.run();
+                });
+            };
+
+            if(window.chutzpah.amdAutoStart) {
+                window.chutzpah.amdStart();
+            }
+
 
         } else {
             if (window._Chutzpah_covobj_name) {

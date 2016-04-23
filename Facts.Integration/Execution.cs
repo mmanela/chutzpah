@@ -68,7 +68,12 @@ namespace Chutzpah.Facts.Integration
             get { return TestPathGroups.SkippedTests; }
         }
 
-       
+        public static IEnumerable<object[]> ManualStartAmdTests
+        {
+            get { return TestPathGroups.ManualStartAmdTests; }
+        }
+
+        
         public Execution()
         {
             ChutzpahTracer.Enabled = false;
@@ -86,6 +91,20 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(count, result.PassedCount);
             Assert.Equal(count, result.TotalCount);
         }
+
+        [Theory]
+        [PropertyData("ManualStartAmdTests")]
+        public void Will_run_manual_start_amd_tests(string scriptPath, int count)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(0, result.FailedCount);
+            Assert.Equal(count, result.PassedCount);
+            Assert.Equal(count, result.TotalCount);
+        }
+
 
         [Theory]
         [PropertyData("BasicTestScripts")]

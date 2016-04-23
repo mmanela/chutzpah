@@ -47,11 +47,18 @@
                     }
                 });
 
-                window.chutzpah.amdImport(amdTestPaths, function () {
+                window.chutzpah.amdStart = function() {
+                    window.chutzpah.amdImport(amdTestPaths, function () {
 
-                    console.log("!!_!! Stating Jasmine from AMD callback...");
-                    jasmineEnv.execute();
-                });
+                        console.log("!!_!! Stating Jasmine from AMD callback...");
+                        jasmineEnv.execute();
+                    });
+                };
+
+                if(window.chutzpah.amdAutoStart) {
+                    window.chutzpah.amdStart();
+                }
+
             }
             else {
                 var currentWindowOnload = window.onload;

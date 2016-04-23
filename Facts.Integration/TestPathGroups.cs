@@ -4,6 +4,19 @@ namespace Chutzpah.Facts.Integration
 {
     public static class TestPathGroups
     {
+        public static IEnumerable<object[]> ManualStartAmdTests
+        {
+            get
+            {
+                return new[]
+                    {
+                        new object[] {@"JS\Test\ManualAmdStart\QUnit-ManualStart\chutzpah.json", 2},
+                        new object[] {@"JS\Test\ManualAmdStart\Mocha-ManualStart\chutzpah.json", 2},
+                        new object[] {@"JS\Test\ManualAmdStart\Jasmine-ManualStart\chutzpah.json", 2},
+                    };
+            }
+        }
+
         public static IEnumerable<object[]> SkippedTests
         {
             get

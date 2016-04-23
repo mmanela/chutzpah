@@ -1,5 +1,10 @@
 ﻿window.chutzpah = window.chutzpah || {};
 
+window.chutzpah.amdAutoStart = true;
+window.chutzpah.preventAmdAutoStart = function () {
+    window.chutzpah.amdAutoStart = false;
+};
+
 window.chutzpah.boot = function (amdTestPaths) {
 
     var amdImport, amdConfig;

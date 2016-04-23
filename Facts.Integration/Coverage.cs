@@ -89,6 +89,11 @@ namespace Chutzpah.Facts.Integration
             }
         }
 
+        public static IEnumerable<object[]> ManualStartAmdTests
+        {
+            get { return TestPathGroups.ManualStartAmdTests; }
+        }
+
 
         public static IEnumerable<object[]> ChutzpahSamples
         {
@@ -98,6 +103,17 @@ namespace Chutzpah.Facts.Integration
         [Theory]
         [PropertyData("ChutzpahSamples")]
         public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath, int count)
+        {
+            var testRunner = TestRunner.Create();
+
+            var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(count, result.TotalCount);
+        }
+
+        [Theory]
+        [PropertyData("ManualStartAmdTests")]
+        public void Will_run_manual_start_amd_tests(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
 

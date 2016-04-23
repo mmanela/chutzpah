@@ -16,10 +16,7 @@
         window.chutzpah.boot(amdTestPaths);
 
         if (window.chutzpah.usingModuleLoader) {
-            if (window.chutzpah) {
-                window.chutzpah.usingModuleLoader = true;
-            }
-
+            
             if("@@AMDBasePath@@") {
                 window.chutzpah.amdConfig({
                     baseUrl: "@@AMDBasePath@@"
@@ -35,12 +32,18 @@
             });
 
             window.QUnit.config.autostart = false;
-            window.chutzpah.amdImport(amdTestPaths, function () {
-                console.log("!!_!! Starting QUnit from inline AMD call...");
-                if (!window._Chutzpah_covobj_name) {
-                    window.QUnit.start();
-                }
-            });
+            window.chutzpah.amdStart = function() {
+                window.chutzpah.amdImport(amdTestPaths, function () {
+                    console.log("!!_!! Starting QUnit from inline AMD call...");
+                    if (!window._Chutzpah_covobj_name) {
+                        window.QUnit.start();
+                    }
+                });
+            }
+
+            if(window.chutzpah.amdAutoStart) {
+                window.chutzpah.amdStart();
+            }
         }
     </script>
 </head>
