@@ -14,9 +14,13 @@
 
         function startJasmine() {
             
+            if (!window.jasmine) {
+                return;
+            }
+
             console.log("!!_!! Starting Jasmine from window onload...");
 
-            var jasmineEnv = jasmine.getEnv();
+            var jasmineEnv = window.jasmine.getEnv();
             var runner = jasmineEnv.currentRunner();
 
             // Check if runner hasn't been executed
@@ -65,7 +69,7 @@
 
         function patchDdescribeIitSupport() {
             if (window.ddescribeIitSupport) {
-                window.ddescribeIitSupport.patch(jasmine.getEnv());
+                window.ddescribeIitSupport.patch(window.jasmine.getEnv());
             }
         }
 
@@ -103,7 +107,7 @@
             };
 
             self.reportRunnerResults = function (runner) {
-                var res = jasmine.getEnv().currentRunner().results();
+                var res = window.jasmine.getEnv().currentRunner().results();
                 var timetaken = new Date().getTime() - fileStartTime;
                 logCoverage();
                 log({ type: "FileDone", timetaken: timetaken, passed: res.passedCount, failed: res.failedCount });
@@ -152,7 +156,7 @@
             };
 
             self.log = function () {
-                var console = jasmine.getGlobal().console;
+                var console = window.jasmine.getGlobal().console;
                 if (console && console.log) {
                     if (console.log.apply) {
                         console.log.apply(console, arguments);
@@ -179,12 +183,12 @@
         };
 
         if (window.chutzpah.testMode) {
-            jasmine.getEnv().addReporter(new ChutzpahJasmineReporter());
+            window.jasmine.getEnv().addReporter(new ChutzpahJasmineReporter());
         }
 
         if (window.chutzpah.testMode === 'discovery') {
             // If discovery mode overwrite execute to not run the test
-            jasmine.Block.prototype.execute = function (onComplete) {
+            window.jasmine.Block.prototype.execute = function (onComplete) {
                 onComplete();
             };
         }
