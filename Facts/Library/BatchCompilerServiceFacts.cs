@@ -145,6 +145,24 @@ namespace Chutzpah.Facts
         }
 
         [Fact]
+        public void Will_attempt_colocation_if_initially_not_found()
+        {
+            var service = new TestableBatchCompilerService();
+            var context = service.BuildContext();
+            context.TestFileSettings.Compile.Extensions = new[] { ".ts" };
+            context.TestFileSettings.Compile.Paths = new List<CompilePathMap> { new CompilePathMap { SourcePath = @"C:\other", OutputPath = @"C:\src" } };
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"C:\hello\a.ts" });
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".js"))))
+                .Returns(true);
+            service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f != null && f.EndsWith(".ts")))).Returns(true);
+
+            service.ClassUnderTest.Compile(new[] { context });
+
+            Assert.Equal(@"C:\hello\a.js", context.ReferencedFiles.ElementAt(0).GeneratedFilePath);
+        }
+
+
+        [Fact]
         public void Will_set_source_map_path_when_UseSourceMap_setting_enabled()
         {
             var service = new TestableBatchCompilerService();

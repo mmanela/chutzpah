@@ -84,13 +84,25 @@ namespace Chutzpah.BatchProcessor
                     }
                     else
                     {
-                        var error = string.Format("Couldn't find generated path for {0} at {1}", file.Path, outputPath);
-                        ChutzpahTracer.TraceError(error);
-
-                        if (!testSettings.Compile.IgnoreMissingFiles.GetValueOrDefault())
+                        // If we could not find the file at the configured path attempt to see if it co-located
+                        ChutzpahTracer.TraceInformation("Unable to find generated path at configured location so attempting to see if generated file is co-located.");
+                        var coLocatedOutputPath = Path.ChangeExtension(file.Path, ".js");
+                        if (fileSystem.FileExists(coLocatedOutputPath))
                         {
-                            // Throw and fail here since if we cant find the file we cannot be sure anything will run
-                            throw new FileNotFoundException(error, outputPath);
+                            file.GeneratedFilePath = coLocatedOutputPath;
+                            ChutzpahTracer.TraceInformation("Found generated path for {0} at {1}", file.Path, coLocatedOutputPath);
+                        }
+                        else
+                        {
+
+                            var error = string.Format("Couldn't find generated path for {0} at {1} or at {2}", file.Path, outputPath, coLocatedOutputPath);
+                            ChutzpahTracer.TraceError(error);
+
+                            if (!testSettings.Compile.IgnoreMissingFiles.GetValueOrDefault())
+                            {
+                                // Throw and fail here since if we cant find the file we cannot be sure anything will run
+                                throw new FileNotFoundException(error, outputPath);
+                            }
                         }
                     }
 
