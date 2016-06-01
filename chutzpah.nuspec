@@ -14,9 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Upgraded to PhantomJS 2.1.1
-* Fixed Jasmine v1 bug
-* Added manual AMD start functionality
+* Small bug fixes
         </releaseNotes>
     </metadata>
 </package>
