@@ -90,5 +90,10 @@ namespace Chutzpah.Models
         public Dictionary<string, string> FrameworkReplacements { get; set; }
 
         public TemplateOptions TemplateOptions { get; set; }
+
+        /// <summary>
+        /// Determines if this is a file added by the built in frameworks
+        /// </summary>
+        public bool IsBuiltInDependency { get; internal set; }
     }
 }
