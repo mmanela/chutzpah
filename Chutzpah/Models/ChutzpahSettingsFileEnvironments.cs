@@ -101,7 +101,7 @@ namespace Chutzpah.Models
 
         private static string ProcessEnvironmentPath(string path)
         {
-            path = FileProbe.NormalizeFilePath(path).TrimEnd('\\', ' ');
+            path = UrlBuilder.NormalizeFilePath(path).TrimEnd('\\', ' ');
             if (path.EndsWith(Constants.SettingsFileName, StringComparison.OrdinalIgnoreCase))
             {
                 path = Path.GetDirectoryName(path);

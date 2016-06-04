@@ -63,11 +63,11 @@ namespace Chutzpah
 
             if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
-                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
+                amdBasePathUrl = UrlBuilder.GenerateLocalFileUrl(chutzpahTestSettings.AMDBasePath);
             }
             else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrl))
             {
-                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBaseUrl);
+                amdBasePathUrl = UrlBuilder.GenerateLocalFileUrl(chutzpahTestSettings.AMDBaseUrl);
             }
 
             var replacements = new Dictionary<string, string>
@@ -336,7 +336,7 @@ namespace Chutzpah
             if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath))
             {
                 // Encode the reference path and then decode / (forward slash) and \ (back slash) into / (forward slash)
-                return FileProbe.GenerateFileUrl(referencePath);
+                return UrlBuilder.GenerateLocalFileUrl(referencePath);
             }
 
             return referencePath;

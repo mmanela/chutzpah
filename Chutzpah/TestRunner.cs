@@ -619,7 +619,7 @@ namespace Chutzpah
             }
             else
             {
-                return string.Format("\"{0}\"", FileProbe.GenerateFileUrl(absolutePath));
+                return string.Format("\"{0}\"", UrlBuilder.GenerateLocalFileUrl(absolutePath));
             }
         }
     }

@@ -95,5 +95,10 @@ namespace Chutzpah.Models
         /// Determines if this is a file added by the built in frameworks
         /// </summary>
         public bool IsBuiltInDependency { get; internal set; }
+
+        /// <summary>
+        /// The path of the file when running from the server
+        /// </summary>
+        public string ServerFilePath { get; internal set; }
     }
 }

@@ -19,7 +19,7 @@ namespace Chutzpah.VS.Common
             {
                 UseShellExecute = true,
                 FileName = BrowserPathHelper.GetBrowserPath("ie"),
-                Arguments = string.Format("-noframemerging -suspended -debug {0}", FileProbe.GenerateFileUrl(testContext.TestHarnessPath))
+                Arguments = string.Format("-noframemerging -suspended -debug {0}", UrlBuilder.GenerateLocalFileUrl(testContext.TestHarnessPath))
                     // -noframemerging
                     //      This is what VS does when launching the script debugger.
                     //      Unsure whether strictly necessary.

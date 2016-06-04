@@ -62,6 +62,7 @@ namespace Chutzpah.Models
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             Transforms = new List<TransformConfig>();
+            Server = new ChutzpahWebServerConfiguration();
         }
 
         private ChutzpahTestSettingsFile(bool isDefaultSetings) : this()
@@ -69,9 +70,9 @@ namespace Chutzpah.Models
             IsDefaultSettings = true;
 
             CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
-            TestHarnessReferenceMode = Chutzpah.Models.TestHarnessReferenceMode.Normal;
-            TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.TestFileAdjacent;
-            RootReferencePathMode = Chutzpah.Models.RootReferencePathMode.DriveRoot;
+            TestHarnessReferenceMode = Models.TestHarnessReferenceMode.Normal;
+            TestHarnessLocationMode = Models.TestHarnessLocationMode.TestFileAdjacent;
+            RootReferencePathMode = Models.RootReferencePathMode.DriveRoot;
             EnableTestFileBatching = false;
             IgnoreResourceLoadingErrors = false;
         }
@@ -248,6 +249,11 @@ namespace Chutzpah.Models
         public BatchCompileConfiguration Compile { get; set; }
 
         /// <summary>
+        /// The web server configuration
+        /// </summary>
+        public ChutzpahWebServerConfiguration Server { get; set; }
+
+        /// <summary>
         /// The user agent to tell PhantomJS to use when making web requests
         /// </summary>
         public string UserAgent { get; set; }
@@ -383,6 +389,16 @@ namespace Chutzpah.Models
                 }
 
                 this.BrowserArguments[browserArgument.Key] = browserArgument.Value;
+            }
+
+            if(this.Server == null)
+            {
+                this.Server = parent.Server;
+            }
+            else if(this.Server != null && parent.Server != null)
+            {
+                this.Server.DefaultPort = parent.Server.DefaultPort;
+                this.Server.Enabled = parent.Server.Enabled;
             }
 
             if (this.Compile == null)

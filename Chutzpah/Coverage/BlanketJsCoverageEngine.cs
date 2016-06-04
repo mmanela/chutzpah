@@ -270,13 +270,13 @@ namespace Chutzpah.Coverage
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
-            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(includePattern))))
+            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(includePattern))))
             {
                 return false;
             }
 
             // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
-            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(excludePattern))))
+            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(excludePattern))))
             {
                 return false;
             }
@@ -287,7 +287,7 @@ namespace Chutzpah.Coverage
         public bool IsIgnored(string filePath)
         {
             // If no ignore pattern is given then include all files. Otherwise ignore the ones that match an ignore pattern
-            if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(ignorePattern))))
+            if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(ignorePattern))))
             {
                 return true;
             }

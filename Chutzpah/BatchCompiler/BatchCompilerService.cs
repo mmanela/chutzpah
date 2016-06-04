@@ -195,7 +195,7 @@ namespace Chutzpah.BatchProcessor
                 {
                     // If the configured sourcePath is a full file path we just assume the fileName is the relative name
                     // Otherwise we calculate the relative path from the configured sourcePath to the current file
-                    var relativePath = pathMap.SourcePathIsFile ? Path.GetFileName(pathMap.SourcePath) : FileProbe.GetRelativePath(pathMap.SourcePath, filePath);
+                    var relativePath = pathMap.SourcePathIsFile ? Path.GetFileName(pathMap.SourcePath) : UrlBuilder.GetRelativePath(pathMap.SourcePath, filePath);
 
                     string outputPath = pathMap.OutputPath;
                     if (!pathMap.OutputPathIsFile)

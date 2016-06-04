@@ -43,6 +43,7 @@ namespace Chutzpah
             }
 
 
+            referenceProcessor.SetupWebServerPaths(testContext.TestFileSettings, testContext.ReferencedFiles.ToList());
             SetupAmdPathsIfNeeded(testContext.TestFileSettings, testContext.ReferencedFiles.ToList(), testContext.TestHarnessDirectory);
 
             string testFilePathHash = hasher.Hash(string.Join(",",testContext.InputTestFiles));

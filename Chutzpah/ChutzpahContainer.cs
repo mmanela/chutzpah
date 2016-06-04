@@ -1,6 +1,7 @@
 ﻿using Chutzpah.Coverage;
 using Chutzpah.FileProcessors;
 using Chutzpah.FrameworkDefinitions;
+using Chutzpah.Server;
 using Chutzpah.Utility;
 using StructureMap;
 
@@ -21,7 +22,8 @@ namespace Chutzpah
             container.Configure(config =>
                 {
                     config.For<IHasher>().Singleton().Use<Hasher>();
-                    config.For<ICoverageEngineFactory>().Singleton().Use<CoverageEngineFactory>();                    
+                    config.For<ICoverageEngineFactory>().Singleton().Use<CoverageEngineFactory>();
+                    config.For<IChutzpahWebServerFactory>().Singleton().Use<ChutzpahWebServerFactory>();
                     config.For<ICoverageEngine>().Use<BlanketJsCoverageEngine>();
                     config.Scan(scan =>
                         {

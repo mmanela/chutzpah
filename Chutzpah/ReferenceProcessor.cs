@@ -57,6 +57,8 @@ namespace Chutzpah
         void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings);
 
         void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings);
+
+        void SetupWebServerPaths(ChutzpahTestSettingsFile testSettings, List<ReferencedFile> referencedFiles);
     }
 
     public class ReferenceProcessor : IReferenceProcessor
@@ -127,12 +129,24 @@ namespace Chutzpah
             }
         }
 
+
+        /// <summary>
+        /// Adds the paths for when running in a web server
+        /// </summary>
+        public void SetupWebServerPaths(ChutzpahTestSettingsFile testSettings, List<ReferencedFile> referencedFiles)
+        {
+            if (testSettings.Server.Enabled.GetValueOrDefault())
+            {
+                foreach (var referencedFile in referencedFiles)
+                {
+                    referencedFile.ServerFilePath = UrlBuilder.GenerateServerFileUrl(testSettings.Server.RootPath, referencedFile.GeneratedFilePath ?? referencedFile.Path);
+                }
+            }
+        }
+
         /// <summary>
         /// Add the AMD file paths for the Path and GeneratePath fields
         /// </summary>
-        /// <param name="referencedFiles"></param>
-        /// <param name="testHarnessDirectory"></param>
-        /// <param name="testSettings"></param>
         public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings)
         {
             // If the legacy BasePath setting it set then defer to that
@@ -156,7 +170,7 @@ namespace Chutzpah
 
         private static string GetAmdPath(string filePath, string amdAppRoot)
         {
-            string amdModulePath = FileProbe.GetRelativePath(amdAppRoot, filePath);
+            string amdModulePath = UrlBuilder.GetRelativePath(amdAppRoot, filePath);
 
             amdModulePath = amdModulePath
                 .Replace(Path.GetExtension(filePath), "")
@@ -179,7 +193,7 @@ namespace Chutzpah
             string relativeAmdRootPath = "";
             if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
             {
-                relativeAmdRootPath = FileProbe.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
+                relativeAmdRootPath = UrlBuilder.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
             } 
 
             foreach (var referencedFile in referencedFiles)
@@ -195,7 +209,7 @@ namespace Chutzpah
 
         private static string GetLegacyAmdPath(string testHarnessDirectory, string filePath, string relativeAmdRootPath)
         {
-            string amdModulePath = FileProbe.GetRelativePath(testHarnessDirectory, filePath);
+            string amdModulePath = UrlBuilder.GetRelativePath(testHarnessDirectory, filePath);
 
             amdModulePath = Path.Combine(relativeAmdRootPath, amdModulePath)
                 .Replace(Path.GetExtension(filePath), "")
@@ -337,14 +351,14 @@ namespace Chutzpah
                 string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
                 if (absoluteFolderPath != null)
                 {
-                    var includePatterns = pathSettings.Includes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
-                    var excludePatterns = pathSettings.Excludes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
+                    var includePatterns = pathSettings.Includes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
+                    var excludePatterns = pathSettings.Excludes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
 
                     // Find all files in this folder including sub-folders. This can be ALOT of files.
                     // Only a subset of these files Chutzpah might understand so many of these will be ignored.
                     var childFiles = fileSystem.GetFiles(absoluteFolderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
-                        let normalizedFile = FileProbe.NormalizeFilePath(file)
+                        let normalizedFile = UrlBuilder.NormalizeFilePath(file)
                         where !fileProbe.IsTemporaryChutzpahFile(file)
                         && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
                         && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
