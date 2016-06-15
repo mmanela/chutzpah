@@ -15,6 +15,11 @@
 
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
+
+
+        if (!window._Chutzpah_covobj_name) {
+            mocha.run();
+        }
     }
 
     function isMochaLoaded() {

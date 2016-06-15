@@ -186,7 +186,7 @@ namespace Chutzpah
 
             if (ChutzpahWebServerHost.ActiveWebServer != null)
             {
-                Console.WriteLine("Press any key to end Chutzpah and stop the web server host...");
+                Console.WriteLine("Press any key to end Chutzpah...");
                 Console.ReadKey();
             }
 

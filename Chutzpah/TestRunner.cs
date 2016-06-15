@@ -483,7 +483,7 @@ namespace Chutzpah
                 }
             }
 
-            if(!m_debugEnabled 
+            if( webServerHost!= null
                 && options.TestLaunchMode != TestLaunchMode.FullBrowser
                 && options.TestLaunchMode != TestLaunchMode.Custom)
             {

@@ -7,5 +7,10 @@
     ],
     "Tests" : [
       {"Includes": ["*basic-*.js"]}
-    ]
+    ],
+
+    "Server": {
+    	"Enabled": true
+    }
+}
 }

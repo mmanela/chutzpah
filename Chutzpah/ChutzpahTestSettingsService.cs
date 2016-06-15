@@ -161,13 +161,15 @@ namespace Chutzpah
                 {
                     rootPath = settings.Server.RootPath;
                 }
-                else if (!string.IsNullOrEmpty(settings.AMDBaseUrl))
+                else
                 {
-                    ChutzpahTracer.TraceInformation("Setting WebServer RootPath to AMDBaseUrl as fallback attempt");
-                    rootPath = settings.AMDBaseUrl;
+                    ChutzpahTracer.TraceInformation("Defaulting the RootPath to the drive root of the chutzpah.json file");
+                    rootPath = Path.GetPathRoot(settings.SettingsFileDirectory);
                 }
 
                 settings.Server.RootPath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, rootPath));
+
+                
             }
         }
 

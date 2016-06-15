@@ -71,7 +71,7 @@
                         currentWindowOnload();
                     }
 
-                    if (!runner.queue.running && runner.queue.index <= 0) {
+                    if (!runner.queue.running && runner.queue.index <= 0 && !window.chutzpah.phantom) {
                         jasmineEnv.execute();
                     }
                 };

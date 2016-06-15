@@ -151,6 +151,10 @@
 
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
+
+        if (!window.chutzpah.usingModuleLoader) {
+            window.initializeJasmine();
+        }
     }
 
 

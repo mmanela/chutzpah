@@ -8,7 +8,6 @@ namespace Chutzpah.Server
         {
             Get["/{uri*}"] = parameters =>
             {
-//this.Context.CurrentUser
                 string path = parameters["uri"].Value;
                 return Response.AsFile(path);
             };

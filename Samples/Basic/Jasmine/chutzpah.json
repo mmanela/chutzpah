@@ -6,5 +6,9 @@
     ],
     "Tests" : [
       {"Path": "basic-jasmine.js"}
-    ]
+    ],
+    "Server": {
+    	"Enabled": true
+    }
+}
 }

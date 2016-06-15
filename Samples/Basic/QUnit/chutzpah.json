@@ -6,5 +6,9 @@
     ],
     "Tests" : [
       {"Path": "basic-qunit.js"}
-    ]
+    ],
+
+    "Server": {
+    	"Enabled": true
+    }
 }

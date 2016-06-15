@@ -8,45 +8,6 @@
 
     function onInitialized() {
         console.log("!!_!! onInitialized Jasmine - v1");
-
-
-        var _cachedWindowLoad = window.onload;
-
-        function startJasmine() {
-            
-            if (!window.jasmine) {
-                return;
-            }
-
-            console.log("!!_!! Starting Jasmine from window onload...");
-
-            var jasmineEnv = window.jasmine.getEnv();
-            var runner = jasmineEnv.currentRunner();
-
-            // Check if runner hasn't been executed
-            // If so, run it
-            if (!runner.queue.running && runner.queue.index <= 0) {
-                jasmineEnv.execute();
-            }
-
-        }
-
-        window.onload = function () {
-            if (_cachedWindowLoad) {
-                _cachedWindowLoad();
-            }
-
-
-            if (window.chutzpah.usingModuleLoader) {
-                console.log("!!_!! Test file is using module loader.");
-                // Since we are using a module loader let the harness determine when its ready to run tests
-                return;
-            }
-            
-
-
-            startJasmine();
-        };
     }
 
     function isTestingDone() {
@@ -196,6 +157,34 @@
 
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
+
+        function startJasmine() {
+
+            if (!window.jasmine) {
+                return;
+            }
+
+            console.log("!!_!! Starting Jasmine from window onload in phantom...");
+
+            var jasmineEnv = window.jasmine.getEnv();
+            var runner = jasmineEnv.currentRunner();
+
+            // Check if runner hasn't been executed
+            // If so, run it
+            if (!runner.queue.running && runner.queue.index <= 0) {
+                jasmineEnv.execute();
+            }
+
+        }
+
+        if (window.chutzpah.usingModuleLoader) {
+            console.log("!!_!! Test file is using module loader.");
+            // Since we are using a module loader let the harness determine when its ready to run tests
+            return;
+        }
+
+
+        startJasmine();
     }
 
 

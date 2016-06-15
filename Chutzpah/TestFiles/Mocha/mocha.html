@@ -59,7 +59,8 @@
                     currentWindowOnload();
                 }
 
-                if (!window._Chutzpah_covobj_name) {
+                if (!window._Chutzpah_covobj_name && !window.chutzpah.phantom) {
+                    console.log("!!_!! Stating Mocha from HTML OnLoad callback...");
                     mocha.run();
                 }
             };
