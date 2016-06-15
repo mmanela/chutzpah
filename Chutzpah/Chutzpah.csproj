@@ -89,6 +89,7 @@
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
+    <Compile Include="IUrlBuilder.cs" />
     <Compile Include="UrlBuilder.cs" />
     <Compile Include="FileProcessors\ISourceMapDiscoverer.cs" />
     <Compile Include="Extensions\VSTSExtensions.cs" />

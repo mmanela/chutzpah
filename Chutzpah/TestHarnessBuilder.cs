@@ -20,13 +20,16 @@ namespace Chutzpah
         private readonly IReferenceProcessor referenceProcessor;
         private readonly IFileSystemWrapper fileSystem;
         private readonly IHasher hasher;
-    
+        readonly IUrlBuilder urlBuilder;
+
         public TestHarnessBuilder(
             IReferenceProcessor referenceProcessor,
             IFileSystemWrapper fileSystem,
             IFileProbe fileProbe,
-            IHasher hasher)
+            IHasher hasher,
+            IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.referenceProcessor = referenceProcessor;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
@@ -43,7 +46,7 @@ namespace Chutzpah
             }
 
 
-            referenceProcessor.SetupWebServerPaths(testContext.TestFileSettings, testContext.ReferencedFiles.ToList());
+            referenceProcessor.SetupPathsFormattedForTestHarness(testContext, testContext.ReferencedFiles.ToList());
             SetupAmdPathsIfNeeded(testContext.TestFileSettings, testContext.ReferencedFiles.ToList(), testContext.TestHarnessDirectory);
 
             string testFilePathHash = hasher.Hash(string.Join(",",testContext.InputTestFiles));
@@ -55,7 +58,7 @@ namespace Chutzpah
 
             string testHtmlTemplate = fileSystem.GetText(templatePath);
 
-            var harness = new TestHarness(testContext.TestFileSettings, options, testContext.ReferencedFiles, fileSystem);
+            var harness = new TestHarness(testContext, options, testContext.ReferencedFiles, fileSystem, urlBuilder);
 
             if (testContext.CoverageEngine != null)
             {
@@ -106,8 +109,7 @@ namespace Chutzpah
 
             if (templatePath == null)
             {
-                templatePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, definition.GetTestHarness(chutzpahTestSettings))).FullPath;
-
+                templatePath = Path.Combine(fileProbe.BuiltInDependencyDirectory, definition.GetTestHarness(chutzpahTestSettings));
                 ChutzpahTracer.TraceInformation("Using builtin Test Harness from {0}", templatePath);
             }
             return templatePath;

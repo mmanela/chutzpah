@@ -62,7 +62,6 @@ namespace Chutzpah.Models
             References = new List<SettingsFileReference>();
             Tests = new List<SettingsFileTestPath>();
             Transforms = new List<TransformConfig>();
-            Server = new ChutzpahWebServerConfiguration();
         }
 
         private ChutzpahTestSettingsFile(bool isDefaultSetings) : this()

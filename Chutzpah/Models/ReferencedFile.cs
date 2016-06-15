@@ -99,6 +99,6 @@ namespace Chutzpah.Models
         /// <summary>
         /// The path of the file when running from the server
         /// </summary>
-        public string ServerFilePath { get; internal set; }
+        public string PathForUseInTestHarness { get; internal set; }
     }
 }

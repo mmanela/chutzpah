@@ -1,9 +1,10 @@
-﻿using Chutzpah.Server.Models;
+﻿using Chutzpah.Models;
+using Chutzpah.Server.Models;
 
 namespace Chutzpah.Server
 {
     public interface IChutzpahWebServerFactory
     {
-        ChutzpahServerHost CreateServer(string rootPath, int defaultPort);
+        ChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration);
     }
 }

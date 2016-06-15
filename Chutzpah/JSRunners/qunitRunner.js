@@ -23,8 +23,6 @@
     function onQUnitLoaded() {
         console.log("!!_!! onQUnitLoaded");
 
-        // Prevent QUnit from autostarting so have better control of the timing
-        window.QUnit.config.autostart = false;
 
         function log(obj) {
             console.log(JSON.stringify(obj));

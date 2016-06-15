@@ -11,6 +11,7 @@ namespace Chutzpah
     {
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
+        private string builtInDependencyDirectory;
 
         private static readonly Dictionary<string, PathType> ExtensionToPathTypeMap =
             new Dictionary<string, PathType>
@@ -208,6 +209,19 @@ namespace Chutzpah
             }
 
             return PathType.Other;
+        }
+
+        public string BuiltInDependencyDirectory
+        {
+            get
+            {
+                if(builtInDependencyDirectory == null)
+                {
+                    builtInDependencyDirectory = FindFolderPath(Constants.TestFileFolder);
+                }
+
+                return builtInDependencyDirectory;
+            }
         }
 
         private string FindPath(string path, Predicate<string> pathExists)

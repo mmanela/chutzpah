@@ -10,15 +10,17 @@ namespace Chutzpah.Server
     public class NancySettingsBootstrapper : Nancy.DefaultNancyBootstrapper
     {
         readonly string rootPath;
+        readonly string buildInTestFilesFolder;
 
-        public NancySettingsBootstrapper(string rootPath)
+        public NancySettingsBootstrapper(string rootPath, string buildInTestFilesFolder)
         {
+            this.buildInTestFilesFolder = buildInTestFilesFolder;
             this.rootPath = rootPath;
         }
 
         protected override void ConfigureConventions(NancyConventions nancyConventions)
         {
-            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("chutzpah", @"dev/chutzpah/Samples/RequireJS/QUnit"));
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(Constants.ServerVirtualBuiltInFilesPath, buildInTestFilesFolder));
 
             base.ConfigureConventions(nancyConventions);
         }

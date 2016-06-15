@@ -13,6 +13,13 @@ namespace Chutzpah
 {
     public class ProcessHelper : IProcessHelper
     {
+        readonly IUrlBuilder urlBuilder;
+
+        public ProcessHelper(IUrlBuilder urlBuilder)
+        {
+            this.urlBuilder = urlBuilder;
+        }
+
         public ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<ProcessStream, T> streamProcessor) where T : class
         {
             var p = new Process();
@@ -107,9 +114,9 @@ namespace Chutzpah
 
         }
 
-        public void LaunchFileInBrowser(string file, string browserName = null, IDictionary<string, string> browserArgs = null)
+        public void LaunchFileInBrowser(TestContext testContext, string file, string browserName = null, IDictionary<string, string> browserArgs = null)
         {
-            file = UrlBuilder.GenerateLocalFileUrl(file);
+            file = urlBuilder.GenerateFileUrl(testContext, file, fullyQualified: true);
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
 
             var startInfo = new ProcessStartInfo();

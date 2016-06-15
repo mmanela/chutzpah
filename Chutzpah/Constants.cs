@@ -57,5 +57,8 @@ namespace Chutzpah
         public const string DefaultCoverageHtmlTransform = "coveragehtml";
         public const string DefaultCoverageJsonTransform = "coveragejson";
 
+        public const int DefaultWebServerPort = 9876;
+        public const string ServerVirtualBuiltInFilesPath = "__chutzpah__";
+
     }
 }

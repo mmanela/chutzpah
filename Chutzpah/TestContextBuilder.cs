@@ -358,7 +358,7 @@ namespace Chutzpah
         {
             foreach (string item in deps.Reverse())
             {
-                string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
+                string sourcePath = Path.Combine(fileProbe.BuiltInDependencyDirectory, item);
                 ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
                 referencedFiles.Insert(0, new ReferencedFile { IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true, IsBuiltInDependency = true });
             }
@@ -377,7 +377,7 @@ namespace Chutzpah
 
                 foreach (string item in deps)
                 {
-                    string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
+                    string sourcePath = Path.Combine(fileProbe.BuiltInDependencyDirectory, item);
                     ChutzpahTracer.TraceInformation(
                         "Added code coverage dependency '{0}' to referenced files",
                         sourcePath);

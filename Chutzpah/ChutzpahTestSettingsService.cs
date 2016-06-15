@@ -151,20 +151,24 @@ namespace Chutzpah
 
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
-            settings.Server = settings.Server ?? new ChutzpahWebServerConfiguration();
+            if (settings.Server != null)
+            { 
 
-            string rootPath = null;
-            if(!string.IsNullOrEmpty(settings.Server.RootPath))
-            {
-                rootPath = settings.Server.RootPath;
-            } 
-            else if(!string.IsNullOrEmpty(settings.AMDBaseUrl))
-            {
-                ChutzpahTracer.TraceInformation("Setting WebServer RootPath to AMDBaseUrl as fallback attempt");
-                rootPath = settings.AMDBaseUrl;
+                settings.Server.DefaultPort = settings.Server.DefaultPort ?? Constants.DefaultWebServerPort;
+
+                string rootPath = null;
+                if (!string.IsNullOrEmpty(settings.Server.RootPath))
+                {
+                    rootPath = settings.Server.RootPath;
+                }
+                else if (!string.IsNullOrEmpty(settings.AMDBaseUrl))
+                {
+                    ChutzpahTracer.TraceInformation("Setting WebServer RootPath to AMDBaseUrl as fallback attempt");
+                    rootPath = settings.AMDBaseUrl;
+                }
+
+                settings.Server.RootPath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, rootPath));
             }
-
-            settings.Server.RootPath = ResolveFilePath(settings, ExpandVariable(chutzpahVariables, rootPath));
         }
 
         private void ProcessTraceFilePath(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)

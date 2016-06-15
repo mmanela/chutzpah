@@ -7,6 +7,7 @@ using Chutzpah.RunnerCallbacks;
 using System.Linq;
 using Chutzpah.Transformers;
 using Chutzpah.Wrappers;
+using Chutzpah.Server.Models;
 
 namespace Chutzpah
 {
@@ -183,11 +184,19 @@ namespace Chutzpah
                 Console.WriteLine(ex.Message);
             }
 
+            if (ChutzpahWebServerHost.ActiveWebServer != null)
+            {
+                Console.WriteLine("Press any key to end Chutzpah and stop the web server host...");
+                Console.ReadKey();
+            }
+
+
             var failedCount = testResultsSummary.FailedCount;
             if (commandLine.FailOnError && testResultsSummary.Errors.Any())
             {
                 return failedCount > 0 ? failedCount : 1;
             }
+
 
             return failedCount;
         }

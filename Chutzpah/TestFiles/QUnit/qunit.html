@@ -11,6 +11,9 @@
     @@TestJSFile@@
 
     <script>
+        
+        // Prevent QUnit from autostarting so have better control of the timing
+        window.QUnit.config.autostart = false;
 
         var amdTestPaths = [@@AMDTestPath@@];
         window.chutzpah.boot(amdTestPaths);
@@ -44,6 +47,18 @@
             if(window.chutzpah.amdAutoStart) {
                 window.chutzpah.amdStart();
             }
+        }
+        else {
+            var currentWindowOnload = window.onload;
+            window.onload = function() {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }
+
+                if (!window._Chutzpah_covobj_name && !window.chutzpah.phantom) {
+                    window.QUnit.start();
+                }
+            };
         }
     </script>
 </head>
