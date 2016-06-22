@@ -2,7 +2,9 @@
 using Chutzpah.Server.Models;
 using Nancy.Hosting.Self;
 using System;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace Chutzpah.Server
@@ -26,6 +28,7 @@ namespace Chutzpah.Server
 
             var hostConfiguration = new HostConfiguration
             {
+                RewriteLocalhost = true,
                 UrlReservations = new UrlReservations { CreateAutomatically = true }
             };
 
@@ -43,22 +46,45 @@ namespace Chutzpah.Server
 
         int GetNextAvailablePort(int port)
         {
-            IPEndPoint endPoint;
-            while (true)
+            while (!IsPortOpen(port))
             {
-                try
-                {
-                    endPoint = new IPEndPoint(IPAddress.Any, port);
-                    break;
-                }
-                catch (SocketException)
-                {
-                    ChutzpahTracer.TraceWarning("Unable to get port {0} so trying next one", port);
-                    port++;
-                }
+                ChutzpahTracer.TraceWarning("Unable to get port {0} so trying next one", port);
+                port++;
+
             }
 
             return port;
+        }
+
+        public static bool IsPortOpen(int port)
+        {
+            HttpListener listener = null;
+
+            try
+            {
+                listener = new HttpListener();
+                listener.Prefixes.Add($"http://*:{port}/");
+                listener.Start();
+
+                return true;
+            }
+            catch (HttpListenerException)
+            {
+            }
+            catch(SocketException)
+            {
+
+            }
+            finally
+            {
+
+                if (listener != null && listener.IsListening)
+                {
+                    listener.Stop();
+                }
+            }
+
+            return false;
         }
     }
 }
