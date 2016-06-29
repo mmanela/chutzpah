@@ -132,6 +132,10 @@ namespace Chutzpah
 
                     ProcessTraceFilePath(settings, chutzpahVariables);
 
+
+
+
+                    settings.Server = new ChutzpahWebServerConfiguration { Enabled = true };
                     ProcessServerSettings(settings, chutzpahVariables);
 
                     ProcessInheritance(environment, settings, chutzpahVariables);

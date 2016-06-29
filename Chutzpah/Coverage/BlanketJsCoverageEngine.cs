@@ -170,7 +170,8 @@ namespace Chutzpah.Coverage
                 {
                     if (!uri.IsAbsoluteUri)
                     {
-                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, entry.Key, true, false));
+                        string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, Path.Combine(basePath, entry.Key), true, false));
                     }
 
                     executedFilePath = uri.AbsoluteUri;

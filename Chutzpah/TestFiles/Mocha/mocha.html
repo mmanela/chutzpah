@@ -39,6 +39,7 @@
 
             window.chutzpah.amdStart = function() {
                 window.chutzpah.amdImport(amdTestPaths, function () {
+                    console.log("!!_!! Stating Mocha from AMD callback...");
                     mocha.run();
                 });
             };

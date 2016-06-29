@@ -17,7 +17,7 @@
         console.log("!!_!! onPageLoaded");
 
 
-        if (!window._Chutzpah_covobj_name) {
+        if (!window._Chutzpah_covobj_name && !window.chutzpah.usingModuleLoader) {
             mocha.run();
         }
     }
