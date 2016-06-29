@@ -140,6 +140,7 @@ namespace Chutzpah
             foreach (var referencedFile in referencedFiles)
             {
                 var referencePath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
+                referencedFile.AbsoluteServerUrl = urlBuilder.GenerateAbsoluteServerUrl(testContext, referencedFile);
                 referencedFile.PathForUseInTestHarness = urlBuilder.GenerateFileUrl(testContext, referencedFile);
             }
 

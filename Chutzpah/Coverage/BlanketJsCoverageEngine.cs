@@ -27,8 +27,11 @@ namespace Chutzpah.Coverage
         private List<string> excludePatterns { get; set; }
         private List<string> ignorePatterns { get; set; }
 
-        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper)
+        readonly IUrlBuilder urlBuilder;
+
+        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper, IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
             this.lineCoverageMapper = lineCoverageMapper;
@@ -139,11 +142,22 @@ namespace Chutzpah.Coverage
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
+            var isRunningInWebServer = testContext.TestFileSettings.Server != null && testContext.TestFileSettings.Server.Enabled.GetValueOrDefault();
             var data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
-            var generatedToReferencedFile =
-                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToLookup(rf => rf.GeneratedFilePath, rf => rf);
+            ILookup<string, ReferencedFile> generatedToReferencedFile = null;
+
+            if (isRunningInWebServer)
+            {
+                generatedToReferencedFile = testContext.ReferencedFiles.Where(rf => rf.AbsoluteServerUrl != null).ToLookup(rf => rf.AbsoluteServerUrl, rf => rf);
+            }
+            else
+            {
+                generatedToReferencedFile = testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToLookup(rf => rf.GeneratedFilePath, rf => rf);
+            }
 
             var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage.Value);
+            string executedFilePath = null;
+            var referencedFiles = new List<ReferencedFile>();
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths, then only keep the ones
@@ -152,31 +166,38 @@ namespace Chutzpah.Coverage
             {
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
 
-                if (!uri.IsAbsoluteUri)
+                if (isRunningInWebServer)
                 {
-                    // Resolve against the test file path.
-                    string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
-                    uri = new Uri(Path.Combine(basePath, entry.Key));
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, entry.Key, true, false));
+                    }
+
+                    executedFilePath = uri.AbsoluteUri;
+                }
+                else
+                {
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        // Resolve against the test file path.
+                        string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
+                        uri = new Uri(Path.Combine(basePath, entry.Key));
+                    }
+
+                    executedFilePath = uri.LocalPath;
+
+                    // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
+                    // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
+                    executedFilePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(executedFilePath, "$1");
+
+                    //REMOVE URI Query part from filepath like ?ver=1233123
+                    executedFilePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(executedFilePath, "$1");
+
+                    var fileUri = new Uri(executedFilePath, UriKind.RelativeOrAbsolute);
+                    executedFilePath = fileUri.LocalPath;
                 }
 
-                if (uri.Scheme != "file")
-                    continue;
-
-
-                string executedFilePath = uri.LocalPath;
-
-                // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
-                // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
-                executedFilePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(executedFilePath, "$1");
-
-                //REMOVE URI Query part from filepath like ?ver=1233123
-                executedFilePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(executedFilePath, "$1");
-
-                var fileUri = new Uri(executedFilePath, UriKind.RelativeOrAbsolute);
-                executedFilePath = fileUri.LocalPath;
-                var referencedFiles = new List<ReferencedFile>();
-
-                if (!generatedToReferencedFile.Contains(executedFilePath))
+                if (!generatedToReferencedFile.Any(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase)))
                 {
                     // This does not appear to be a compiled file so just created a referencedFile with the path
                     referencedFiles.Add(new ReferencedFile { Path = executedFilePath });
@@ -194,7 +215,7 @@ namespace Chutzpah.Coverage
                     // The coveredPath is the file which we have coverage lines for. We assume generated if it exsits otherwise the file path
                     var coveredPath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
 
-                    // If the user is using source maps then always take sourcePath and not generates. 
+                    // If the user is using source maps then always take sourcePath and not generated. 
                     if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps.GetValueOrDefault() && referencedFile.SourceMapFilePath != null)
                     {
                         coveredPath = referencedFile.Path;

@@ -56,6 +56,7 @@
                 }
 
                 if (!window._Chutzpah_covobj_name && !window.chutzpah.phantom) {
+                    console.log("!!_!! Stating QUnit from HTML OnLoad callback...");
                     window.QUnit.start();
                 }
             };

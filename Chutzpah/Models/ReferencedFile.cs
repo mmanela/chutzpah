@@ -100,5 +100,7 @@ namespace Chutzpah.Models
         /// The path of the file when running from the server
         /// </summary>
         public string PathForUseInTestHarness { get; internal set; }
+
+        public string AbsoluteServerUrl { get; internal set; }
     }
 }
