@@ -294,6 +294,11 @@ namespace Chutzpah
             {
                 batchCompilerService.Compile(testContexts);
             }
+            catch (FileNotFoundException e)
+            {
+                callback.ExceptionThrown(e);
+                return false;
+            }
             catch (ChutzpahCompilationFailedException e)
             {
                 callback.ExceptionThrown(e, e.SettingsFile);
