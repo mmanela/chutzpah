@@ -46,7 +46,7 @@ namespace Chutzpah
         /// </summary>
         /// <param name="exception"></param>
         /// <param name="fileName"></param>
-        void ExceptionThrown(Exception exception, string fileName);
+        void ExceptionThrown(Exception exception, string fileName=null);
 
         /// <summary>
         /// An error that occurred in a test file 

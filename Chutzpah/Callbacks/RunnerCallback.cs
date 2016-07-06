@@ -64,9 +64,17 @@ namespace Chutzpah
             return string.Format("Log Message: {0} from {1}\n", log.Message, log.InputTestFile);
         }
 
-        protected virtual string GetExceptionThrownMessage(Exception exception, string fileName)
+        protected virtual string GetExceptionThrownMessage(Exception exception, string fileName=null)
         {
-            return string.Format("Chutzpah Error: {0} - {1}\n While Running:{2}\n\n", exception.GetType().Name, exception, fileName);
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                return string.Format("Chutzpah Error: {0}\n While Running:{1}\n\n", exception, fileName);
+            }
+            else
+            {
+
+                return string.Format("Chutzpah Error: {0}\n\n", exception);
+            }
         }
 
         public static string FormatFileErrorMessage(TestError error)
