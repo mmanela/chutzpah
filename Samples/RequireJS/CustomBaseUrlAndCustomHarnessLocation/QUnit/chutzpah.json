@@ -12,5 +12,9 @@
     ],
     "Tests" : [
       {"Path": "tests"}
-    ]
+    ],
+    
+    "Server": {
+    	"Enabled": true
+    }
 }

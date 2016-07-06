@@ -63,7 +63,7 @@ namespace Chutzpah.Server
             try
             {
                 listener = new HttpListener();
-                listener.Prefixes.Add($"http://*:{port}/");
+                listener.Prefixes.Add(string.Format("http://*:{0}/", port));
                 listener.Start();
 
                 return true;

@@ -157,13 +157,14 @@ namespace Chutzpah.Coverage
 
             var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage.Value);
             string executedFilePath = null;
-            var referencedFiles = new List<ReferencedFile>();
+            string localFilePathForServerItem = null;
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths, then only keep the ones
             // that match the include/exclude patterns.
             foreach (var entry in data)
             {
+                var referencedFiles = new List<ReferencedFile>();
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
 
                 if (isRunningInWebServer)
@@ -171,7 +172,9 @@ namespace Chutzpah.Coverage
                     if (!uri.IsAbsoluteUri)
                     {
                         string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
-                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, Path.Combine(basePath, entry.Key), true, false));
+                        var relativePathFromHarness = Path.Combine(basePath, entry.Key);
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, relativePathFromHarness, true, false));
+                        localFilePathForServerItem = new Uri(relativePathFromHarness).LocalPath;
                     }
 
                     executedFilePath = uri.AbsoluteUri;
@@ -201,7 +204,8 @@ namespace Chutzpah.Coverage
                 if (!generatedToReferencedFile.Any(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase)))
                 {
                     // This does not appear to be a compiled file so just created a referencedFile with the path
-                    referencedFiles.Add(new ReferencedFile { Path = executedFilePath });
+                    // In the case of web server mode we use a local file path we generated
+                    referencedFiles.Add(new ReferencedFile { Path = localFilePathForServerItem ?? executedFilePath });
                 }
                 else
                 {
