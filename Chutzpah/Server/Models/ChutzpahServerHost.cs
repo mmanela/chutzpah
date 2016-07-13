@@ -56,12 +56,15 @@ namespace Chutzpah.Server.Models
                 ChutzpahTracer.TraceInformation("Tearing down Web Server Host at path {0} and port {1}", RootPath, Port);
                 NancyHost.Dispose();
 
-                // Set active server to null
-                Interlocked.Exchange(ref activeWebServer, null);
             }
             catch (Exception e)
             {
                 ChutzpahTracer.TraceError(e, "Error tearing down Web Server Host at path {0} and port {1}", RootPath, Port);
+            }
+            finally
+            {
+                // Set active server to null
+                Interlocked.Exchange(ref activeWebServer, null);
             }
 
         }
