@@ -27,12 +27,12 @@ namespace Chutzpah.Facts
 ";
         private static string TestContextBuilder_GetScriptStatement(string path)
         {
-            return new Script(new ReferencedFile { Path = path }).ToString();
+            return new Script(new ReferencedFile { Path = path, PathForUseInTestHarness = path }).ToString();
         }
 
         private static string TestContextBuilder_GetStyleStatement(string path)
         {
-            return new ExternalStylesheet(new ReferencedFile { Path = path }).ToString();
+            return new ExternalStylesheet(new ReferencedFile { Path = path, PathForUseInTestHarness = path }).ToString();
         }
 
 
@@ -56,11 +56,12 @@ namespace Chutzpah.Facts
                 Mock<IFileProbe>()
                     .Setup(x => x.GetPathInfo(@"TestFiles\qunit.html"))
                     .Returns(new PathInfo { Type = PathType.JavaScript, FullPath = @"path\qunit.html" });
+                Mock<IFileProbe>()
+                    .Setup(x => x.BuiltInDependencyDirectory)
+                    .Returns(@"dependencyPath\");
                 Mock<IFileSystemWrapper>()
-                    .Setup(x => x.GetText(@"path\qunit.html"))
+                    .Setup(x => x.GetText(@"dependencyPath\qunit.html"))
                     .Returns(TestTempateContents);
-
-
             }
 
             public TestContext GetContext()
@@ -99,8 +100,8 @@ namespace Chutzpah.Facts
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
             string text = null;
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\qunit.js", IsTestFrameworkFile = true});
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\qunit.css", IsTestFrameworkFile = true });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"dependencyPath\qunit.js", PathForUseInTestHarness = @"dependencyPath\qunit.js", IsTestFrameworkFile = true});
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"dependencyPath\qunit.css", PathForUseInTestHarness = @"dependencyPath\qunit.css", IsTestFrameworkFile = true });
 
             context.TestFileSettings.CustomTestHarnessPath = @"folder\customHarness.html";
             creator.Mock<IFileSystemWrapper>()
@@ -115,8 +116,8 @@ namespace Chutzpah.Facts
 
             creator.ClassUnderTest.CreateTestHarness(context, new TestOptions());
 
-            string scriptStatement = TestContextBuilder_GetScriptStatement(@"path\qunit.js");
-            string cssStatement = TestContextBuilder_GetStyleStatement(@"path\qunit.css");
+            string scriptStatement = TestContextBuilder_GetScriptStatement(@"dependencyPath\qunit.js");
+            string cssStatement = TestContextBuilder_GetStyleStatement(@"dependencyPath\qunit.css");
             Assert.Contains(scriptStatement, text);
             Assert.Contains(cssStatement, text);
             Assert.DoesNotContain("@@TestFrameworkDependencies@@", text);
@@ -127,8 +128,9 @@ namespace Chutzpah.Facts
         {
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\qunit.js", IsTestFrameworkFile = true });
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\qunit.css", IsTestFrameworkFile = true });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"dependencyPath\qunit.js", PathForUseInTestHarness = @"dependencyPath\qunit.js", IsTestFrameworkFile = true });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"dependencyPath\qunit.css", PathForUseInTestHarness = @"dependencyPath\qunit.css", IsTestFrameworkFile = true });
+
             string text = null;
             creator.Mock<IFileSystemWrapper>()
                 .Setup(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()))
@@ -136,8 +138,8 @@ namespace Chutzpah.Facts
 
             creator.ClassUnderTest.CreateTestHarness(context, new TestOptions());
 
-            string scriptStatement = TestContextBuilder_GetScriptStatement(@"path\qunit.js");
-            string cssStatement = TestContextBuilder_GetStyleStatement(@"path\qunit.css");
+            string scriptStatement = TestContextBuilder_GetScriptStatement(@"dependencyPath\qunit.js");
+            string cssStatement = TestContextBuilder_GetStyleStatement(@"dependencyPath\qunit.css");
             Assert.Contains(scriptStatement, text);
             Assert.Contains(cssStatement, text);
             Assert.DoesNotContain("@@TestFrameworkDependencies@@", text);
@@ -148,7 +150,7 @@ namespace Chutzpah.Facts
         {
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\file.html" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\file.html" , PathForUseInTestHarness = @"path\file.html" });
             string text = null;
             creator.Mock<IFileSystemWrapper>()
                 .Setup(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()))
@@ -168,9 +170,9 @@ namespace Chutzpah.Facts
         {
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\test.js", IsFileUnderTest = true });
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\lib.js" });
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\common.js" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\test.js", PathForUseInTestHarness = @"path\test.js", IsFileUnderTest = true });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\lib.js" , PathForUseInTestHarness = @"path\lib.js" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\common.js" , PathForUseInTestHarness = @"path\common.js" });
             string text = null;
             creator.Mock<IFileSystemWrapper>()
                 .Setup(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()))
@@ -194,8 +196,8 @@ namespace Chutzpah.Facts
         {
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\lib.js" });
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\common.js" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\lib.js", PathForUseInTestHarness = @"path\lib.js" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\common.js", PathForUseInTestHarness = @"path\common.js" });
             string text = null;
             creator.Mock<IFileSystemWrapper>()
                 .Setup(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()))
@@ -215,7 +217,7 @@ namespace Chutzpah.Facts
         {
             var creator = new TestableTestHarnessBuilder();
             var context = creator.GetContext();
-            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\style.css" });
+            context.ReferencedFiles.Add(new ReferencedFile { Path = @"path\style.css", PathForUseInTestHarness = @"path\style.css" });
             string text = null;
             creator.Mock<IFileSystemWrapper>()
                 .Setup(x => x.Save(@"C:\folder\_Chutzpah.hash.test.html", It.IsAny<string>()))
