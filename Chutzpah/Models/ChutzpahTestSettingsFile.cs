@@ -396,8 +396,8 @@ namespace Chutzpah.Models
             }
             else if(this.Server != null && parent.Server != null)
             {
-                this.Server.DefaultPort = parent.Server.DefaultPort;
-                this.Server.Enabled = parent.Server.Enabled;
+                ChutzpahTracer.TraceWarning("Ignoring Server setting in child settings file since it is already configured in parent");
+                this.Server = parent.Server;
             }
 
             if (this.Compile == null)
