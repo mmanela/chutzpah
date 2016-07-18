@@ -68,7 +68,7 @@ namespace Chutzpah.Models
         public ICoverageEngine CoverageEngine { get; set; }
 
         public string InputTestFilesString { get; set; }
-        public bool TestHarnessCreationFailed { get; internal set; }
-        public ChutzpahWebServerHost WebServerHost { get; internal set; }
+        public bool TestHarnessCreationFailed { get; set; }
+        public IChutzpahWebServerHost WebServerHost { get; set; }
     }
 }

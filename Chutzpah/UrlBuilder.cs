@@ -49,6 +49,17 @@ namespace Chutzpah
             return absolutePath;
         }
 
+
+        /// <summary>
+        /// This generates a file url based on an absolute file path
+        /// </summary>
+        string GenerateLocalFileUrl(string absolutePath)
+        {
+            var encodedReferencePath = EncodeFilePath(absolutePath);
+            var fileUrlFormat = encodedReferencePath.StartsWith("//", StringComparison.OrdinalIgnoreCase) ? "file://{0}" : "file:///{0}";
+            return string.Format(fileUrlFormat, encodedReferencePath);
+        }
+
         public string GenerateAbsoluteServerUrl(TestContext testContext, ReferencedFile referencedFile)
         {
             var isRunningInWebServer = testContext.TestFileSettings.Server != null && testContext.TestFileSettings.Server.Enabled.GetValueOrDefault();
@@ -66,15 +77,6 @@ namespace Chutzpah
             return path;
         }
 
-        /// <summary>
-        /// This generates a file url based on an absolute file path
-        /// </summary>
-        string GenerateLocalFileUrl(string absolutePath)
-        {
-            var encodedReferencePath = EncodeFilePath(absolutePath);
-            var fileUrlFormat = encodedReferencePath.StartsWith("//", StringComparison.OrdinalIgnoreCase) ? "file://{0}" : "file:///{0}";
-            return string.Format(fileUrlFormat, encodedReferencePath);
-        }
 
         /// <summary>
         /// Generate a file url that can be used when hosting it on a server
