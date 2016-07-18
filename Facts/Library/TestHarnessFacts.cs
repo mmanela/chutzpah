@@ -22,10 +22,10 @@ namespace Chutzpah.Facts.Library
             }
 
             [Fact]
-            public void Will_have_href_that_points_to_file()
+            public void Will_have_href()
             {
-                var stylesheet = new ExternalStylesheet(new ReferencedFile { Path = "file.css" });
-                Assert.Equal("file:///file.css", stylesheet.Attributes["href"]);
+                var stylesheet = new ExternalStylesheet(new ReferencedFile {  PathForUseInTestHarness = "file.css" });
+                Assert.Equal("file.css", stylesheet.Attributes["href"]);
             }
 
             [Fact]
@@ -60,10 +60,10 @@ namespace Chutzpah.Facts.Library
             }
 
             [Fact]
-            public void Will_have_href_that_points_to_file()
+            public void Will_have_href()
             {
-                var icon = new ShortcutIcon(new ReferencedFile { Path = "file.png" });
-                Assert.Equal("file:///file.png", icon.Attributes["href"]);
+                var icon = new ShortcutIcon(new ReferencedFile { PathForUseInTestHarness = "file.png" });
+                Assert.Equal("file.png", icon.Attributes["href"]);
             }
 
             [Fact]
@@ -84,18 +84,12 @@ namespace Chutzpah.Facts.Library
             }
 
             [Fact]
-            public void Will_have_src_that_points_to_file()
+            public void Will_have_src()
             {
-                var script = new Script(new ReferencedFile { Path = "file.js" });
-                Assert.Equal("file:///file.js", script.Attributes["src"]);
+                var script = new Script(new ReferencedFile { PathForUseInTestHarness = "file.js" });
+                Assert.Equal("file.js", script.Attributes["src"]);
             }
 
-            [Fact]
-            public void Will_encode_path()
-            {
-                var script = new Script(new ReferencedFile { Path = "C#/file.js" });
-                Assert.Equal("file:///C%23/file.js", script.Attributes["src"]);
-            }
 
             [Fact]
             public void Will_have_explicit_end_tag_and_no_content()
