@@ -152,8 +152,8 @@
     function onPageLoaded() {
         console.log("!!_!! onPageLoaded");
 
-        if (!window.chutzpah.usingModuleLoader) {
-            window.initializeJasmine();
+        if (!window.chutzpah.usingModuleLoader && window.chutzpah.autoStart !== false) {
+            (window.chutzpah.start || window.initializeJasmine)();
         }
     }
 

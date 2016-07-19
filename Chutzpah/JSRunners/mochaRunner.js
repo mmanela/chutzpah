@@ -17,8 +17,8 @@
         console.log("!!_!! onPageLoaded");
 
 
-        if (!window._Chutzpah_covobj_name && !window.chutzpah.usingModuleLoader) {
-            mocha.run();
+        if (!window.chutzpah.usingModuleLoader && window.chutzpah.autoStart !== false) {
+            (window.chutzpah.start || mocha.run)();
         }
     }
 

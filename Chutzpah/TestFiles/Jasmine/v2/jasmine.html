@@ -31,7 +31,7 @@
                     }
                 });
 
-                window.chutzpah.amdStart = function() {
+                window.chutzpah.start = function() {
                     window.chutzpah.amdImport(amdTestPaths, function () {
 
                         console.log("!!_!! Stating Jasmine from AMD callback...");
@@ -39,12 +39,18 @@
                     });
                 };
 
-                if(window.chutzpah.amdAutoStart) {
-                    window.chutzpah.amdStart();
+                if(window.chutzpah.autoStart) {
+                    window.chutzpah.start();
                 }
 
             }
             else {
+
+                window.chutzpah.start = function() {
+                    console.log("!!_!! Stating Jasmine...");
+                    window.initializeJasmine();  
+                };
+
                 var currentWindowOnload = window.onload;
 
                 window.onload = function() {
@@ -52,9 +58,9 @@
                         currentWindowOnload();
                     }
 
-                    if(!window.chutzpah.phantom) {
+                    if(!window.chutzpah.phantom && window.chutzpah.autoStart !== false) {
                         console.log("!!_!! Stating Jasmine from HTML OnLoad callback...");
-                        window.initializeJasmine();
+                        window.chutzpah.start();
                     }
                 };
             }

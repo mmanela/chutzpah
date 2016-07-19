@@ -160,20 +160,17 @@
 
         function startJasmine() {
 
-            if (!window.jasmine) {
+            if (!window.jasmine || !window.chutzpah.autoStart) {
                 return;
             }
 
             console.log("!!_!! Starting Jasmine from window onload in phantom...");
-
+	    
             var jasmineEnv = window.jasmine.getEnv();
             var runner = jasmineEnv.currentRunner();
-
-            // Check if runner hasn't been executed
-            // If so, run it
-            if (!runner.queue.running && runner.queue.index <= 0) {
-                jasmineEnv.execute();
-            }
+	    
+            (window.chutzpah.start || jasmineEnv.execute)();
+            
 
         }
 
