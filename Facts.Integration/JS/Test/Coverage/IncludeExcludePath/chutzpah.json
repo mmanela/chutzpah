@@ -1,4 +1,6 @@
 {
-  "CodeCoverageExcludes": ["*\\JS\\Code\\*"],
-  "CodeCoverageIncludes": ["*Coverage\\IncludeExcludePath\\*"]
+    "CodeCoverageExcludes": [ "*\\JS\\Code\\*" ],
+    "CodeCoverageIncludes": [ "*IncludeExcludePath\\*" ],
+    "TestHarnessLocationMode": "Custom",
+    "TestHarnessDirectory": "../"
 }

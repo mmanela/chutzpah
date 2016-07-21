@@ -4,8 +4,8 @@
     "TestHarnessReferenceMode": "AMD",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "References" : [
-        {"Path" : "require-2.1.8.js" }, 
-        {"Path" : "config.js" }
+        {"Path" : "require-2.1.8.js", "IsTestFrameworkFile": true }, 
+        {"Path" : "config.js", "IsTestFrameworkFile": true }
     ],
     "Tests" : [
       {"Path": "tests"}

@@ -6,7 +6,7 @@
    "AMDBaseUrl": "out",
    "AMDAppDirectory": "./",
     "References" : [
-      { "Path": "require-2.1.8.js" },
+      { "Path": "require-2.1.8.js", "IsTestFrameworkFile": "true" },
     ],
     "Tests" : [
       {"Path": "tests"}
