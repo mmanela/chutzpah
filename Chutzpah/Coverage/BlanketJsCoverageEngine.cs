@@ -201,7 +201,8 @@ namespace Chutzpah.Coverage
                     executedFilePath = fileUri.LocalPath;
                 }
 
-                if (!generatedToReferencedFile.Any(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase)))
+                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase));
+                if (matchedFile == null)
                 {
                     // This does not appear to be a compiled file so just created a referencedFile with the path
                     // In the case of web server mode we use a local file path we generated
@@ -209,7 +210,7 @@ namespace Chutzpah.Coverage
                 }
                 else
                 {
-                    referencedFiles = generatedToReferencedFile[executedFilePath].ToList();
+                    referencedFiles = matchedFile.ToList();
                 }
 
                 referencedFiles = referencedFiles.Where(file => IsFileEligibleForInstrumentation(file.Path)
