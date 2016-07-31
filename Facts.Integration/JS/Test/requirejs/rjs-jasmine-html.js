@@ -1,5 +1,6 @@
-﻿/// <reference path="../../Code/RequireJS/require.js" />
+﻿/// <reference path="../../Code/require-2.1.8.js" />
 
+window.chutzpah.preventAutoStart();
 requirejs(['base/core', 'ui/screen'],
     function (core, screen) {
 
@@ -16,4 +17,8 @@ requirejs(['base/core', 'ui/screen'],
                 expect(disp).toEqual("Version: 8");
             });
         });
+
+
+        window.chutzpah.start();
+
     });

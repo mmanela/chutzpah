@@ -5759,6 +5759,10 @@ blanket.defaultReporter = function (coverage) {
         console.log("waiting for blanket...");
     };
 
+    /// ### CHUTZPAH EDIT ###
+    /// ### Add all loaded which can check if any tests are found yet
+    /// ### CHUTZPAH EDIT ###
+
     //check to make sure requirejs is completed before we start the test runner
     var allLoaded = function () {
         return window.mocha.suite.suites.length > 0 && blanket.requireFilesLoaded();
