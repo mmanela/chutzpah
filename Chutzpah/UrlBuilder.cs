@@ -53,7 +53,7 @@ namespace Chutzpah
         /// <summary>
         /// This generates a file url based on an absolute file path
         /// </summary>
-        string GenerateLocalFileUrl(string absolutePath)
+        public string GenerateLocalFileUrl(string absolutePath)
         {
             var encodedReferencePath = EncodeFilePath(absolutePath);
             var fileUrlFormat = encodedReferencePath.StartsWith("//", StringComparison.OrdinalIgnoreCase) ? "file://{0}" : "file:///{0}";

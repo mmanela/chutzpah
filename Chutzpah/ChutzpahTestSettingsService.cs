@@ -132,10 +132,6 @@ namespace Chutzpah
 
                     ProcessTraceFilePath(settings, chutzpahVariables);
 
-
-
-                    // TODO(mmanela): REMOVE THIS, ONLY FOR TESTING PURPOSES
-                    settings.Server = new ChutzpahWebServerConfiguration { Enabled = true };
                     ProcessServerSettings(settings, chutzpahVariables);
 
                     ProcessInheritance(environment, settings, chutzpahVariables);

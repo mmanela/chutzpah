@@ -82,7 +82,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         [ImportingConstructor]
         public ChutzpahTestContainerDiscoverer(
-            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof(IServiceProvider))] IServiceProvider serviceProvider,
             IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,

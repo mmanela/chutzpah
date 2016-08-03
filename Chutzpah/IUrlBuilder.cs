@@ -4,6 +4,7 @@ namespace Chutzpah
 {
     public interface IUrlBuilder
     {
+        string GenerateLocalFileUrl(string absolutePath);
         string GenerateFileUrl(TestContext testContext, ReferencedFile referencedFile);
         string GenerateFileUrl(TestContext testContext, string absolutePath, bool fullyQualified = false, bool isBuiltInDependency = false);
 

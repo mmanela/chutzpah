@@ -43,7 +43,7 @@ namespace Chutzpah.VS2012.TestAdapter
                         runContext.IsBeingDebugged ? TestLaunchMode.Custom:
                         settings.OpenInBrowser ? TestLaunchMode.FullBrowser:
                         TestLaunchMode.HeadlessBrowser,
-                    CustomTestLauncher     = runContext.IsBeingDebugged ? new VsDebuggerTestLauncher() : null,
+                    CustomTestLauncher     = runContext.IsBeingDebugged ? ChutzpahContainer.Get<VsDebuggerTestLauncher>() : null,
                     MaxDegreeOfParallelism = runContext.IsBeingDebugged ? 1 : settings.MaxDegreeOfParallelism,
                     ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
                 };

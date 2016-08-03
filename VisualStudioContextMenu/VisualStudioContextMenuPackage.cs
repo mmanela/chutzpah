@@ -91,8 +91,8 @@ namespace Chutzpah.VisualStudioContextMenu
             }
 
             testRunner = TestRunner.Create();
-
-            processHelper = new ProcessHelper();
+            
+            processHelper = ChutzpahContainer.Get<IProcessHelper>();
             Logger = new Logger(this);
             Settings = GetDialogPage(typeof(ChutzpahSettings)) as ChutzpahSettings;
 
@@ -407,7 +407,7 @@ namespace Chutzpah.VisualStudioContextMenu
                                                               Enabled = withCodeCoverage
                                                           },
 
-                                                          CustomTestLauncher = withDebugger ? new VsDebuggerTestLauncher() : null,
+                                                          CustomTestLauncher = withDebugger ? ChutzpahContainer.Get<VsDebuggerTestLauncher>() : null,
                                                           TestLaunchMode = GetTestLaunchMode(openInBrowser, withDebugger),
                                                           ChutzpahSettingsFileEnvironments = settingsEnvironments
                                                       };
@@ -416,7 +416,7 @@ namespace Chutzpah.VisualStudioContextMenu
                                     if (result.CoverageObject != null)
                                     {
                                         var path = CoverageOutputGenerator.WriteHtmlFile(Path.Combine(solutionDir, Constants.CoverageHtmlFileName), result.CoverageObject);
-                                        processHelper.LaunchFileInBrowser(path);
+                                        processHelper.LaunchLocalFileInBrowser(path);
                                     }
                                 }
                                 catch (Exception e)

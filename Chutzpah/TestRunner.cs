@@ -160,88 +160,100 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
 
-            options.TestExecutionMode = testExecutionMode;
-
-            stopWatch.Start();
-            string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
-            if (testPaths == null)
-                throw new ArgumentNullException("testPaths");
-            if (headlessBrowserPath == null)
-                throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
-            if (fileProbe.FindFilePath(TestRunnerJsName) == null)
-                throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
-
             var overallSummary = new TestCaseSummary();
 
-            // Concurrent list to collect test contexts
-            var testContexts = new ConcurrentBag<TestContext>();
-
-            // Concurrent collection used to gather the parallel results from
-            var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
-            var resultCount = 0;
-            var cancellationSource = new CancellationTokenSource();
-
-
-            // Given the input paths discover the potential test files
-            var scriptPaths = FindTestFiles(testPaths, options);
-
-            // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
-            // If so, we keep those tests in a group together to be used in one context
-            // Otherwise, we put each file in its own test group so each get their own context
-            var testRunConfiguration = BuildTestRunConfiguration(scriptPaths, options);
-
-            ConfigureTracing(testRunConfiguration);
-
-            var parallelism = testRunConfiguration.MaxDegreeOfParallelism.HasValue
-                                ? Math.Min(options.MaxDegreeOfParallelism, testRunConfiguration.MaxDegreeOfParallelism.Value)
-                                : options.MaxDegreeOfParallelism;
-
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = parallelism, CancellationToken = cancellationSource.Token };
-
-            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, parallelOptions.MaxDegreeOfParallelism);
-
-            // Build test contexts in parallel given a list of files each
-            BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
-
-            // Find the first test context with a web server configuration and use it
-            var host = SetupWebServerHost(testContexts);
-
-
-            // Compile the test contexts
-            if (!PerformBatchCompile(callback, testContexts))
+            try
             {
+                options.TestExecutionMode = testExecutionMode;
+
+                stopWatch.Start();
+                string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
+                if (testPaths == null)
+                    throw new ArgumentNullException("testPaths");
+                if (headlessBrowserPath == null)
+                    throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
+                if (fileProbe.FindFilePath(TestRunnerJsName) == null)
+                    throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
+
+
+                // Concurrent list to collect test contexts
+                var testContexts = new ConcurrentBag<TestContext>();
+
+                // Concurrent collection used to gather the parallel results from
+                var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
+                var resultCount = 0;
+                var cancellationSource = new CancellationTokenSource();
+
+
+                // Given the input paths discover the potential test files
+                var scriptPaths = FindTestFiles(testPaths, options);
+
+                // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
+                // If so, we keep those tests in a group together to be used in one context
+                // Otherwise, we put each file in its own test group so each get their own context
+                var testRunConfiguration = BuildTestRunConfiguration(scriptPaths, options);
+
+                ConfigureTracing(testRunConfiguration);
+
+                var parallelism = testRunConfiguration.MaxDegreeOfParallelism.HasValue
+                                    ? Math.Min(options.MaxDegreeOfParallelism, testRunConfiguration.MaxDegreeOfParallelism.Value)
+                                    : options.MaxDegreeOfParallelism;
+
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = parallelism, CancellationToken = cancellationSource.Token };
+
+                ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, parallelOptions.MaxDegreeOfParallelism);
+
+                // Build test contexts in parallel given a list of files each
+                BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
+
+                // Find the first test context with a web server configuration and use it
+                var host = SetupWebServerHost(testContexts);
+
+
+                // Compile the test contexts
+                if (!PerformBatchCompile(callback, testContexts))
+                {
+                    return overallSummary;
+                }
+
+                // Build test harness for each context and execute it in parallel
+                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, host);
+
+
+                // Gather TestFileSummaries into TaseCaseSummary
+                foreach (var fileSummary in testFileSummaries)
+                {
+                    overallSummary.Append(fileSummary);
+                }
+
+                stopWatch.Stop();
+                overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
+
+                overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
+
+                // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
+                // If we don't clear then the user can never update the file.
+                testSettingsService.ClearCache();
+
+                // host.Dispose();
+
+
+                ChutzpahTracer.TraceInformation(
+                    "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
+                    overallSummary.PassedCount,
+                    overallSummary.FailedCount,
+                    overallSummary.Errors.Count);
+
                 return overallSummary;
             }
-
-            // Build test harness for each context and execute it in parallel
-            ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, host);
-
-
-            // Gather TestFileSummaries into TaseCaseSummary
-            foreach (var fileSummary in testFileSummaries)
+            catch(Exception e)
             {
-                overallSummary.Append(fileSummary);
+                callback.ExceptionThrown(e);
+
+                ChutzpahTracer.TraceError(e, "Unhandled exception during Chutzpah test run");
+
+                return overallSummary;
             }
-
-            stopWatch.Stop();
-            overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
-
-            overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
-
-            // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
-            // If we don't clear then the user can never update the file.
-            testSettingsService.ClearCache();
-            
-           // host.Dispose();
-
-
-            ChutzpahTracer.TraceInformation(
-                "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
-                overallSummary.PassedCount,
-                overallSummary.FailedCount,
-                overallSummary.Errors.Count);
-
-            return overallSummary;
         }
 
         private ChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts)
@@ -328,6 +340,9 @@ namespace Chutzpah
             catch (FileNotFoundException e)
             {
                 callback.ExceptionThrown(e);
+
+                ChutzpahTracer.TraceError(e, "Error during batch compile");
+
                 return false;
             }
             catch (ChutzpahCompilationFailedException e)

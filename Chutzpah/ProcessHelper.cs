@@ -117,6 +117,17 @@ namespace Chutzpah
         public void LaunchFileInBrowser(TestContext testContext, string file, string browserName = null, IDictionary<string, string> browserArgs = null)
         {
             file = urlBuilder.GenerateFileUrl(testContext, file, fullyQualified: true);
+            OpenBrowser(file, browserName, browserArgs);
+        }
+
+        public void LaunchLocalFileInBrowser(string file)
+        {
+            file = urlBuilder.GenerateLocalFileUrl(file);
+            OpenBrowser(file);
+        }
+
+        private void OpenBrowser(string file, string browserName = null, IDictionary<string, string> browserArgs = null)
+        {
             var browserAppPath = BrowserPathHelper.GetBrowserPath(browserName);
 
             var startInfo = new ProcessStartInfo();
