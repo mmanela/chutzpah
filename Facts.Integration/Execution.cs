@@ -199,6 +199,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_encode_file_path_of_test_file_with_space()
         {
+            if (ChutzpahTestSettingsFile.ForceWebServerMode) { return; }
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\PathEncoding\With Space+\pathEncoding.js", new ExceptionThrowingRunnerCallback());
@@ -824,35 +825,6 @@ namespace Chutzpah.Facts.Integration
                 Assert.Equal(0, result.FailedCount);
                 Assert.Equal(1, result.PassedCount);
                 Assert.Equal(1, result.TotalCount);
-            }
-
-
-            [Fact]
-            public void Will_run_qunit_require_html_test_where_test_file_uses_requirejs_command()
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\requirejs\qunit-test.html", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(2, result.PassedCount);
-                Assert.Equal(2, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_jasmine_require_html_test_where_test_file_uses_requirejs_command()
-            {
-                var testRunner = TestRunner.Create();
-                
-                TestCaseSummary result = null;
-                TestUtils.RunAsJasmineVersionOne(() =>
-                {
-                    result = testRunner.RunTests(@"JS\Test\requirejs\jasmine-test.html", new ExceptionThrowingRunnerCallback());
-                });
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(2, result.PassedCount);
-                Assert.Equal(2, result.TotalCount);
             }
 
             [Theory]

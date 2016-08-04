@@ -44,11 +44,10 @@ namespace Chutzpah.Models
         Never
     }
 
-
-    // TODO(mmanela): REMOVE THIS, ONLY FOR TESTING PURPOSES
-    public class DefaultChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
+    
+    public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
     {
-        public DefaultChutzpahWebServerConfiguration()
+        public ForcedChutzpahWebServerConfiguration()
         {
             Enabled = true;
             DefaultPort = Constants.DefaultWebServerPort;
@@ -63,6 +62,8 @@ namespace Chutzpah.Models
     public class ChutzpahTestSettingsFile
     {
         public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile(true);
+        public static bool ForceWebServerMode = true;
+
         private Regex testPatternRegex;
 
         public ChutzpahTestSettingsFile()
@@ -86,9 +87,11 @@ namespace Chutzpah.Models
             RootReferencePathMode = Models.RootReferencePathMode.DriveRoot;
             EnableTestFileBatching = false;
             IgnoreResourceLoadingErrors = false;
-
-            // TODO(mmanela): REMOVE THIS, ONLY FOR TESTING PURPOSES
-            Server = new DefaultChutzpahWebServerConfiguration();
+            
+            if (ForceWebServerMode)
+            {
+                Server = new ForcedChutzpahWebServerConfiguration();
+            }
         }
 
         public bool IsDefaultSettings { get; set; }
@@ -411,8 +414,8 @@ namespace Chutzpah.Models
             }
             else if(this.Server != null && parent.Server != null
 
-                // TODO(mmanela): REMOVE THIS, ONLY FOR TESTING PURPOSES
-                && !(parent.Server is DefaultChutzpahWebServerConfiguration)
+                // Only allow override if the parent is a force configuration which is used for testing
+                && !(parent.Server is ForcedChutzpahWebServerConfiguration)
                 )
             {
                 ChutzpahTracer.TraceWarning("Ignoring Server setting in child settings file since it is already configured in parent");

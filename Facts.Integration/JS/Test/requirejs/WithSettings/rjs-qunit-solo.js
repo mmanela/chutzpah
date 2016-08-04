@@ -1,5 +1,7 @@
 ﻿/// <reference path="../../../Code/RequireJS/require.js" />
 
+window.chutzpah.preventAutoStart();
+
 requirejs(['base/core', 'ui/screen'],
     function (core, screen) {
 
@@ -15,5 +17,5 @@ requirejs(['base/core', 'ui/screen'],
             equal(disp, "Version: 8");
         });
 
-
+        window.chutzpah.start();
     });
