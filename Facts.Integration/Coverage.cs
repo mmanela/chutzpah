@@ -97,7 +97,7 @@ namespace Chutzpah.Facts.Integration
 
         public static IEnumerable<object[]> ChutzpahSamples
         {
-            get { return TestPathGroups.ChutzpahSamples; }
+            get { return TestPathGroups.ChutzpahSamplesWithCoverageSupported; }
         }
 
         [Theory]

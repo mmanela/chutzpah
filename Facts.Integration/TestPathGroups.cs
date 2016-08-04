@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chutzpah.Facts.Integration
 {
@@ -29,7 +30,8 @@ namespace Chutzpah.Facts.Integration
                     };
             }
         }
-        public static IEnumerable<object[]> ChutzpahSamples
+
+        public static IEnumerable<object[]> ChutzpahSamplesWithCoverageSupported
         {
             get
             {
@@ -71,12 +73,22 @@ namespace Chutzpah.Facts.Integration
                     // Angular Samples
                     new object[] { @"Samples\Angular\Basic_TypeScript\tests\chutzpah.json", 1},
                     new object[] { @"Samples\Angular\TemplateDirective\chutzpah.json", 2},
-
+  
                     // React Samples
                     
                     new object[] { @"Samples\React\Basic\chutzpah.json", 1},
 
                 };
+            }
+        }
+
+
+        public static IEnumerable<object[]> ChutzpahSamples
+        {
+            get
+            {
+                // Angular 2 Samples which do not support code coverage
+                return ChutzpahSamplesWithCoverageSupported.Concat(new[] { new object[] { @"Samples\Angular2\Basic\App\chutzpah.json", 2 } });
             }
         }
     }
