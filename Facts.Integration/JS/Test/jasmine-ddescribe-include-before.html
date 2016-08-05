@@ -27,13 +27,17 @@
 
           var currentWindowOnload = window.onload;
 
+          function initializeJasmine() {
+              jasmineEnv.execute();
+          }
+
           window.onload = function () {
 
               if (currentWindowOnload) {
                   currentWindowOnload();
               }
-              
-              jasmineEnv.execute();
+
+              initializeJasmine();
           };
 
 

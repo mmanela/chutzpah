@@ -187,6 +187,7 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_encode_file_path_of_test_file_with_hash_tag()
         {
+            if (ChutzpahTestSettingsFile.ForceWebServerMode) { return; }
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\PathEncoding\C#\pathEncoding.js", new ExceptionThrowingRunnerCallback());
