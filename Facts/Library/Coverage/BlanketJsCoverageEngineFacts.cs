@@ -61,7 +61,7 @@ namespace Chutzpah.Facts.Library.Coverage
 
         private static TestContext GetContext()
         {
-            return new TestContext
+            var context =  new TestContext
             {
                 TestFileSettings = new ChutzpahTestSettingsFile
                 {
@@ -75,6 +75,10 @@ namespace Chutzpah.Facts.Library.Coverage
                     new ReferencedFile { Path = @"X:\file1.ts", GeneratedFilePath = @"X:\file1.js", SourceMapFilePath = @"X:\file1.map" }
                 }
             };
+
+            context.TestFileSettings.Server = null;
+
+            return context;
         }
 
         [Fact]
