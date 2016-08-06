@@ -419,7 +419,7 @@ namespace Chutzpah.Models
                 )
             {
                 ChutzpahTracer.TraceWarning("Ignoring Server setting in child settings file since it is already configured in parent");
-                this.Server = parent.Server;
+                this.Server = new ChutzpahWebServerConfiguration(parent.Server);
             }
 
             if (this.Compile == null)

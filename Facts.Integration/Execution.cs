@@ -419,7 +419,7 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" },
-                                                         new TestOptions { TestFileTimeoutMilliseconds = 1500 },
+                                                         new TestOptions { TestFileTimeoutMilliseconds = 2000 },
                                                          new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);

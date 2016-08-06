@@ -1,11 +1,18 @@
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-
 namespace Chutzpah.Models
 {
     public class ChutzpahWebServerConfiguration
     {
+        public ChutzpahWebServerConfiguration()
+        {
+
+        }
+
+        public ChutzpahWebServerConfiguration(ChutzpahWebServerConfiguration configurationToCopy)
+        {
+            Enabled = configurationToCopy.Enabled;
+            DefaultPort = configurationToCopy.DefaultPort;
+            RootPath = configurationToCopy.RootPath;
+        }
 
         /// <summary>
         /// Determines if the web server is enabled for thi chutzpah.json
