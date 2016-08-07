@@ -6,4 +6,3 @@
         }
     }
 });
-System.import('scripts/node.component.spec');
