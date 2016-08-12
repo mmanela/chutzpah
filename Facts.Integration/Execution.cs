@@ -176,7 +176,6 @@ namespace Chutzpah.Facts.Integration
         public void Will_run_tests_using_custom_test_harness_path()
         {
             var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
             TestCaseSummary result = testRunner.RunTests(@"JS\Test\TestSettings\CustomTestHarness\customHarnessTest.js", new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);
@@ -419,7 +418,7 @@ namespace Chutzpah.Facts.Integration
             var testRunner = TestRunner.Create();
 
             TestCaseSummary result = testRunner.RunTests(new List<string> { @"JS\Test\timeoutTest.js" },
-                                                         new TestOptions { TestFileTimeoutMilliseconds = 2000 },
+                                                         new TestOptions { TestFileTimeoutMilliseconds = 10000 },
                                                          new ExceptionThrowingRunnerCallback());
 
             Assert.Equal(0, result.FailedCount);

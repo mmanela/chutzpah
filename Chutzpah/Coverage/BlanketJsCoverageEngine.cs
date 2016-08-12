@@ -274,7 +274,7 @@ namespace Chutzpah.Coverage
         {
             foreach (var pattern in patterns)
             {
-                includePatterns.Add(pattern);
+                includePatterns.Add(PrependWildCard(pattern));
             }
         }
 
@@ -282,7 +282,7 @@ namespace Chutzpah.Coverage
         {
             foreach (var pattern in patterns)
             {
-                excludePatterns.Add(pattern);
+                excludePatterns.Add(PrependWildCard(pattern));
             }
         }
 
@@ -290,8 +290,24 @@ namespace Chutzpah.Coverage
         {
             foreach (var pattern in patterns)
             {
-                ignorePatterns.Add(pattern);
+                ignorePatterns.Add(PrependWildCard(pattern));
             }
+        }
+
+        /// <summary>
+        /// Prepends the wildcard (*) to the path if it is missing. This helps
+        /// since most people don't intend to match the exact begining of a path since that is the
+        /// drive root
+        /// </summary>
+        private string PrependWildCard(string pattern)
+        {
+            pattern = pattern.Trim();
+            if(pattern.Length > 1 && pattern[0] != '*')
+            {
+                pattern = "*" + pattern;
+            }
+
+            return pattern;
         }
 
         private bool IsFileEligibleForInstrumentation(string filePath)

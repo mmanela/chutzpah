@@ -31,6 +31,8 @@ namespace Chutzpah.Server.Models
 
             set
             {
+
+                ChutzpahTracer.TraceInformation("Active server set to {0}", value.ToString());
                 Interlocked.Exchange(ref activeWebServer, value);
             }
         }
@@ -67,6 +69,11 @@ namespace Chutzpah.Server.Models
                 Interlocked.Exchange(ref activeWebServer, null);
             }
 
+        }
+
+        public override string ToString()
+        {
+            return string.Format("ChutzpahServerHost - Port: {0}, RootPath: {1}", Port, RootPath);
         }
     }
 }
