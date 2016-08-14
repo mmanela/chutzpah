@@ -34,6 +34,9 @@ namespace Chutzpah.Facts
                 Mock<IFileSystemWrapper>().Setup(x => x.GetTemporaryFolder(It.IsAny<string>())).Returns(@"C:\temp\");
                 Mock<IFileSystemWrapper>().Setup(x => x.GetText(It.IsAny<string>())).Returns(string.Empty);
                 Mock<IFileSystemWrapper>().Setup(x => x.FolderExists(It.IsAny<string>())).Returns(true);
+                Mock<IFileProbe>()
+                .Setup(x => x.BuiltInDependencyDirectory)
+                .Returns(@"dependencyPath\");
                 ChutzpahTestSettingsFile = new ChutzpahTestSettingsFile
                 {
                     SettingsFileDirectory = "settingsPath"
@@ -493,57 +496,6 @@ namespace Chutzpah.Facts
 
                 Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test1.js")).IsFileUnderTest);
                 Assert.True(context.ReferencedFiles.SingleOrDefault(x => x.Path.Contains("test2.js")).IsFileUnderTest);
-            }
-        }
-
-        public class GetAbsoluteFileUrl
-        {
-            // Shim to be able to preserve the old tests despite TestContextBuilder not
-            // having a static GetAbsoluteFileUrl method anymore.
-            private string TestContextBuilder_GetAbsoluteFileUrl(string path)
-            {
-                string html = new Script(new ReferencedFile { Path = path }).ToString();
-                return Regex.Match(html, "src=\"([^\"]+)\"").Groups[1].Value;
-            }
-
-            [Fact]
-            public void Will_prepend_scheme_and_convert_slashes_of_a_path_without_a_scheme_and_encode()
-            {
-                var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\file\path.js");
-
-                Assert.Equal("file:///D:/some/file/path.js", actual);
-            }
-
-            [Fact]
-            public void Will_prepend_scheme_and_convert_slashes_of_a_path_containing_a_scheme_and_encode()
-            {
-                var actual = TestContextBuilder_GetAbsoluteFileUrl(@"D:\some\http://.js");
-
-                Assert.Equal("file:///D:/some/http://.js", actual);
-            }
-
-            [Fact]
-            public void Will_not_prefix_a_path_using_http_scheme()
-            {
-                var actual = TestContextBuilder_GetAbsoluteFileUrl("http://someurl/x.js");
-
-                Assert.Equal("http://someurl/x.js", actual);
-            }
-
-            [Fact]
-            public void Will_not_prefix_a_path_using_https_scheme()
-            {
-                var actual = TestContextBuilder_GetAbsoluteFileUrl("https://anyurl/y.js");
-
-                Assert.Equal("https://anyurl/y.js", actual);
-            }
-
-            [Fact]
-            public void Will_not_prefix_a_path_using_file_scheme()
-            {
-                var actual = TestContextBuilder_GetAbsoluteFileUrl("file://Z:/path/z.js");
-
-                Assert.Equal("file://Z:/path/z.js", actual);
             }
         }
     }

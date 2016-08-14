@@ -11,6 +11,9 @@
     @@TestJSFile@@
 
     <script>
+        
+        // Prevent QUnit from autostarting so have better control of the timing
+        window.QUnit.config.autostart = false;
 
         var amdTestPaths = [@@AMDTestPath@@];
         window.chutzpah.boot(amdTestPaths);
@@ -32,7 +35,7 @@
             });
 
             window.QUnit.config.autostart = false;
-            window.chutzpah.amdStart = function() {
+            window.chutzpah.start = function() {
                 window.chutzpah.amdImport(amdTestPaths, function () {
                     console.log("!!_!! Starting QUnit from inline AMD call...");
                     if (!window._Chutzpah_covobj_name) {
@@ -41,9 +44,30 @@
                 });
             }
 
-            if(window.chutzpah.amdAutoStart) {
-                window.chutzpah.amdStart();
+            if(window.chutzpah.autoStart !== false) {
+                window.chutzpah.start();
             }
+        }
+        else {
+            window.chutzpah.start = function() {
+                console.log("!!_!! Starting QUnit ...");
+                if (!window._Chutzpah_covobj_name) {
+                    window.QUnit.start();
+                }
+            }
+
+
+            var currentWindowOnload = window.onload;
+            window.onload = function() {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }
+
+                if (!window.chutzpah.phantom && window.chutzpah.autoStart !== false) {
+                    console.log("!!_!! Stating QUnit from HTML OnLoad callback...");
+                    window.chutzpah.start();
+                }
+            };
         }
     </script>
 </head>

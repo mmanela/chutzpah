@@ -74,7 +74,7 @@ namespace Chutzpah.Coverage
         private bool IsCurrentFile(string relativePath, ReferencedFile referencedFile)
         {
             
-            var candidatePath = FileProbe.NormalizeFilePath(new Uri(Path.Combine(Path.GetDirectoryName(referencedFile.SourceMapFilePath), relativePath)).AbsolutePath);
+            var candidatePath = UrlBuilder.NormalizeFilePath(new Uri(Path.Combine(Path.GetDirectoryName(referencedFile.SourceMapFilePath), relativePath)).AbsolutePath);
             return referencedFile.Path.Equals(candidatePath, StringComparison.OrdinalIgnoreCase);
         }
 

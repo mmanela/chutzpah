@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Chutzpah.Coverage;
 using Chutzpah.FrameworkDefinitions;
+using Chutzpah.Server.Models;
 
 namespace Chutzpah.Models
 {
@@ -67,6 +68,7 @@ namespace Chutzpah.Models
         public ICoverageEngine CoverageEngine { get; set; }
 
         public string InputTestFilesString { get; set; }
-        public bool TestHarnessCreationFailed { get; internal set; }
+        public bool TestHarnessCreationFailed { get; set; }
+        public IChutzpahWebServerHost WebServerHost { get; set; }
     }
 }

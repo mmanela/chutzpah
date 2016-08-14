@@ -44,6 +44,17 @@ namespace Chutzpah.Models
         Never
     }
 
+    
+    public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
+    {
+        public ForcedChutzpahWebServerConfiguration()
+        {
+            Enabled = true;
+            DefaultPort = Constants.DefaultWebServerPort;
+            RootPath = Path.GetPathRoot(Environment.CurrentDirectory);
+        }
+    }
+
     /// <summary>
     /// Represents the Chutzpah Test Settings file (chutzpah.json)
     /// Applies to all test files in its directory and below.
@@ -51,6 +62,8 @@ namespace Chutzpah.Models
     public class ChutzpahTestSettingsFile
     {
         public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile(true);
+        public const bool ForceWebServerMode = true;
+
         private Regex testPatternRegex;
 
         public ChutzpahTestSettingsFile()
@@ -69,11 +82,16 @@ namespace Chutzpah.Models
             IsDefaultSettings = true;
 
             CodeCoverageSuccessPercentage = Constants.DefaultCodeCoverageSuccessPercentage;
-            TestHarnessReferenceMode = Chutzpah.Models.TestHarnessReferenceMode.Normal;
-            TestHarnessLocationMode = Chutzpah.Models.TestHarnessLocationMode.TestFileAdjacent;
-            RootReferencePathMode = Chutzpah.Models.RootReferencePathMode.DriveRoot;
+            TestHarnessReferenceMode = Models.TestHarnessReferenceMode.Normal;
+            TestHarnessLocationMode = Models.TestHarnessLocationMode.TestFileAdjacent;
+            RootReferencePathMode = Models.RootReferencePathMode.DriveRoot;
             EnableTestFileBatching = false;
             IgnoreResourceLoadingErrors = false;
+            
+            if (ForceWebServerMode)
+            {
+                Server = new ForcedChutzpahWebServerConfiguration();
+            }
         }
 
         public bool IsDefaultSettings { get; set; }
@@ -248,6 +266,11 @@ namespace Chutzpah.Models
         public BatchCompileConfiguration Compile { get; set; }
 
         /// <summary>
+        /// The web server configuration
+        /// </summary>
+        public ChutzpahWebServerConfiguration Server { get; set; }
+
+        /// <summary>
         /// The user agent to tell PhantomJS to use when making web requests
         /// </summary>
         public string UserAgent { get; set; }
@@ -383,6 +406,20 @@ namespace Chutzpah.Models
                 }
 
                 this.BrowserArguments[browserArgument.Key] = browserArgument.Value;
+            }
+
+            if(this.Server == null)
+            {
+                this.Server = parent.Server;
+            }
+            else if(this.Server != null && parent.Server != null
+
+                // Only allow override if the parent is a force configuration which is used for testing
+                && !(parent.Server is ForcedChutzpahWebServerConfiguration)
+                )
+            {
+                ChutzpahTracer.TraceWarning("Ignoring Server setting in child settings file since it is already configured in parent");
+                this.Server = new ChutzpahWebServerConfiguration(parent.Server);
             }
 
             if (this.Compile == null)

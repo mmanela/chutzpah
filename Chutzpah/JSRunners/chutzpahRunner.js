@@ -148,12 +148,12 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     page.onInitialized = function () {
         if (testMode === 'discovery') {
             page.evaluate(function () {
-                window.chutzpah = { testMode: 'discovery' };
+                window.chutzpah = { testMode: 'discovery', phantom: true };
             });
         }
         else {
             page.evaluate(function () {
-                window.chutzpah = { testMode: 'execution' };
+                window.chutzpah = { testMode: 'execution', phantom: true };
             });
         }
 

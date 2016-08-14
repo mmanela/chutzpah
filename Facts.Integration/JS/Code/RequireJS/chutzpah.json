@@ -1,4 +1,11 @@
 ﻿{
-	"MochaInterface": "qunit",
-    "CodeCoverageExcludes": ["*chai.js"]
+    "MochaInterface": "qunit",
+    "CodeCoverageExcludes": [ "*chai.js" ],
+    "References": [
+        
+        {
+            "Path": "require.js",
+            "IsTestFrameworkFile": true
+        }
+    ]
 }

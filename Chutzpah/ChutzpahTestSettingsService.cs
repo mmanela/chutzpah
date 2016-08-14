@@ -132,6 +132,8 @@ namespace Chutzpah
 
                     ProcessTraceFilePath(settings, chutzpahVariables);
 
+                    ProcessServerSettings(settings, chutzpahVariables);
+
                     ProcessInheritance(environment, settings, chutzpahVariables);
 
                     // Add a mapping in the cache for the directory that contains the test settings file
@@ -145,6 +147,30 @@ namespace Chutzpah
 
 
             return settings;
+        }
+
+        private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
+        {
+            if (settings.Server != null)
+            { 
+
+                settings.Server.DefaultPort = settings.Server.DefaultPort ?? Constants.DefaultWebServerPort;
+
+                string rootPath = null;
+                if (!string.IsNullOrEmpty(settings.Server.RootPath))
+                {
+                    rootPath = settings.Server.RootPath;
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation("Defaulting the RootPath to the drive root of the chutzpah.json file");
+                    rootPath = Path.GetPathRoot(settings.SettingsFileDirectory);
+                }
+
+                settings.Server.RootPath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, rootPath));
+
+                
+            }
         }
 
         private void ProcessTraceFilePath(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
@@ -368,7 +394,7 @@ namespace Chutzpah
             // If OutputPath is null then we will assume later on this is the current settings directory
             // We do not use the resolvePath method here since the path may not exist yet
 
-            pathMap.OutputPath = FileProbe.NormalizeFilePath(Path.Combine(settings.SettingsFileDirectory, ExpandVariable(chutzpahVariables, pathMap.OutputPath)));
+            pathMap.OutputPath = UrlBuilder.NormalizeFilePath(Path.Combine(settings.SettingsFileDirectory, ExpandVariable(chutzpahVariables, pathMap.OutputPath)));
             if (pathMap.OutputPath == null)
             {
                 throw new FileNotFoundException("Unable to find file/directory specified by OutputPath of {0}", (pathMap.OutputPath ?? ""));

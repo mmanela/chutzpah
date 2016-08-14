@@ -12,10 +12,12 @@ namespace Chutzpah
 {
     public class TestHarness
     {
-        private readonly ChutzpahTestSettingsFile chutzpahTestSettings;
-        private readonly TestOptions testOptions;
-        private readonly IEnumerable<ReferencedFile> referencedFiles;
-        private readonly IFileSystemWrapper fileSystem;
+        readonly TestContext testContext;
+        readonly ChutzpahTestSettingsFile chutzpahTestSettings;
+        readonly TestOptions testOptions;
+        readonly IEnumerable<ReferencedFile> referencedFiles;
+        readonly IFileSystemWrapper fileSystem;
+        readonly IUrlBuilder urlBuilder;
 
         public IList<TestHarnessItem> CodeCoverageDependencies { get; private set; }
         public IList<TestHarnessItem> TestFrameworkDependencies { get; private set; }
@@ -23,9 +25,11 @@ namespace Chutzpah
         public IList<TestHarnessItem> ReferencedScripts { get; private set; }
         public IList<TestHarnessItem> ReferencedStyles { get; private set; }
 
-        public TestHarness(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions testOptions, IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem)
+        public TestHarness(TestContext testContext, TestOptions testOptions, IEnumerable<ReferencedFile> referencedFiles, IFileSystemWrapper fileSystem, IUrlBuilder urlBuilder)
         {
-            this.chutzpahTestSettings = chutzpahTestSettings;
+            this.urlBuilder = urlBuilder;
+            this.testContext = testContext;
+            this.chutzpahTestSettings = testContext.TestFileSettings;
             this.testOptions = testOptions;
             this.referencedFiles = referencedFiles;
             this.fileSystem = fileSystem;
@@ -63,11 +67,11 @@ namespace Chutzpah
 
             if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
-                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBasePath);
+                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBasePath);
             }
             else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrl))
             {
-                amdBasePathUrl = FileProbe.GenerateFileUrl(chutzpahTestSettings.AMDBaseUrl);
+                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBaseUrl);
             }
 
             var replacements = new Dictionary<string, string>
@@ -251,7 +255,6 @@ namespace Chutzpah
             }
         }
 
-
         private void CleanupTestHarness()
         {
             // TODO: Remove this need for this by updating the logic in the framework definition to support regex matches in ReferenceIsDependency
@@ -269,7 +272,6 @@ namespace Chutzpah
                 }
             }
         }
-
     }
 
     public class TestHarnessItem
@@ -327,20 +329,6 @@ namespace Chutzpah
             return builder.ToString();
         }
 
-        protected static string GetAbsoluteFileUrl(ReferencedFile referencedFile)
-        {
-            string referencePath = string.IsNullOrEmpty(referencedFile.GeneratedFilePath)
-                        ? referencedFile.Path
-                        : referencedFile.GeneratedFilePath;
-
-            if (!RegexPatterns.SchemePrefixRegex.IsMatch(referencePath))
-            {
-                // Encode the reference path and then decode / (forward slash) and \ (back slash) into / (forward slash)
-                return FileProbe.GenerateFileUrl(referencePath);
-            }
-
-            return referencePath;
-        }
     }
 
     public class ExternalStylesheet : TestHarnessItem
@@ -350,7 +338,7 @@ namespace Chutzpah
         {
             Attributes.Add("rel", "stylesheet");
             Attributes.Add("type", "text/css");
-            Attributes.Add("href", GetAbsoluteFileUrl(referencedFile));
+            Attributes.Add("href", referencedFile.PathForUseInTestHarness);
         }
     }
 
@@ -361,7 +349,7 @@ namespace Chutzpah
         {
             Attributes.Add("rel", "shortcut icon");
             Attributes.Add("type", "image/png");
-            Attributes.Add("href", GetAbsoluteFileUrl(referencedFile));
+            Attributes.Add("href", referencedFile.PathForUseInTestHarness);
         }
     }
 
@@ -371,7 +359,7 @@ namespace Chutzpah
             : base(referencedFile, "script", true)
         {
             Attributes.Add("type", "text/javascript");
-            Attributes.Add("src", GetAbsoluteFileUrl(referencedFile));
+            Attributes.Add("src", referencedFile.PathForUseInTestHarness);
         }
 
         public Script(string scriptCode)

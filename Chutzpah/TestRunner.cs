@@ -11,6 +11,8 @@ using Chutzpah.Exceptions;
 using Chutzpah.Models;
 using Chutzpah.Utility;
 using Chutzpah.Transformers;
+using Chutzpah.Server;
+using Chutzpah.Server.Models;
 
 namespace Chutzpah
 {
@@ -27,6 +29,7 @@ namespace Chutzpah
         private readonly ITestContextBuilder testContextBuilder;
         private readonly IChutzpahTestSettingsService testSettingsService;
         private readonly ITransformProcessor transformProcessor;
+        private readonly IChutzpahWebServerFactory webServerFactory;
         private bool m_debugEnabled;
 
         public static ITestRunner Create(bool debugEnabled = false)
@@ -40,6 +43,8 @@ namespace Chutzpah
             return runner;
         }
 
+        readonly IUrlBuilder urlBuilder;
+
         public TestRunner(IProcessHelper process,
                           ITestCaseStreamReaderFactory testCaseStreamReaderFactory,
                           IFileProbe fileProbe,
@@ -47,8 +52,11 @@ namespace Chutzpah
                           ITestHarnessBuilder testHarnessBuilder,
                           ITestContextBuilder htmlTestFileCreator,
                           IChutzpahTestSettingsService testSettingsService,
-                          ITransformProcessor transformProcessor)
+                          ITransformProcessor transformProcessor,
+                          IChutzpahWebServerFactory webServerFactory,
+                          IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.process = process;
             this.testCaseStreamReaderFactory = testCaseStreamReaderFactory;
             this.fileProbe = fileProbe;
@@ -58,6 +66,7 @@ namespace Chutzpah
             testContextBuilder = htmlTestFileCreator;
             this.testSettingsService = testSettingsService;
             this.transformProcessor = transformProcessor;
+            this.webServerFactory = webServerFactory;
         }
 
 
@@ -151,83 +160,117 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
 
-            options.TestExecutionMode = testExecutionMode;
-
-            stopWatch.Start();
-            string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
-            if (testPaths == null)
-                throw new ArgumentNullException("testPaths");
-            if (headlessBrowserPath == null)
-                throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
-            if (fileProbe.FindFilePath(TestRunnerJsName) == null)
-                throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
-
             var overallSummary = new TestCaseSummary();
 
-            // Concurrent list to collect test contexts
-            var testContexts = new ConcurrentBag<TestContext>();
-
-            // Concurrent collection used to gather the parallel results from
-            var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
-            var resultCount = 0;
-            var cancellationSource = new CancellationTokenSource();
-
-
-            // Given the input paths discover the potential test files
-            var scriptPaths = FindTestFiles(testPaths, options);
-
-            // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
-            // If so, we keep those tests in a group together to be used in one context
-            // Otherwise, we put each file in its own test group so each get their own context
-            var testRunConfiguration = BuildTestRunConfiguration(scriptPaths, options);
-
-            ConfigureTracing(testRunConfiguration);
-
-            var parallelism = testRunConfiguration.MaxDegreeOfParallelism.HasValue
-                                ? Math.Min(options.MaxDegreeOfParallelism, testRunConfiguration.MaxDegreeOfParallelism.Value)
-                                : options.MaxDegreeOfParallelism;
-
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = parallelism, CancellationToken = cancellationSource.Token };
-            
-            ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, parallelOptions.MaxDegreeOfParallelism);
-
-            // Build test contexts in parallel given a list of files each
-            BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
-
-
-            // Compile the test contexts
-            if (!PerformBatchCompile(callback, testContexts))
+            try
             {
+                options.TestExecutionMode = testExecutionMode;
+
+                stopWatch.Start();
+                string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
+                if (testPaths == null)
+                    throw new ArgumentNullException("testPaths");
+                if (headlessBrowserPath == null)
+                    throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
+                if (fileProbe.FindFilePath(TestRunnerJsName) == null)
+                    throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
+
+
+                // Concurrent list to collect test contexts
+                var testContexts = new ConcurrentBag<TestContext>();
+
+                // Concurrent collection used to gather the parallel results from
+                var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
+                var resultCount = 0;
+                var cancellationSource = new CancellationTokenSource();
+
+
+                // Given the input paths discover the potential test files
+                var scriptPaths = FindTestFiles(testPaths, options);
+
+                // Group the test files by their chutzpah.json files. Then check if those settings file have batching mode enabled.
+                // If so, we keep those tests in a group together to be used in one context
+                // Otherwise, we put each file in its own test group so each get their own context
+                var testRunConfiguration = BuildTestRunConfiguration(scriptPaths, options);
+
+                ConfigureTracing(testRunConfiguration);
+
+                var parallelism = testRunConfiguration.MaxDegreeOfParallelism.HasValue
+                                    ? Math.Min(options.MaxDegreeOfParallelism, testRunConfiguration.MaxDegreeOfParallelism.Value)
+                                    : options.MaxDegreeOfParallelism;
+
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = parallelism, CancellationToken = cancellationSource.Token };
+
+                ChutzpahTracer.TraceInformation("Chutzpah run started in mode {0} with parallelism set to {1}", testExecutionMode, parallelOptions.MaxDegreeOfParallelism);
+
+                // Build test contexts in parallel given a list of files each
+                BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
+
+                // Find the first test context with a web server configuration and use it
+                var host = SetupWebServerHost(testContexts);
+
+
+                // Compile the test contexts
+                if (!PerformBatchCompile(callback, testContexts))
+                {
+                    return overallSummary;
+                }
+
+                // Build test harness for each context and execute it in parallel
+                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, host);
+
+
+                // Gather TestFileSummaries into TaseCaseSummary
+                foreach (var fileSummary in testFileSummaries)
+                {
+                    overallSummary.Append(fileSummary);
+                }
+
+                stopWatch.Stop();
+                overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
+
+                overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
+
+                // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
+                // If we don't clear then the user can never update the file.
+                testSettingsService.ClearCache();
+
+                // host.Dispose();
+
+
+                ChutzpahTracer.TraceInformation(
+                    "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
+                    overallSummary.PassedCount,
+                    overallSummary.FailedCount,
+                    overallSummary.Errors.Count);
+
                 return overallSummary;
             }
-
-            // Build test harness for each context and execute it in parallel
-            ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary);
-
-
-            // Gather TestFileSummaries into TaseCaseSummary
-            foreach (var fileSummary in testFileSummaries)
+            catch(Exception e)
             {
-                overallSummary.Append(fileSummary);
+                callback.ExceptionThrown(e);
+
+                ChutzpahTracer.TraceError(e, "Unhandled exception during Chutzpah test run");
+
+                return overallSummary;
+            }
+        }
+
+        private ChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts)
+        {
+            ChutzpahWebServerHost webServerHost = null;
+            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.GetValueOrDefault()).ToList();
+            var contextWithChosenServerConfiguration = contextUsingWebServer.FirstOrDefault();
+            if (contextWithChosenServerConfiguration != null)
+            {
+                var webServerConfiguration = contextWithChosenServerConfiguration.TestFileSettings.Server;
+                webServerHost = webServerFactory.CreateServer(webServerConfiguration);
+
+                // Stash host object on context for use in url generation
+                contextUsingWebServer.ForEach(x => x.WebServerHost = webServerHost);
             }
 
-            stopWatch.Stop();
-            overallSummary.SetTotalRunTime((int)stopWatch.Elapsed.TotalMilliseconds);
-
-            overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
-
-            // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
-            // If we don't clear then the user can never update the file.
-            testSettingsService.ClearCache();
-
-
-            ChutzpahTracer.TraceInformation(
-                "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
-                overallSummary.PassedCount,
-                overallSummary.FailedCount,
-                overallSummary.Errors.Count);
-
-            return overallSummary;
+            return webServerHost;
         }
 
         private void ConfigureTracing(TestRunConfiguration testRunConfiguration)
@@ -297,6 +340,9 @@ namespace Chutzpah
             catch (FileNotFoundException e)
             {
                 callback.ExceptionThrown(e);
+
+                ChutzpahTracer.TraceError(e, "Error during batch compile");
+
                 return false;
             }
             catch (ChutzpahCompilationFailedException e)
@@ -318,7 +364,8 @@ namespace Chutzpah
             ParallelOptions parallelOptions,
             string headlessBrowserPath,
             ConcurrentQueue<TestFileSummary> testFileSummaries,
-            TestCaseSummary overallSummary)
+            TestCaseSummary overallSummary,
+            IChutzpahWebServerHost webServerHost)
         {
             Parallel.ForEach(
                 testContexts,
@@ -361,8 +408,8 @@ namespace Chutzpah
                                     { Path.GetFileNameWithoutExtension(path), options.BrowserArgs }
                                 };
                             }
-                                                   
-                            process.LaunchFileInBrowser(testContext.TestHarnessPath, options.BrowserName, browserArgs);
+
+                           process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.BrowserName, browserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
@@ -454,6 +501,13 @@ namespace Chutzpah
                         ChutzpahTracer.TraceError(e, "Error cleaning up test context for {0}", testContext.FirstInputTestFile);
                     }
                 }
+            }
+
+            if( webServerHost!= null
+                && options.TestLaunchMode != TestLaunchMode.FullBrowser
+                && options.TestLaunchMode != TestLaunchMode.Custom)
+            {
+                webServerHost.Dispose();
             }
         }
 
@@ -554,7 +608,7 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
-            string fileUrl = BuildHarnessUrl(testContext.TestHarnessPath, testContext.IsRemoteHarness);
+            string fileUrl = BuildHarnessUrl(testContext);
 
             string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testExecutionMode);
             Func<ProcessStream, IList<TestFileSummary>> streamProcessor =
@@ -616,15 +670,16 @@ namespace Chutzpah
             return runnerArgs;
         }
 
-        private static string BuildHarnessUrl(string absolutePath, bool isRemoteHarness)
+        private string BuildHarnessUrl(TestContext testContext)
         {
-            if (isRemoteHarness)
+            
+            if (testContext.IsRemoteHarness)
             {
-                return absolutePath;
+                return testContext.TestHarnessPath;
             }
             else
             {
-                return string.Format("\"{0}\"", FileProbe.GenerateFileUrl(absolutePath));
+                return string.Format("\"{0}\"", urlBuilder.GenerateFileUrl(testContext, testContext.TestHarnessPath, fullyQualified: true));
             }
         }
     }

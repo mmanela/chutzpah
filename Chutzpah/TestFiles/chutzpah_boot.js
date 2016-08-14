@@ -1,8 +1,9 @@
 ﻿window.chutzpah = window.chutzpah || {};
 
-window.chutzpah.amdAutoStart = true;
-window.chutzpah.preventAmdAutoStart = function () {
-    window.chutzpah.amdAutoStart = false;
+window.chutzpah.autoStart = true;
+
+window.chutzpah.preventAutoStart =  function () {
+    window.chutzpah.autoStart = false;
 };
 
 window.chutzpah.boot = function (amdTestPaths) {

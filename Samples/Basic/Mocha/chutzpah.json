@@ -1,0 +1,16 @@
+﻿{
+    "Framework": "mocha",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "References" : [
+      {"Path" : "chai.js" },
+      {"Path" : "../code.js" },
+    ],
+    "Tests" : [
+      {"Includes": ["*basic-*.js"]}
+    ],
+
+    "Server": {
+    	"Enabled": true
+    }
+}
+}

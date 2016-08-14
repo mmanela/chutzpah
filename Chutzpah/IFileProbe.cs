@@ -5,6 +5,11 @@ namespace Chutzpah
     public interface IFileProbe
     {
         /// <summary>
+        /// The directory where built in dependencies can be found
+        /// </summary>
+        string BuiltInDependencyDirectory { get; }
+        
+        /// <summary>
         /// Finds the full path of a file. This method will probe from both the executing assembly
         /// path. As well as the current working directory.
         /// </summary>

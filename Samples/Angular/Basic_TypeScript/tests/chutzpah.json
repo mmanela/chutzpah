@@ -5,10 +5,7 @@
     "Executable": "../compile.bat",
     "Extensions": [ ".ts" ],
     "ExtensionsWithNoOutput": [ ".d.ts" ],
-    "UseSourceMaps": true,
-    "Paths" : [
-      { "SourcePath": "../", "OutputPath": "../" }
-    ]
+    "UseSourceMaps": true
   },
   "References": [
     { "Path": "../../libs/angular.min.js", "IsTestFrameworkFile": true },

@@ -7,7 +7,17 @@ namespace Chutzpah
     public abstract class RunnerCallback : ITestMethodRunnerCallback
     {
         public static ITestMethodRunnerCallback Empty = new EmptyRunnerCallback();
-        private sealed class EmptyRunnerCallback : RunnerCallback { }
+        private sealed class EmptyRunnerCallback : RunnerCallback
+        {
+            public override void ExceptionThrown(Exception exception, string fileName)
+            {
+                // Default runner callback will re-throw exception. In other implementations 
+                // we don't do this since we know they can report the error
+                base.ExceptionThrown(exception, fileName);
+
+                throw exception;
+            }
+        }
 
         public virtual void TestSuiteStarted() { }
         public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary) { }

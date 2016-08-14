@@ -97,7 +97,7 @@ namespace Chutzpah.Facts.Integration
 
         public static IEnumerable<object[]> ChutzpahSamples
         {
-            get { return TestPathGroups.ChutzpahSamples; }
+            get { return TestPathGroups.ChutzpahSamplesWithCoverageSupported; }
         }
 
         [Theory]
@@ -182,6 +182,8 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_get_coverage_for_path_with_hash_tag()
         {
+            if (ChutzpahTestSettingsFile.ForceWebServerMode) { return; }
+
             var testRunner = TestRunner.Create();
 
             var result = testRunner.RunTests(@"JS\Test\PathEncoding\C#\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());
@@ -192,6 +194,8 @@ namespace Chutzpah.Facts.Integration
         [Fact]
         public void Will_get_coverage_for_path_with_space()
         {
+            if (ChutzpahTestSettingsFile.ForceWebServerMode) { return; }
+
             var testRunner = TestRunner.Create();
 
             var result = testRunner.RunTests(@"JS\Test\PathEncoding\With Space+\pathEncoding.js", WithCoverage(), new ExceptionThrowingRunnerCallback());

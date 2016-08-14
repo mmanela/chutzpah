@@ -16,9 +16,11 @@ namespace Chutzpah.Coverage
         private readonly IFileSystemWrapper fileSystem;
         private readonly IJsonSerializer jsonSerializer;
         private readonly ILineCoverageMapper lineCoverageMapper;
+        readonly IUrlBuilder urlBuilder;
 
-        public CoverageEngineFactory(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper)
+        public CoverageEngineFactory(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper, IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
             this.lineCoverageMapper = lineCoverageMapper;
@@ -26,7 +28,7 @@ namespace Chutzpah.Coverage
 
         public ICoverageEngine CreateCoverageEngine()
         {
-            return new BlanketJsCoverageEngine(jsonSerializer, fileSystem, lineCoverageMapper);
+            return new BlanketJsCoverageEngine(jsonSerializer, fileSystem, lineCoverageMapper, urlBuilder);
         }
     }
 }

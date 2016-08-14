@@ -88,9 +88,9 @@ namespace Chutzpah.VS2012.TestAdapter
 
                     var directory = runContext.SolutionDirectory;
                     var coverageHtmlFile = CoverageOutputGenerator.WriteHtmlFile(Path.Combine(directory, Constants.CoverageHtmlFileName), testResultsSummary.CoverageObject);
-                    var processHelper = new ProcessHelper();
+                    var processHelper = ChutzpahContainer.Get<IProcessHelper>();
 
-                    processHelper.LaunchFileInBrowser(coverageHtmlFile);
+                    processHelper.LaunchLocalFileInBrowser(coverageHtmlFile);
                 }
             }
             catch(Exception e)

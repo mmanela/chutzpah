@@ -422,7 +422,8 @@ namespace Chutzpah.Facts.Library.Models
                 TestHarnessLocationMode = TestHarnessLocationMode.Custom,
                 TestHarnessReferenceMode = TestHarnessReferenceMode.AMD,
                 RootReferencePathMode = RootReferencePathMode.SettingsFileDirectory,
-                Compile = new BatchCompileConfiguration { Mode = BatchCompileMode.External }
+                Compile = new BatchCompileConfiguration { Mode = BatchCompileMode.External },
+                Server = new ChutzpahWebServerConfiguration()
             };
 
             var childSettings = new ChutzpahTestSettingsFile
@@ -438,7 +439,8 @@ namespace Chutzpah.Facts.Library.Models
 
                 TestPattern = "childTestPattern",
                 TestFileTimeout = 11,
-                UserAgent = "childUserAgent"
+                UserAgent = "childUserAgent",
+                Server = new ChutzpahWebServerConfiguration()
             };
 
             service.Mock<IFileProbe>().Setup(x => x.FindTestSettingsFile(@"C:\settingsDir")).Returns(@"C:\settingsDir\settingsFile.json");
@@ -464,6 +466,9 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal("childTestPattern", childSettings.TestPattern);
             Assert.Equal(11, childSettings.TestFileTimeout);
             Assert.Equal("childUserAgent", childSettings.UserAgent);
+
+
+            Assert.Equal(parentSettings.Server, childSettings.Server);
         }
 
 

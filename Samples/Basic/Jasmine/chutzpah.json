@@ -1,0 +1,14 @@
+﻿{
+    "Framework": "jasmine",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "References" : [
+      {"Path" : "../code.js" }
+    ],
+    "Tests" : [
+      {"Path": "basic-jasmine.js"}
+    ],
+    "Server": {
+    	"Enabled": true
+    }
+}
+}

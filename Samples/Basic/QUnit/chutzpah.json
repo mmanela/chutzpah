@@ -1,0 +1,14 @@
+﻿{
+    "Framework": "qunit",
+    "TestHarnessLocationMode": "SettingsFileAdjacent",
+    "References" : [
+      {"Path" : "../code.js" }
+    ],
+    "Tests" : [
+      {"Path": "basic-qunit.js"}
+    ],
+
+    "Server": {
+    	"Enabled": true
+    }
+}

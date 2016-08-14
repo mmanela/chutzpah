@@ -57,15 +57,19 @@ namespace Chutzpah
         void GetReferencedFiles(List<ReferencedFile> referencedFiles, IFrameworkDefinition definition, ChutzpahTestSettingsFile chutzpahTestSettings);
 
         void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings);
+
+        void SetupPathsFormattedForTestHarness(TestContext testContext, List<ReferencedFile> referencedFiles);
     }
 
     public class ReferenceProcessor : IReferenceProcessor
     {
-        private readonly IFileSystemWrapper fileSystem;
-        private readonly IFileProbe fileProbe;
+        readonly IFileSystemWrapper fileSystem;
+        readonly IFileProbe fileProbe;
+        readonly IUrlBuilder urlBuilder;
 
-        public ReferenceProcessor(IFileSystemWrapper fileSystem, IFileProbe fileProbe)
+        public ReferenceProcessor(IFileSystemWrapper fileSystem, IFileProbe fileProbe, IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.fileSystem = fileSystem;
             this.fileProbe = fileProbe;
         }
@@ -127,12 +131,26 @@ namespace Chutzpah
             }
         }
 
+
+        /// <summary>
+        /// Adds the paths for when running in a web server or local file system
+        /// </summary>
+        public void SetupPathsFormattedForTestHarness(TestContext testContext, List<ReferencedFile> referencedFiles)
+        {
+            foreach (var referencedFile in referencedFiles)
+            {
+                var referencePath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
+                referencedFile.AbsoluteServerUrl = urlBuilder.GenerateAbsoluteServerUrl(testContext, referencedFile);
+                referencedFile.PathForUseInTestHarness = urlBuilder.GenerateFileUrl(testContext, referencedFile);
+            }
+
+        }
+
+
+
         /// <summary>
         /// Add the AMD file paths for the Path and GeneratePath fields
         /// </summary>
-        /// <param name="referencedFiles"></param>
-        /// <param name="testHarnessDirectory"></param>
-        /// <param name="testSettings"></param>
         public void SetupAmdFilePaths(List<ReferencedFile> referencedFiles, string testHarnessDirectory, ChutzpahTestSettingsFile testSettings)
         {
             // If the legacy BasePath setting it set then defer to that
@@ -156,7 +174,7 @@ namespace Chutzpah
 
         private static string GetAmdPath(string filePath, string amdAppRoot)
         {
-            string amdModulePath = FileProbe.GetRelativePath(amdAppRoot, filePath);
+            string amdModulePath = UrlBuilder.GetRelativePath(amdAppRoot, filePath);
 
             amdModulePath = amdModulePath
                 .Replace(Path.GetExtension(filePath), "")
@@ -179,8 +197,8 @@ namespace Chutzpah
             string relativeAmdRootPath = "";
             if (!string.IsNullOrEmpty(testSettings.AMDBasePath))
             {
-                relativeAmdRootPath = FileProbe.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
-            } 
+                relativeAmdRootPath = UrlBuilder.GetRelativePath(testSettings.AMDBasePath, testHarnessDirectory);
+            }
 
             foreach (var referencedFile in referencedFiles)
             {
@@ -195,7 +213,7 @@ namespace Chutzpah
 
         private static string GetLegacyAmdPath(string testHarnessDirectory, string filePath, string relativeAmdRootPath)
         {
-            string amdModulePath = FileProbe.GetRelativePath(testHarnessDirectory, filePath);
+            string amdModulePath = UrlBuilder.GetRelativePath(testHarnessDirectory, filePath);
 
             amdModulePath = Path.Combine(relativeAmdRootPath, amdModulePath)
                 .Replace(Path.GetExtension(filePath), "")
@@ -254,7 +272,7 @@ namespace Chutzpah
                             templateType = propValue;
                             break;
                         case "mode":
-                            if(propValue.Equals("script", StringComparison.OrdinalIgnoreCase))
+                            if (propValue.Equals("script", StringComparison.OrdinalIgnoreCase))
                             {
                                 templateMode = TemplateMode.Script;
                             }
@@ -337,18 +355,18 @@ namespace Chutzpah
                 string absoluteFolderPath = fileProbe.FindFolderPath(relativeReferencePath);
                 if (absoluteFolderPath != null)
                 {
-                    var includePatterns = pathSettings.Includes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
-                    var excludePatterns = pathSettings.Excludes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
+                    var includePatterns = pathSettings.Includes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
+                    var excludePatterns = pathSettings.Excludes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
 
                     // Find all files in this folder including sub-folders. This can be ALOT of files.
                     // Only a subset of these files Chutzpah might understand so many of these will be ignored.
                     var childFiles = fileSystem.GetFiles(absoluteFolderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
-                        let normalizedFile = FileProbe.NormalizeFilePath(file)
-                        where !fileProbe.IsTemporaryChutzpahFile(file)
-                        && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
-                        && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
-                        select file;
+                                     let normalizedFile = UrlBuilder.NormalizeFilePath(file)
+                                     where !fileProbe.IsTemporaryChutzpahFile(file)
+                                     && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
+                                     && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
+                                     select file;
 
                     validFiles.ForEach(file => VisitReferencedFile(file, definition, discoveredPaths, referencedFiles, chutzpahTestSettings, pathSettings));
 

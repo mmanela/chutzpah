@@ -27,8 +27,11 @@ namespace Chutzpah.Coverage
         private List<string> excludePatterns { get; set; }
         private List<string> ignorePatterns { get; set; }
 
-        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper)
+        readonly IUrlBuilder urlBuilder;
+
+        public BlanketJsCoverageEngine(IJsonSerializer jsonSerializer, IFileSystemWrapper fileSystem, ILineCoverageMapper lineCoverageMapper, IUrlBuilder urlBuilder)
         {
+            this.urlBuilder = urlBuilder;
             this.jsonSerializer = jsonSerializer;
             this.fileSystem = fileSystem;
             this.lineCoverageMapper = lineCoverageMapper;
@@ -139,51 +142,75 @@ namespace Chutzpah.Coverage
 
         public CoverageData DeserializeCoverageObject(string json, TestContext testContext)
         {
+            var isRunningInWebServer = testContext.TestFileSettings.Server != null && testContext.TestFileSettings.Server.Enabled.GetValueOrDefault();
             var data = jsonSerializer.Deserialize<BlanketCoverageObject>(json);
-            var generatedToReferencedFile =
-                testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToLookup(rf => rf.GeneratedFilePath, rf => rf);
+            ILookup<string, ReferencedFile> generatedToReferencedFile = null;
+
+            if (isRunningInWebServer)
+            {
+                generatedToReferencedFile = testContext.ReferencedFiles.Where(rf => rf.AbsoluteServerUrl != null).ToLookup(rf => rf.AbsoluteServerUrl, rf => rf);
+            }
+            else
+            {
+                generatedToReferencedFile = testContext.ReferencedFiles.Where(rf => rf.GeneratedFilePath != null).ToLookup(rf => rf.GeneratedFilePath, rf => rf);
+            }
 
             var coverageData = new CoverageData(testContext.TestFileSettings.CodeCoverageSuccessPercentage.Value);
+            string executedFilePath = null;
+            string localFilePathForServerItem = null;
 
             // Rewrite all keys in the coverage object dictionary in order to change URIs
             // to paths and generated paths to original paths, then only keep the ones
             // that match the include/exclude patterns.
             foreach (var entry in data)
             {
+                var referencedFiles = new List<ReferencedFile>();
                 Uri uri = new Uri(entry.Key, UriKind.RelativeOrAbsolute);
 
-                if (!uri.IsAbsoluteUri)
+                if (isRunningInWebServer)
                 {
-                    // Resolve against the test file path.
-                    string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
-                    uri = new Uri(Path.Combine(basePath, entry.Key));
-                }
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
+                        var relativePathFromHarness = Path.Combine(basePath, entry.Key);
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, relativePathFromHarness, true, false));
+                        localFilePathForServerItem = new Uri(relativePathFromHarness).LocalPath;
+                    }
 
-                if (uri.Scheme != "file")
-                    continue;
-
-
-                string executedFilePath = uri.LocalPath;
-
-                // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
-                // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
-                executedFilePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(executedFilePath, "$1");
-
-                //REMOVE URI Query part from filepath like ?ver=1233123
-                executedFilePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(executedFilePath, "$1");
-
-                var fileUri = new Uri(executedFilePath, UriKind.RelativeOrAbsolute);
-                executedFilePath = fileUri.LocalPath;
-                var referencedFiles = new List<ReferencedFile>();
-
-                if (!generatedToReferencedFile.Contains(executedFilePath))
-                {
-                    // This does not appear to be a compiled file so just created a referencedFile with the path
-                    referencedFiles.Add(new ReferencedFile { Path = executedFilePath });
+                    executedFilePath = uri.AbsoluteUri;
                 }
                 else
                 {
-                    referencedFiles = generatedToReferencedFile[executedFilePath].ToList();
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        // Resolve against the test file path.
+                        string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
+                        uri = new Uri(Path.Combine(basePath, entry.Key));
+                    }
+
+                    executedFilePath = uri.LocalPath;
+
+                    // Fix local paths of the form: file:///c:/zzz should become c:/zzz not /c:/zzz
+                    // but keep network paths of the form: file://network/files/zzz as //network/files/zzz
+                    executedFilePath = RegexPatterns.InvalidPrefixedLocalFilePath.Replace(executedFilePath, "$1");
+
+                    //REMOVE URI Query part from filepath like ?ver=1233123
+                    executedFilePath = RegexPatterns.IgnoreQueryPartFromUri.Replace(executedFilePath, "$1");
+
+                    var fileUri = new Uri(executedFilePath, UriKind.RelativeOrAbsolute);
+                    executedFilePath = fileUri.LocalPath;
+                }
+
+                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase));
+                if (matchedFile == null)
+                {
+                    // This does not appear to be a compiled file so just created a referencedFile with the path
+                    // In the case of web server mode we use a local file path we generated
+                    referencedFiles.Add(new ReferencedFile { Path = localFilePathForServerItem ?? executedFilePath });
+                }
+                else
+                {
+                    referencedFiles = matchedFile.ToList();
                 }
 
                 referencedFiles = referencedFiles.Where(file => IsFileEligibleForInstrumentation(file.Path)
@@ -194,7 +221,7 @@ namespace Chutzpah.Coverage
                     // The coveredPath is the file which we have coverage lines for. We assume generated if it exsits otherwise the file path
                     var coveredPath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
 
-                    // If the user is using source maps then always take sourcePath and not generates. 
+                    // If the user is using source maps then always take sourcePath and not generated. 
                     if (testContext.TestFileSettings.Compile != null && testContext.TestFileSettings.Compile.UseSourceMaps.GetValueOrDefault() && referencedFile.SourceMapFilePath != null)
                     {
                         coveredPath = referencedFile.Path;
@@ -270,13 +297,13 @@ namespace Chutzpah.Coverage
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
-            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(includePattern))))
+            if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(includePattern))))
             {
                 return false;
             }
 
             // If no exclude pattern is given then exclude none otherwise exclude the patterns that match any given exclude pattern
-            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(excludePattern))))
+            if (excludePatterns.Any() && excludePatterns.Any(excludePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(excludePattern))))
             {
                 return false;
             }
@@ -287,7 +314,7 @@ namespace Chutzpah.Coverage
         public bool IsIgnored(string filePath)
         {
             // If no ignore pattern is given then include all files. Otherwise ignore the ones that match an ignore pattern
-            if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, FileProbe.NormalizeFilePath(ignorePattern))))
+            if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(ignorePattern))))
             {
                 return true;
             }

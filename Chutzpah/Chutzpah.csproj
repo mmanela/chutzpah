@@ -45,6 +45,14 @@
       <HintPath>..\packages\AntiXSS.4.3.0\lib\net40\HtmlSanitizationLibrary.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Nancy, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages_autosigned\Nancy.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy.Hosting.Self, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages_autosigned\Nancy.Hosting.Self.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -81,12 +89,15 @@
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
+    <Compile Include="IUrlBuilder.cs" />
+    <Compile Include="UrlBuilder.cs" />
     <Compile Include="FileProcessors\ISourceMapDiscoverer.cs" />
     <Compile Include="Extensions\VSTSExtensions.cs" />
     <Compile Include="FileProcessors\LineNumberProcessor.cs" />
     <Compile Include="FileProcessors\MochaInterfaceDetectionProcessor.cs" />
     <Compile Include="FileProcessors\SourceMapDiscoverer.cs" />
     <Compile Include="ITestLauncher.cs" />
+    <Compile Include="Models\ChutzpahWebServerConfiguration.cs" />
     <Compile Include="Models\BatchCompileConfiguration.cs" />
     <Compile Include="Models\BatchCompileResult.cs" />
     <Compile Include="Models\ChutzpahSettingsFileEnvironments.cs" />
@@ -149,6 +160,12 @@
     <Compile Include="ReferenceProcessor.cs" />
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="Callbacks\RunnerCallback.cs" />
+    <Compile Include="Server\IChutzpahWebServerFactory.cs" />
+    <Compile Include="Server\Models\ChutzpahServerHost.cs" />
+    <Compile Include="Server\NancySettingsBootstrapper.cs" />
+    <Compile Include="Server\NancyRootPathProvider.cs" />
+    <Compile Include="Server\WebServerModule.cs" />
+    <Compile Include="Server\ChutzpahWebServerFactory.cs" />
     <Compile Include="TestCaseStreamReaderFactory.cs" />
     <Compile Include="TestContextBuilder.cs" />
     <Compile Include="IFileProbe.cs" />

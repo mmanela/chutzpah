@@ -292,16 +292,16 @@ namespace Chutzpah
                 return true;
             }
 
-            testFilePath = FileProbe.NormalizeFilePath(testFilePath);
+            testFilePath = UrlBuilder.NormalizeFilePath(testFilePath);
 
             foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
-                var includePatterns = pathSettings.Includes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
-                var excludePatterns = pathSettings.Excludes.Select(x => FileProbe.NormalizeFilePath(x)).ToList();
+                var includePatterns = pathSettings.Includes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
+                var excludePatterns = pathSettings.Excludes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
                 var testPath = string.IsNullOrEmpty(pathSettings.Path) ? pathSettings.SettingsFileDirectory : pathSettings.Path;
-                testPath = FileProbe.NormalizeFilePath(testPath);
+                testPath = UrlBuilder.NormalizeFilePath(testPath);
                 testPath = testPath != null ? Path.Combine(pathSettings.SettingsFileDirectory, testPath) : null;
 
                 // If a file path is given just match the test file against it to see if we should urn
@@ -317,7 +317,7 @@ namespace Chutzpah
                 }
 
                 // If a folder path is given then match the test file path that is in that folder with the optional include/exclude paths
-                var folderPath = FileProbe.NormalizeFilePath(fileProbe.FindFolderPath(testPath));
+                var folderPath = UrlBuilder.NormalizeFilePath(fileProbe.FindFolderPath(testPath));
                 if (folderPath != null)
                 {
                     if (testFilePath.Contains(folderPath))
@@ -358,7 +358,7 @@ namespace Chutzpah
         {
             foreach (string item in deps.Reverse())
             {
-                string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
+                string sourcePath = Path.Combine(fileProbe.BuiltInDependencyDirectory, item);
                 ChutzpahTracer.TraceInformation("Added framework dependency '{0}' to referenced files", sourcePath);
                 referencedFiles.Insert(0, new ReferencedFile { IsLocal = true, IsTestFrameworkFile = true, Path = sourcePath, IncludeInTestHarness = true, IsBuiltInDependency = true });
             }
@@ -377,7 +377,7 @@ namespace Chutzpah
 
                 foreach (string item in deps)
                 {
-                    string sourcePath = fileProbe.GetPathInfo(Path.Combine(Constants.TestFileFolder, item)).FullPath;
+                    string sourcePath = Path.Combine(fileProbe.BuiltInDependencyDirectory, item);
                     ChutzpahTracer.TraceInformation(
                         "Added code coverage dependency '{0}' to referenced files",
                         sourcePath);

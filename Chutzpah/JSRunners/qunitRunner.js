@@ -23,8 +23,6 @@
     function onQUnitLoaded() {
         console.log("!!_!! onQUnitLoaded");
 
-        // Prevent QUnit from autostarting so have better control of the timing
-        window.QUnit.config.autostart = false;
 
         function log(obj) {
             console.log(JSON.stringify(obj));
@@ -220,11 +218,11 @@
         }
         
         function startQUnit() {
-        	console.log("!!_!! Starting QUnit...");
-                window.QUnit.start();
+        	console.log("!!_!! Starting QUnit from Phantom onPageLoaded...");
+        	(window.chutzpah.start || window.QUnit.start)();
         }
         
-        if (!window._Chutzpah_covobj_name) {
+        if (!window._Chutzpah_covobj_name && window.chutzpah.autoStart !== false) {
             startQUnit();
         }
     }

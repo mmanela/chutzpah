@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Chutzpah.Models;
+using Chutzpah.Wrappers;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Web;
-using Chutzpah.Extensions;
-using Chutzpah.Models;
-using Chutzpah.Wrappers;
 
 namespace Chutzpah
 {
@@ -14,6 +11,7 @@ namespace Chutzpah
     {
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
+        private string builtInDependencyDirectory;
 
         private static readonly Dictionary<string, PathType> ExtensionToPathTypeMap =
             new Dictionary<string, PathType>
@@ -156,13 +154,13 @@ namespace Chutzpah
 
             foreach (var pathSettings in chutzpahTestSettings.Tests.Where(x => x != null))
             {
-                var includePatterns = pathSettings.Includes.Select(x => NormalizeFilePath(x)).ToList();
-                var excludePatterns = pathSettings.Excludes.Select(x => NormalizeFilePath(x)).ToList();
+                var includePatterns = pathSettings.Includes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
+                var excludePatterns = pathSettings.Excludes.Select(x => UrlBuilder.NormalizeFilePath(x)).ToList();
 
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
                 var testPath = string.IsNullOrEmpty(pathSettings.Path) ? pathSettings.SettingsFileDirectory : pathSettings.Path;
-                testPath = NormalizeFilePath(testPath);
+                testPath = UrlBuilder.NormalizeFilePath(testPath);
                 testPath = testPath != null ? Path.Combine(pathSettings.SettingsFileDirectory, testPath) : null;
 
                 // If a file path is given just return that file
@@ -174,13 +172,13 @@ namespace Chutzpah
                 }
 
                 // If a folder path is given enumerate that folder (recursively) with the optional include/exclude paths
-                var folderPath = NormalizeFilePath(FindFolderPath(testPath));
+                var folderPath = UrlBuilder.NormalizeFilePath(FindFolderPath(testPath));
                 if (folderPath != null)
                 {
 
                     var childFiles = fileSystem.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
-                                     let normalizedFile = NormalizeFilePath(file)
+                                     let normalizedFile = UrlBuilder.NormalizeFilePath(file)
                                      where !IsTemporaryChutzpahFile(normalizedFile)
                                              && (!includePatterns.Any() || includePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
                                              && (!excludePatterns.Any() || !excludePatterns.Any(pat => NativeImports.PathMatchSpec(normalizedFile, pat)))
@@ -213,6 +211,19 @@ namespace Chutzpah
             return PathType.Other;
         }
 
+        public string BuiltInDependencyDirectory
+        {
+            get
+            {
+                if(builtInDependencyDirectory == null)
+                {
+                    builtInDependencyDirectory = FindFolderPath(Constants.TestFileFolder);
+                }
+
+                return builtInDependencyDirectory;
+            }
+        }
+
         private string FindPath(string path, Predicate<string> pathExists)
         {
             if (string.IsNullOrEmpty(path))
@@ -237,52 +248,6 @@ namespace Chutzpah
                 return filePath;
 
             return null;
-        }
-
-        private static string EncodeFilePath(string path)
-        {
-            return HttpUtility.UrlEncode(path)
-                .Replace("+", "%20")
-                .Replace("%3a", ":")
-                .Replace("%5c", "/")
-                .Replace("%2f", "/");
-        }
-
-        /// <summary>
-        /// This generates a file url based on an absolute file path
-        /// </summary>
-        public static string GenerateFileUrl(string absolutePath)
-        {
-            var encodedReferencePath = EncodeFilePath(absolutePath);
-            var fileUrlFormat = encodedReferencePath.StartsWith("//") ? "file://{0}" : "file:///{0}";
-            return string.Format(fileUrlFormat, encodedReferencePath);
-        }
-
-        public static string NormalizeFilePath(string path)
-        {
-            if (path == null) return null;
-
-            return path.ToLowerInvariant().Replace(@"/", @"\");
-        }
-
-        /// <summary>
-        /// This get a relative path from one path to another. 
-        /// </summary>
-        /// <param name="pathToStartFrom"></param>
-        /// <param name="pathToGetTo"></param>
-        /// <returns></returns>
-        public static string GetRelativePath(string pathToStartFrom, string pathToGetTo)
-        {
-            var pathToGetToUri = new Uri(pathToGetTo);
-            
-            // Folders must end in a slash
-            if (!pathToStartFrom.EndsWith(Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)))
-            {
-                pathToStartFrom += Path.DirectorySeparatorChar;
-            }
-            
-            var pathToStartFromUri = new Uri(pathToStartFrom);
-            return Uri.UnescapeDataString(pathToStartFromUri.MakeRelativeUri(pathToGetToUri).ToString().Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }

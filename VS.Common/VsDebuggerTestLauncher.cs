@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Chutzpah;
 using Chutzpah.Models;
 using Chutzpah.Utility;
 
@@ -12,14 +7,24 @@ namespace Chutzpah.VS.Common
 {
     public class VsDebuggerTestLauncher : ITestLauncher
     {
+        readonly IUrlBuilder urlBuilder;
+
+        public VsDebuggerTestLauncher(IUrlBuilder urlBuilder)
+        {
+            this.urlBuilder = urlBuilder;
+        }
+
         public void LaunchTest(TestContext testContext)
         {
+            var file = testContext.TestHarnessPath;
+            file = urlBuilder.GenerateFileUrl(testContext, file, fullyQualified: true);
+
             // Start IE.
             ProcessStartInfo startInfo = new ProcessStartInfo()
             {
                 UseShellExecute = true,
                 FileName = BrowserPathHelper.GetBrowserPath("ie"),
-                Arguments = string.Format("-noframemerging -suspended -debug {0}", FileProbe.GenerateFileUrl(testContext.TestHarnessPath))
+                Arguments = string.Format("-noframemerging -suspended -debug {0}", file)
                     // -noframemerging
                     //      This is what VS does when launching the script debugger.
                     //      Unsure whether strictly necessary.

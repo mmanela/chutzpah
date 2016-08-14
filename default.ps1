@@ -6,13 +6,20 @@ properties {
   $nugetDir = "$baseDir\_nuget"
   $chocolateyDir = "$baseDir\_chocolatey"
   $packageDir = "$baseDir\_package"
+  
+  $autoSignedNugetPackages = "$baseDir/packages_autosigned"
+  $nugetPackges = "$baseDir/packages"
 }
 
 # Aliases
 task Default -depends Build
+
+task Install -depends Restore-Packages, Sign-ForeignAssemblies
+
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
 task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-UnitTests, Run-IntegrationTests
+
 
 # Build Tasks
 task Build -depends  Clean-Solution-NoVS, Build-Solution-NoVS, Run-UnitTests, Run-IntegrationTests
@@ -121,6 +128,45 @@ task Run-Phantom {
   $testFilePath = $testFilePath.Path.Replace("\","/");
   
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner$suffix.js" "file:///$testFilePath" $mode }
+}
+
+task Restore-Packages {
+  exec { .\Tools\nuget.exe restore Chutzpah.VS.sln }
+}
+ 
+function getLatestNugetPackagePath($name) {
+  return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+}
+
+task Sign-ForeignAssemblies {
+
+  $packagesToSign = @("Nancy", "Nancy.Hosting.Self")
+  
+  clean $autoSignedNugetPackages
+ 
+  if( -not (Test-Path $autoSignedNugetPackages)) {
+    create $autoSignedNugetPackages
+  }
+  
+  $signerToolFolder = (getLatestNugetPackagePath "Brutal.Dev.StrongNameSigner").FullName
+  $signerExe = Join-Path $signerToolFolder Tools/StrongNameSigner.Console.exe
+  
+  Write-Host "Signing assemblies"
+  $folderPaths = ""
+  
+  foreach($name in $packagesToSign) {
+  
+    $folderToSign = getLatestNugetPackagePath $name
+    $fullPath = $folderToSign.FullName
+    $folderName = $folderToSign.Name
+    
+    $folderPaths += $fullpath + "|"
+  } 
+  
+  $folderPaths = $folderPaths.TrimEnd("|");
+  
+  Write-Host "Signing dll's in $autoSignedNugetPackages"
+  exec { & $signerExe -in $folderPaths -out $autoSignedNugetPackages -k "$baseDir/chutzpah.snk" }
 }
 
 task Package-Files -depends Clean-PackageFiles {

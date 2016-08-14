@@ -1,4 +1,4 @@
-﻿window.chutzpah.preventAmdAutoStart();
+﻿window.chutzpah.preventAutoStart();
 
 setTimeout(function() {
   require.config({
@@ -12,5 +12,5 @@ setTimeout(function() {
       }
   });
   
-  window.chutzpah.amdStart();
+  window.chutzpah.start();
 }, 500);
