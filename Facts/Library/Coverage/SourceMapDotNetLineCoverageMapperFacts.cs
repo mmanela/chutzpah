@@ -63,7 +63,7 @@ namespace Chutzpah.Facts.Library.Coverage
         [Fact]
         public void GetOriginalFileLineExecutionCounts_ReadsSourceMapFromDisk()
         {
-            var sourceMapFilePath = @"C:\folder\path";
+            var sourceMapFilePath = @"C:\folder\with spaces\path";
 
             var mockFileSystem = new Mock<IFileSystemWrapper>();
             mockFileSystem
@@ -79,11 +79,11 @@ namespace Chutzpah.Facts.Library.Coverage
             mockFileSystem.Verify(x => x.GetText(sourceMapFilePath), Times.Once());
             Assert.Equal("contents", mapper.LastConsumerFileContents);
         }
-
+        
         [Fact]
         public void GetOriginalFileLineExecutionCounts_AggregatesLineExecutionCountsViaMapping()
         {
-            var sourceMapFilePath = @"C:\folder\path";
+            var sourceMapFilePath = @"C:\folder\with spaces\path";
 
             var mockFileSystem = new Mock<IFileSystemWrapper>();
             mockFileSystem
@@ -98,7 +98,7 @@ namespace Chutzpah.Facts.Library.Coverage
 
             var mapper = new TestableSourceMapDotNetLineCoverageMapper(mockFileSystem.Object, GetFakeMappings());
             // Line 1 executed twice, line 2 once, line 3 never, line 4 never
-            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 2, 1, null, null }, 3, new ReferencedFile() { Path  = @"C:\folder\source.file", SourceMapFilePath = sourceMapFilePath });
+            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 2, 1, null, null }, 3, new ReferencedFile() { Path  = @"C:\folder\with spaces\source.file", SourceMapFilePath = sourceMapFilePath });
 
             var expected = new int?[] 
             {
@@ -118,7 +118,7 @@ namespace Chutzpah.Facts.Library.Coverage
         [Fact]
         public void GetOriginalFileLineExecutionCounts_AggregatesLineExecutionCountsViaMapping_ExcludesOtherFilesReferencedInSourceMap()
         {
-            var sourceMapFilePath = @"C:\folder\path";
+            var sourceMapFilePath = @"C:\folder\with spaces\path";
 
             var mockFileSystem = new Mock<IFileSystemWrapper>();
             mockFileSystem
@@ -133,7 +133,7 @@ namespace Chutzpah.Facts.Library.Coverage
 
             var mapper = new TestableSourceMapDotNetLineCoverageMapper(mockFileSystem.Object, GetFakeMappings());
             // Line 1 executed never, line 2 never, line 3 once, line 4 never
-            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 2, 1, null, null }, 3, new ReferencedFile() { Path  = @"C:\folder\other.file", SourceMapFilePath = sourceMapFilePath });
+            var result = mapper.GetOriginalFileLineExecutionCounts(new int?[] { null, 2, 1, null, null }, 3, new ReferencedFile() { Path  = @"C:\folder\with spaces\other.file", SourceMapFilePath = sourceMapFilePath });
 
             var expected = new int?[] 
             {
