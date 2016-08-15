@@ -19,7 +19,6 @@ namespace Chutzpah.Coverage
             {
                 throw new ArgumentNullException("fileSystem");
             }
-
             this.fileSystem = fileSystem;
         }
 
@@ -73,9 +72,9 @@ namespace Chutzpah.Coverage
         /// </summary>
         private bool IsCurrentFile(string relativePath, ReferencedFile referencedFile)
         {
-            
             var candidatePath = UrlBuilder.NormalizeFilePath(new Uri(Path.Combine(Path.GetDirectoryName(referencedFile.SourceMapFilePath), relativePath)).AbsolutePath);
-            return referencedFile.Path.Equals(candidatePath, StringComparison.OrdinalIgnoreCase);
+            var normalisedReferencedFilePath = UrlBuilder.NormalizeFilePath(new Uri(referencedFile.Path).AbsolutePath);
+            return normalisedReferencedFilePath.Equals(candidatePath, StringComparison.OrdinalIgnoreCase);
         }
 
         protected virtual ISourceMapConsumer GetConsumer(string mapFileContents)
