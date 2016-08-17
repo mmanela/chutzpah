@@ -8,6 +8,7 @@ using System.Linq;
 using Chutzpah.Transformers;
 using Chutzpah.Wrappers;
 using Chutzpah.Server.Models;
+using System.Collections.Generic;
 
 namespace Chutzpah
 {
@@ -16,11 +17,12 @@ namespace Chutzpah
         [STAThread]
         public static int Main(string[] args)
         {
-            
+            var transformers = new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper());
+
             if (args.Length == 0 || args[0] == "/?")
             {
                 PrintHeader();
-                PrintUsage();
+                PrintUsage(transformers);
                 return -1;
             }
 
@@ -28,14 +30,15 @@ namespace Chutzpah
 
             try
             {
-                CommandLine commandLine = CommandLine.Parse(args);
+
+                CommandLine commandLine = CommandLine.Parse(args, transformers.Select(x => x.Name));
 
                 if (!commandLine.NoLogo)
                 {
                     PrintHeader();
                 }
 
-                int failCount = RunTests(commandLine);
+                int failCount = RunTests(commandLine, transformers);
 
                 if (commandLine.Wait)
                 {
@@ -50,7 +53,9 @@ namespace Chutzpah
             catch (ArgumentException ex)
             {
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("error: {0}", ex.Message);
+                Console.ResetColor();
                 return -1;
             }
         }
@@ -59,7 +64,7 @@ namespace Chutzpah
         {
             Console.WriteLine("Chutzpah console test runner  ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
             Console.WriteLine("Version {0}", Assembly.GetEntryAssembly().GetName().Version);
-            Console.WriteLine("Copyright (C) 2015 Matthew Manela (http://matthewmanela.com).");
+            Console.WriteLine("Copyright (C) 2016 Matthew Manela (http://matthewmanela.com).");
         }
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -74,7 +79,7 @@ namespace Chutzpah
             Environment.Exit(1);
         }
 
-        static void PrintUsage()
+        static void PrintUsage(IEnumerable<SummaryTransformer> transformers)
         {
             string executableName = Path.GetFileNameWithoutExtension(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
 
@@ -109,7 +114,7 @@ namespace Chutzpah
 
 
 
-            foreach (var transformer in new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper()))
+            foreach (var transformer in transformers)
             {
                 Console.WriteLine("  /{0} filename              : {1}", transformer.Name, transformer.Description);
             }
@@ -117,7 +122,7 @@ namespace Chutzpah
             Console.WriteLine();
         }
 
-        static int RunTests(CommandLine commandLine)
+        static int RunTests(CommandLine commandLine, IEnumerable<SummaryTransformer> transformers)
         {
 
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
@@ -163,7 +168,7 @@ namespace Chutzpah
                 if (!commandLine.Discovery)
                 {
                     testResultsSummary = testRunner.RunTests(commandLine.Files, testOptions, callback);
-                    ProcessTestSummaryTransformers(commandLine, testResultsSummary);
+                    ProcessTestSummaryTransformers(transformers, commandLine, testResultsSummary);
                 }
                 else
                 {
@@ -181,7 +186,9 @@ namespace Chutzpah
             }
             catch (ArgumentException ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex.Message);
+                Console.ResetColor();
             }
 
             if (ChutzpahWebServerHost.ActiveWebServer != null)
@@ -201,13 +208,13 @@ namespace Chutzpah
             return failedCount;
         }
 
-        private static void ProcessTestSummaryTransformers(CommandLine commandLine, TestCaseSummary testResultsSummary)
+        private static void ProcessTestSummaryTransformers(IEnumerable<SummaryTransformer>  transformers, CommandLine commandLine, TestCaseSummary testResultsSummary)
         {
-            var transformers = new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper());
-            foreach (var transformer in transformers.Where(x => commandLine.UnmatchedArguments.ContainsKey(x.Name)))
+            foreach (var transformer in transformers.Where(x => commandLine.TransformersRequested.ContainsKey(x.Name)))
             {
-                var path = commandLine.UnmatchedArguments[transformer.Name];
+                var path = commandLine.TransformersRequested[transformer.Name];
                 transformer.Transform(testResultsSummary, path);
+
             }
         }
     }

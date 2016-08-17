@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Chutzpah.Models;
 using Xunit;
 
@@ -8,14 +10,14 @@ namespace Chutzpah.Facts.ConsoleRunner
     {
         private class TestableCommandLine : CommandLine
         {
-            private TestableCommandLine(string[] arguments)
-                : base(arguments)
+            private TestableCommandLine(string[] arguments, IEnumerable<string> transformerNames)
+                : base(arguments, transformerNames)
             {
             }
 
-            public static TestableCommandLine Create(string[] arguments)
+            public static TestableCommandLine Create(string[] arguments, IEnumerable<string> transformerNames = null)
             {
-                return new TestableCommandLine(arguments);
+                return new TestableCommandLine(arguments, transformerNames ?? Enumerable.Empty<string>());
             }
         }
 

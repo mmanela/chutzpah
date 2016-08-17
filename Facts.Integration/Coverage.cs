@@ -11,7 +11,7 @@ namespace Chutzpah.Facts.Integration
     {
         public Coverage()
         {
-            ChutzpahTracer.Enabled = false;
+            ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
         }
 
         private const string ABasicTestScript = @"JS\Test\basic-jasmine.js";
@@ -137,6 +137,7 @@ namespace Chutzpah.Facts.Integration
         public void Will_create_a_coverage_object(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
             ChutzpahTestSettingsFile.Default.FrameworkVersion = frameworkVersion;
 
             var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());

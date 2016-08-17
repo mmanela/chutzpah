@@ -10,13 +10,15 @@ namespace Chutzpah
         private const string TeamcityProjectName = "TEAMCITY_PROJECT_NAME";
 
         private readonly Stack<string> arguments = new Stack<string>();
+        private readonly HashSet<string> transformerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        protected CommandLine(string[] args)
+        protected CommandLine(string[] args, IEnumerable<string> transformerNames)
         {
             for (var i = args.Length - 1; i >= 0; i--)
                 arguments.Push(args[i]);
 
-            UnmatchedArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            transformerNames = new HashSet<string>(transformerNames);
+            TransformersRequested = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Files = new List<string>();
             SettingsFileEnvironments = new ChutzpahSettingsFileEnvironments();
             TeamCity = Environment.GetEnvironmentVariable(TeamcityProjectName) != null;
@@ -51,7 +53,7 @@ namespace Chutzpah
 
         public ChutzpahSettingsFileEnvironments SettingsFileEnvironments { get; set; }
 
-        public IDictionary<string,string> UnmatchedArguments { get; set; }
+        public IDictionary<string, string> TransformersRequested { get; set; }
 
         public bool VsOutput { get; protected set; }
 
@@ -73,9 +75,9 @@ namespace Chutzpah
                 throw new ArgumentException(String.Format("unknown command line option: {0}", option.Value));
         }
 
-        public static CommandLine Parse(string[] args)
+        public static CommandLine Parse(string[] args, IEnumerable<string> transformerNames)
         {
-            return new CommandLine(args);
+            return new CommandLine(args, transformerNames);
         }
 
         protected void Parse()
@@ -96,86 +98,89 @@ namespace Chutzpah
 
                 switch (optionName)
                 {
-                    case "/wait":
-                        GuardNoOptionValue(option);
-                        Wait = true;
-                        break;
-                    case "/discovery":
-                        GuardNoOptionValue(option);
-                        Discovery = true;
-                        break;
-                    case "/debug":
-                        GuardNoOptionValue(option);
-                        Debug = true;
-                        break;
-                    case "/trace":
-                        GuardNoOptionValue(option);
-                        Trace = true;
-                        break;
-                    case "/failonerror":
-                    case "/failonscripterror":
-                        GuardNoOptionValue(option);
-                        FailOnError = true;
-                        break;
-                    case "/openinbrowser":
-                        AddBrowserName(option.Value);
-                        OpenInBrowser = true;
-                        break;
-                    case "/browserargs":
-                        AddBrowserArgs(option.Value);
-                        break;
-                    case "/silent":
-                        GuardNoOptionValue(option);
-                        Silent = true;
-                        break;
-                    case "/nologo":
-                        GuardNoOptionValue(option);
-                        NoLogo = true;
-                        break;
-                    case "/teamcity":
-                        GuardNoOptionValue(option);
-                        TeamCity = true;
-                        break;
-                    case "/timeoutmilliseconds":
-                        AddTimeoutOption(option.Value);
-                        break;
-                    case "/parallelism":
-                        AddParallelismOption(option.Value);
-                        break;
-                    case "/file":
-                    case "/path":
-                        AddFileOption(option.Value);
-                        break;
-                    case "/vsoutput":
-                        GuardNoOptionValue(option);
-                        VsOutput = true;
-                        break;
-                    case "/coverage":
-                        GuardNoOptionValue(option);
-                        Coverage = true;
-                        break;
-                    case "/coverageincludes":
-                        AddCoverageIncludeOption(option.Value);
-                        break;
-                    case "/coverageexcludes":
-                        AddCoverageExcludeOption(option.Value);
-                        break;
-                    case "/coverageignores":
-                        AddCoverageIgnoreOption(option.Value);
-                        break;
-                    case "/showfailurereport":
-                        GuardNoOptionValue(option);
-                        ShowFailureReport = true;
-                        break;
-                    case "/settingsfileenvironment":
-                        AddSettingsFileEnvironment(option.Value);
-                        break;
-                    default:
-                        if (!optionName.StartsWith("/"))
-                            throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
+                case "/wait":
+                    GuardNoOptionValue(option);
+                    Wait = true;
+                    break;
+                case "/discovery":
+                    GuardNoOptionValue(option);
+                    Discovery = true;
+                    break;
+                case "/debug":
+                    GuardNoOptionValue(option);
+                    Debug = true;
+                    break;
+                case "/trace":
+                    GuardNoOptionValue(option);
+                    Trace = true;
+                    break;
+                case "/failonerror":
+                case "/failonscripterror":
+                    GuardNoOptionValue(option);
+                    FailOnError = true;
+                    break;
+                case "/openinbrowser":
+                    AddBrowserName(option.Value);
+                    OpenInBrowser = true;
+                    break;
+                case "/browserargs":
+                    AddBrowserArgs(option.Value);
+                    break;
+                case "/silent":
+                    GuardNoOptionValue(option);
+                    Silent = true;
+                    break;
+                case "/nologo":
+                    GuardNoOptionValue(option);
+                    NoLogo = true;
+                    break;
+                case "/teamcity":
+                    GuardNoOptionValue(option);
+                    TeamCity = true;
+                    break;
+                case "/timeoutmilliseconds":
+                    AddTimeoutOption(option.Value);
+                    break;
+                case "/parallelism":
+                    AddParallelismOption(option.Value);
+                    break;
+                case "/file":
+                case "/path":
+                    AddFileOption(option.Value);
+                    break;
+                case "/vsoutput":
+                    GuardNoOptionValue(option);
+                    VsOutput = true;
+                    break;
+                case "/coverage":
+                    GuardNoOptionValue(option);
+                    Coverage = true;
+                    break;
+                case "/coverageincludes":
+                    AddCoverageIncludeOption(option.Value);
+                    break;
+                case "/coverageexcludes":
+                    AddCoverageExcludeOption(option.Value);
+                    break;
+                case "/coverageignores":
+                    AddCoverageIgnoreOption(option.Value);
+                    break;
+                case "/showfailurereport":
+                    GuardNoOptionValue(option);
+                    ShowFailureReport = true;
+                    break;
+                case "/settingsfileenvironment":
+                    AddSettingsFileEnvironment(option.Value);
+                    break;
+                default:
+                    if (!optionName.StartsWith("/") || !transformerNames.Contains(option.Value))
+                    {
+                        throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
+                    }
 
-                        UnmatchedArguments[optionName.Trim('/')] = option.Value;
-                        break;
+                    TransformersRequested[optionName.Trim('/')] = option.Value;
+
+                    break;
                 }
             }
         }
@@ -280,18 +285,18 @@ namespace Chutzpah
             Files.Add(file);
         }
 
-        
+
         private void AddSettingsFileEnvironment(string environmentStr)
-        {   
+        {
             if (string.IsNullOrEmpty(environmentStr))
             {
                 throw new ArgumentException(
                     "missing argument for /settingsFileEnvironment.  Expecting the settings file path and at least one property (e.g. settingsFilePath;prop1=val1;prop2=val2)");
             }
 
-            var envParts = environmentStr.Split(new []{";"},StringSplitOptions.RemoveEmptyEntries);
-            if(envParts.Length <2)
-            {  
+            var envParts = environmentStr.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            if (envParts.Length < 2)
+            {
                 throw new ArgumentException(
                     "invalid argument for /settingsFileEnvironment.  Expecting the settings file path and at least one property (e.g. settingsFilePath;prop1=val1;prop2=val2)");
             }

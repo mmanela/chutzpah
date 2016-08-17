@@ -68,7 +68,7 @@ namespace Chutzpah.Facts.Integration
 
         public Discovery()
         {
-            ChutzpahTracer.Enabled = false;
+            ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
         }
 
 

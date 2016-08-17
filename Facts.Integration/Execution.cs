@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Chutzpah.Exceptions;
 using Chutzpah.Models;
-using Moq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -76,7 +73,7 @@ namespace Chutzpah.Facts.Integration
         
         public Execution()
         {
-            ChutzpahTracer.Enabled = false;
+            ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
         }
 
         [Theory]
@@ -678,7 +675,7 @@ namespace Chutzpah.Facts.Integration
         {
             public TestFileBatching()
             {
-                ChutzpahTracer.Enabled = false;
+                ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
             }
 
             [Fact]
@@ -705,7 +702,7 @@ namespace Chutzpah.Facts.Integration
 
             public JasmineDdescribeIit()
             {
-                ChutzpahTracer.Enabled = false;
+                ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
                 version = ChutzpahTestSettingsFile.Default.FrameworkVersion;
                 ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
             }
@@ -810,7 +807,7 @@ namespace Chutzpah.Facts.Integration
 
             public AMD()
             {
-                ChutzpahTracer.Enabled = false;
+                ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
             }
 
 
@@ -869,7 +866,7 @@ namespace Chutzpah.Facts.Integration
         {
             public ChutzpahSettingsFile()
             {
-                ChutzpahTracer.Enabled = false;
+                ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
             }
 
             [Fact]

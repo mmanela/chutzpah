@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Chutzpah.Models;
 
 namespace Chutzpah.Facts.Integration
 {
     public static class TestUtils
     {
+        public static bool TracingEnabled = true;
+
         public static void RunAsJasmineVersionOne(Action action)
         {
             var version = ChutzpahTestSettingsFile.Default.FrameworkVersion;

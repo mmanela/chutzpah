@@ -10,6 +10,10 @@ namespace Chutzpah.Facts.Integration
 {
     public class Transforms : CoverageBase
     {
+        public Transforms()
+        {
+            ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
+        }
 
         [Fact]
         public void Will_generate_coverage_HTML()
