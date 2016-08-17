@@ -467,8 +467,10 @@ namespace Chutzpah.Facts.Library.Models
             Assert.Equal(11, childSettings.TestFileTimeout);
             Assert.Equal("childUserAgent", childSettings.UserAgent);
 
-
-            Assert.Equal(parentSettings.Server, childSettings.Server);
+            if (!ChutzpahTestSettingsFile.ForceWebServerMode)
+            {
+                Assert.Equal(parentSettings.Server, childSettings.Server);
+            }
         }
 
 
