@@ -13,12 +13,11 @@ using Chutzpah.Wrappers;
 
 namespace Chutzpah.Transformers
 {
-    public class TrxXmlTransformer: SummaryTransformer
+    public class TrxXmlTransformer : SummaryTransformer
     {
-
         private TestRunType testRun;
 
-        public TrxXmlTransformer(IFileSystemWrapper fileSystem) 
+        public TrxXmlTransformer(IFileSystemWrapper fileSystem)
             : base(fileSystem)
         {
         }
@@ -40,7 +39,7 @@ namespace Chutzpah.Transformers
 
         public override string Transform(TestCaseSummary testFileSummary)
         {
-            if(testFileSummary == null) throw new ArgumentNullException("testFileSummary");
+            if (testFileSummary == null) throw new ArgumentNullException("testFileSummary");
 
 
             testRun = new TestRunType
@@ -172,9 +171,8 @@ namespace Chutzpah.Transformers
                     executionId = testCase.ExecutionId.ToString(),
                     testId = testCase.Id.ToString(),
                     testName = testCase.TestName,
-
                     computerName = Environment.MachineName,
-                    duration = new TimeSpan(0,0,testCase.TimeTaken).ToString("c"),
+                    duration = new TimeSpan(0, 0, testCase.TimeTaken).ToString("c"),
                     // I tried adding this to StandardConsoleRunner, but it demanded too many changes.
                     // Setting start to the creation date.
                     startTime = DateTime.Now.AddSeconds(-testFileSummary.TimeTaken).ToString("O"),
@@ -210,7 +208,7 @@ namespace Chutzpah.Transformers
 
             var stringStream = new StringWriter();
             var xs = new XmlSerializer(typeof(TestRunType));
-            xs.Serialize(stringStream,testRun,ns);
+            xs.Serialize(stringStream, testRun, ns);
 
             return stringStream.ToString();
         }
