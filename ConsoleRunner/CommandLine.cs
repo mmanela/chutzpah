@@ -17,7 +17,7 @@ namespace Chutzpah
             for (var i = args.Length - 1; i >= 0; i--)
                 arguments.Push(args[i]);
 
-            transformerNames = new HashSet<string>(transformerNames);
+            this.transformerNames = new HashSet<string>(transformerNames);
             TransformersRequested = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Files = new List<string>();
             SettingsFileEnvironments = new ChutzpahSettingsFileEnvironments();
@@ -173,12 +173,13 @@ namespace Chutzpah
                     AddSettingsFileEnvironment(option.Value);
                     break;
                 default:
-                    if (!optionName.StartsWith("/") || !transformerNames.Contains(option.Value))
+                    var trimmedName = optionName.Trim('/');
+                    if (!optionName.StartsWith("/") || !transformerNames.Contains(trimmedName))
                     {
                         throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
                     }
 
-                    TransformersRequested[optionName.Trim('/')] = option.Value;
+                    TransformersRequested[trimmedName] = option.Value;
 
                     break;
                 }

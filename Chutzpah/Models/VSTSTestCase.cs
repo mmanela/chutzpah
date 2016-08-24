@@ -32,6 +32,7 @@ namespace Chutzpah.Models
             this.TestName = that.TestName;
             this.TestResults = that.TestResults;
             this.TimeTaken = that.TimeTaken;
+            this.Skipped = that.Skipped;
             return this;
         }
 

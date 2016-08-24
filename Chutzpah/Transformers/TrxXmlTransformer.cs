@@ -180,7 +180,8 @@ namespace Chutzpah.Transformers
                     endTime = DateTime.Now.AddSeconds((-testFileSummary.TimeTaken) + testCase.TimeTaken).ToString("O"),
                     // This is for specific test type.
                     testType = "13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b",
-                    outcome = testCase.Passed ? "Passed" : "Failed",
+                    outcome = testCase.TestOutcome == Models.TestOutcome.Passed ? "Passed" : 
+                                                      testCase.TestOutcome == Models.TestOutcome.Skipped ? "NotExecuted" : "Failed",
                     testListId = testList.id,
 
                 };
