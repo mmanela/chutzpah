@@ -1,15 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Chutzpah.Callbacks;
-using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.VS.Common;
-using Chutzpah.Wrappers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Chutzpah.VS2012.TestAdapter
 {

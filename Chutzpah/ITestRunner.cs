@@ -31,6 +31,7 @@ namespace Chutzpah
 
         IEnumerable<TestCase> DiscoverTests(string testPath);
         IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths);
+        IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback);
         bool IsTestFile(string testFile, ChutzpahSettingsFileEnvironments envionrments);
         IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options);
         void CleanTestContext(TestContext context);

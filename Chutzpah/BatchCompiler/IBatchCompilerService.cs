@@ -6,6 +6,6 @@ namespace Chutzpah.BatchProcessor
 {
     public interface IBatchCompilerService
     {
-        void Compile(IEnumerable<TestContext> testContexts);
+        void Compile(IEnumerable<TestContext> testContexts, ITestMethodRunnerCallback callback = null);
     }
 }

@@ -102,10 +102,11 @@ namespace Chutzpah.Facts
                 .Returns(false)
                 .Returns(true);
             service.Mock<IFileSystemWrapper>().Setup(x => x.FileExists(It.Is<string>(f => f.EndsWith(".ts")))).Returns(true);
+            var callback = service.Mock<ITestMethodRunnerCallback>();
 
-            var ex  = Record.Exception( () => service.ClassUnderTest.Compile(new[] { context }));
+            service.ClassUnderTest.Compile(new[] { context }, callback.Object);
 
-            Assert.IsType<FileNotFoundException>(ex);
+            callback.Verify(x => x.ExceptionThrown(It.IsAny<FileNotFoundException>(), It.IsAny<string>()));
             service.Mock<IProcessHelper>().Verify(x => x.RunBatchCompileProcess(It.IsAny<BatchCompileConfiguration>()), Times.Never());
         }
 

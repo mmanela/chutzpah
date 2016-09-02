@@ -113,6 +113,12 @@ namespace Chutzpah
             return summary.Tests;
         }
 
+        public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback)
+        {
+            var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Discovery, callback);
+            return summary.Tests;
+        }
+
 
         public TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
@@ -298,7 +304,7 @@ namespace Chutzpah
         {
             try
             {
-                batchCompilerService.Compile(testContexts);
+                batchCompilerService.Compile(testContexts, callback);
             }
             catch (FileNotFoundException e)
             {
