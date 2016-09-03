@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="0a3da9d8-a5b6-4fb9-b423-ef87ff203628" Version="4.2.3" Language="en-US" Publisher="Matthew Manela" />
+    <Identity Id="0a3da9d8-a5b6-4fb9-b423-ef87ff203628" Version="4.2.4" Language="en-US" Publisher="Matthew Manela" />
     <DisplayName>Chutzpah Test Runner Context Menu Extension</DisplayName>
     <Description>Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
     <License>EULA.rtf</License>

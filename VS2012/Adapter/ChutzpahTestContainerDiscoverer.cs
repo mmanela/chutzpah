@@ -424,14 +424,19 @@ namespace Chutzpah.VS2012.TestAdapter
                 var dirPath = Path.GetDirectoryName(projectPath);
                 foreach (var prop in ChutzpahMsBuildProps.GetProps())
                 {
-                    chutzpahEnvProps.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, buildProject.GetPropertyValue(prop)));
+                    var value = buildProject.GetPropertyValue(prop);
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        chutzpahEnvProps.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, value));
+                    }
                 }
 
                 lock (sync)
                 {
                     var envProps = settingsMapper.Settings.ChutzpahSettingsFileEnvironments
                                                           .FirstOrDefault(x => x.Path.TrimEnd('/', '\\').Equals(dirPath, StringComparison.OrdinalIgnoreCase));
-                    if (envProps == null)
+
+                    if (envProps == null && chutzpahEnvProps.Any())
                     {
                         envProps = new ChutzpahSettingsFileEnvironment(dirPath);
 
@@ -439,7 +444,10 @@ namespace Chutzpah.VS2012.TestAdapter
 
                     }
 
-                    envProps.Properties = chutzpahEnvProps;
+                    if (envProps != null)
+                    {
+                        envProps.Properties = chutzpahEnvProps;
+                    }
                 }
             }
         }

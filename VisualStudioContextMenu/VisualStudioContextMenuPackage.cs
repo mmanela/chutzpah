@@ -150,10 +150,17 @@ namespace Chutzpah.VisualStudioContextMenu
                 var environment = new ChutzpahSettingsFileEnvironment(dirPath);
                 foreach (var prop in ChutzpahMsBuildProps.GetProps())
                 {
-                    environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, buildProject.GetPropertyValue(prop)));
+                    var value = buildProject.GetPropertyValue(prop);
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        environment.Properties.Add(new ChutzpahSettingsFileEnvironmentProperty(prop, value));
+                    }
                 }
 
-                newEnvironments.AddEnvironment(environment);
+                if (environment.Properties.Any())
+                {
+                    newEnvironments.AddEnvironment(environment);
+                }
             }
 
             settingsEnvironments = newEnvironments;
@@ -365,7 +372,7 @@ namespace Chutzpah.VisualStudioContextMenu
         private void RunTestsFromEditorCallback(object sender, EventArgs e, bool withCodeCoverage = false, bool withDebugger = false)
         {
             string filePath = CurrentDocumentPath;
-            RunTests(filePath, withCodeCoverage:withCodeCoverage, withDebugger:withDebugger);
+            RunTests(filePath, withCodeCoverage: withCodeCoverage, withDebugger: withDebugger);
         }
 
         private void RunTests(string filePath, bool openInBrowser = false, bool withCodeCoverage = false, bool withDebugger = false)

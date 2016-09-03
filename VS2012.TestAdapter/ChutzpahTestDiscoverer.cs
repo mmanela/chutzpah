@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Chutzpah.Callbacks;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
@@ -31,6 +32,11 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
+            if (Environment.GetEnvironmentVariable("ATTACH_DEBUGGER_CHUTZPAH") != null)
+            {
+                Debugger.Launch();
+            }
+
             ChutzpahTracer.TraceInformation("Begin Test Adapter Discover Tests");
 
             var settingsProvider = discoveryContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsProvider;
@@ -44,21 +50,12 @@ namespace Chutzpah.VS2012.TestAdapter
                 ChutzpahSettingsFileEnvironments = new ChutzpahSettingsFileEnvironments(settings.ChutzpahSettingsFileEnvironments)
             };
 
-            IList<TestError> errors;
-            var testCases = testRunner.DiscoverTests(sources, testOptions, out errors);
 
             ChutzpahTracer.TraceInformation("Sending discovered tests to test case discovery sink");
 
-            foreach (var testCase in testCases)
-            {
-                var vsTestCase = testCase.ToVsTestCase();
-                discoverySink.SendTestCase(vsTestCase);
-            }
+            var callback = new ParallelRunnerCallbackAdapter(new DiscoveryCallback(logger, discoverySink));
+            var testCases = testRunner.DiscoverTests(sources, testOptions, callback);
 
-            foreach (var error in errors)
-            {
-                logger.SendMessage(TestMessageLevel.Error, RunnerCallback.FormatFileErrorMessage(error));
-            }
 
             ChutzpahTracer.TraceInformation("End Test Adapter Discover Tests");
 

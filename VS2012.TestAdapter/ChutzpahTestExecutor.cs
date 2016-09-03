@@ -1,15 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Chutzpah.Callbacks;
-using Chutzpah.Coverage;
 using Chutzpah.Models;
 using Chutzpah.VS.Common;
-using Chutzpah.Wrappers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using System.Diagnostics;
+using System;
 
 namespace Chutzpah.VS2012.TestAdapter
 {
@@ -30,6 +27,11 @@ namespace Chutzpah.VS2012.TestAdapter
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+            if (Environment.GetEnvironmentVariable("ATTACH_DEBUGGER_CHUTZPAH") != null)
+            {
+                Debugger.Launch();
+            }
+            
             ChutzpahTracer.TraceInformation("Begin Test Adapter Run Tests");
 
             var settingsProvider = runContext.RunSettings.GetSettings(AdapterConstants.SettingsName) as ChutzpahAdapterSettingsProvider;

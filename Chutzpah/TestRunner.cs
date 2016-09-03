@@ -122,6 +122,12 @@ namespace Chutzpah
             return summary.Tests;
         }
 
+        public IEnumerable<TestCase> DiscoverTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback)
+        {
+            var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Discovery, callback);
+            return summary.Tests;
+        }
+
 
         public TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null)
         {
@@ -162,28 +168,29 @@ namespace Chutzpah
 
             var overallSummary = new TestCaseSummary();
 
+            options.TestExecutionMode = testExecutionMode;
+
+            stopWatch.Start();
+            string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
+            if (testPaths == null)
+                throw new ArgumentNullException("testPaths");
+            if (headlessBrowserPath == null)
+                throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
+            if (fileProbe.FindFilePath(TestRunnerJsName) == null)
+                throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
+
+
+            // Concurrent list to collect test contexts
+            var testContexts = new ConcurrentBag<TestContext>();
+
+            // Concurrent collection used to gather the parallel results from
+            var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
+            var resultCount = 0;
+            var cancellationSource = new CancellationTokenSource();
+
+
             try
             {
-                options.TestExecutionMode = testExecutionMode;
-
-                stopWatch.Start();
-                string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
-                if (testPaths == null)
-                    throw new ArgumentNullException("testPaths");
-                if (headlessBrowserPath == null)
-                    throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
-                if (fileProbe.FindFilePath(TestRunnerJsName) == null)
-                    throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
-
-
-                // Concurrent list to collect test contexts
-                var testContexts = new ConcurrentBag<TestContext>();
-
-                // Concurrent collection used to gather the parallel results from
-                var testFileSummaries = new ConcurrentQueue<TestFileSummary>();
-                var resultCount = 0;
-                var cancellationSource = new CancellationTokenSource();
-
 
                 // Given the input paths discover the potential test files
                 var scriptPaths = FindTestFiles(testPaths, options);
@@ -231,13 +238,6 @@ namespace Chutzpah
 
                 overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
 
-                // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
-                // If we don't clear then the user can never update the file.
-                testSettingsService.ClearCache();
-
-                // host.Dispose();
-
-
                 ChutzpahTracer.TraceInformation(
                     "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
                     overallSummary.PassedCount,
@@ -246,13 +246,19 @@ namespace Chutzpah
 
                 return overallSummary;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 callback.ExceptionThrown(e);
 
                 ChutzpahTracer.TraceError(e, "Unhandled exception during Chutzpah test run");
 
                 return overallSummary;
+            }
+            finally
+            {
+                // Clear the settings file cache since in VS Chutzpah is not unloaded from memory.
+                // If we don't clear then the user can never update the file.
+                testSettingsService.ClearCache();
             }
         }
 
@@ -335,7 +341,7 @@ namespace Chutzpah
         {
             try
             {
-                batchCompilerService.Compile(testContexts);
+                batchCompilerService.Compile(testContexts, callback);
             }
             catch (FileNotFoundException e)
             {
@@ -380,7 +386,7 @@ namespace Chutzpah
                         {
                             testHarnessBuilder.CreateTestHarness(testContext, options);
                         }
-                        catch(IOException)
+                        catch (IOException)
                         {
                             // Mark this creation failed so we do not try to clean it up later
                             // This is to work around a bug in TestExplorer that runs chutzpah in parallel on 
@@ -409,7 +415,7 @@ namespace Chutzpah
                                 };
                             }
 
-                           process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.BrowserName, browserArgs);
+                            process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.BrowserName, browserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
@@ -503,7 +509,7 @@ namespace Chutzpah
                 }
             }
 
-            if( webServerHost!= null
+            if (webServerHost != null
                 && options.TestLaunchMode != TestLaunchMode.FullBrowser
                 && options.TestLaunchMode != TestLaunchMode.Custom)
             {
@@ -524,7 +530,7 @@ namespace Chutzpah
             Parallel.ForEach(scriptPathGroups, parallelOptions, testFiles =>
             {
                 var pathString = string.Join(",", testFiles.Select(x => x.FullPath));
-                ChutzpahTracer.TraceInformation("Building test context for {0}", pathString);
+                ChutzpahTracer.TraceInformation("Trying to build test context for {0}", pathString);
 
                 try
                 {
@@ -672,7 +678,7 @@ namespace Chutzpah
 
         private string BuildHarnessUrl(TestContext testContext)
         {
-            
+
             if (testContext.IsRemoteHarness)
             {
                 return testContext.TestHarnessPath;

@@ -2,7 +2,7 @@ namespace Chutzpah
 {
     public static class Constants
     {
-        public const string ChutzpahVersion = "4.2.3";
+        public const string ChutzpahVersion = "4.2.4";
 
         public const string TestFileFolder = "TestFiles";
 

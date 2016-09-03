@@ -83,7 +83,7 @@ namespace Chutzpah
             var fileCount = files.Count();
 
             var allFilePathString = string.Join(",", files.Select(x => x.FullPath));
-            ChutzpahTracer.TraceInformation("Building test context for '{0}'", allFilePathString);
+            ChutzpahTracer.TraceInformation("Building test context for {0}", allFilePathString);
 
             // Make sure all test paths have been resolved to real files
             var missingPaths = files.Where(x => x.FullPath == null).ToList();
@@ -211,7 +211,7 @@ namespace Chutzpah
 
         public bool IsTestFile(string file, ChutzpahSettingsFileEnvironments environments = null)
         {
-            ChutzpahTracer.TraceInformation("Determining if '{0}' might be a test file", file);
+            ChutzpahTracer.TraceInformation("Determining if {0} might be a test file", file);
             if (string.IsNullOrWhiteSpace(file))
             {
                 return false;

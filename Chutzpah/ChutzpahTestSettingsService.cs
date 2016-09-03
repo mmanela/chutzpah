@@ -35,7 +35,7 @@ namespace Chutzpah
         /// <summary>
         /// Cache settings file
         /// </summary>
-        private static readonly ConcurrentDictionary<string, ChutzpahTestSettingsFile> ChutzpahSettingsFileCache =
+        private readonly ConcurrentDictionary<string, ChutzpahTestSettingsFile> ChutzpahSettingsFileCache =
             new ConcurrentDictionary<string, ChutzpahTestSettingsFile>(StringComparer.OrdinalIgnoreCase);
 
         private readonly IFileProbe fileProbe;
@@ -81,7 +81,7 @@ namespace Chutzpah
                     environment = environments.GetSettingsFileEnvironment(directory);
                 }
 
-                return FindSettingsFile(directory, environment).InheritFromDefault();
+                return ProcessSettingsFile(directory, environment).InheritFromDefault();
             }
             else
             {
@@ -89,14 +89,14 @@ namespace Chutzpah
             }
         }
 
-        private ChutzpahTestSettingsFile FindSettingsFile(string directory, ChutzpahSettingsFileEnvironment environment)
+        private ChutzpahTestSettingsFile ProcessSettingsFile(string directory, ChutzpahSettingsFileEnvironment environment, bool forceFresh = false)
         {
             if (string.IsNullOrEmpty(directory)) return ChutzpahTestSettingsFile.Default;
 
             directory = directory.TrimEnd('/', '\\');
 
             ChutzpahTestSettingsFile settings;
-            if (!ChutzpahSettingsFileCache.TryGetValue(directory, out settings))
+            if (!ChutzpahSettingsFileCache.TryGetValue(directory, out settings) || forceFresh)
             {
                 var testSettingsFilePath = fileProbe.FindTestSettingsFile(directory);
                 if (string.IsNullOrEmpty(testSettingsFilePath))
@@ -104,7 +104,7 @@ namespace Chutzpah
                     ChutzpahTracer.TraceInformation("Chutzpah.json file not found given starting directory {0}", directory);
                     settings = ChutzpahTestSettingsFile.Default;
                 }
-                else if (!ChutzpahSettingsFileCache.TryGetValue(Path.GetDirectoryName(testSettingsFilePath), out settings))
+                else if (!ChutzpahSettingsFileCache.TryGetValue(Path.GetDirectoryName(testSettingsFilePath), out settings) || forceFresh)
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directory {1}", testSettingsFilePath, directory);
                     settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
@@ -117,7 +117,6 @@ namespace Chutzpah
                     {
                         settings.IsDefaultSettings = false;
                     }
-
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
                     var chutzpahVariables = BuildChutzpahReplacementVariables(testSettingsFilePath, environment, settings);
@@ -136,15 +135,19 @@ namespace Chutzpah
 
                     ProcessInheritance(environment, settings, chutzpahVariables);
 
-                    // Add a mapping in the cache for the directory that contains the test settings file
-                    ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
+                    if (!forceFresh)
+                    {
+                        // Add a mapping in the cache for the directory that contains the test settings file
+                        ChutzpahSettingsFileCache.TryAdd(settings.SettingsFileDirectory, settings);
+                    }
                 }
 
-                // Add mapping in the cache for the original directory tried to skip needing to traverse the tree again
-                ChutzpahSettingsFileCache.TryAdd(directory, settings);
+                if (!forceFresh)
+                {
+                    // Add mapping in the cache for the original directory tried to skip needing to traverse the tree again
+                    ChutzpahSettingsFileCache.TryAdd(directory, settings);
+                }
             }
-
-
 
             return settings;
         }
@@ -207,7 +210,11 @@ namespace Chutzpah
                     settings.InheritFromPath = settingsToInherit;
                 }
 
-                var parentSettingsFile = FindSettingsFile(settings.InheritFromPath, environment);
+                // If we have any environment properties do not use cached
+                // parents and re-evaluate using current environment
+                var forceFresh = environment != null && environment.Properties.Any();
+
+                var parentSettingsFile = ProcessSettingsFile(settings.InheritFromPath, environment, forceFresh);
 
                 if (!parentSettingsFile.IsDefaultSettings)
                 {
@@ -498,6 +505,7 @@ namespace Chutzpah
                     AddChutzpahVariable(chutzpahVariables, prop.Name, prop.Value);
                 }
             }
+
 
             return chutzpahVariables;
         }

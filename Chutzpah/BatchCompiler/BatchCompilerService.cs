@@ -23,7 +23,7 @@ namespace Chutzpah.BatchProcessor
             this.sourceMapDiscoverer = sourceMapDiscoverer;
         }
 
-        public void Compile(IEnumerable<TestContext> testContexts)
+        public void Compile(IEnumerable<TestContext> testContexts, ITestMethodRunnerCallback callback = null)
         {
             // Group the test contexts by test settings to run batch aware settings like compile
             // For each test settings file that defines a compile step we will run it and update 
@@ -67,7 +67,7 @@ namespace Chutzpah.BatchProcessor
                 }
                 else
                 {
-                    ChutzpahTracer.TraceInformation("Skipping batch compile since all files are supdate to date for {0}", testSettings.SettingsFileName);
+                    ChutzpahTracer.TraceInformation("Skipping batch compile since all files are update to date for {0}", testSettings.SettingsFileName);
                 }
 
                 // Now that compile finished set generated path on  all files who match the compiled extensions
@@ -101,7 +101,8 @@ namespace Chutzpah.BatchProcessor
                             if (!testSettings.Compile.IgnoreMissingFiles.GetValueOrDefault())
                             {
                                 // Throw and fail here since if we cant find the file we cannot be sure anything will run
-                                throw new FileNotFoundException(error, outputPath);
+                                var exception = new FileNotFoundException(error, outputPath);
+                                callback.ExceptionThrown(exception, outputPath);
                             }
                         }
                     }

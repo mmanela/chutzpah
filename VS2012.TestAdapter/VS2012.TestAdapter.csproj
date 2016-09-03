@@ -59,6 +59,7 @@
     <Compile Include="ChutzpahAdapterSettings.cs" />
     <Compile Include="ChutzpahAdapterSettingsProvider.cs" />
     <Compile Include="ChutzpahExtensionMethods.cs" />
+    <Compile Include="DiscoveryCallback.cs" />
     <Compile Include="ExecutionCallback.cs" />
     <Compile Include="ChutzpahTestDiscoverer.cs" />
     <Compile Include="IChutzpahSettingsMapper.cs" />

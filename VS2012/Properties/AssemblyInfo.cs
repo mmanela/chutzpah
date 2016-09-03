@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("4.2.3.0")]
-[assembly: AssemblyFileVersion("4.2.3.0")]
+[assembly: AssemblyVersion("4.2.4.0")]
+[assembly: AssemblyFileVersion("4.2.4.0")]
 
 [assembly: InternalsVisibleTo("VS2012_IntegrationTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100b5d0d0037c1860700951dacd66f284af268c594cd703483d37e8eb3182e5d5dec2201673145ef8d2145a82a3156e5d22f675634b1bc328114f1431129e62e86517e323eb6b3f6ea6e813fba1f50bfddfecafa2d8ba5900c021a7e1b6b14d3f4f8d6b65173e38a9ce2143324d7e24deaf5a0aee6f00499a57ad2b2dc51fde9dbd")]
 [assembly: InternalsVisibleTo("VS2012_UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100b5d0d0037c1860700951dacd66f284af268c594cd703483d37e8eb3182e5d5dec2201673145ef8d2145a82a3156e5d22f675634b1bc328114f1431129e62e86517e323eb6b3f6ea6e813fba1f50bfddfecafa2d8ba5900c021a7e1b6b14d3f4f8d6b65173e38a9ce2143324d7e24deaf5a0aee6f00499a57ad2b2dc51fde9dbd")]
