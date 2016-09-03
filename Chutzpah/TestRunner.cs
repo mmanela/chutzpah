@@ -482,7 +482,7 @@ namespace Chutzpah
             Parallel.ForEach(scriptPathGroups, parallelOptions, testFiles =>
             {
                 var pathString = string.Join(",", testFiles.Select(x => x.FullPath));
-                ChutzpahTracer.TraceInformation("Building test context for {0}", pathString);
+                ChutzpahTracer.TraceInformation("Trying to build test context for {0}", pathString);
 
                 try
                 {

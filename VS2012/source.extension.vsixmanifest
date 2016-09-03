@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="VS11.Plugin.Chutzpah.67f38ef0-909a-40b5-b183-9477ad8c266a" Version="4.2.3" Language="en-US" Publisher="Matthew Manela" />
+    <Identity Id="VS11.Plugin.Chutzpah.67f38ef0-909a-40b5-b183-9477ad8c266a" Version="4.2.4" Language="en-US" Publisher="Matthew Manela" />
     <DisplayName>Chutzpah Test Adapter for the Test Explorer</DisplayName>
     <Description xml:space="preserve">Chutzpah adapter for the Visual Studio Unit Test Explorer. Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
     <MoreInfo>https://github.com/mmanela/chutzpah</MoreInfo>
