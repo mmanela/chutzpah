@@ -1,11 +1,16 @@
 ﻿using Chutzpah.Models;
 using Chutzpah.Server.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 using Nancy.Hosting.Self;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using Microsoft.Extensions.Primitives;
 
 namespace Chutzpah.Server
 {
@@ -20,71 +25,63 @@ namespace Chutzpah.Server
 
         public ChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration)
         {
-            if(ChutzpahWebServerHost.ActiveWebServer != null && ChutzpahWebServerHost.ActiveWebServer.RootPath.Equals(configuration.RootPath, StringComparison.OrdinalIgnoreCase))
+            if (ChutzpahWebServerHost.ActiveWebServer != null && ChutzpahWebServerHost.ActiveWebServer.RootPath.Equals(configuration.RootPath, StringComparison.OrdinalIgnoreCase))
             {
                 // If the requested server is already running just re-use it
                 return ChutzpahWebServerHost.ActiveWebServer;
             }
 
-            var hostConfiguration = new HostConfiguration
-            {
-                RewriteLocalhost = true,
-                UrlReservations = new UrlReservations { CreateAutomatically = true }
-            };
-
-            var port = GetNextAvailablePort(configuration.DefaultPort.Value);
             var builtInDependencyFolder = fileProbe.BuiltInDependencyDirectory;
 
-            ChutzpahTracer.TraceInformation("Creating Web Server Host at path {0} and port {1}", configuration.RootPath, port);
 
-            var host = new NancyHost(new Uri(string.Format("http://localhost:{0}", port)), new NancySettingsBootstrapper(configuration.RootPath, builtInDependencyFolder), hostConfiguration);
-            host.Start();
-            var chutzpahWebServerHost = ChutzpahWebServerHost.Create(host, configuration.RootPath, port);
-            return chutzpahWebServerHost;
+            return BuildHost(configuration.RootPath, configuration.DefaultPort.Value, builtInDependencyFolder);
+        }
+
+        private ChutzpahWebServerHost BuildHost(string rootPath, int defaultPort, string builtInDependencyFolder)
+        {
+            var port = FindFreePort(defaultPort);
+
+            ChutzpahTracer.TraceInformation("Creating Web Server Host at path {0} and port {1}", rootPath, port);
+            var host = new WebHostBuilder()
+               .UseUrls($"http://localhost:{port}")
+               .UseContentRoot(rootPath)
+               .UseWebRoot("")
+               .UseKestrel()
+               .Configure((app) =>
+               {
+                   var env = (IHostingEnvironment)app.ApplicationServices.GetService(typeof(IHostingEnvironment));
+                   app.UseStaticFiles(new StaticFileOptions { FileProvider = new ChutzpahServerFileProvider(env.ContentRootPath, builtInDependencyFolder) });
+                   app.Run(async (context) =>
+                   {
+                       await context.Response.WriteAsync("Chutzpah Web Server");
+                   });
+               })
+               .Build();
+
+            host.Run();
+
+            return ChutzpahWebServerHost.Create(host, rootPath, port);
         }
 
 
-        int GetNextAvailablePort(int port)
+
+
+        public static int FindFreePort(int initialPort)
         {
-            while (!IsPortOpen(port))
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                ChutzpahTracer.TraceWarning("Unable to get port {0} so trying next one", port);
-                port++;
-
-            }
-
-            return port;
-        }
-
-        public static bool IsPortOpen(int port)
-        {
-            HttpListener listener = null;
-
-            try
-            {
-                listener = new HttpListener();
-                listener.Prefixes.Add(string.Format("http://+:{0}/", port));
-                listener.Start();
-
-                return true;
-            }
-            catch (HttpListenerException)
-            {
-            }
-            catch(SocketException)
-            {
-
-            }
-            finally
-            {
-
-                if (listener != null && listener.IsListening)
+                try
                 {
-                    listener.Stop();
+                    socket.Bind(new IPEndPoint(IPAddress.Loopback, initialPort));
                 }
-            }
+                catch (SocketException)
+                {
+                    socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                }
 
-            return false;
+                return ((IPEndPoint)socket.LocalEndPoint).Port;
+            }
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using Nancy.Hosting.Self;
+﻿using Microsoft.AspNetCore.Hosting;
+using Nancy.Hosting.Self;
 using System;
 using System.Threading;
 
@@ -15,9 +16,9 @@ namespace Chutzpah.Server.Models
     {
         static ChutzpahWebServerHost activeWebServer;
 
-        public static ChutzpahWebServerHost Create(NancyHost nancyHost, string rootPath, int port)
+        public static ChutzpahWebServerHost Create(IWebHost webHost, string rootPath, int port)
         {
-            var host = new ChutzpahWebServerHost(nancyHost, rootPath, port);
+            var host = new ChutzpahWebServerHost(webHost, rootPath, port);
             ActiveWebServer = host;
             return host;
         }
@@ -39,16 +40,16 @@ namespace Chutzpah.Server.Models
 
 
 
-        public NancyHost NancyHost { get; set; }
+        public IWebHost WebHost { get; set; }
         public string RootPath { get; set; }
 
         public int Port { get; set; }
 
-        private ChutzpahWebServerHost(NancyHost nancyHost, string rootPath, int port)
+        private ChutzpahWebServerHost(IWebHost webHost, string rootPath, int port)
         {
             Port = port;
             RootPath = rootPath;
-            NancyHost = nancyHost;
+            WebHost = webHost;
         }
 
         public void Dispose()
@@ -56,7 +57,7 @@ namespace Chutzpah.Server.Models
             try
             {
                 ChutzpahTracer.TraceInformation("Tearing down Web Server Host at path {0} and port {1}", RootPath, Port);
-                NancyHost.Dispose();
+                WebHost.Dispose();
 
             }
             catch (Exception e)
