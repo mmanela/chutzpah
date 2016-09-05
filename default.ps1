@@ -139,8 +139,9 @@ function getLatestNugetPackagePath($name) {
 }
 
 task Sign-ForeignAssemblies {
+  return; # Nothing to sign for now....
 
-  $packagesToSign = @("Nancy", "Nancy.Hosting.Self")
+  $packagesToSign = @()
   
   clean $autoSignedNugetPackages
  

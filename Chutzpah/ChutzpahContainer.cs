@@ -1,14 +1,30 @@
 ﻿using Chutzpah.Coverage;
+using Chutzpah.Exceptions;
 using Chutzpah.FileProcessors;
 using Chutzpah.FrameworkDefinitions;
 using Chutzpah.Server;
 using Chutzpah.Utility;
 using StructureMap;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace Chutzpah
 {
     public class ChutzpahContainer
     {
+        static ChutzpahContainer()
+        {
+            // Dynamically choose right folder for native dlls
+            var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
+            bool ok = NativeImports.SetDllDirectory(path);
+            if (!ok)
+            {
+                throw new ChutzpahException("Unable to initialize native dlls");
+            }
+        }
+
         public static IContainer Current
         {
             get { return container; }

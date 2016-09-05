@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,12 +28,24 @@ namespace Chutzpah.Server
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            if(subpath.StartsWith("/" + Constants.ServerVirtualBuiltInFilesPath, StringComparison.OrdinalIgnoreCase))
+            // This implements of simple virtual directly fo chutzpah internal files
+            if (subpath.StartsWith("/" + Constants.ServerVirtualBuiltInFilesPath, StringComparison.OrdinalIgnoreCase))
             {
-                subpath = subpath.Replace(Constants.ServerVirtualBuiltInFilesPath, UrlBuilder.NormalizeUrlPath(builtInDependencyFolder));
-            }
+                var path = subpath.Replace("/" + Constants.ServerVirtualBuiltInFilesPath, UrlBuilder.NormalizeUrlPath(builtInDependencyFolder));
 
-            return fileProvider.GetFileInfo(subpath);
+                var fileInfo = new FileInfo(path);
+                if(!fileInfo.FullName.StartsWith(builtInDependencyFolder, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Prevent any shenanigans of someone trying to access file they shouldn't
+                    return new NotFoundFileInfo(subpath);
+                }
+
+                return new PhysicalFileInfo(fileInfo);
+            }
+            else
+            {
+                return fileProvider.GetFileInfo(subpath);
+            }
         }
 
         public IChangeToken Watch(string filter)

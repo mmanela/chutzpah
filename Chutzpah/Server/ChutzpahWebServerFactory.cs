@@ -3,8 +3,6 @@ using Chutzpah.Server.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.FileProviders;
-using Nancy.Hosting.Self;
 using System;
 using System.Linq;
 using System.Net;
@@ -58,8 +56,8 @@ namespace Chutzpah.Server
                })
                .Build();
 
-            host.Run();
-
+            host.Start();
+            
             return ChutzpahWebServerHost.Create(host, rootPath, port);
         }
 

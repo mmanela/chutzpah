@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Nancy.Hosting.Self;
 using System;
 using System.Threading;
 
@@ -58,7 +57,6 @@ namespace Chutzpah.Server.Models
             {
                 ChutzpahTracer.TraceInformation("Tearing down Web Server Host at path {0} and port {1}", RootPath, Port);
                 WebHost.Dispose();
-
             }
             catch (Exception e)
             {

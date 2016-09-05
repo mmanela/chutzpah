@@ -195,6 +195,7 @@ namespace Chutzpah
             {
                 Console.WriteLine("Press any key to end Chutzpah...");
                 Console.ReadKey();
+                ChutzpahWebServerHost.ActiveWebServer.Dispose();
             }
 
 

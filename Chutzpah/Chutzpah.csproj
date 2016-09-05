@@ -40,6 +40,18 @@
     <AssemblyOriginatorKeyFile>../chutzpah.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\packages\Libuv.*\runtimes\win7-x64\native\*.dll">
+      <Link>x64\%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <InProject>false</InProject>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\packages\Libuv.*\runtimes\win7-x86\native\*.dll">
+      <Link>x86\%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <InProject>false</InProject>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="AntiXssLibrary, Version=4.3.0.0, Culture=neutral, PublicKeyToken=d127efab8a9c114f, processorArchitecture=MSIL">
       <HintPath>..\packages\AntiXSS.4.3.0\lib\net40\AntiXssLibrary.dll</HintPath>
       <Private>True</Private>
@@ -151,14 +163,6 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.Headers.1.0.0\lib\netstandard1.1\Microsoft.Net.Http.Headers.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Nancy, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages_autosigned\Nancy.dll</HintPath>
-    </Reference>
-    <Reference Include="Nancy.Hosting.Self, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages_autosigned\Nancy.Hosting.Self.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -303,9 +307,6 @@
     <Compile Include="Callbacks\RunnerCallback.cs" />
     <Compile Include="Server\IChutzpahWebServerFactory.cs" />
     <Compile Include="Server\Models\ChutzpahServerHost.cs" />
-    <Compile Include="Server\NancySettingsBootstrapper.cs" />
-    <Compile Include="Server\NancyRootPathProvider.cs" />
-    <Compile Include="Server\WebServerModule.cs" />
     <Compile Include="Server\ChutzpahWebServerFactory.cs" />
     <Compile Include="TestCaseStreamReaderFactory.cs" />
     <Compile Include="TestContextBuilder.cs" />
