@@ -16,7 +16,7 @@ namespace Chutzpah
         static ChutzpahContainer()
         {
             // Dynamically choose right folder for native dlls
-            var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
             bool ok = NativeImports.SetDllDirectory(path);
             if (!ok)
