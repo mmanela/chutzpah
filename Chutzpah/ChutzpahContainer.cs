@@ -17,12 +17,21 @@ namespace Chutzpah
         {
             // Dynamically choose right folder for native dlls
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            path = SetNativeDllPath(path);
+
+            SetNativeDllPath(Environment.CurrentDirectory);
+        }
+
+        private static string SetNativeDllPath(string path)
+        {
             path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
             bool ok = NativeImports.SetDllDirectory(path);
             if (!ok)
             {
                 throw new ChutzpahException("Unable to initialize native dlls");
             }
+
+            return path;
         }
 
         public static IContainer Current
