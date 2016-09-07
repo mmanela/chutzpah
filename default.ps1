@@ -1,7 +1,7 @@
+
 properties {
   $baseDir = Resolve-Path .
   $configuration = "debug"
-  $xUnit = Resolve-Path .\3rdParty\XUnit\xunit.console.clr4.exe
   $filesDir = "$baseDir\_build"
   $nugetDir = "$baseDir\_nuget"
   $chocolateyDir = "$baseDir\_chocolatey"
@@ -24,6 +24,11 @@ task TeamCity -depends  Clean-TeamCitySolution, Build-TeamCitySolution, Run-Unit
 # Build Tasks
 task Build -depends  Clean-Solution-NoVS, Build-Solution-NoVS, Run-UnitTests, Run-IntegrationTests
 task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, Run-IntegrationTests
+
+
+function getLatestNugetPackagePath($name) {
+  return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+}
 
 task Set-Version {
   
@@ -106,10 +111,12 @@ task Run-PerfTester {
 }
 
 task Run-UnitTests {
+    $xUnit = Join-Path (getLatestNugetPackagePath("xunit.runner.console")) "tools/xunit.console.exe"
     exec { & $xUnit "Facts\bin\$configuration\Facts.Chutzpah.dll" }
 }
 
 task Run-IntegrationTests {
+    $xUnit = Join-Path (getLatestNugetPackagePath("xunit.runner.console")) "tools/xunit.console.exe"
     exec { & $xUnit "Facts.Integration\bin\$configuration\Facts.Integration.Chutzpah.dll" }
 }
 
@@ -134,9 +141,6 @@ task Restore-Packages {
   exec { .\Tools\nuget.exe restore Chutzpah.VS.sln }
 }
  
-function getLatestNugetPackagePath($name) {
-  return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
-}
 
 task Sign-ForeignAssemblies {
   return; # Nothing to sign for now....

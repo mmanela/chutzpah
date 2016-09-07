@@ -73,7 +73,7 @@ namespace Chutzpah.Facts.Integration
 
 
         [Theory]
-        [PropertyData("ChutzpahSamples")]
+        [MemberData("ChutzpahSamples")]
         public void Will_discover_amd_tests_from_chutzpah_samples(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
@@ -84,7 +84,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("BasicTestScripts")]
+        [MemberData("BasicTestScripts")]
         public void Will_discover_tests_from_a_js_file(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
@@ -100,7 +100,7 @@ namespace Chutzpah.Facts.Integration
 
 
         [Theory]
-        [PropertyData("AmdTestScriptWithForcedRequire")]
+        [MemberData("AmdTestScriptWithForcedRequire")]
         public void Will_discover_amd_forced_require_tests(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -111,7 +111,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("AmdTestScriptWithAMDMode")]
+        [MemberData("AmdTestScriptWithAMDMode")]
         public void Will_discover_amd_mode_tests(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -122,7 +122,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("SkippedTests")]
+        [MemberData("SkippedTests")]
         public void Will_discover_skipped_tests(string scriptPath)
         {
             var testRunner = TestRunner.Create();

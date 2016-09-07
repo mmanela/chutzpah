@@ -49,7 +49,7 @@
             }
 
             [Theory]
-            [PropertyData("TestSuites")]
+            [MemberData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
             {
                 var creator = new QUnitDefinitionCreator();
@@ -57,7 +57,7 @@
             }
 
             [Theory]
-            [PropertyData("TestSuites")]
+            [MemberData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
             {
                 var creator = new QUnitDefinitionCreator();

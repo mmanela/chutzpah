@@ -6,7 +6,7 @@
        { "OutputPath": "_out" } 
     ],
     "Executable": "%powershellexe%",
-    "Arguments": "-NoProfile %chutzpahsettingsdir%\\compile.ps1"
+    "Arguments": "-ExecutionPolicy unrestricted -NoProfile %chutzpahsettingsdir%\\compile.ps1"
    },
   "References": [
     {"Includes": ["*/src/*.ts"], "Excludes": ["*/src/*.d.ts"] }

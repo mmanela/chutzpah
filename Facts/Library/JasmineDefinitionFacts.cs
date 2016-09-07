@@ -52,7 +52,7 @@ namespace Chutzpah.Facts.Library
             }
 
             [Theory]
-            [PropertyData("TestSuites")]
+            [MemberData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndDefinitiveDetection(string suite)
             {
                 var creator = new JasmineDefinitionCreator();
@@ -61,7 +61,7 @@ namespace Chutzpah.Facts.Library
             }
 
             [Theory]
-            [PropertyData("TestSuites")]
+            [MemberData("TestSuites")]
             public void ReturnsFalse_WithForeignSuiteAndBestGuessDetection(string suite)
             {
                 var creator = new JasmineDefinitionCreator();

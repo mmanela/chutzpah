@@ -1,4 +1,5 @@
 ﻿using Chutzpah.Exceptions;
+using System;
 using Xunit;
 
 namespace Chutzpah.Facts.Exceptions
@@ -25,7 +26,7 @@ namespace Chutzpah.Facts.Exceptions
             [Fact]
             public void Its_ToString_excludes_the_stack_trace()
             {
-                var ex = Record.Exception(() => { throw new ChutzpahCompilationFailedException("foo"); });
+                var ex = Record.Exception(new Action(() => { throw new ChutzpahCompilationFailedException("foo"); }));
                 Assert.DoesNotContain("at Chutzpah.Facts.Exceptions", ex.ToString());
             }
         }

@@ -133,7 +133,7 @@ namespace Chutzpah.Facts.Library.Transformers
                 context.TestFileSettings.Transforms.Clear();
             }
 
-            Assert.DoesNotThrow(() => processor.ClassUnderTest.ProcessTransforms(contexts, summary));
+            processor.ClassUnderTest.ProcessTransforms(contexts, summary);
         }
 
         [Fact]

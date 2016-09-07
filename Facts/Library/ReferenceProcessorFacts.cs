@@ -330,7 +330,7 @@ namespace Chutzpah.Facts
                 Assert.True(pos1 < pos2);
             }
 
-            [Fact(Timeout = 5000)]
+            [Fact]
             public void Will_stop_infinite_loop_when_processing_referenced_files()
             {
                 var processor = new TestableReferenceProcessor();

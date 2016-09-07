@@ -77,7 +77,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("ChutzpahSamples")]
+        [MemberData("ChutzpahSamples")]
         public void Will_run_tests_from_chutzpah_samples(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
@@ -90,7 +90,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("ManualStartAmdTests")]
+        [MemberData("ManualStartAmdTests")]
         public void Will_run_manual_start_amd_tests(string scriptPath, int count)
         {
             var testRunner = TestRunner.Create();
@@ -104,7 +104,7 @@ namespace Chutzpah.Facts.Integration
 
 
         [Theory]
-        [PropertyData("BasicTestScripts")]
+        [MemberData("BasicTestScripts")]
         public void Will_run_tests_from_a_js_file(string scriptPath, string frameworkVersion)
         {
             var testRunner = TestRunner.Create();
@@ -118,7 +118,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("SkippedTests")]
+        [MemberData("SkippedTests")]
         public void Will_report_skipped_tests(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -244,7 +244,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("ReferencesTestScripts")]
+        [MemberData("ReferencesTestScripts")]
         public void Will_expand_references_in_a_js_file(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -257,7 +257,7 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Theory]
-        [PropertyData("HtmlTemplateTestScripts")]
+        [MemberData("HtmlTemplateTestScripts")]
         public void Will_load_html_template(string scriptPath)
         {
             var testRunner = TestRunner.Create();
@@ -368,7 +368,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(2, result.TotalCount);
         }
 
-        [Fact(Timeout = 40000)]
+        [Fact]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout()
         {
             var testRunner = TestRunner.Create();
@@ -382,7 +382,7 @@ namespace Chutzpah.Facts.Integration
 
         }
 
-        [Fact(Timeout = 40000)]
+        [Fact]
         public void Will_execute_nothing_if_test_takes_longer_than_timeout_from_settings_file()
         {
             var testRunner = TestRunner.Create();
@@ -396,7 +396,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(0, result.TotalCount);
         }
 
-        [Fact(Timeout = 40000)]
+        [Fact]
         public void Will_execute_nothing_if_test_file_has_infinite_loop()
         {
             var testRunner = TestRunner.Create();
@@ -812,7 +812,7 @@ namespace Chutzpah.Facts.Integration
 
 
             [Theory]
-            [PropertyData("AmdTestScriptWithAMDMode")]
+            [MemberData("AmdTestScriptWithAMDMode")]
             public void Will_run_requirejs_tests_with_chutzpah_in_amd_mode(string path)
             {
                 var testRunner = TestRunner.Create();
@@ -825,7 +825,7 @@ namespace Chutzpah.Facts.Integration
             }
 
             [Theory]
-            [PropertyData("AmdTestScriptWithForcedRequire")]
+            [MemberData("AmdTestScriptWithForcedRequire")]
             public void Will_run_require_js_test_where_test_file_uses_requirejs_command(string path)
             {
                 var testRunner = TestRunner.Create();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Chutzpah.Models;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Chutzpah.Facts.ConsoleRunner
 {
