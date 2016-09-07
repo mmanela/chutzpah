@@ -14,7 +14,7 @@ properties {
 # Aliases
 task Default -depends Build
 
-task Install -depends Restore-Packages, Sign-ForeignAssemblies
+task Install -depends Sign-ForeignAssemblies
 
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
@@ -136,11 +136,6 @@ task Run-Phantom {
   
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner$suffix.js" "file:///$testFilePath" $mode }
 }
-
-task Restore-Packages {
-  exec { .\Tools\nuget.exe restore Chutzpah.VS.sln }
-}
- 
 
 task Sign-ForeignAssemblies {
 

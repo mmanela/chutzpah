@@ -3,6 +3,7 @@
 if ERRORLEVEL 1 goto end
 set Configuration=Debug
 
+if /i "%1"=="Install" goto Install
 if /i "%1"=="Package" goto Release
 if /i "%1"=="run-perftester" goto Release
 goto Build
@@ -12,6 +13,9 @@ set Configuration=Release
 goto Build
 
 
+:Install
+.\Tools\nuget.exe restore Chutzpah.VS.sln
+goto Build
 
 :Build
 
