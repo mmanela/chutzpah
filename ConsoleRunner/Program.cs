@@ -9,6 +9,7 @@ using Chutzpah.Transformers;
 using Chutzpah.Wrappers;
 using Chutzpah.Server.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Chutzpah
 {
@@ -17,6 +18,12 @@ namespace Chutzpah
         [STAThread]
         public static int Main(string[] args)
         {
+            if (Environment.GetEnvironmentVariable("ATTACH_DEBUGGER_CHUTZPAH") != null)
+            {
+                Debugger.Launch();
+            }
+
+
             var transformers = new SummaryTransformerProvider().GetTransformers(new FileSystemWrapper());
 
             if (args.Length == 0 || args[0] == "/?")

@@ -16,22 +16,20 @@ namespace Chutzpah
         static ChutzpahContainer()
         {
             // Dynamically choose right folder for native dlls
-            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            path = SetNativeDllPath(path);
+            var success = TryLoadLibuv(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
+                          || TryLoadLibuv(Environment.CurrentDirectory);
 
-            SetNativeDllPath(Environment.CurrentDirectory);
+            if (!success)
+            {
+                throw new ChutzpahException("Unable to load libuv.dll");
+            }
         }
 
-        private static string SetNativeDllPath(string path)
+        private static bool TryLoadLibuv(string folder)
         {
-            path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
-            bool ok = NativeImports.SetDllDirectory(path);
-            if (!ok)
-            {
-                throw new ChutzpahException("Unable to initialize native dlls");
-            }
-
-            return path;
+            var path = Path.Combine(folder, Environment.Is64BitProcess ? "x64" : "x86", "libuv.dll");
+            bool ok = File.Exists(path) &&  NativeImports.LoadLibrary(path) != IntPtr.Zero;
+            return ok;
         }
 
         public static IContainer Current

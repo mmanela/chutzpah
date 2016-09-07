@@ -143,9 +143,8 @@ task Restore-Packages {
  
 
 task Sign-ForeignAssemblies {
-  return; # Nothing to sign for now....
 
-  $packagesToSign = @()
+  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"}
   
   clean $autoSignedNugetPackages
  
@@ -159,10 +158,10 @@ task Sign-ForeignAssemblies {
   Write-Host "Signing assemblies"
   $folderPaths = ""
   
-  foreach($name in $packagesToSign) {
-  
+  foreach($name in $packagesToSign.Keys) {
+    $targetFolder = $packagesToSign[$name]
     $folderToSign = getLatestNugetPackagePath $name
-    $fullPath = $folderToSign.FullName
+    $fullPath = Join-Path $folderToSign.FullName $targetFolder
     $folderName = $folderToSign.Name
     
     $folderPaths += $fullpath + "|"
