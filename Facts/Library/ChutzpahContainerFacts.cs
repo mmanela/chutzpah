@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 
 namespace Chutzpah.Facts.Library
 {
@@ -12,6 +8,16 @@ namespace Chutzpah.Facts.Library
         public void ContainerIsValid()
         {
             ChutzpahContainer.Current.AssertConfigurationIsValid();
+        }
+
+        [Fact]
+        public void WillGetNewTestRunnerEachTime()
+        {
+            var testRunner1 = TestRunner.Create();
+            var testRunner2 = TestRunner.Create();
+
+            Assert.NotEqual(testRunner1, testRunner2);
+
         }
     }
 

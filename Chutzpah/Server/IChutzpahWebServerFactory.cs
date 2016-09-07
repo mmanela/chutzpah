@@ -5,6 +5,6 @@ namespace Chutzpah.Server
 {
     public interface IChutzpahWebServerFactory
     {
-        ChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration);
+        IChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration, IChutzpahWebServerHost activeWebServerHost);
     }
 }

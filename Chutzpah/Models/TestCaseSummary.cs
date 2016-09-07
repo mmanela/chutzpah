@@ -42,7 +42,7 @@ namespace Chutzpah.Models
         {
             if (fileCoverageObject != null)
             {
-                
+
                 if (CoverageObject == null)
                 {
                     CoverageObject = new CoverageData();

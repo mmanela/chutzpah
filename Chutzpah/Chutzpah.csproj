@@ -307,7 +307,7 @@
     <Compile Include="RegexPatterns.cs" />
     <Compile Include="Callbacks\RunnerCallback.cs" />
     <Compile Include="Server\IChutzpahWebServerFactory.cs" />
-    <Compile Include="Server\Models\ChutzpahServerHost.cs" />
+    <Compile Include="Server\Models\ChutzpahWebServerHost.cs" />
     <Compile Include="Server\ChutzpahWebServerFactory.cs" />
     <Compile Include="TestCaseStreamReaderFactory.cs" />
     <Compile Include="TestContextBuilder.cs" />

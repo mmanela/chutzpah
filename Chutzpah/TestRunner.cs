@@ -31,6 +31,7 @@ namespace Chutzpah
         private readonly ITransformProcessor transformProcessor;
         private readonly IChutzpahWebServerFactory webServerFactory;
         private bool m_debugEnabled;
+        private IChutzpahWebServerHost m_activeWebServerHost;
 
         public static ITestRunner Create(bool debugEnabled = false)
         {
@@ -44,6 +45,25 @@ namespace Chutzpah
         }
 
         readonly IUrlBuilder urlBuilder;
+
+        public IChutzpahWebServerHost ActiveWebServerHost
+        {
+            get
+            {
+                if (m_activeWebServerHost != null && m_activeWebServerHost.IsRunning)
+                {
+                    return m_activeWebServerHost;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                m_activeWebServerHost = value;
+            }
+        }
 
         public TestRunner(IProcessHelper process,
                           ITestCaseStreamReaderFactory testCaseStreamReaderFactory,
@@ -148,24 +168,25 @@ namespace Chutzpah
         }
 
         public TestCaseSummary RunTests(IEnumerable<string> testPaths,
-                                        TestOptions options,
-                                        ITestMethodRunnerCallback callback = null)
+                                          TestOptions options,
+                                          ITestMethodRunnerCallback callback = null)
         {
             callback = options.TestLaunchMode == TestLaunchMode.FullBrowser || callback == null ? RunnerCallback.Empty : callback;
             callback.TestSuiteStarted();
+            
+            var testCaseSummary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
 
-            var summary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
-
-            callback.TestSuiteFinished(summary);
-            return summary;
+            callback.TestSuiteFinished(testCaseSummary);
+            return testCaseSummary;
         }
+
 
         private TestCaseSummary ProcessTestPaths(IEnumerable<string> testPaths,
                                                  TestOptions options,
                                                  TestExecutionMode testExecutionMode,
-                                                 ITestMethodRunnerCallback callback)
+                                                 ITestMethodRunnerCallback callback,
+                                                 IChutzpahWebServerHost activeWebServerHost = null)
         {
-
             var overallSummary = new TestCaseSummary();
 
             options.TestExecutionMode = testExecutionMode;
@@ -213,18 +234,18 @@ namespace Chutzpah
                 // Build test contexts in parallel given a list of files each
                 BuildTestContexts(options, testRunConfiguration.TestGroups, parallelOptions, cancellationSource, resultCount, testContexts, callback, overallSummary);
 
-                // Find the first test context with a web server configuration and use it
-                var host = SetupWebServerHost(testContexts);
-
-
                 // Compile the test contexts
                 if (!PerformBatchCompile(callback, testContexts))
                 {
                     return overallSummary;
                 }
 
+                // Find the first test context with a web server configuration and use it
+                var webServerHost = SetupWebServerHost(testContexts, activeWebServerHost);
+                ActiveWebServerHost = webServerHost;
+
                 // Build test harness for each context and execute it in parallel
-                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, host);
+                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, webServerHost);
 
 
                 // Gather TestFileSummaries into TaseCaseSummary
@@ -262,15 +283,15 @@ namespace Chutzpah
             }
         }
 
-        private ChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts)
+        private IChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts, IChutzpahWebServerHost activeWebServerHost)
         {
-            ChutzpahWebServerHost webServerHost = null;
+            IChutzpahWebServerHost webServerHost = null;
             var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.GetValueOrDefault()).ToList();
             var contextWithChosenServerConfiguration = contextUsingWebServer.FirstOrDefault();
             if (contextWithChosenServerConfiguration != null)
             {
                 var webServerConfiguration = contextWithChosenServerConfiguration.TestFileSettings.Server;
-                webServerHost = webServerFactory.CreateServer(webServerConfiguration);
+                webServerHost = webServerFactory.CreateServer(webServerConfiguration, ActiveWebServerHost);
 
                 // Stash host object on context for use in url generation
                 contextUsingWebServer.ForEach(x => x.WebServerHost = webServerHost);

@@ -7,7 +7,6 @@ using Chutzpah.RunnerCallbacks;
 using System.Linq;
 using Chutzpah.Transformers;
 using Chutzpah.Wrappers;
-using Chutzpah.Server.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -198,11 +197,11 @@ namespace Chutzpah
                 Console.ResetColor();
             }
 
-            if (ChutzpahWebServerHost.ActiveWebServer != null)
+            if (testRunner.ActiveWebServerHost != null)
             {
                 Console.WriteLine("Press any key to end Chutzpah...");
                 Console.ReadKey();
-                ChutzpahWebServerHost.ActiveWebServer.Dispose();
+                testRunner.ActiveWebServerHost.Dispose();
             }
 
 

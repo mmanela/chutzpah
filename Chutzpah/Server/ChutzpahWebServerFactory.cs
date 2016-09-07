@@ -18,12 +18,14 @@ namespace Chutzpah.Server
             this.fileProbe = fileProbe;
         }
 
-        public ChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration)
+        public IChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration, IChutzpahWebServerHost activeWebServerHost)
         {
-            if (ChutzpahWebServerHost.ActiveWebServer != null && ChutzpahWebServerHost.ActiveWebServer.RootPath.Equals(configuration.RootPath, StringComparison.OrdinalIgnoreCase))
+            if (activeWebServerHost != null 
+                && activeWebServerHost.IsRunning
+                && activeWebServerHost.RootPath.Equals(configuration.RootPath, StringComparison.OrdinalIgnoreCase))
             {
                 // If the requested server is already running just re-use it
-                return ChutzpahWebServerHost.ActiveWebServer;
+                return activeWebServerHost;
             }
 
             var builtInDependencyFolder = fileProbe.BuiltInDependencyDirectory;
