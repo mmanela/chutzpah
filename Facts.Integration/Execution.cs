@@ -46,11 +46,7 @@ namespace Chutzpah.Facts.Integration
                         new object[] { @"JS\Test\basic-jasmine.js", "2" },
                         new object[] {@"JS\Test\basic-mocha-bdd.js", null }, 
                         new object[] {@"JS\Test\basic-mocha-tdd.js", null},
-                        new object[] {@"JS\Test\basic-mocha-qunit.js", null},
-                        
-                        // Exports does not work. Not sure how it is supposed to get the 
-                        // exports variable in the browser
-                        //new object[] {@"JS\Test\basic-mocha-exports.js"}
+                        new object[] {@"JS\Test\basic-mocha-qunit.js", null}
                     };
             }
         }
@@ -692,82 +688,6 @@ namespace Chutzpah.Facts.Integration
                 {
                     Assert.Equal(2, file.Tests.Count());
                 }
-            }
-
-        }
-
-        public class JasmineDdescribeIit : IDisposable
-        {
-            string version;
-
-            public JasmineDdescribeIit()
-            {
-                ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
-                version = ChutzpahTestSettingsFile.Default.FrameworkVersion;
-                ChutzpahTestSettingsFile.Default.FrameworkVersion = "1";
-            }
-
-            [Fact]
-            public void Will_run_jasmine_test_which_uses_iit()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\jasmine-iit.js", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(3, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_jasmine_test_which_uses_ddescribe()
-            {
-                var testRunner = TestRunner.Create();
-
-                var result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe.js", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(3, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_after_jasmine()
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-after.html", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(3, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_run_jasmine_test_which_uses_ddescribe_from_a_html_file_that_includes_jasmine_ddescribe_iit_before_jasmine()
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-include-before.html", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.FailedCount);
-                Assert.Equal(3, result.PassedCount);
-                Assert.Equal(3, result.TotalCount);
-            }
-
-            [Fact]
-            public void Will_chain_filters_correctly_when_running_jasmine_test_with_ddescribe_from_a_html_file()
-            {
-                var testRunner = TestRunner.Create();
-
-                TestCaseSummary result = testRunner.RunTests(@"JS\Test\jasmine-ddescribe-run-nothing.html", new ExceptionThrowingRunnerCallback());
-
-                Assert.Equal(0, result.TotalCount);
-            }
-
-            public void Dispose()
-            {
-                ChutzpahTestSettingsFile.Default.FrameworkVersion = version;
             }
 
         }
