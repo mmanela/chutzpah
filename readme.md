@@ -1,8 +1,7 @@
 # ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/chetTimesSmall.png) Chutzpah - A JavaScript Test Runner
 Pronunciation: [hutz·pah](http://www.thefreedictionary.com/chutzpah)
 
-[VSTS](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx): ![](https://mmanela.visualstudio.com/_apis/public/build/definitions/d138cdb1-ab34-408d-9015-bf48614703d6/1/badge)
-
+[![VSTS Build](https://mmanela.visualstudio.com/_apis/public/build/definitions/d138cdb1-ab34-408d-9015-bf48614703d6/1/badge)](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx)
 
 Chutzpah is an open source JavaScript test runner which enables you to run unit tests using QUnit, Jasmine, Mocha, CoffeeScript and TypeScript.
 
