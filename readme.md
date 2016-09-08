@@ -3,6 +3,8 @@ Pronunciation: [hutz·pah](http://www.thefreedictionary.com/chutzpah)
 
 Chutzpah is an open source JavaScript test runner which enables you to run unit tests using QUnit, Jasmine, Mocha, CoffeeScript and TypeScript.
 
+[VSTS Build](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx): ![](https://mmanela.visualstudio.com/_apis/public/build/definitions/d138cdb1-ab34-408d-9015-bf48614703d6/1/badge)
+
 _For comments, praise, complaints you can reach me on twitter at [@mmanela](http://twitter.com/mmanela)_.
 
 Chutzpah supports the [QUnit](http://docs.jquery.com/QUnit), [Jasmine](http://pivotal.github.com/jasmine/) and [Mocha](http://visionmedia.github.io/mocha/) testing frameworks. 
