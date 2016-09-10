@@ -685,7 +685,7 @@ namespace Chutzpah
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
 
-            runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none \"{0}\" {1} {2} {3} {4} {5}",
+            runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none --ssl-protocol=any \"{0}\" {1} {2} {3} {4} {5}",
                                        runnerPath,
                                        fileUrl,
                                        testModeStr,

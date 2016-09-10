@@ -42,7 +42,7 @@ namespace Chutzpah.Facts
             public static string BuildArgs(string runner, string harness, string mode = "execution", int? timeout = null, bool ignoreResourceLoadingError = false)
             {
                 var format = "{0} \"{1}\" \"{2}\" {3} {4} {5} ";
-                return string.Format(format, "--ignore-ssl-errors=true --proxy-type=none", runner, harness, mode, timeout.HasValue ? timeout.ToString() : "", ignoreResourceLoadingError.ToString());
+                return string.Format(format, "--ignore-ssl-errors=true --proxy-type=none --ssl-protocol=any", runner, harness, mode, timeout.HasValue ? timeout.ToString() : "", ignoreResourceLoadingError.ToString());
             }
 
             public TestContext SetupTestContext(string[] testPaths = null,  string harnessPath = @"harnessPath", string testRunnerPath = "testRunner.js", bool success = true, bool @throw = false)
