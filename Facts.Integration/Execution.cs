@@ -516,13 +516,15 @@ namespace Chutzpah.Facts.Integration
         }
 
         [Fact]
-        public void Will_run_multiple_files_and_aggregate_results()
+        public void Will_run_multiple_js_files_and_aggregate_results()
         {
             var testRunner = TestRunner.Create();
+            ChutzpahTracer.Enabled = true;
+            ChutzpahTracer.AddConsoleListener();
             var tests = new List<string>
                 {
                     @"JS\Test\basic-qunit.js",
-                    @"JS\Test\basic-qunit.html"
+                    @"JS\Test\basic-jasmine.js"
                 };
             TestCaseSummary result = testRunner.RunTests(tests, new ExceptionThrowingRunnerCallback());
 
@@ -530,6 +532,52 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(6, result.PassedCount);
             Assert.Equal(8, result.TotalCount);
         }
+
+        [Fact]
+        public void Will_run_multiple_files_and_aggregate_results()
+        {
+            var testRunner = TestRunner.Create();
+
+            ChutzpahTracer.Enabled = true;
+            ChutzpahTracer.AddConsoleListener();
+            var tests = new List<string>
+                {
+                    @"JS\Test\basic-qunit.js",
+                    @"JS\Test\basic-qunit.html"
+                };
+            TestCaseSummary result = testRunner.RunTests(tests, new ExceptionThrowingRunnerCallback());
+
+            Console.WriteLine("CC_TESTS");
+            foreach (var test in result.Tests)
+            {
+                Console.WriteLine();
+                Console.WriteLine("InputTestFile: {0}", test.InputTestFile);
+                Console.WriteLine("HtmlTestFile: {0}", test.HtmlTestFile);
+                Console.WriteLine("ModuleName: {0}", test.ModuleName);
+                Console.WriteLine("TestName: {0}", test.TestName);
+                Console.WriteLine("TestOutcome: {0}", test.TestOutcome);
+            }
+
+            Console.WriteLine("CC__INFO");
+            Console.WriteLine("Tests: {0}  TestGroups:{1}", result.TestGroups.Count, result.Tests.Count);
+
+            Console.WriteLine("CC__LOGS");
+            foreach (var log in result.Logs)
+            {
+                Console.WriteLine(log.Message);
+            }
+
+            Console.WriteLine("CC__ERRORS");
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Message);
+            }
+
+            Assert.Equal(2, result.FailedCount);
+            Assert.Equal(6, result.PassedCount);
+            Assert.Equal(8, result.TotalCount);
+        }
+
 
         [Fact]
         public void Will_run_test_which_logs_object_to_console_log()
