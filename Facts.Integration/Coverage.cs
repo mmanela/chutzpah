@@ -40,9 +40,6 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                 {
                     new object[] {@"JS\Code\RequireJS\all.tests.qunit.js"},
-                    new object[] {@"JS\Code\RequireJS\all.tests.jasmine.js"},
-                    new object[] {@"JS\Code\RequireJS\all.tests.mocha-qunit.js"},
-                    new object[] {@"JS\Code\RequireJS\MochaWithSettings\all.tests.mocha-qunit.js"},
                 };
             }
         }
@@ -54,11 +51,6 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js"},
                     };
             }
         }
@@ -70,8 +62,6 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.qunit.test.js"},
-                       new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.jasmine.test.js"},
-                       new object[] {@"JS\Code\AMDMode_RequireJS\tests\base\base.mocha-qunit.test.js"},
                     };
             }
         }
@@ -83,8 +73,6 @@ namespace Chutzpah.Facts.Integration
                 return new[]
                     {
                         new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.qunit.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.jasmine.test.js"},
-                        new object[] {@"JS\Code\AMDMode_RequireJS\tests\ui\ui.mocha-qunit.test.js"},
                     };
             }
         }
