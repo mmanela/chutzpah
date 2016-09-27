@@ -176,13 +176,16 @@ namespace Chutzpah
         {
             string amdModulePath = UrlBuilder.GetRelativePath(amdAppRoot, filePath);
 
-            amdModulePath = amdModulePath
-                .Replace(Path.GetExtension(filePath), "")
-                .Replace("\\", "/")
-                .Trim('/', '\\');
-
+            amdModulePath = NormalizeAmdModulePath(amdModulePath);
 
             return amdModulePath;
+        }
+
+        private static string NormalizeAmdModulePath(string path)
+        {
+            return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path))
+                .Replace("\\", "/")
+                .Trim('/', '\\');
         }
 
         /// <summary>
@@ -215,11 +218,7 @@ namespace Chutzpah
         {
             string amdModulePath = UrlBuilder.GetRelativePath(testHarnessDirectory, filePath);
 
-            amdModulePath = Path.Combine(relativeAmdRootPath, amdModulePath)
-                .Replace(Path.GetExtension(filePath), "")
-                .Replace("\\", "/")
-                .Trim('/', '\\');
-
+            amdModulePath = NormalizeAmdModulePath(Path.Combine(relativeAmdRootPath, amdModulePath));
 
             return amdModulePath;
         }
