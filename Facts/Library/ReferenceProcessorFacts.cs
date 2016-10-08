@@ -80,6 +80,38 @@ namespace Chutzpah.Facts
 
 
             [Fact]
+            public void Will_not_replace_directory_name_containing_extension_in_relative_amd_path()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\src\folder";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path.jstests\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../../path.jstests/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
+            public void Will_not_replace_directory_name_containing_extension_in_relative_amd_path_with_legacy_setting()
+            {
+                var processor = new TestableReferenceProcessor();
+                var testHarnessDirectory = @"c:\some\src\folder";
+                var referencedFile = new ReferencedFile { Path = @"C:\some\path.jstests\code\test.js" };
+                var referenceFiles = new List<ReferencedFile> { referencedFile };
+                var settings = new ChutzpahTestSettingsFile { AMDBasePath = @"C:\some\other" };
+
+                processor.ClassUnderTest.SetupAmdFilePaths(referenceFiles, testHarnessDirectory, settings);
+
+                Assert.Equal("../src/folder/../../path.jstests/code/test", referencedFile.AmdFilePath);
+                Assert.Null(referencedFile.AmdGeneratedFilePath);
+            }
+
+
+            [Fact]
             public void Will_make_amd_path_relative_to_amdbasepath_with_legacy_setting()
             {
                 var processor = new TestableReferenceProcessor();
