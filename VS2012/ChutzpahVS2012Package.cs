@@ -7,6 +7,8 @@ using Chutzpah.VS.Common.Settings;
 using Chutzpah.VS2012.TestAdapter;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
+using System.Linq;
+using System.ComponentModel.Composition.Hosting;
 
 namespace Chutzpah.VS2012
 {
@@ -82,6 +84,7 @@ namespace Chutzpah.VS2012
 
             settingsMapper = ComponentModel.GetService<IChutzpahSettingsMapper>();
             settingsMapper.MapSettings(Settings);
+
         }
 
         private void SettingsPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -20,7 +20,7 @@ namespace Chutzpah.VS.Common
         public event EventHandler SolutionUnloaded;
 
         [ImportingConstructor]
-        public SolutionEventsListener([Import(typeof(IServiceProvider))]IServiceProvider serviceProvider)
+        public SolutionEventsListener([Import(typeof(SVsServiceProvider))]IServiceProvider serviceProvider)
         {
             this.solution = serviceProvider.GetService<IVsSolution>(typeof(SVsSolution));
         }

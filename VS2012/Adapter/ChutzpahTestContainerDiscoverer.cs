@@ -38,6 +38,7 @@ namespace Chutzpah.VS2012.TestAdapter
     }
 
     [Export(typeof(ITestContainerDiscoverer))]
+    [Export(typeof(ChutzpahTestContainerDiscoverer))]
     public class ChutzpahTestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider serviceProvider;
@@ -82,7 +83,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         [ImportingConstructor]
         public ChutzpahTestContainerDiscoverer(
-            [Import(typeof(IServiceProvider))] IServiceProvider serviceProvider,
+            [Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider,
             IChutzpahSettingsMapper settingsMapper,
             ISolutionEventsListener solutionListener,
             ITestFilesUpdateWatcher testFilesUpdateWatcher,

@@ -19,7 +19,7 @@ namespace Chutzpah.VS11.EventWatchers
         public event EventHandler<TestFileChangedEventArgs> TestFileChanged;
 
         [ImportingConstructor]
-        public TestFileAddRemoveListener([Import(typeof(IServiceProvider))] IServiceProvider serviceProvider)
+        public TestFileAddRemoveListener([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             ValidateArg.NotNull(serviceProvider, "serviceProvider");
 
