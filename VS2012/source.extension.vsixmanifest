@@ -22,6 +22,11 @@
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
     <Dependency Id="Microsoft.VisualStudio.MPF.11.0" DisplayName="Visual Studio MPF 11.0" d:Source="Installed" Version="11.0" />
   </Dependencies>
+  <Installer>
+    <SetupDependencies>
+      <SetupDependency Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" />
+    </SetupDependencies>
+  </Installer>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
     <Asset d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2012.TestAdapter|" />
