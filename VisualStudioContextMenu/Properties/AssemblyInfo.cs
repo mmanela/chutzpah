@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Reflection;
 using System.Resources;
@@ -30,6 +31,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 
 [assembly: AssemblyVersion("4.2.4.0")]
-
-
 

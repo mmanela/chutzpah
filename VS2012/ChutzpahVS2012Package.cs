@@ -25,6 +25,7 @@ namespace Chutzpah.VS2012
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
     [PackageRegistration(UseManagedResourcesOnly = true)]
+    [ProvideBindingPath]
     [ProvideOptionPage(typeof (ChutzpahUTESettings), "Chutzpah", "Chutzpah Test Adapter Settings", 115, 116, true)]
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
