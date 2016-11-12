@@ -96,6 +96,7 @@
     <Compile Include="Library\ChutzpahSettingsFileEnvironmentFacts.cs" />
     <Compile Include="Library\Coverage\BlanketJsCoverageEngineFacts.cs" />
     <Compile Include="Library\Coverage\SourceMapDotNetLineCoverageMapperFacts.cs" />
+    <Compile Include="Library\Transformers\JacocoTransformerFacts.cs" />
     <Compile Include="Library\UrlBuilderFacts.cs" />
     <Compile Include="Library\MochaLineNumberProcessorFacts.cs" />
     <Compile Include="Library\MochaDefinitionFacts.cs" />
