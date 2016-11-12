@@ -10,5 +10,6 @@
 
     "Server": {
     	"Enabled": true
-    }
+    },
+    "CodeCoverageTimeout": 10000
 }
