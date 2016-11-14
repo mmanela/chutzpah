@@ -38,6 +38,10 @@ namespace Chutzpah.Transformers
             {
                 throw new ArgumentNullException("testFileSummary");
             }
+
+
+            GetOverallStats(testFileSummary.CoverageObject);
+
             var builder = new StringBuilder();
             builder.AppendLine(@"<?xml version=""1.0"" encoding=""UTF-8"" ?>");
             builder.AppendLine(@"<report name=""Chutzpah Coverage"">");
@@ -45,6 +49,9 @@ namespace Chutzpah.Transformers
 
             AppendCoverageBySourceFile(builder, testFileSummary.CoverageObject);
             builder.AppendLine(@"  </package>");
+
+            AppendOverallCoverage(builder);
+
             builder.AppendLine(@"</report>");
             return builder.ToString();
         }
@@ -94,9 +101,46 @@ namespace Chutzpah.Transformers
             builder.AppendLine(@"   </sourcefile>");
         }
 
+        private void GetOverallStats(CoverageData coverage)
+        {
+            foreach (var pair in coverage)
+            {
+                TotalSourceFiles += 1;
+                var fileData = pair.Value;
+                var totalStatements = 0;
+                if (fileData.LineExecutionCounts == null)
+                {
+                    continue;
+                }
+
+                for (var i = 1; i < fileData.LineExecutionCounts.Length; i++)
+                {
+                    var lineExecution = fileData.LineExecutionCounts[i];
+                    if (lineExecution.HasValue)
+                    {
+                        totalStatements++;
+
+                        if (lineExecution > 0)
+                        {
+                            TotalSourceLinesCovered += 1;
+                        }
+                    }
+                }
+
+                TotalSourceLines += totalStatements;
+            }
+        }
+
         private void AppendLineCoverageForSourceFile(StringBuilder builder, int statementsCovered, int totalStatements)
         {
             builder.AppendLine($@"     <counter type=""LINE"" missed=""{totalStatements - statementsCovered}"" covered=""{statementsCovered}"" />");
+        }
+
+        private void AppendOverallCoverage(StringBuilder builder)
+        {
+            var overall = $@"  <counter type=""LINE"" missed=""{TotalSourceLines - TotalSourceLinesCovered}"" covered=""{TotalSourceLinesCovered}"" />";
+ 
+            builder.AppendLine(overall);
         }
     }
 }

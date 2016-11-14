@@ -85,6 +85,7 @@ namespace Chutzpah.Facts.Library.Transformers
      <counter type=""LINE"" missed=""0"" covered=""4"" />
    </sourcefile>
   </package>
+  <counter type=""LINE"" missed=""1"" covered=""6"" />
 </report>
 ";
 
