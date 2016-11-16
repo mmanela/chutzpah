@@ -14,7 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Small bug fixes
+* Run Chutzpah using local web server (Kestrel) instead of file system
+* Jacoco XML Support
+* VS 2017 Support
+* Configurable CodeCoverageTimeout setting
         </releaseNotes>
     </metadata>
 </package>
