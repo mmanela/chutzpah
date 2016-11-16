@@ -14,7 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Run Chutzpah using local web server (Kestrel) instead of file system
+* Ability to run Chutzpah using a local web server (Kestrel) instead of the file system
 * Jacoco XML Support
 * VS 2017 Support
 * Configurable CodeCoverageTimeout setting
