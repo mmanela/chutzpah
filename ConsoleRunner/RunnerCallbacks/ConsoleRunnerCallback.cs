@@ -22,18 +22,7 @@ namespace Chutzpah.RunnerCallbacks
 
         public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
         {
-            if (testResultsSummary.CoverageObject != null)
-            {
-                WriteCoverageFiles(testResultsSummary.CoverageObject);
-            }
-
             base.TestSuiteFinished(testResultsSummary);
-        }
-
-        public void WriteCoverageFiles(CoverageData coverage)
-        {
-            var currentDirectory = Environment.CurrentDirectory;
-            CoverageOutputGenerator.WriteHtmlFile(Path.Combine(currentDirectory, Constants.CoverageHtmlFileName), coverage);
         }
     }
 }
