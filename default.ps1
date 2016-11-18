@@ -9,6 +9,18 @@ properties {
   
   $autoSignedNugetPackages = "$baseDir/packages_autosigned"
   $nugetPackges = "$baseDir/packages"
+
+  # Temp work around psake limitation to not use Msbuild 15
+  $defaultMSBuildPath = Resolve-Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
+  if($env:Chutzpah_MSBuild_Path -and (Test-Path $env:Chutzpah_MSBuild_Path)) {
+    $msbuild = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
+  } 
+  elseif (Test-Path $defaultMSBuildPath) {
+    $msbuild = $defaultMSBuildPath
+  }
+  else {
+    throw "Unable to find msbuild!!! Please set environment variable Chutzpah_MSBuild_Path to MSBuild.exe version 15"
+  }
 }
 
 # Aliases
@@ -79,29 +91,29 @@ task Clean-PackageFiles {
 # CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
 # VS components
 task Clean-TeamCitySolution {
-    exec { msbuild TeamCity.CodeBetter.sln /t:Clean /v:quiet }
+    exec { & $msbuild TeamCity.CodeBetter.sln /t:Clean /v:quiet }
 
 }
 task Clean-Solution-VS {
-    exec { msbuild Chutzpah.VS.sln /t:Clean /v:quiet }
+    exec { & $msbuild Chutzpah.VS.sln /t:Clean /v:quiet }
 }
 
 task Clean-Solution-NoVS {
-    exec { msbuild Chutzpah.NoVS.sln /t:Clean /v:quiet }
+    exec { & $msbuild Chutzpah.NoVS.sln /t:Clean /v:quiet }
 }
 
 # CodeBetter TeamCity does not have VS SDK installed so we use a custom solution that does not build the 
 # VS components
 task Build-TeamCitySolution {
-    exec { msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+    exec { & $msbuild TeamCity.CodeBetter.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Build-Solution-VS {
-    exec { msbuild Chutzpah.VS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+    exec { & $msbuild Chutzpah.VS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Build-Solution-NoVS {
-    exec { msbuild Chutzpah.NoVS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
+    exec { & $msbuild Chutzpah.NoVS.sln /maxcpucount /t:Build /v:Minimal /p:Configuration=$configuration }
 }
 
 task Run-PerfTester {
