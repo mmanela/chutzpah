@@ -160,7 +160,7 @@ task Sign-ForeignAssemblies {
   }
   
   $signerToolFolder = (getLatestNugetPackagePath "Brutal.Dev.StrongNameSigner").FullName
-  $signerExe = Join-Path $signerToolFolder Tools/StrongNameSigner.Console.exe
+  $signerExe = Join-Path $signerToolFolder build/StrongNameSigner.Console.exe
   
   Write-Host "Signing assemblies"
   $folderPaths = ""
