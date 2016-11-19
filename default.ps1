@@ -184,7 +184,6 @@ task Package-Files -depends Clean-PackageFiles {
     
     create $filesDir, $packageDir
     copy-item "$baseDir\License.txt" -destination $filesDir
-    copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $filesDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
     
     
@@ -209,7 +208,6 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     create $nugetDir, $nugetTools, $packageDir
     
     copy-item "$baseDir\License.txt", $nuspec -destination $nugetDir
-    copy-item "$baseDir\3rdParty\ServiceStack\LICENSE.BSD" -destination $nugetDir\ServiceStack.LICENSE.BSD
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $nugetTools /S /xd JS /xf *.xml}
     
     
