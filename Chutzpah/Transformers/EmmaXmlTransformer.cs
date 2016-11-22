@@ -39,6 +39,10 @@ namespace Chutzpah.Transformers
             {
                 throw new ArgumentNullException("testFileSummary");
             }
+            else if (testFileSummary.CoverageObject == null)
+            {
+                return string.Empty;
+            }
 
             GetOverallStats(testFileSummary.CoverageObject);
             var builder = new StringBuilder();
