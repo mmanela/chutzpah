@@ -249,7 +249,7 @@ task Package-Chocolatey -depends Clean-PackageFiles, Set-Version {
 
 task Push-Nuget -depends Set-Version {
   $v = new-object -TypeName System.Version -ArgumentList $global:version
-	exec { .\Tools\nuget.exe push $packageDir\Chutzpah.$($v.ToString(3)).nupkg }
+  exec { .\Tools\nuget.exe push $packageDir\Chutzpah.$($v.ToString(3)).nupkg -source https://www.nuget.org }
 }
 
 
