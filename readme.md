@@ -11,10 +11,6 @@ Chutzpah supports the [QUnit](http://docs.jquery.com/QUnit), [Jasmine](http://pi
 Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run your tests.
 
 
-**Notice**: [Version 4.1: Breaking change to how reference comments are processed](https://github.com/mmanela/chutzpah/wiki/Breaking-change-to-nested-reference-comments-in-version-4.1)
-
-
-
 ## Get Chutzpah
 
 * Command Line Runner [nuget](https://www.nuget.org/packages/Chutzpah) or [chocolatey](http://chocolatey.org/packages/chutzpah)
