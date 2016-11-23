@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 
 namespace Chutzpah.Server
 {
@@ -64,7 +65,14 @@ namespace Chutzpah.Server
                            app.UseStaticFiles(new StaticFileOptions { FileProvider = new ChutzpahServerFileProvider(env.ContentRootPath, builtInDependencyFolder) });
                            app.Run(async (context) =>
                            {
-                               await context.Response.WriteAsync("Chutzpah Web Server");
+                               if (context.Request.Path == "/")
+                               {
+                                   await context.Response.WriteAsync($"Chutzpah Web Server (Version { Assembly.GetEntryAssembly().GetName().Version})");
+                               }
+                               else
+                               {
+                                   context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                               }
                            });
                        })
                        .Build();
