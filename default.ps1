@@ -19,7 +19,7 @@ properties {
     $msbuild = $defaultMSBuildPath
   }
   else {
-    Write-Host "Unable to find msbuild!!! Please set environment variable Chutzpah_MSBuild_Path to MSBuild.exe version 15"
+    Write-Warning "Unable to find msbuild!!! Please set environment variable Chutzpah_MSBuild_Path to MSBuild.exe version 15"
   }
 }
 
