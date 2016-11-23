@@ -35,6 +35,11 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 * [How to build the code?](https://github.com/mmanela/chutzpah/wiki/building-and-running-the-code)
 * [How can I contribute to this project?](https://github.com/mmanela/chutzpah/wiki/contributing-to-chutzpah)
 
+## Building the code
+1. Clone the repo
+2. One time run .\build.bat install - This will install all dependencies
+3. Run .\build - This will build all the code and run tests.
+4. Open solution Chutzpah.NoVS.sln for normal changes
 
 ## Features
 
