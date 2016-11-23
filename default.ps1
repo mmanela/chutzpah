@@ -26,7 +26,7 @@ properties {
 # Aliases
 task Default -depends Build
 
-task Install -depends Sign-ForeignAssemblies
+task Install -depends Sign-ForeignAssemblies, Install-TypeScript
 
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
@@ -147,6 +147,11 @@ task Run-Phantom {
   $testFilePath = $testFilePath.Path.Replace("\","/");
   
   exec {  & $phantom "Chutzpah\JSRunners\$($type)Runner$suffix.js" "file:///$testFilePath" $mode }
+}
+
+task Install-TypeScript {
+  
+  exec {  & npm install TypeScript -g }
 }
 
 task Sign-ForeignAssemblies {
