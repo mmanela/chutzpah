@@ -49,7 +49,6 @@ namespace Chutzpah.Facts.Integration
                     // Compilation Tests
                     new object[] {@"Samples\Compilation\ExternalCompile\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScript\chutzpah.json",2},
-                    new object[] {@"Samples\Compilation\CoffeeScript\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScriptMsbuild\chutzpah.json",2},
                     new object[] {@"Samples\Compilation\TypeScriptPowershell\chutzpah.json",2},
 
