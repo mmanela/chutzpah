@@ -152,7 +152,7 @@ task Run-Phantom {
 
 task Install-TypeScript {
   
-  exec {  & npm install TypeScript -g }
+  exec {  & npm install typescript -g }
 }
 
 task Sign-ForeignAssemblies {
