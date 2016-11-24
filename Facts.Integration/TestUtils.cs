@@ -5,7 +5,7 @@ namespace Chutzpah.Facts.Integration
 {
     public static class TestUtils
     {
-        public static bool TracingEnabled = true;
+        public static bool TracingEnabled = false;
 
         public static void RunAsJasmineVersionOne(Action action)
         {
