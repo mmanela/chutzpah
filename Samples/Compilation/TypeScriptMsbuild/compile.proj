@@ -2,7 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <TscExe>tsc</TscExe>
+    <TscExe>$(Appdata)\npm\tsc.cmd</TscExe>
   </PropertyGroup>
 
   <Target Name="CompileTS">
