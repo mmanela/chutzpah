@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Internal.Networking;
+using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.IO;
 using System.Net;
@@ -24,7 +25,7 @@ namespace Chutzpah.Server
 
         public IChutzpahWebServerHost CreateServer(ChutzpahWebServerConfiguration configuration, IChutzpahWebServerHost activeWebServerHost)
         {
-            if (activeWebServerHost != null 
+            if (activeWebServerHost != null
                 && activeWebServerHost.IsRunning
                 && activeWebServerHost.RootPath.Equals(configuration.RootPath, StringComparison.OrdinalIgnoreCase))
             {
@@ -36,6 +37,24 @@ namespace Chutzpah.Server
 
 
             return BuildHost(configuration.RootPath, configuration.DefaultPort.Value, builtInDependencyFolder);
+        }
+
+        private void AddFileCacheHeaders(StaticFileResponseContext context)
+        {
+            // If we see you have sha on the url we send aggresive cache values
+            // otherwise we tell to not cache ever
+            if(context.Context.Request.Query.ContainsKey(Constants.FileUrlShaKey))
+            {
+                // Cache for a year
+                context.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
+            }
+            else
+            {
+                context.Context.Response.Headers["Cache-Control"] = "no-cache";
+                context.Context.Response.Headers["Pragma"] = "no-cache";
+                context.Context.Response.Headers["Expires"] = "Thu, 01 Jan 1970 00:00:00 GMT";
+
+            }
         }
 
         private ChutzpahWebServerHost BuildHost(string rootPath, int defaultPort, string builtInDependencyFolder)
@@ -62,7 +81,11 @@ namespace Chutzpah.Server
                        .Configure((app) =>
                        {
                            var env = (IHostingEnvironment)app.ApplicationServices.GetService(typeof(IHostingEnvironment));
-                           app.UseStaticFiles(new StaticFileOptions { FileProvider = new ChutzpahServerFileProvider(env.ContentRootPath, builtInDependencyFolder) });
+                           app.UseStaticFiles(new StaticFileOptions
+                           {
+                               OnPrepareResponse = AddFileCacheHeaders, 
+                               FileProvider = new ChutzpahServerFileProvider(env.ContentRootPath, builtInDependencyFolder)
+                           });
                            app.Run(async (context) =>
                            {
                                if (context.Request.Path == "/")

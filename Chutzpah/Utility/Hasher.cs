@@ -9,11 +9,11 @@ namespace Chutzpah.Utility
     public class Hasher : IHasher
     {
         private readonly string versionSalt;
-        private readonly ThreadLocal<MD5CryptoServiceProvider> md5;
+        private readonly ThreadLocal<SHA1Managed> sha1;
 
         public Hasher()
         {
-            md5 = new ThreadLocal<MD5CryptoServiceProvider>(() => new MD5CryptoServiceProvider());
+            sha1 = new ThreadLocal<SHA1Managed>(() => new SHA1Managed());
             versionSalt = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
@@ -21,7 +21,7 @@ namespace Chutzpah.Utility
         {
             if (String.IsNullOrEmpty(input)) return null;
             input += versionSalt;
-            return BytesToString(md5.Value.ComputeHash(Encoding.UTF8.GetBytes(input)));
+            return BytesToString(sha1.Value.ComputeHash(Encoding.UTF8.GetBytes(input)));
         }
 
         private string BytesToString(byte[] arr)

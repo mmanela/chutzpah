@@ -27,10 +27,10 @@ namespace Chutzpah
         public string GenerateFileUrl(TestContext testContext, ReferencedFile referencedFile)
         {
             var path = referencedFile.GeneratedFilePath ?? referencedFile.Path;
-            return GenerateFileUrl(testContext, path, fullyQualified: false, isBuiltInDependency: referencedFile.IsBuiltInDependency);
+            return GenerateFileUrl(testContext, path, fullyQualified: false, isBuiltInDependency: referencedFile.IsBuiltInDependency, fileHash: referencedFile.Hash);
         }
 
-        public string GenerateFileUrl(TestContext testContext, string absolutePath, bool fullyQualified = false, bool isBuiltInDependency = false)
+        public string GenerateFileUrl(TestContext testContext, string absolutePath, bool fullyQualified = false, bool isBuiltInDependency = false, string fileHash = null)
         {
             var isRunningInWebServer = testContext.TestFileSettings.Server != null && testContext.TestFileSettings.Server.Enabled.GetValueOrDefault();
 
@@ -38,7 +38,7 @@ namespace Chutzpah
             {
                 if (isRunningInWebServer)
                 {
-                    return GenerateServerFileUrl(testContext, absolutePath, fullyQualified, isBuiltInDependency);
+                    return GenerateServerFileUrl(testContext, absolutePath, fullyQualified, isBuiltInDependency, fileHash);
                 }
                 else
                 {
@@ -71,7 +71,7 @@ namespace Chutzpah
             var path = referencedFile.GeneratedFilePath ?? referencedFile.Path;
             if (!RegexPatterns.SchemePrefixRegex.IsMatch(path))
             {
-                return GenerateServerFileUrl(testContext, path, fullyQualified:true, isBuiltInDependency: referencedFile.IsBuiltInDependency);
+                return GenerateServerFileUrl(testContext, path, fullyQualified:true, isBuiltInDependency: referencedFile.IsBuiltInDependency, fileHash: referencedFile.Hash);
             }
 
             return path;
@@ -81,7 +81,7 @@ namespace Chutzpah
         /// <summary>
         /// Generate a file url that can be used when hosting it on a server
         /// </summary>
-        public string GenerateServerFileUrl(TestContext testContext, string absolutePath, bool fullyQualified, bool isBuiltInDependency)
+        public string GenerateServerFileUrl(TestContext testContext, string absolutePath, bool fullyQualified, bool isBuiltInDependency, string fileHash)
         {
             var port = testContext.WebServerHost.Port;
             var rootPath = testContext.WebServerHost.RootPath;
@@ -111,7 +111,9 @@ namespace Chutzpah
                 relativePath = NormalizeUrlPath(GetRelativePath(parentPath, absolutePath, false));
             }
 
-            return fullyQualified ? string.Format("http://localhost:{0}/{1}", port, relativePath) : relativePath;
+            var url = fullyQualified ? string.Format("http://localhost:{0}/{1}", port, relativePath) : relativePath;
+
+            return string.IsNullOrEmpty(fileHash) ? url : $"{url}?{Constants.FileUrlShaKey}={fileHash}";
         }
 
 

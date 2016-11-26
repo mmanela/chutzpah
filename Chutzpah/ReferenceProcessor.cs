@@ -108,10 +108,10 @@ namespace Chutzpah
             // Process the references defined using /// <reference comments in test file contents
             foreach (var fileUnderTest in filesUnderTests)
             {
-                var testFileText = fileSystem.GetText(fileUnderTest.Path);
+                var testFileText = fileProbe.GetReferencedFileContent(fileUnderTest, chutzpahTestSettings);
 
                 definition.Process(fileUnderTest, testFileText, chutzpahTestSettings);
-
+                
                 if (fileUnderTest.ExpandReferenceComments)
                 {
                     var result = GetReferencedFiles(
@@ -140,13 +140,12 @@ namespace Chutzpah
             foreach (var referencedFile in referencedFiles)
             {
                 var referencePath = referencedFile.GeneratedFilePath ?? referencedFile.Path;
+                fileProbe.SetReferencedFileHash(referencedFile, testContext.TestFileSettings);
                 referencedFile.AbsoluteServerUrl = urlBuilder.GenerateAbsoluteServerUrl(testContext, referencedFile);
                 referencedFile.PathForUseInTestHarness = urlBuilder.GenerateFileUrl(testContext, referencedFile);
             }
 
         }
-
-
 
         /// <summary>
         /// Add the AMD file paths for the Path and GeneratePath fields

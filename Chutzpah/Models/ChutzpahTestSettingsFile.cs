@@ -52,6 +52,7 @@ namespace Chutzpah.Models
             Enabled = true;
             DefaultPort = Constants.DefaultWebServerPort;
             RootPath = Path.GetPathRoot(Environment.CurrentDirectory);
+            FileCachingEnabled = true;
         }
     }
 

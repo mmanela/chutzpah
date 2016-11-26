@@ -1,4 +1,5 @@
 ﻿using Chutzpah.Models;
+using Chutzpah.Utility;
 using Chutzpah.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace Chutzpah
     {
         private readonly IEnvironmentWrapper environment;
         private readonly IFileSystemWrapper fileSystem;
+        private readonly IHasher hasher;
         private string builtInDependencyDirectory;
 
         private static readonly Dictionary<string, PathType> ExtensionToPathTypeMap =
@@ -27,10 +29,11 @@ namespace Chutzpah
                 {Constants.CSHtmlScriptExtension,PathType.Html},
             };
 
-        public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem)
+        public FileProbe(IEnvironmentWrapper environment, IFileSystemWrapper fileSystem, IHasher hasher)
         {
             this.environment = environment;
             this.fileSystem = fileSystem;
+            this.hasher = hasher;
         }
 
         /// <summary>
@@ -248,6 +251,31 @@ namespace Chutzpah
                 return filePath;
 
             return null;
+        }
+
+        public string GetReferencedFileContent(ReferencedFile file, ChutzpahTestSettingsFile settings)
+        {
+            return GetReferenceFileContentAndSetHash(file, settings);
+        }
+
+        public void SetReferencedFileHash(ReferencedFile file, ChutzpahTestSettingsFile settings)
+        {
+            GetReferenceFileContentAndSetHash(file, settings);
+        }
+
+        private string GetReferenceFileContentAndSetHash(ReferencedFile file, ChutzpahTestSettingsFile settings)
+        {
+            var text = fileSystem.GetText(file.Path);
+
+            if (string.IsNullOrEmpty(file.Hash)
+                && settings.Server != null
+                && settings.Server.Enabled.GetValueOrDefault()
+                && settings.Server.FileCachingEnabled.GetValueOrDefault())
+            {
+                file.Hash = hasher.Hash(text);
+            }
+
+            return text;
         }
     }
 }

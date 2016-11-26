@@ -198,7 +198,7 @@ namespace Chutzpah.Facts
                 var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -215,8 +215,8 @@ namespace Chutzpah.Facts
                     new ReferencedFile { IsFileUnderTest = true, Path = @"path\test2.js", ExpandReferenceComments = true }};
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test1.js")).Returns(text);
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test2.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test1.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test2.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -232,7 +232,7 @@ namespace Chutzpah.Facts
                 var referenceFiles = new List<ReferencedFile> { new ReferencedFile { IsFileUnderTest = true, Path = @"path\test.js", ExpandReferenceComments = true } };
                 var text = (@"/// <reference path=""lib.js"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -252,7 +252,7 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""/this/file.js"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path1\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path1\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -272,7 +272,7 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""~/this/file.js"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path1\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path1\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -288,7 +288,7 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""/this/file.js"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path1\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path1\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -308,7 +308,7 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""/this/file.html"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path1\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path1\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -328,7 +328,7 @@ namespace Chutzpah.Facts
                         /// <reference path=""../../js/doublenegative.js"" chutzpahExclude=""false"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path1\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path1\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -351,7 +351,7 @@ namespace Chutzpah.Facts
                 string text = @"/// <reference path=""../../js/references.js"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -373,7 +373,7 @@ namespace Chutzpah.Facts
                         ";
                 var loopText = @"/// <reference path=""../../js/references.js"" />";
 
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
                 processor.Mock<IFileSystemWrapper>()
                     .Setup(x => x.GetText(@"path\references.js"))
                     .Returns(loopText);
@@ -404,7 +404,7 @@ namespace Chutzpah.Facts
                 var text = @"/// <reference path=""../../js/somefolder"" />
                         some javascript code
                         ";
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -430,7 +430,7 @@ namespace Chutzpah.Facts
                         some javascript code
                         ";
                 processor.Mock<IFileProbe>().Setup(x => x.IsTemporaryChutzpahFile(It.IsAny<string>())).Returns(true);
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -446,7 +446,7 @@ namespace Chutzpah.Facts
                 var text = (@"/// <template path=""../../templates/file.html"" />
                         /// <template path=""../../templates/file.html"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -462,7 +462,7 @@ namespace Chutzpah.Facts
                 var settings = new ChutzpahTestSettingsFile { };
                 var text = (@"/// <template mode=""script"" id=""my.Id"" path=""../../templates/file.html"" type=""My/Type""/>
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -481,7 +481,7 @@ namespace Chutzpah.Facts
                 var settings = new ChutzpahTestSettingsFile { };
                 var text = (@"/// <template path=""../../templates/file.html"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -500,7 +500,8 @@ namespace Chutzpah.Facts
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = (@"/// <reference path=""http://a.com/lib.js"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -515,7 +516,7 @@ namespace Chutzpah.Facts
                 var settings = new ChutzpahTestSettingsFile {};
                 var text = (@"/// <chutzpah_reference path=""lib.js"" />
                         some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -537,7 +538,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -565,7 +566,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -591,7 +592,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -618,7 +619,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -647,7 +648,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -676,7 +677,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -706,7 +707,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -737,7 +738,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 
@@ -768,7 +769,7 @@ namespace Chutzpah.Facts
                         SettingsFileDirectory = settings.SettingsFileDirectory
                     });
                 var text = (@"some javascript code");
-                processor.Mock<IFileSystemWrapper>().Setup(x => x.GetText(@"path\test.js")).Returns(text);
+                processor.Mock<IFileProbe>().Setup(x => x.GetReferencedFileContent(It.Is<ReferencedFile>(f => f.Path == @"path\test.js"), It.IsAny<ChutzpahTestSettingsFile>())).Returns(text);
 
                 processor.ClassUnderTest.GetReferencedFiles(referenceFiles, processor.FrameworkDefinition, settings);
 

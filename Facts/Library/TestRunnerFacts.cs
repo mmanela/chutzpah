@@ -35,8 +35,8 @@ namespace Chutzpah.Facts
                 .Returns(@"dependencyPath\");
 
                 Mock<IUrlBuilder>()
-                    .Setup(x => x.GenerateFileUrl(It.IsAny<TestContext>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                    .Returns<TestContext, string, bool, bool>((c, p, fq, d) => p);
+                    .Setup(x => x.GenerateFileUrl(It.IsAny<TestContext>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<string>()))
+                    .Returns<TestContext, string, bool, bool, string>((c, p, fq, d, s) => p);
             }
 
             public static string BuildArgs(string runner, string harness, string mode = "execution", int? timeout = null, bool ignoreResourceLoadingError = false)

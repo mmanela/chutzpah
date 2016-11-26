@@ -173,7 +173,7 @@ namespace Chutzpah.Coverage
                     {
                         string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
                         var relativePathFromHarness = Path.Combine(basePath, entry.Key);
-                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, relativePathFromHarness, true, false));
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, relativePathFromHarness, true, false, null));
                         localFilePathForServerItem = new Uri(relativePathFromHarness).LocalPath;
                     }
 

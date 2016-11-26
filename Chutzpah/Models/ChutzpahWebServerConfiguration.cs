@@ -12,6 +12,7 @@ namespace Chutzpah.Models
             Enabled = configurationToCopy.Enabled;
             DefaultPort = configurationToCopy.DefaultPort;
             RootPath = configurationToCopy.RootPath;
+            FileCachingEnabled = configurationToCopy.FileCachingEnabled;
         }
 
         /// <summary>
@@ -30,5 +31,10 @@ namespace Chutzpah.Models
         /// Defaults to settings file drive root path
         /// </summary>
         public string RootPath { get; set; }
+
+        /// <summary>
+        /// Set large experation on files served by appending a hash value on the urls. Defaults to true.
+        /// </summary>
+        public bool? FileCachingEnabled { get; set; }
     }   
 }

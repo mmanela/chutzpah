@@ -75,5 +75,13 @@ namespace Chutzpah
         /// <param name="path"></param>
         /// <returns></returns>
         bool IsChutzpahSettingsFile(string path);
+
+
+        /// <summary>
+        /// Gets the content of a reference file and updates its hash
+        /// </summary>
+        string GetReferencedFileContent(ReferencedFile file, ChutzpahTestSettingsFile settings);
+
+        void SetReferencedFileHash(ReferencedFile file, ChutzpahTestSettingsFile settings);
     }
 }

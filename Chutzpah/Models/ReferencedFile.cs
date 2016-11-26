@@ -102,5 +102,10 @@ namespace Chutzpah.Models
         public string PathForUseInTestHarness { get; set; }
 
         public string AbsoluteServerUrl { get; set; }
+
+        /// <summary>
+        /// A cached hash string for the file user for user generation
+        /// </summary>
+        public string Hash { get; set; }
     }
 }

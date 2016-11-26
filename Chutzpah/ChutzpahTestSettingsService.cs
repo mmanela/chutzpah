@@ -155,7 +155,8 @@ namespace Chutzpah
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.Server != null)
-            { 
+            {
+                settings.Server.FileCachingEnabled = settings.Server.FileCachingEnabled ?? true;
 
                 settings.Server.DefaultPort = settings.Server.DefaultPort ?? Constants.DefaultWebServerPort;
 
