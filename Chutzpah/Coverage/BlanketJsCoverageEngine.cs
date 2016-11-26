@@ -92,7 +92,7 @@ namespace Chutzpah.Coverage
 
             // Configure Blanket.
             TestHarnessItem blanketMain = harness.CodeCoverageDependencies.Single(
-                                            d => d.Attributes.ContainsKey("src") && d.Attributes["src"].EndsWith(blanketScriptName));
+                                            d => d.Attributes.ContainsKey("src") && (d.Attributes["src"].EndsWith(blanketScriptName) || d.Attributes["src"].Contains(blanketScriptName + "?")));
 
 
             string dataCoverNever = "[" + string.Join(",", filesToExcludeFromCoverage.Select(file => "'" + file + "'")) + "]";
@@ -201,7 +201,7 @@ namespace Chutzpah.Coverage
                     executedFilePath = fileUri.LocalPath;
                 }
 
-                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.Equals(executedFilePath, StringComparison.OrdinalIgnoreCase));
+                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.IndexOf(executedFilePath, StringComparison.OrdinalIgnoreCase) > 0);
                 if (matchedFile == null)
                 {
                     // This does not appear to be a compiled file so just created a referencedFile with the path
