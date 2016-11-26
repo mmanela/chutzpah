@@ -265,6 +265,11 @@ namespace Chutzpah
 
         private string GetReferenceFileContentAndSetHash(ReferencedFile file, ChutzpahTestSettingsFile settings)
         {
+            if(!file.IsLocal)
+            {
+                return null;
+            }
+
             var text = fileSystem.GetText(file.Path);
 
             if (string.IsNullOrEmpty(file.Hash)
