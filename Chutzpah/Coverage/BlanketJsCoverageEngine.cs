@@ -201,7 +201,7 @@ namespace Chutzpah.Coverage
                     executedFilePath = fileUri.LocalPath;
                 }
 
-                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.IndexOf(executedFilePath, StringComparison.OrdinalIgnoreCase) > 0);
+                var matchedFile = generatedToReferencedFile.FirstOrDefault(group => group.Key.IndexOf(executedFilePath, StringComparison.OrdinalIgnoreCase) >= 0);
                 if (matchedFile == null)
                 {
                     // This does not appear to be a compiled file so just created a referencedFile with the path
