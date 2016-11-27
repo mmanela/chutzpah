@@ -67,11 +67,11 @@ namespace Chutzpah
 
             if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBasePath))
             {
-                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBasePath);
+                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBasePath, fullyQualified: true);
             }
             else if (!string.IsNullOrEmpty(chutzpahTestSettings.AMDBaseUrl))
             {
-                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBaseUrl);
+                amdBasePathUrl = urlBuilder.GenerateFileUrl(testContext, chutzpahTestSettings.AMDBaseUrl, fullyQualified: true);
             }
 
             var replacements = new Dictionary<string, string>
