@@ -14,8 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Fix caching in server mode
-* Ensure 404 thrown when unknown file requested
+* Handle race condition when created the Kestrel webserver and retry
         </releaseNotes>
     </metadata>
 </package>
