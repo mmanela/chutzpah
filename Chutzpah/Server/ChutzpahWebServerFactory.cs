@@ -105,7 +105,7 @@ namespace Chutzpah.Server
 
                     return ChutzpahWebServerHost.Create(host, rootPath, port);
                 }
-                catch (Exception ex) when ((ex is UvException || ex is IOException) && attemptLimit > 0)
+                catch (Exception ex) when (attemptLimit > 0)
                 {
                     ChutzpahTracer.TraceError(ex, "Unable to create web server host at path {0} and port {1}. Trying again...", rootPath, port);
                 }
