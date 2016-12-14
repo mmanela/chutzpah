@@ -106,7 +106,7 @@ namespace Chutzpah.Coverage
             blanketMain.Attributes.Add("data-cover-flags", "ignoreError autoStart");
             blanketMain.Attributes.Add("data-cover-only", dataCoverOnly);
             blanketMain.Attributes.Add("data-cover-never", dataCoverNever);
-            blanketMain.Attributes.Add("timeout", testSettingsFile.CodeCoverageTimeout.HasValue ? testSettingsFile.CodeCoverageTimeout.Value.ToString() : "5000");
+            blanketMain.Attributes.Add("data-cover-timeout", testSettingsFile.CodeCoverageTimeout.HasValue ? testSettingsFile.CodeCoverageTimeout.Value.ToString() : "5000");
         }
 
         /// <summary>

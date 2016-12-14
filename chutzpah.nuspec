@@ -14,7 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-* Handle race condition when created the Kestrel webserver and retry
+* Fix bug in coverage timeout setting
         </releaseNotes>
     </metadata>
 </package>
