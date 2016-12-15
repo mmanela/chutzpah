@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.Exceptions;
 
 namespace Chutzpah
 {
@@ -107,15 +108,22 @@ namespace Chutzpah
                 else if (!ChutzpahSettingsFileCache.TryGetValue(Path.GetDirectoryName(testSettingsFilePath), out settings) || forceFresh)
                 {
                     ChutzpahTracer.TraceInformation("Chutzpah.json file found at {0} given starting directory {1}", testSettingsFilePath, directory);
-                    settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
-
-                    if (settings == null)
+                    try
                     {
-                        settings = ChutzpahTestSettingsFile.Default;
+                        settings = serializer.DeserializeFromFile<ChutzpahTestSettingsFile>(testSettingsFilePath);
+                        if (settings == null)
+                        {
+                            settings = ChutzpahTestSettingsFile.Default;
+                        }
+                        else
+                        {
+                            settings.IsDefaultSettings = false;
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        settings.IsDefaultSettings = false;
+                        ChutzpahTracer.TraceError("Error parsing Chutzpah.json: {0}", e.Message);
+                        throw new ChutzpahException("Error parsing Chutzpah.json: " + e.Message);
                     }
                     settings.SettingsFileDirectory = Path.GetDirectoryName(testSettingsFilePath);
 
