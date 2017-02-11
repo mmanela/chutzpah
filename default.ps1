@@ -157,7 +157,7 @@ task Install-TypeScript {
 
 task Install-NodeModules {
   
-  exec {  & npm install typescript -g }
+  exec {  & npm install }
 }
 
 task Setup-SymbolicLinks {
