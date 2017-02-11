@@ -71,9 +71,9 @@ namespace Chutzpah.Transformers
                 }
             };
             // Time taken is current time 
-            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).creation = DateTime.Now.AddSeconds(-testFileSummary.TimeTaken).ToString("O");
-            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).start = DateTime.Now.AddSeconds(-testFileSummary.TimeTaken).ToString("O");
-            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).queuing = DateTime.Now.AddSeconds(-testFileSummary.TimeTaken).ToString("O");
+            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).creation = DateTime.Now.AddMilliseconds(-testFileSummary.TimeTaken).ToString("O");
+            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).start = DateTime.Now.AddMilliseconds(-testFileSummary.TimeTaken).ToString("O");
+            testRun.Items.GetInstance<TestRunTypeTimes>(VSTSExtensions.TestRunItemType.Times).queuing = DateTime.Now.AddMilliseconds(-testFileSummary.TimeTaken).ToString("O");
 
 
             var testList = new TestListType
@@ -175,9 +175,9 @@ namespace Chutzpah.Transformers
                     duration = new TimeSpan(0, 0, testCase.TimeTaken).ToString("c"),
                     // I tried adding this to StandardConsoleRunner, but it demanded too many changes.
                     // Setting start to the creation date.
-                    startTime = DateTime.Now.AddSeconds(-testFileSummary.TimeTaken).ToString("O"),
+                    startTime = DateTime.Now.AddMilliseconds(-testFileSummary.TimeTaken).ToString("O"),
                     // Setting end time to creation date + time taken to run this test.
-                    endTime = DateTime.Now.AddSeconds((-testFileSummary.TimeTaken) + testCase.TimeTaken).ToString("O"),
+                    endTime = DateTime.Now.AddMilliseconds((-testFileSummary.TimeTaken) + testCase.TimeTaken).ToString("O"),
                     // This is for specific test type.
                     testType = "13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b",
                     outcome = testCase.TestOutcome == Models.TestOutcome.Passed ? "Passed" : 
