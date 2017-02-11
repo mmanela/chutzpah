@@ -27,7 +27,7 @@ properties {
 # Aliases
 task Default -depends Build
 
-task Install -depends Sign-ForeignAssemblies, Install-TypeScript
+task Install -depends Sign-ForeignAssemblies, Install-TypeScript, Install-NodeModules, Setup-SymbolicLinks
 
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
@@ -154,6 +154,18 @@ task Install-TypeScript {
   
   exec {  & npm install typescript -g }
 }
+
+task Install-NodeModules {
+  
+  exec {  & npm install typescript -g }
+}
+
+task Setup-SymbolicLinks {
+
+  New-Item -path "$baseDir\Samples\Angular2\Basic\node_modules" -ItemType SymbolicLink -Value "$baseDir\node_modules" -ErrorAction SilentlyContinue
+
+}
+
 
 task Sign-ForeignAssemblies {
 

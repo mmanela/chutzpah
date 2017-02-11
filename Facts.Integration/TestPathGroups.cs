@@ -87,7 +87,7 @@ namespace Chutzpah.Facts.Integration
             get
             {
                 // Angular 2 Samples which do not support code coverage
-                return ChutzpahSamplesWithCoverageSupported.Concat(new[] { new object[] { @"Samples\Angular2\Basic\App\chutzpah.json", 2 } });
+                return ChutzpahSamplesWithCoverageSupported.Concat(new[] { new object[] { @"Samples\Angular2\Basic\chutzpah.json", 2 } });
             }
         }
     }

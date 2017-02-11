@@ -1,0 +1,33 @@
+﻿{
+  "Framework": "jasmine", 
+  "TestHarnessReferenceMode": "AMD",
+  "TestHarnessLocationMode": "SettingsFileAdjacent",
+  "EnableTestFileBatching": true,   
+  "Compile": {
+    "Mode": "External",
+    "Extensions": [ ".ts" ],
+    "ExtensionsWithNoOutput": [ ".d.ts" ]
+  },
+
+   "Tests": [ 
+    {
+      "Includes": [ "*/Angular_Code/Specs/*.ts" ]
+    }
+  ],
+  "References": [    
+    { "Path": "node_modules/systemjs/dist/system.js" }, 
+    { "Path": "node_modules/core-js/client/shim.min.js" },  
+    { "Path": "node_modules/zone.js/dist/zone.js"},
+    { "Path": "node_modules/zone.js/dist/long-stack-trace-zone.js"},
+    { "Path": "node_modules/zone.js/dist/proxy.js" },
+    { "Path": "node_modules/zone.js/dist/sync-test.js" },
+    { "Path": "node_modules/zone.js/dist/jasmine-patch.js" },
+    { "Path": "node_modules/zone.js/dist/async-test.js" },
+    { "Path": "node_modules/zone.js/dist/fake-async-test.js" },
+    { "Path": "node_modules/reflect-metadata/Reflect.js"},
+    { "Path": "systemjs.config.js" }
+  ],
+   "Server": {
+       "Enabled": true
+    }
+} 
