@@ -83,7 +83,8 @@ namespace Chutzpah.Server
                            var env = (IHostingEnvironment)app.ApplicationServices.GetService(typeof(IHostingEnvironment));
                            app.UseStaticFiles(new StaticFileOptions
                            {
-                               OnPrepareResponse = AddFileCacheHeaders, 
+                               OnPrepareResponse = AddFileCacheHeaders,
+                               ServeUnknownFileTypes = true,
                                FileProvider = new ChutzpahServerFileProvider(env.ContentRootPath, builtInDependencyFolder)
                            });
                            app.Run(async (context) =>
