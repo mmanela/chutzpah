@@ -60,7 +60,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// <param name="chutzpahTestSettings"></param>
         public virtual string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings)
         {
-            return @"JSRunners\" + FrameworkKey + "Runner.js";
+            return @"ChutzpahJSRunners\" + FrameworkKey + "Runner.js";
         }
 
         /// <summary>

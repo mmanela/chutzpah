@@ -19,7 +19,7 @@ namespace Chutzpah
     public class TestRunner : ITestRunner
     {
         public static string HeadlessBrowserName = "phantomjs.exe";
-        public static string TestRunnerJsName = @"JSRunners\chutzpahRunner.js";
+        public static string TestRunnerJsName = @"ChutzpahJSRunners\chutzpahRunner.js";
         private readonly Stopwatch stopWatch;
         private readonly IProcessHelper process;
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;

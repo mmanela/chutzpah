@@ -374,92 +374,92 @@
     <Compile Include="Wrappers\ProcessWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="JSRunners\jasmineRunnerV2.js">
+    <Content Include="ChutzpahJSRunners\jasmineRunnerV2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="JSRunners\mochaRunner.js">
+    <Content Include="ChutzpahJSRunners\mochaRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\chutzpah_boot.js">
+    <Content Include="ChutzpahTestHarnessFiles\chutzpah_boot.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Coverage\blanket_jasmine_v2.js">
+    <Content Include="ChutzpahTestHarnessFiles\Coverage\blanket_jasmine_v2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Coverage\blanket_jasmine_v1.js">
+    <Content Include="ChutzpahTestHarnessFiles\Coverage\blanket_jasmine_v1.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Coverage\blanket_mocha.js">
+    <Content Include="ChutzpahTestHarnessFiles\Coverage\blanket_mocha.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Coverage\blanket_qunit.js">
+    <Content Include="ChutzpahTestHarnessFiles\Coverage\blanket_qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine-ddescribe-iit.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine-ddescribe-iit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine-html.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine.css">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine.html">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v1\jasmine_favicon.png">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v1\jasmine_favicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\boot.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\boot.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\jasmine-html.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\jasmine-html.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\jasmine.css">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\jasmine.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\jasmine.html">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\jasmine.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\jasmine.js">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\jasmine.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Jasmine\v2\jasmine_favicon.png">
+    <Content Include="ChutzpahTestHarnessFiles\Jasmine\v2\jasmine_favicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Mocha\mocha.css">
+    <Content Include="ChutzpahTestHarnessFiles\Mocha\mocha.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Mocha\mocha.html">
+    <Content Include="ChutzpahTestHarnessFiles\Mocha\mocha.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\Mocha\mocha.js">
+    <Content Include="ChutzpahTestHarnessFiles\Mocha\mocha.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\QUnit\qunit.js">
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\QUnit\qunit.html">
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestFiles\QUnit\qunit.css">
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\3rdParty\Phantom\phantomjs.exe">
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="JSRunners\chutzpahRunner.js">
+    <Content Include="ChutzpahJSRunners\chutzpahRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="JSRunners\jasmineRunnerV1.js">
+    <Content Include="ChutzpahJSRunners\jasmineRunnerV1.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="JSRunners\qunitRunner.js">
+    <Content Include="ChutzpahJSRunners\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

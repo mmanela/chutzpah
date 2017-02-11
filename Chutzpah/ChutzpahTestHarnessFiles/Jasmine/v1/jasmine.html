@@ -1,0 +1,95 @@
+﻿<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Jasmine Spec Runner</title>
+    @@TestFrameworkDependencies@@
+    @@CodeCoverageDependencies@@
+    @@ReferencedCSSFiles@@
+    @@ReferencedJSFiles@@
+    @@TestJSFile@@
+    <script type="text/javascript">
+
+        (function () {
+
+            var jasmineEnv = jasmine.getEnv();
+            jasmineEnv.updateInterval = 1000;
+
+            var htmlReporter = new jasmine.HtmlReporter();
+
+            jasmineEnv.addReporter(htmlReporter);
+
+            jasmineEnv.specFilter = function (spec) {
+                return htmlReporter.specFilter(spec);
+            };
+
+            if (ddescribeIitSupport) {
+                ddescribeIitSupport.patch(jasmineEnv);
+            }
+
+            var amdTestPaths = [@@AMDTestPath@@];
+            window.chutzpah.boot(amdTestPaths);
+
+            if (window.chutzpah.usingModuleLoader) {
+
+                if("@@AMDBasePath@@") {
+                    window.chutzpah.amdConfig({
+                        baseUrl: "@@AMDBasePath@@"
+                    });
+                }
+
+                window.chutzpah.amdConfig({
+                    map: {
+                        '*': {
+                            @@AMDModuleMap@@
+                            }
+                    }
+                });
+
+                window.chutzpah.start = function() {
+                    window.chutzpah.amdImport(amdTestPaths, function () {
+
+                        console.log("!!_!! Stating Jasmine from AMD callback...");
+                        jasmineEnv.execute();
+                    });
+                };
+
+                if(window.chutzpah.autoStart !== false) {
+                    window.chutzpah.start();
+                }
+
+            }
+            else {
+
+                window.chutzpah.start = function() {
+                    if (!runner.queue.running && runner.queue.index <= 0) {
+                        console.log("!!_!! Stating Jasmine...");
+                        jasmineEnv.execute();
+                    }
+                };
+
+
+                var currentWindowOnload = window.onload;
+                
+                var jasmineEnv = jasmine.getEnv();
+                var runner = jasmineEnv.currentRunner();
+
+                window.onload = function() {
+                    if (currentWindowOnload) {
+                        currentWindowOnload();
+                    }
+
+                    if (!window.chutzpah.phantom && window.chutzpah.autoStart !== false) {
+                        window.chutzpah.start();
+                    }
+                };
+            }
+
+        })();
+    </script>
+</head>
+<body>
+    @@TestHtmlTemplateFiles@@
+</body>
+</html>

@@ -4,7 +4,7 @@ namespace Chutzpah
     {
         public const string ChutzpahVersion = "4.3.2";
 
-        public const string TestFileFolder = "TestFiles";
+        public const string TestFileFolder = "ChutzpahTestHarnessFiles";
 
         public const string LogFileName = "chutzpah.log";
 

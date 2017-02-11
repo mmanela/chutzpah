@@ -1,0 +1,79 @@
+﻿<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mocha Tests</title>
+    @@TestFrameworkDependencies@@
+    <script type="text/javascript">
+        mocha.setup('@@MochaUi@@');
+    </script>
+    @@CodeCoverageDependencies@@
+    @@ReferencedCSSFiles@@
+    @@ReferencedJSFiles@@
+    @@TestJSFile@@
+</head>
+<body>
+    @@TestHtmlTemplateFiles@@
+    <div id="mocha"></div>
+    <script type="text/javascript">
+
+        var amdTestPaths = [@@AMDTestPath@@];
+        window.chutzpah.boot(amdTestPaths);
+
+        if (window.chutzpah.usingModuleLoader) {
+
+            if("@@AMDBasePath@@") {
+                window.chutzpah.amdConfig({
+                    baseUrl: "@@AMDBasePath@@"
+                });
+            }
+
+            window.chutzpah.amdConfig({
+                map: {
+                    '*': {
+                        @@AMDModuleMap@@
+                        }
+                }
+            });
+
+            window.chutzpah.start = function() {
+                window.chutzpah.amdImport(amdTestPaths, function () {
+                    console.log("!!_!! Stating Mocha from AMD callback...");
+                    mocha.run();
+                });
+            };
+
+            if(window.chutzpah.autoStart !== false) {
+                window.chutzpah.start();
+            }
+
+
+        } else {
+            
+            window.chutzpah.start = function() {
+                console.log("!!_!! Starting Mocha ...");
+                if (!window._Chutzpah_covobj_name) { 
+                    mocha.run();
+                }
+            }
+
+            if (window._Chutzpah_covobj_name) {
+                blanket.options("existingRequireJS", false);
+            }
+
+            var currentWindowOnload = window.onload;
+            window.onload = function() {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }
+
+                if (!window.chutzpah.phantom && window.chutzpah.autoStart !== false) {
+                    console.log("!!_!! Stating Mocha from HTML OnLoad callback...");
+                    window.chutzpah.start();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

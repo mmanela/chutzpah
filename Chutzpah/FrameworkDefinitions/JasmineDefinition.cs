@@ -45,8 +45,8 @@ namespace Chutzpah.FrameworkDefinitions
             testHarness["1"] = @"jasmine\v1\jasmine.html";
             testHarness["2"] = @"jasmine\v2\jasmine.html";
 
-            testRunner["1"] = @"JSRunners\jasmineRunnerV1.js";
-            testRunner["2"] = @"JSRunners\jasmineRunnerV2.js";
+            testRunner["1"] = @"ChutzpahJSRunners\jasmineRunnerV1.js";
+            testRunner["2"] = @"ChutzpahJSRunners\jasmineRunnerV2.js";
         }
 
         /// <summary>
