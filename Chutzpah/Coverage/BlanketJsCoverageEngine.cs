@@ -171,10 +171,13 @@ namespace Chutzpah.Coverage
                 {
                     if (!uri.IsAbsoluteUri)
                     {
-                        string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
-                        var relativePathFromHarness = Path.Combine(basePath, entry.Key);
-                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, relativePathFromHarness, true, false, null));
-                        localFilePathForServerItem = new Uri(relativePathFromHarness).LocalPath;
+						string basePath = Path.GetDirectoryName(testContext.TestHarnessPath);
+                        localFilePathForServerItem = Path.Combine(basePath, entry.Key);
+                        uri = new Uri(urlBuilder.GenerateServerFileUrl(testContext, localFilePathForServerItem, true, false, null));
+                    }
+                    else
+                    {
+                        localFilePathForServerItem = Path.Combine(testContext.WebServerHost.RootPath, UrlBuilder.NormalizeFilePath(uri.LocalPath).TrimStart('\\'));
                     }
 
                     executedFilePath = uri.AbsoluteUri;
@@ -312,6 +315,8 @@ namespace Chutzpah.Coverage
 
         private bool IsFileEligibleForInstrumentation(string filePath)
         {
+            filePath = Chutzpah.UrlBuilder.NormalizeFilePath(filePath);
+
             // If no include patterns are given then include all files. Otherwise include only the ones that match an include pattern
             if (includePatterns.Any() && !includePatterns.Any(includePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(includePattern))))
             {
@@ -329,6 +334,8 @@ namespace Chutzpah.Coverage
 
         public bool IsIgnored(string filePath)
         {
+            filePath = Chutzpah.UrlBuilder.NormalizeFilePath(filePath);
+
             // If no ignore pattern is given then include all files. Otherwise ignore the ones that match an ignore pattern
             if (ignorePatterns.Any() && ignorePatterns.Any(ignorePattern => NativeImports.PathMatchSpec(filePath, UrlBuilder.NormalizeFilePath(ignorePattern))))
             {
