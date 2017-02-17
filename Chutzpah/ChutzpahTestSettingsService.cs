@@ -133,6 +133,8 @@ namespace Chutzpah
 
                     ProcessServerSettings(settings, chutzpahVariables);
 
+                    ProcessProxy(settings, chutzpahVariables);
+
                     ProcessInheritance(environment, settings, chutzpahVariables);
 
                     if (!forceFresh)
@@ -186,6 +188,20 @@ namespace Chutzpah
             }
         }
 
+        private void ProcessProxy(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
+        {
+            if (!string.IsNullOrEmpty(settings.Proxy))
+            {
+                var validProxyPattern = @".*:[\d]+$";
+                if (string.IsNullOrEmpty(settings.Proxy) || !System.Text.RegularExpressions.Regex.IsMatch(settings.Proxy, validProxyPattern))
+                {
+                    ChutzpahTracer.TraceInformation("invalid proxy, must be in format of address:port");
+                }else
+                {
+                    ChutzpahTracer.TraceInformation(string.Format("Proxy setting:{0}", settings.Proxy));
+                }
+            }
+        }
         private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.InheritFromParent || !string.IsNullOrEmpty(settings.InheritFromPath))

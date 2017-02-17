@@ -326,6 +326,11 @@ namespace Chutzpah.Models
             }
         }
 
+        /// <summary>
+        /// Allow configure the optional proxy setting for the headless browser in format of [address]:[port]
+        /// If not set, the default is no proxy
+        /// </summary>
+        public string Proxy { get; set; }
 
         public string SettingsFileName
         {
@@ -468,7 +473,7 @@ namespace Chutzpah.Models
             this.EnableTracing = this.EnableTracing ?? parent.EnableTracing;
             this.TraceFilePath = this.TraceFilePath ?? parent.TraceFilePath;
             this.CodeCoverageTimeout = this.CodeCoverageTimeout ?? parent.CodeCoverageTimeout;
-            
+            this.Proxy = this.Proxy ?? parent.Proxy;
 
             // Deprecated
             this.AMDBasePath = this.AMDBasePath ?? parent.AMDBasePath;

@@ -69,6 +69,8 @@ namespace Chutzpah
 
         public string BrowserArgs { get; protected set; }
 
+        public string Proxy { get; protected set; }
+
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
             if (option.Value != null)
@@ -147,6 +149,9 @@ namespace Chutzpah
                 case "/file":
                 case "/path":
                     AddFileOption(option.Value);
+                    break;
+                case "/proxy":
+                    AddProxy(option.Value);
                     break;
                 case "/vsoutput":
                     GuardNoOptionValue(option);
@@ -244,6 +249,18 @@ namespace Chutzpah
             }
 
             TimeOutMilliseconds = timeout;
+        }
+
+        private void AddProxy(string value)
+        {
+            var validProxyPattern = @".*:[\d]+$";
+            if (string.IsNullOrEmpty(value) || !System.Text.RegularExpressions.Regex.IsMatch(value, validProxyPattern))
+            {
+                throw new ArgumentException(
+                    "invalid proxy, must be in format of address:port");
+            }
+
+            Proxy = value;
         }
 
         private void AddBrowserName(string value)

@@ -1,4 +1,4 @@
-﻿{
+{
     "Framework": "jasmine",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "References" : [
@@ -9,6 +9,7 @@
     ],
     "Server": {
     	"Enabled": true
-    }
+    },
+    "Proxy":"127.1.1.1:8080"
 }
 }
