@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Chutzpah.Models;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -253,8 +254,7 @@ namespace Chutzpah
 
         private void AddProxy(string value)
         {
-            var validProxyPattern = @".*:[\d]+$";
-            if (string.IsNullOrEmpty(value) || !System.Text.RegularExpressions.Regex.IsMatch(value, validProxyPattern))
+            if (ValidationHelper.IsValidProxySetting(value))
             {
                 throw new ArgumentException(
                     "invalid proxy, must be in format of address:port");

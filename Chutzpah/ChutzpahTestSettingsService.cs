@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -192,11 +193,12 @@ namespace Chutzpah
         {
             if (!string.IsNullOrEmpty(settings.Proxy))
             {
-                var validProxyPattern = @".*:[\d]+$";
-                if (string.IsNullOrEmpty(settings.Proxy) || !System.Text.RegularExpressions.Regex.IsMatch(settings.Proxy, validProxyPattern))
+                if (!ValidationHelper.IsValidProxySetting(settings.Proxy))
                 {
+                    settings.Proxy = string.Empty;
                     ChutzpahTracer.TraceInformation("invalid proxy, must be in format of address:port");
-                }else
+                }
+                else
                 {
                     ChutzpahTracer.TraceInformation(string.Format("Proxy setting:{0}", settings.Proxy));
                 }
