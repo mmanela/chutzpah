@@ -254,7 +254,7 @@ namespace Chutzpah
 
         private void AddProxy(string value)
         {
-            if (ValidationHelper.IsValidProxySetting(value))
+            if (!ValidationHelper.IsValidProxySetting(value))
             {
                 throw new ArgumentException(
                     "invalid proxy, must be in format of address:port");

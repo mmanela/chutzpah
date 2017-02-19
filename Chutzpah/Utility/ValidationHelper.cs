@@ -11,8 +11,8 @@ namespace Chutzpah.Utility
         private const string ValidProxyPattern = @".*:[\d]+$";
         public static bool IsValidProxySetting(string value)
         {
-            return (string.IsNullOrEmpty(value) || 
-                !System.Text.RegularExpressions.Regex.IsMatch(value, ValidProxyPattern));
+            return (!string.IsNullOrEmpty(value) &&
+                System.Text.RegularExpressions.Regex.IsMatch(value, ValidProxyPattern));
         }
     }
 }
