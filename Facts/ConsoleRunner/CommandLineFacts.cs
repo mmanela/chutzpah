@@ -125,6 +125,47 @@ namespace Chutzpah.Facts.ConsoleRunner
             }
         }
 
+        public class ProxyOptionFacts
+        {
+            [Fact]
+            public void Will_Add_IP_Proxy()
+            {
+                var arguments = new[] { "/Proxy", "127.0.0.1:8080" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+                Assert.Equal("127.0.0.1:8080", commandLine.Proxy);
+            }
+
+            [Fact]
+            public void Will_Add_Host_Proxy()
+            {
+                var arguments = new[] { "/Proxy", "proxy:8080" };
+
+                var commandLine = TestableCommandLine.Create(arguments);
+                Assert.Equal("proxy:8080", commandLine.Proxy);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_proxy_given()
+            {
+                var arguments = new[] { "/Proxy", "" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+
+            [Fact]
+            public void Will_throw_if_no_port_given()
+            {
+                var arguments = new[] { "/Proxy", "127.0.0.1" };
+
+                var ex = Record.Exception(() => TestableCommandLine.Create(arguments)) as ArgumentException;
+
+                Assert.NotNull(ex);
+            }
+        }
+
         public class ShowFailureReportOptionFacts
         {
             [Fact]

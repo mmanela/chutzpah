@@ -684,8 +684,10 @@ namespace Chutzpah
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
-
-            runnerArgs = string.Format("--ignore-ssl-errors=true --proxy-type=none --ssl-protocol=any \"{0}\" {1} {2} {3} {4} {5}",
+            var proxy = options.Proxy ?? context.TestFileSettings.Proxy;
+            var proxySetting = string.IsNullOrEmpty(proxy) ? "--proxy-type=none" : string.Format("--proxy={0}", proxy);
+            runnerArgs = string.Format("--ignore-ssl-errors=true {0} --ssl-protocol=any \"{1}\" {2} {3} {4} {5} {6}",
+                                       proxySetting,
                                        runnerPath,
                                        fileUrl,
                                        testModeStr,

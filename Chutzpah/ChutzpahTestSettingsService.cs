@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using Chutzpah.Models;
 using Chutzpah.Wrappers;
+using Chutzpah.Utility;
 
 namespace Chutzpah
 {
@@ -133,6 +134,8 @@ namespace Chutzpah
 
                     ProcessServerSettings(settings, chutzpahVariables);
 
+                    ProcessProxy(settings, chutzpahVariables);
+
                     ProcessInheritance(environment, settings, chutzpahVariables);
 
                     if (!forceFresh)
@@ -186,6 +189,21 @@ namespace Chutzpah
             }
         }
 
+        private void ProcessProxy(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
+        {
+            if (!string.IsNullOrEmpty(settings.Proxy))
+            {
+                if (!ValidationHelper.IsValidProxySetting(settings.Proxy))
+                {
+                    settings.Proxy = string.Empty;
+                    ChutzpahTracer.TraceInformation("invalid proxy, must be in format of address:port");
+                }
+                else
+                {
+                    ChutzpahTracer.TraceInformation(string.Format("Proxy setting:{0}", settings.Proxy));
+                }
+            }
+        }
         private void ProcessInheritance(ChutzpahSettingsFileEnvironment environment, ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
             if (settings.InheritFromParent || !string.IsNullOrEmpty(settings.InheritFromPath))

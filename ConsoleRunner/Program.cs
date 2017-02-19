@@ -117,6 +117,7 @@ namespace Chutzpah
             Console.WriteLine("  /settingsFileEnvironment     : Sets the environment properties for a chutzpah.json settings file.");
             Console.WriteLine("                               : Specify more than one to add multiple environments.");
             Console.WriteLine("                               : (e.g. settingsFilePath;prop1=val1;prop2=val2).");
+            Console.WriteLine("  /proxy                       : Sets the proxy server and port if the test require reference to external uri.");
 
 
 
@@ -157,6 +158,7 @@ namespace Chutzpah
                         BrowserArgs = commandLine.BrowserArgs,
                         TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
                         ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
+                        Proxy = commandLine.Proxy,
                         CoverageOptions = new CoverageOptions
                                               {
                                                   Enabled = commandLine.Coverage,

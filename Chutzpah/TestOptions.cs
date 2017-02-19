@@ -89,5 +89,10 @@ namespace Chutzpah
         /// the settings file
         /// </summary>
         public ChutzpahSettingsFileEnvironments ChutzpahSettingsFileEnvironments { get; set; }
+
+        /// <summary>
+        /// Optional proxy settings in format of [address]:[port]
+        /// </summary>
+        public string Proxy { get; set; }
     }
 }
