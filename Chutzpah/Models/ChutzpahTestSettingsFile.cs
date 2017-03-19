@@ -327,7 +327,7 @@ namespace Chutzpah.Models
         }
 
 
-        public string SettingsFileName
+        public string SettingsFilePath
         {
             get
             {

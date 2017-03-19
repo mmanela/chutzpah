@@ -14,6 +14,8 @@ namespace Chutzpah.Server.Models
 
     public class ChutzpahWebServerHost : IChutzpahWebServerHost
     {
+        public static ChutzpahWebServerHost Empty = new ChutzpahWebServerHost();
+
         public static ChutzpahWebServerHost Create(IWebHost webHost, string rootPath, int port)
         {
             var host = new ChutzpahWebServerHost(webHost, rootPath, port);
@@ -33,6 +35,10 @@ namespace Chutzpah.Server.Models
             RootPath = rootPath;
             WebHost = webHost;
             IsRunning = true;
+        }
+
+        private ChutzpahWebServerHost()
+        {
         }
 
         public void Dispose()

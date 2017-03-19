@@ -67,7 +67,7 @@ namespace Chutzpah.BatchProcessor
                 }
                 else
                 {
-                    ChutzpahTracer.TraceInformation("Skipping batch compile since all files are update to date for {0}", testSettings.SettingsFileName);
+                    ChutzpahTracer.TraceInformation("Skipping batch compile since all files are update to date for {0}", testSettings.SettingsFilePath);
                 }
 
                 // Now that compile finished set generated path on  all files who match the compiled extensions
@@ -122,13 +122,13 @@ namespace Chutzpah.BatchProcessor
                 var result = processHelper.RunBatchCompileProcess(testSettings.Compile);
                 if (result.ExitCode > 0)
                 {
-                    throw new ChutzpahCompilationFailedException(result.StandardOutput + Environment.NewLine + result.StandardError, testSettings.SettingsFileName);
+                    throw new ChutzpahCompilationFailedException(result.StandardOutput + Environment.NewLine + result.StandardError, testSettings.SettingsFilePath);
                 }
             }
             catch (Exception e)
             {
-                ChutzpahTracer.TraceError(e, "Error during batch compile of {0}", testSettings.SettingsFileName);
-                throw new ChutzpahCompilationFailedException(e.Message, testSettings.SettingsFileName, e);
+                ChutzpahTracer.TraceError(e, "Error during batch compile of {0}", testSettings.SettingsFilePath);
+                throw new ChutzpahCompilationFailedException(e.Message, testSettings.SettingsFilePath, e);
             }
         }
         /// <summary>
