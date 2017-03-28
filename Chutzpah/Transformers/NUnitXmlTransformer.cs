@@ -81,7 +81,7 @@ namespace Chutzpah.Transformers
             testCase.SetAttribute("time", (test.TimeTaken / 1000m).ToString());
             testCase.SetAttribute("executed", "True");
             testCase.SetAttribute("asserts", "0");
-            testCase.SetAttribute("result", test.ResultsAllPassed ? "Success" : "Failed");
+            testCase.SetAttribute("result", test.ResultsAllPassed ? "Success" : "Failure");
 
             AddFailureToTestCase(test, testCase, document);
 
@@ -99,7 +99,7 @@ namespace Chutzpah.Transformers
             testSuite.SetAttribute("time", elapsedSeconds.ToString());
             testSuite.SetAttribute("executed", executed ? "True" : "False");
             testSuite.SetAttribute("asserts", "0");
-            testSuite.SetAttribute("result", successful ? "Success" : "Failed");
+            testSuite.SetAttribute("result", successful ? "Success" : "Failure");
             testResults.AppendChild(testSuite);
 
             var results = document.CreateElement("results");
