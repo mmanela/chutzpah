@@ -81,7 +81,7 @@ namespace Chutzpah.Transformers
             testCase.SetAttribute("time", (test.TimeTaken / 1000m).ToString());
             testCase.SetAttribute("executed", "True");
             testCase.SetAttribute("asserts", "0");
-            testCase.SetAttribute("result", test.ResultsAllPassed ? "Success" : "Fail");
+            testCase.SetAttribute("result", test.ResultsAllPassed ? "Success" : "Failed");
 
             AddFailureToTestCase(test, testCase, document);
 
