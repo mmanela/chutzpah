@@ -382,7 +382,7 @@ namespace Chutzpah
 
             if(referencedFile.TemplateOptions.Mode == TemplateMode.Script)
             {
-                contents = string.Format(scriptTagWrapper, referencedFile.TemplateOptions.Id, referencedFile.TemplateOptions.Type, contents);
+                contents = string.Format(scriptTagWrapper, referencedFile.TemplateOptions.Id ?? referencedFile.Path, referencedFile.TemplateOptions.Type, contents);
             }
         }
 
