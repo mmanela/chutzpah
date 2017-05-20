@@ -1,7 +1,4 @@
 ﻿/// <reference path="../src/controller.ts" />
-/// <reference path="../../libs/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="../../libs/typings/angularjs/angular.d.ts" />
-/// <reference path="../../libs/typings/jasmine/jasmine.d.ts" />
 
 
 namespace Tests {
