@@ -28,7 +28,7 @@ properties {
 # Aliases
 task Default -depends Build
 
-task Install -depends Sign-ForeignAssemblies, Install-TypeScript, Install-NodeModules, Setup-SymbolicLinks
+task Install -depends Sign-ForeignAssemblies, Install-EdgeJs, Install-TypeScript, Install-NodeModules, Setup-SymbolicLinks
 
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
@@ -172,6 +172,13 @@ task Setup-SymbolicLinks {
 
 }
 
+task Install-EdgeJs {
+  $edgeJsPackageFolder = (getLatestNugetPackagePath "Edge.js").FullName
+  $edgeJsContentPath = Join-Path $edgeJsPackageFolder "content\edge"
+
+
+  roboexec {robocopy $edgeJsContentPath "$baseDir\chutzpah\edge" /MIR /MT /NP /NJH}
+}
 
 task Sign-ForeignAssemblies {
 

@@ -501,8 +501,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-    <PropertyGroup>
-    <PreBuildEvent>robocopy $(SolutionDir)EdgeJsPackages\node_modules $(TargetDir)node_modules /MIR /MT /NP /NJH
+  <PropertyGroup>
+    <PreBuildEvent>
+robocopy $(SolutionDir)EdgeJsPackages\node_modules $(TargetDir)node_modules /MIR /MT /NP /NJH
 if errorlevel 4 goto BuildEventFailed
 if errorlevel 0 goto end
 
