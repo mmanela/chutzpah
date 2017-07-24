@@ -58,6 +58,9 @@
       <HintPath>..\packages\AntiXSS.4.3.0\lib\net40\AntiXssLibrary.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="EdgeJs, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Edge.js.7.10.1\lib\net40\EdgeJs.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlSanitizationLibrary, Version=4.3.0.0, Culture=neutral, PublicKeyToken=d127efab8a9c114f, processorArchitecture=MSIL">
       <HintPath>..\packages\AntiXSS.4.3.0\lib\net40\HtmlSanitizationLibrary.dll</HintPath>
       <Private>True</Private>
@@ -463,9 +466,27 @@
     <Content Include="ChutzpahJSRunners\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="edge\double_edge.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="edge\edge.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="edge\x64\node.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="edge\x86\node.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="edge\x64\edge_nativeclr.node">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="edge\x86\edge_nativeclr.node">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Models\vstsModel\vstst.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -480,4 +501,15 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+    <PropertyGroup>
+    <PreBuildEvent>robocopy $(SolutionDir)EdgeJsPackages\node_modules $(TargetDir)node_modules /MIR /MT /NP /NJH
+if errorlevel 4 goto BuildEventFailed
+if errorlevel 0 goto end
+
+:BuildEventEnd echo FILECOPY for $(ProjectName) FAILED
+exit 1
+
+:end
+exit 0</PreBuildEvent>
+  </PropertyGroup>
 </Project>

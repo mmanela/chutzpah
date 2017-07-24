@@ -9,6 +9,7 @@ properties {
   
   $autoSignedNugetPackages = "$baseDir/packages_autosigned"
   $nugetPackges = "$baseDir/packages"
+  $edgeJsPackges = "$baseDir/EdgeJsPackages"
 
   # Temp work around psake limitation to not use Msbuild 15
   $defaultMSBuildPath = Join-Path (Resolve-Path "${env:ProgramFiles(x86)}") "Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
@@ -158,6 +159,11 @@ task Install-TypeScript {
 task Install-NodeModules {
   
   exec {  & npm install }
+
+
+  push-location $edgeJsPackges
+  exec {  & npm install }
+  pop-location
 }
 
 task Setup-SymbolicLinks {
@@ -203,8 +209,7 @@ task Package-Files -depends Clean-PackageFiles {
     create $filesDir, $packageDir
     copy-item "$baseDir\License.txt" -destination $filesDir
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
-    
-    
+
     # Copy Adapter files to package zip  
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $filesDir
