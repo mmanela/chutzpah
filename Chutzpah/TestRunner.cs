@@ -631,7 +631,12 @@ namespace Chutzpah
                                                  ITestMethodRunnerCallback callback)
         {
 
-            var provider = testExecutionProviders.First();
+            var provider = testExecutionProviders.FirstOrDefault(x => x.Name == testContext.TestFileSettings.Browser);
+            if(provider == null)
+            {
+                throw new ArgumentException("Could not find browser");
+            }
+
             return provider.Execute(options, testContext, testExecutionMode, callback);
         }
 

@@ -12,10 +12,10 @@ namespace Chutzpah
         private readonly IProcessHelper processTools;
         private readonly IFileProbe fileProbe;
         private readonly IUrlBuilder urlBuilder;
-        private string headlessBrowserPath;
+        private readonly string headlessBrowserPath;
         private readonly ITestCaseStreamReaderFactory readerFactory;
 
-        public string Name => Constants.ExecutionEngine_Phantom;
+        public Browser Name => Browser.PhantomJs;
 
         public PhantomTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)

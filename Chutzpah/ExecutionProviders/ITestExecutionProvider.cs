@@ -5,7 +5,9 @@ namespace Chutzpah
 {
     public interface ITestExecutionProvider
     {
-        IList<TestFileSummary> Execute(TestOptions options,
+        Browser Name { get; }
+
+        IList<TestFileSummary> Execute(TestOptions testOptions,
                      TestContext testContext,
                      TestExecutionMode testExecutionMode,
                      ITestMethodRunnerCallback callback);

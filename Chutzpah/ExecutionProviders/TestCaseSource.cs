@@ -28,7 +28,7 @@ namespace Chutzpah.Models
             subscriber = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public abstract Task<bool> Execute();
+        public abstract Task<object> Open();
 
         public virtual void Dispose()
         {

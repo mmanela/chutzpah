@@ -246,6 +246,9 @@
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
+    <Compile Include="ExecutionProviders\ChromeTestExecutionProvider.cs" />
+    <Compile Include="ExecutionProviders\EdgeJsProxy.cs" />
+    <Compile Include="ExecutionProviders\EdgeJsStringSource.cs" />
     <Compile Include="ExecutionProviders\ProcessStreamStringSource.cs" />
     <Compile Include="ExecutionProviders\TestCaseSource.cs" />
     <Compile Include="ExecutionProviders\PhantomTestExecutionProvider.cs" />

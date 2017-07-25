@@ -1,6 +1,7 @@
 using System.IO;
 using Chutzpah.Wrappers;
 using System.Threading.Tasks;
+using System;
 
 namespace Chutzpah.Models
 {
@@ -28,7 +29,7 @@ namespace Chutzpah.Models
             }
         }
 
-        public override async Task<bool> Execute()
+        public override async Task<object> Open()
         {
             string line = null;
             while ((line = await streamReader.ReadLineAsync()) != null)
@@ -36,7 +37,7 @@ namespace Chutzpah.Models
                 Emit(line);
             }
 
-            return false;
+            return null;
         }
     }
 }
