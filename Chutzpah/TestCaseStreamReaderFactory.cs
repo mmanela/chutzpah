@@ -6,7 +6,7 @@ namespace Chutzpah
     {
         public ITestCaseStreamReader Create()
         {
-            return new TestCaseStreamReader();
+            return new TestCaseStreamStringReader();
         } 
     }
 }

@@ -49,7 +49,7 @@ namespace Chutzpah.Facts
 
         }
 
-        private class TestableTestCaseStreamReader : Testable<TestCaseStreamReader>
+        private class TestableTestCaseStreamReader : Testable<TestCaseStreamStringReader>
         {
             public TestableTestCaseStreamReader()
             {
@@ -136,7 +136,7 @@ namespace Chutzpah.Facts
             public void Will_throw_argument_null_exception_if_testoptions_is_null()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
 
                 var model = Record.Exception(() => reader.ClassUnderTest.Read(processStream, null, new TestContext(), null, true)) as ArgumentNullException;
 
@@ -147,7 +147,7 @@ namespace Chutzpah.Facts
             public void Will_throw_argument_null_exception_if_context_is_null()
             {
                 var reader = new TestableTestCaseStreamReader();
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, new StreamReader(new MemoryStream()));
 
                 var model = Record.Exception(() => reader.ClassUnderTest.Read(processStream, new TestOptions(), null, null, true)) as ArgumentNullException;
 
@@ -161,7 +161,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
@@ -176,7 +176,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.TestDoneEventJson + JsonStreamEvents.FileDoneEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestFileSummary result = null;
                 callback.Setup(x => x.FileFinished("file", It.IsAny<TestFileSummary>())).Callback<string, TestFileSummary>((f, t) => result = t); ;
@@ -195,7 +195,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestStarted(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
@@ -215,7 +215,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.TestDoneEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
@@ -235,7 +235,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.LogEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
                 callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
@@ -254,7 +254,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.LogEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
                 callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
@@ -274,7 +274,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + string.Format(JsonStreamEvents.LogEventJsonTemplate, "!!_!! log");
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
                 callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
@@ -291,7 +291,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.ErrorEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestError result = null;
                 callback.Setup(x => x.FileError(It.IsAny<TestError>())).Callback<TestError>(t => result = t);
@@ -316,7 +316,7 @@ namespace Chutzpah.Facts
 ";
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
@@ -342,7 +342,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + string.Format(JsonStreamEvents.LogEventJsonTemplate,"hi")+ string.Format(JsonStreamEvents.LogEventJsonTemplate,"bye");
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
@@ -361,7 +361,7 @@ namespace Chutzpah.Facts
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.ErrorEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
@@ -382,7 +382,7 @@ namespace Chutzpah.Facts
                 var json = @"";
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { CoverageOptions = new CoverageOptions { Enabled = false } }, context, callback.Object, false)[0];
@@ -398,7 +398,7 @@ namespace Chutzpah.Facts
                 var json = @"";
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { CoverageOptions = new CoverageOptions { Enabled = true } }, context, callback.Object, false)[0];
@@ -417,7 +417,7 @@ namespace Chutzpah.Facts
                 context.CoverageEngine = coverageEngine.Object;
                 var json = JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson + JsonStreamEvents.CoverageEventJson;
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
@@ -436,7 +436,7 @@ namespace Chutzpah.Facts
 + string.Format(JsonStreamEvents.LogEventJsonTemplate,"bye") + JsonStreamEvents.FileStartEventJson + JsonStreamEvents.TestStartEventJson;
                 var context = reader.BuildContext("file");
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false)[0];
@@ -464,7 +464,7 @@ namespace Chutzpah.Facts
                     ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
@@ -495,7 +495,7 @@ namespace Chutzpah.Facts
                     ReferencedFiles = new[] { referencedFile }
                 };
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
                 callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
@@ -517,7 +517,7 @@ namespace Chutzpah.Facts
                 var context = reader.BuildContext("file");
                 var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
                 var process = new Mock<IProcessWrapper>();
-                var processStream = new ProcessStream(process.Object, stream);
+                var processStream = new ProcessStreamStringSource(process.Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summary = reader.ClassUnderTest.Read(processStream, new TestOptions { TestFileTimeoutMilliseconds = 200 }, context, callback.Object, false)[0];
@@ -535,7 +535,7 @@ namespace Chutzpah.Facts
                 var context = reader.BuildContext("file");
                 var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
                 var process = new Mock<IProcessWrapper>();
-                var processStream = new ProcessStream(process.Object, stream);
+                var processStream = new ProcessStreamStringSource(process.Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 process.Setup(x => x.Kill()).Throws(new InvalidOperationException());
 
@@ -553,7 +553,7 @@ namespace Chutzpah.Facts
                 context.TestFileSettings = new ChutzpahTestSettingsFile{ TestFileTimeout = 200};
                 var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
                 var process = new Mock<IProcessWrapper>();
-                var processStream = new ProcessStream(process.Object, stream);
+                var processStream = new ProcessStreamStringSource(process.Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 process.Setup(x => x.Kill()).Throws(new InvalidOperationException());
 
@@ -579,7 +579,7 @@ namespace Chutzpah.Facts
                 var json = jsonFile1 + jsonFile2;
                 var context = reader.BuildContext(Tuple.Create("file1", "test1", 1, 1), Tuple.Create("file2", "test1", 2, 2));
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
@@ -607,7 +607,7 @@ namespace Chutzpah.Facts
                 var json = jsonFile1 + jsonFile2;
                 var context = reader.BuildContext(Tuple.Create("file1", "testNoMatch", 1, 1), Tuple.Create("file2", "testNoMatch", 2, 2));
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);
@@ -638,7 +638,7 @@ namespace Chutzpah.Facts
                     Tuple.Create("file2", "test1", 1, 1), Tuple.Create("file2", "test1", 2, 1),
                     Tuple.Create("file3", "test1", 1, 1), Tuple.Create("file3", "test1", 2, 1));
                 var stream = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                var processStream = new ProcessStream(new Mock<IProcessWrapper>().Object, stream);
+                var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream);
                 var callback = new Mock<ITestMethodRunnerCallback>();
 
                 var summaries = reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object, false);

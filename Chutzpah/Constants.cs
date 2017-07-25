@@ -61,5 +61,8 @@ namespace Chutzpah
         public const int WebServerCreationAttemptLimit = 20;
         public const string ServerVirtualBuiltInFilesPath = "__chutzpah__";
         public const string FileUrlShaKey = "sha";
+
+        public const string ExecutionEngine_Phantom = "Phantom";
+        public const string ExecutionEngine_Chrome = "Chrome";
     }
 }

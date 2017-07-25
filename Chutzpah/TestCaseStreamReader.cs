@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
@@ -23,28 +22,29 @@ namespace Chutzpah
     /// than the configured test file timeout then we kill phantom since it is likely stuck in a infinite loop or error.
     /// We make this timeout the test file timeout plus a small (generous) delay time to account for serialization. 
     /// </summary>
-    public class TestCaseStreamReader : ITestCaseStreamReader
+    public class TestCaseStreamStringReader : ITestCaseStreamReader
     {
         private readonly IJsonSerializer jsonSerializer;
         private readonly Regex prefixRegex = new Regex("^#_#(?<type>[a-z]+)#_#(?<json>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private const string internalLogPrefix = "!!_!!";
 
         // Tracks the last time we got an event/update from phantom. 
-        private DateTime lastTestEvent;
+        private int testIndex;
+        StreamingTestFileContext currentTestFileContext = null;
 
-        public TestCaseStreamReader()
+        public TestCaseStreamStringReader()
         {
             jsonSerializer = new JsonSerializer();
         }
 
-        public IList<TestFileSummary> Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled)
+        public TestCaseStreamReadResult Read(TestCaseSource<string> testCaseSource, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback)
         {
-            if (processStream == null) throw new ArgumentNullException("processStream");
-            if (testOptions == null) throw new ArgumentNullException("testOptions");
-            if (testContext == null) throw new ArgumentNullException("testContext");
+            if (testCaseSource == null) throw new ArgumentNullException(nameof(testCaseSource));
+            if (testOptions == null) throw new ArgumentNullException(nameof(testOptions));
+            if (testContext == null) throw new ArgumentNullException(nameof(testContext));
 
-            lastTestEvent = DateTime.Now;
-            var timeout = (testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500; // Add buffer to timeout to account for serialization
+            var testCaseStreamReadResult = new TestCaseStreamReadResult();
+
 
             var codeCoverageEnabled = testOptions.CoverageOptions.ShouldRunCoverage(testContext.TestFileSettings.CodeCoverageExecutionMode);
 
@@ -55,9 +55,18 @@ namespace Chutzpah
 
             var deferredEvents = new List<Action<StreamingTestFileContext>>();
 
-            var readerTask = Task<IList<TestFileSummary>>.Factory.StartNew(() => ReadFromStream(processStream.StreamReader, testContext, testOptions, streamingTestFileContexts, deferredEvents, callback, debugEnabled));
+
+            if (streamingTestFileContexts.Count == 1)
+            {
+                currentTestFileContext = streamingTestFileContexts.First();
+            }
+
+            testCaseSource.Subscribe((line) => ProcessLine(line, testContext, streamingTestFileContexts, deferredEvents, callback, testOptions.DebugEnabled));
+
+            var readerTask = testCaseSource.Execute();
             while (readerTask.Status == TaskStatus.WaitingToRun
-               || (readerTask.Status == TaskStatus.Running && (DateTime.Now - lastTestEvent).TotalMilliseconds < timeout))
+                || readerTask.Status == TaskStatus.WaitingForActivation
+               || (readerTask.Status == TaskStatus.Running && testCaseSource.IsAlive))
             {
                 Thread.Sleep(100);
             }
@@ -65,23 +74,26 @@ namespace Chutzpah
             if (readerTask.IsCompleted)
             {
                 ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.FirstInputTestFile);
-                return readerTask.Result;
+                testCaseStreamReadResult.TestFileSummaries = streamingTestFileContexts.Select(x => x.TestFileSummary).ToList();
             }
             else
             {
 
-                // Since we times out make sure we play the deferred events so we do not lose errors
+                // Since we timed out make sure we play the deferred events so we do not lose errors
                 // We will just attach these events to the first test context at this point since we do
                 // not know where they belong
                 PlayDeferredEvents(streamingTestFileContexts.FirstOrDefault(), deferredEvents);
 
                 // We timed out so kill the process and return an empty test file summary
-                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.FirstInputTestFile, (DateTime.Now - lastTestEvent).TotalMilliseconds);
+                ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.FirstInputTestFile, (DateTime.Now - testCaseSource.LastTestEvent).TotalMilliseconds);
 
-                processStream.TimedOut = true;
-                processStream.KillProcess();
-                return testContext.ReferencedFiles.Where(x => x.IsFileUnderTest).Select(file => new TestFileSummary(file.Path)).ToList();
+
+                testCaseSource.Dispose();
+                testCaseStreamReadResult.TimedOut = true;
+                testCaseStreamReadResult.TestFileSummaries = testContext.ReferencedFiles.Where(x => x.IsFileUnderTest).Select(file => new TestFileSummary(file.Path)).ToList();
             }
+
+            return testCaseStreamReadResult;
         }
 
         class StreamingTestFileContext
@@ -131,7 +143,7 @@ namespace Chutzpah
 
 
             ChutzpahTracer.TraceInformation("Test Case Finished:'{0}'", jsTestCase.TestCase.GetDisplayName());
-            
+
         }
 
         private void FireFileStarted(ITestMethodRunnerCallback callback, TestContext testContext)
@@ -189,200 +201,193 @@ namespace Chutzpah
             ChutzpahTracer.TraceError("Eror recieved from Phantom {0}", error.Error.Message);
         }
 
-        private IList<TestFileSummary> ReadFromStream(StreamReader stream, TestContext testContext, TestOptions testOptions, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)
+        private bool ProcessLine(string line, TestContext testContext, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
-            var testIndex = 0;
 
-            string line;
-            StreamingTestFileContext currentTestFileContext = null;
-
-            if (streamingTestFileContexts.Count == 1)
+            bool isTestEvent = true;
+            if (debugEnabled)
             {
-                currentTestFileContext = streamingTestFileContexts.First();
+                Console.WriteLine(line);
+            }
+
+            var match = prefixRegex.Match(line);
+            if (!match.Success) { return false; }
+
+            var type = match.Groups["type"].Value;
+            var json = match.Groups["json"].Value;
+
+            // Only update last event timestamp if it is an important event.
+            // Log and error could happen even though no test progress is made
+            if (!type.Equals("Log") && !type.Equals("Error"))
+            {
+                isTestEvent = false;
             }
 
 
-            while ((line = stream.ReadLine()) != null)
+            try
             {
-                if (debugEnabled) Console.WriteLine(line);
-
-                var match = prefixRegex.Match(line);
-                if (!match.Success) continue;
-                var type = match.Groups["type"].Value;
-                var json = match.Groups["json"].Value;
-
-                // Only update last event timestamp if it is an important event.
-                // Log and error could happen even though no test progress is made
-                if (!type.Equals("Log") && !type.Equals("Error"))
+                switch (type)
                 {
-                    lastTestEvent = DateTime.Now;
-                }
+                    case "FileStart":
+
+                        FireFileStarted(callback, testContext);
+
+                        break;
+
+                    case "CoverageObject":
+
+                        var jsCov = jsonSerializer.Deserialize<JsCoverage>(json);
+
+                        if (currentTestFileContext == null)
+                        {
+                            AddDeferredEvent((fileContext) => FireCoverageObject(callback, fileContext, jsCov), deferredEvents);
+                        }
+                        else
+                        {
+                            FireCoverageObject(callback, currentTestFileContext, jsCov);
+                        }
+
+                        break;
+
+                    case "FileDone":
+
+                        var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
+                        FireFileFinished(callback, testContext.InputTestFilesString, streamingTestFileContexts, jsFileDone);
+
+                        break;
+
+                    case "TestStart":
+                        var jsTestCaseStart = jsonSerializer.Deserialize<JsTestCase>(json);
+                        StreamingTestFileContext newContext = null;
+                        var testName = jsTestCaseStart.TestCase.TestName.Trim();
+                        var moduleName = (jsTestCaseStart.TestCase.ModuleName ?? "").Trim();
 
 
-                try
-                {
-                    switch (type)
-                    {
-                        case "FileStart":
+                        var fileContexts = GetFileMatches(testName, streamingTestFileContexts);
+                        if (fileContexts.Count == 0 && currentTestFileContext == null)
+                        {
+                            // If there are no matches and not file context has been used yet
+                            // then just choose the first context
+                            newContext = streamingTestFileContexts[0];
 
-                            FireFileStarted(callback, testContext);
+                        }
+                        else if (fileContexts.Count == 0)
+                        {
+                            // If there is already a current context and no matches we just keep using that context
+                            // unless this test name has been used already in the current context. In that case
+                            // move to the next one that hasn't seen this file yet
 
-                            break;
+                            var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
+                            if (testAlreadySeenInCurrentContext)
+                            {
+                                newContext = streamingTestFileContexts.FirstOrDefault(x => !x.HasTestBeenSeen(moduleName, testName)) ?? currentTestFileContext;
+                            }
 
-                        case "CoverageObject":
+                        }
+                        else if (fileContexts.Count > 1)
+                        {
+                            // If we found the test has more than one file match
+                            // try to choose the best match, otherwise just choose the first one
 
-                            var jsCov = jsonSerializer.Deserialize<JsCoverage>(json);
-
+                            // If we have no file context yet take the first one
                             if (currentTestFileContext == null)
                             {
-                                AddDeferredEvent((fileContext) => FireCoverageObject(callback, fileContext, jsCov), deferredEvents);
+                                newContext = fileContexts.First();
                             }
                             else
                             {
-                                FireCoverageObject(callback, currentTestFileContext, jsCov);
-                            }
-
-                            break;
-
-                        case "FileDone":
-
-                            var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
-                            FireFileFinished(callback, testContext.InputTestFilesString, streamingTestFileContexts, jsFileDone);
-
-                            break;
-
-                        case "TestStart":
-                            var jsTestCaseStart = jsonSerializer.Deserialize<JsTestCase>(json);
-                            StreamingTestFileContext newContext = null;
-                            var testName = jsTestCaseStart.TestCase.TestName.Trim();
-                            var moduleName = (jsTestCaseStart.TestCase.ModuleName ?? "").Trim();
-                            
-                            
-                            var fileContexts = GetFileMatches(testName, streamingTestFileContexts);
-                            if (fileContexts.Count == 0 && currentTestFileContext == null)
-                            {
-                                // If there are no matches and not file context has been used yet
-                                // then just choose the first context
-                                newContext = streamingTestFileContexts[0];
-
-                            }
-                            else if (fileContexts.Count == 0)
-                            {
-                                // If there is already a current context and no matches we just keep using that context
-                                // unless this test name has been used already in the current context. In that case
-                                // move to the next one that hasn't seen this file yet
+                                // In this case we have an existing file context so we need to
+                                // 1. Check to see if this test has been seen already on that context
+                                //    if so we need to try the next file context that matches it
+                                // 2. If it is not seen yet in the current context and the current context
+                                //    is one of the matches then keep using it
 
                                 var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
-                                if (testAlreadySeenInCurrentContext)
+                                var currentContextInFileMatches = fileContexts.Any(x => x == currentTestFileContext);
+                                if (!testAlreadySeenInCurrentContext && currentContextInFileMatches)
                                 {
-                                    newContext = streamingTestFileContexts.FirstOrDefault(x => !x.HasTestBeenSeen(moduleName, testName)) ?? currentTestFileContext;
-                                }
-
-                            }
-                            else if (fileContexts.Count > 1)
-                            {
-                                // If we found the test has more than one file match
-                                // try to choose the best match, otherwise just choose the first one
-
-                                // If we have no file context yet take the first one
-                                if (currentTestFileContext == null)
-                                {
-                                    newContext = fileContexts.First();
+                                    // Keep the current context
+                                    newContext = currentTestFileContext;
                                 }
                                 else
                                 {
-                                    // In this case we have an existing file context so we need to
-                                    // 1. Check to see if this test has been seen already on that context
-                                    //    if so we need to try the next file context that matches it
-                                    // 2. If it is not seen yet in the current context and the current context
-                                    //    is one of the matches then keep using it
-
-                                    var testAlreadySeenInCurrentContext = currentTestFileContext.HasTestBeenSeen(moduleName, testName);
-                                    var currentContextInFileMatches = fileContexts.Any(x => x == currentTestFileContext);
-                                    if (!testAlreadySeenInCurrentContext && currentContextInFileMatches)
-                                    {
-                                        // Keep the current context
-                                        newContext = currentTestFileContext;
-                                    }
-                                    else
-                                    {
-                                        // Either take first not used context OR the first one
-                                        newContext = fileContexts.Where(x => !x.IsUsed).FirstOrDefault() ?? fileContexts.First();
-                                    }
+                                    // Either take first not used context OR the first one
+                                    newContext = fileContexts.Where(x => !x.IsUsed).FirstOrDefault() ?? fileContexts.First();
                                 }
                             }
-                            else if (fileContexts.Count == 1)
-                            {
-                                // We found a unique match
-                                newContext = fileContexts[0];
-                            }
+                        }
+                        else if (fileContexts.Count == 1)
+                        {
+                            // We found a unique match
+                            newContext = fileContexts[0];
+                        }
 
 
-                            if (newContext != null && newContext != currentTestFileContext)
-                            {
-                                currentTestFileContext = newContext;
-                                testIndex = 0;
-                            }
+                        if (newContext != null && newContext != currentTestFileContext)
+                        {
+                            currentTestFileContext = newContext;
+                            testIndex = 0;
+                        }
 
-                            currentTestFileContext.IsUsed = true;
+                        currentTestFileContext.IsUsed = true;
 
-                            currentTestFileContext.MarkTestSeen(moduleName, testName);
+                        currentTestFileContext.MarkTestSeen(moduleName, testName);
 
-                            PlayDeferredEvents(currentTestFileContext, deferredEvents);
+                        PlayDeferredEvents(currentTestFileContext, deferredEvents);
 
-                            jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
-                            callback.TestStarted(jsTestCaseStart.TestCase);
+                        jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
+                        callback.TestStarted(jsTestCaseStart.TestCase);
 
 
-                            ChutzpahTracer.TraceInformation("Test Case Started:'{0}'", jsTestCaseStart.TestCase.GetDisplayName());
+                        ChutzpahTracer.TraceInformation("Test Case Started:'{0}'", jsTestCaseStart.TestCase.GetDisplayName());
 
-                            break;
+                        break;
 
-                        case "TestDone":
-                            var jsTestCaseDone = jsonSerializer.Deserialize<JsTestCase>(json);
-                            var currentTestIndex = testIndex;
+                    case "TestDone":
+                        var jsTestCaseDone = jsonSerializer.Deserialize<JsTestCase>(json);
+                        var currentTestIndex = testIndex;
 
-                            FireTestFinished(callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
+                        FireTestFinished(callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
 
-                            testIndex++;
+                        testIndex++;
 
-                            break;
+                        break;
 
-                        case "Log":
-                            var log = jsonSerializer.Deserialize<JsLog>(json);
+                    case "Log":
+                        var log = jsonSerializer.Deserialize<JsLog>(json);
 
-                            if (currentTestFileContext != null)
-                            {
-                                FireLogOutput(callback, currentTestFileContext, log);
-                            }
-                            else
-                            {
-                                AddDeferredEvent((fileContext) => FireLogOutput(callback, fileContext, log), deferredEvents);
-                            }
-                            break;
+                        if (currentTestFileContext != null)
+                        {
+                            FireLogOutput(callback, currentTestFileContext, log);
+                        }
+                        else
+                        {
+                            AddDeferredEvent((fileContext) => FireLogOutput(callback, fileContext, log), deferredEvents);
+                        }
+                        break;
 
-                        case "Error":
-                            var error = jsonSerializer.Deserialize<JsError>(json);
-                            if (currentTestFileContext != null)
-                            {
-                                FireErrorOutput(callback, currentTestFileContext, error);
-                            }
-                            else
-                            {
-                                AddDeferredEvent((fileContext) => FireErrorOutput(callback, fileContext, error), deferredEvents);
-                            }
+                    case "Error":
+                        var error = jsonSerializer.Deserialize<JsError>(json);
+                        if (currentTestFileContext != null)
+                        {
+                            FireErrorOutput(callback, currentTestFileContext, error);
+                        }
+                        else
+                        {
+                            AddDeferredEvent((fileContext) => FireErrorOutput(callback, fileContext, error), deferredEvents);
+                        }
 
-                            break;
-                    }
-                }
-                catch (SerializationException e)
-                {
-                    // Ignore malformed json and move on
-                    ChutzpahTracer.TraceError(e, "Recieved malformed json from Phantom in this line: '{0}'", line);
+                        break;
                 }
             }
+            catch (SerializationException e)
+            {
+                // Ignore malformed json and move on
+                ChutzpahTracer.TraceError(e, "Recieved malformed json from Phantom in this line: '{0}'", line);
+            }
 
-            return streamingTestFileContexts.Select(x => x.TestFileSummary).ToList();
+
+            return isTestEvent;
         }
 
 

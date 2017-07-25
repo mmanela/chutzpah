@@ -20,7 +20,7 @@ namespace Chutzpah
             this.urlBuilder = urlBuilder;
         }
 
-        public ProcessResult<T> RunExecutableAndProcessOutput<T>(string exePath, string arguments, Func<ProcessStream, T> streamProcessor) where T : class
+        public ProcessResult<TestCaseStreamReadResult> RunExecutableAndProcessOutput(string exePath, string arguments, Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor, int streamTimeout) 
         {
             var p = new Process();
             p.StartInfo.UseShellExecute = false;
@@ -34,7 +34,7 @@ namespace Chutzpah
             ChutzpahTracer.TraceInformation("Started headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
 
             // Output will be null if the stream reading times out
-            var processStream = new ProcessStream(new ProcessWrapper(p), p.StandardOutput);
+            var processStream = new ProcessStreamStringSource(new ProcessWrapper(p), p.StandardOutput, streamTimeout);
             var output = streamProcessor(processStream);
             p.WaitForExit(5000);
 
@@ -42,7 +42,7 @@ namespace Chutzpah
 
             ChutzpahTracer.TraceInformation("Ended headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
 
-            return new ProcessResult<T>(processStream.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
+            return new ProcessResult<TestCaseStreamReadResult>(output.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
         }
 
         public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)

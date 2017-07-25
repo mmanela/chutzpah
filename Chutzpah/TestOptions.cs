@@ -94,5 +94,6 @@ namespace Chutzpah
         /// Optional proxy settings in format of [address]:[port]
         /// </summary>
         public string Proxy { get; set; }
+        public bool DebugEnabled { get; internal set; }
     }
 }

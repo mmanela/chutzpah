@@ -23,7 +23,7 @@ namespace Chutzpah.Facts
                     .Setup(x => x.FindScriptFiles(It.IsAny<IEnumerable<string>>()))
                     .Returns<IEnumerable<string>>((x) => x.Select(f => new PathInfo { Path = f, FullPath = f }));
                 Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{new TestFileSummary("somePath")}));
 
                 Mock<IChutzpahTestSettingsService>()
@@ -187,7 +187,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "discovery", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 var res = runner.ClassUnderTest.DiscoverTests(@"path\tests.html");
@@ -243,7 +243,7 @@ namespace Chutzpah.Facts
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "execution", Constants.DefaultTestFileTimeout);
 
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
@@ -264,7 +264,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "execution", 5000);
                 runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                  .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestFileTimeoutMilliseconds = 5000 });
@@ -286,7 +286,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "execution", 6000);
                 runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                  .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestFileTimeoutMilliseconds = 5000 });
@@ -310,7 +310,7 @@ namespace Chutzpah.Facts
                     .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests.html" } });
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                  .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\testFolder");
@@ -335,7 +335,7 @@ namespace Chutzpah.Facts
                     .Returns(new List<PathInfo> { new PathInfo { FullPath = @"path\tests.html" } });
                 var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                  .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\chutzpah.json");
@@ -376,10 +376,10 @@ namespace Chutzpah.Facts
                 var args1 = TestableTestRunner.BuildArgs("jsPath1", "harnessPath1", "execution", Constants.DefaultTestFileTimeout);
                 var args2 = TestableTestRunner.BuildArgs("jsPath2", "harnessPath2", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args1, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args1, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
                 runner.Mock<IFileProbe>()
                     .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.html", @"path\tests2a.htm" }))
@@ -403,10 +403,10 @@ namespace Chutzpah.Facts
                 var args1 = TestableTestRunner.BuildArgs("jsPath1", "harnessPath1", "execution", Constants.DefaultTestFileTimeout);
                 var args2 = TestableTestRunner.BuildArgs("jsPath2", "harnessPath2", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args1, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args1, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(It.IsAny<string>(), args2, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary> { summary }));
                 runner.Mock<IFileProbe>()
                     .Setup(x => x.FindScriptFiles(new List<string> { @"path\tests1a.js", @"path\tests2a.js", @"path2\tests1a.js", @"path2\tests2a.js" }))
@@ -510,7 +510,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns("browserPath");
                 var args = TestableTestRunner.BuildArgs("runner.js", "harnessPath", "execution", Constants.DefaultTestFileTimeout);
                 runner.Mock<IProcessHelper>()
-                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                 .Setup(x => x.RunExecutableAndProcessOutput("browserPath", args, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                  .Returns(new ProcessResult<IList<TestFileSummary>>(0, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests1.html", @"path\tests2.html" }, testCallback.Object);
@@ -532,7 +532,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>((int)TestProcessExitCode.Timeout, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
@@ -554,7 +554,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>((int)TestProcessExitCode.Unknown, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
@@ -576,7 +576,7 @@ namespace Chutzpah.Facts
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.HeadlessBrowserName)).Returns(TestRunner.HeadlessBrowserName);
                 runner.Mock<IProcessHelper>()
-                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStream, IList<TestFileSummary>>>()))
+                    .Setup(x => x.RunExecutableAndProcessOutput(TestRunner.HeadlessBrowserName, TestableTestRunner.ExecutionPhantomArgs, It.IsAny<Func<ProcessStreamStringSource, IList<TestFileSummary>>>()))
                     .Returns(new ProcessResult<IList<TestFileSummary>>((int)TestProcessExitCode.Unknown, new List<TestFileSummary>{summary}));
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(new[] { @"path\tests.html" }, testCallback.Object);
