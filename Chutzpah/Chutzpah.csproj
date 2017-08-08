@@ -385,10 +385,25 @@
     <Compile Include="Wrappers\ProcessWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ChutzpahJSRunners\jasmineRunnerV2.js">
+    <Content Include="ChutzpahJSRunners\jasmineFunctionsV2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\mochaRunner.js">
+    <Content Include="ChutzpahJSRunners\mochaFunctions.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\chutzpahRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ChutzpahTestHarnessFiles\chutzpah_boot.js">
@@ -464,13 +479,13 @@
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\chutzpahRunner.js">
+    <Content Include="ChutzpahJSRunners\chutzpahFunctions.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\jasmineRunnerV1.js">
+    <Content Include="ChutzpahJSRunners\jasmineFunctionsV1.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\qunitRunner.js">
+    <Content Include="ChutzpahJSRunners\qunitFunctions.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="edge\double_edge.js">
@@ -499,7 +514,9 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ChutzpahJSRunners\Edge\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

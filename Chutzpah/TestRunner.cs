@@ -18,7 +18,7 @@ namespace Chutzpah
 {
     public class TestRunner : ITestRunner
     {
-        public static string TestRunnerJsName = @"ChutzpahJSRunners\chutzpahRunner.js";
+        public static string TestRunnerJsName = @"ChutzpahJSRunners\Phantom\chutzpahRunner.js";
         private readonly Stopwatch stopWatch;
         private readonly IProcessHelper process;
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;

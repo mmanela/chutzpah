@@ -1,5 +1,5 @@
 ﻿/*globals phantom, require, console*/
-var chutzpah = {};
+var chutzpah = chutzpah || {};
 
 chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) {
     /// <summary>Executes a test suite and evaluates the results using the provided functions.</summary>
@@ -9,6 +9,9 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     /// <param name="onFrameworkLoaded" type="Function">Callback function which is called when the test framework is loaded.</param>
     /// <param name="isTestingDone" type="Function">Function that returns true of false if the test suite should be considered complete and ready for evaluation.</param>
     'use strict';
+
+
+    phantom.injectJs('../chutzpahFunctions.js');
 
     var page = require('webpage').create(),
         system = require("system"),
@@ -20,6 +23,30 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         userAgent = null,
         ignoreResourceLoadingError = false;
 
+    if (system.args.length <= 1) {
+        console.log('Error: too few arguments');
+        phantom.exit();
+    }
+
+    testFile = system.args[1];
+    testMode = system.args[2] || "execution";
+    timeOut = parseInt(system.args[3]) || 5001;
+
+    if (system.args.length > 4) {
+        ignoreResourceLoadingError = "true" === system.args[4].toLowerCase();
+    }
+
+    if (system.args.length > 5) {
+        userAgent = system.args[5];
+    }
+
+    function updateEventTime() {
+        startTime = new Date().getTime();
+    }
+
+    var chutzpahFunctions = chutzpah.getCommonFunctions(phantom.exit, updateEventTime);
+
+
     function trySetupTestFramework() {
         if (!testFrameworkLoaded) {
             var loaded = page.evaluate(isFrameworkLoaded);
@@ -29,7 +56,6 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
             }
         }
     }
-
 
     function waitFor(testIfDone, timeOutMillis) {
         var maxtimeOutMillis = timeOutMillis,
@@ -54,59 +80,6 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         interval = setInterval(intervalHandler, 100);
     }
 
-    function wrap(txt) {
-        return '#_#' + txt + '#_# ';
-    }
-
-    function writeEvent(eventObj, json) {
-
-        // Everytime we get an event update the startTime. We want timeout to happen
-        // when were have gone quiet for too long
-        startTime = new Date().getTime();
-        switch (eventObj.type) {
-            case 'FileStart':
-            case 'TestStart':
-            case 'TestDone':
-            case 'Log':
-            case 'Error':
-            case 'CoverageObject':
-                console.log(wrap(eventObj.type) + json);
-                break;
-                
-            case 'FileDone':
-                console.log(wrap(eventObj.type) + json);
-                phantom.exit(eventObj.failed > 0 ? 1 : 0);
-                break;
-               
-            default:
-                break;
-        }
-    }
-
-    function captureLogMessage(message) {
-        try {
-            message = message.trim();
-            var obj = JSON.parse(message);
-            if (!obj || !obj.type) throw "Unknown object";
-            writeEvent(obj, message);
-
-        }
-        catch (e) {
-            // The message was not a test status object so log as message
-            rawLog(message);
-        }
-    }
-
-    function rawLog(message) {
-        var log = { type: 'Log', log: { message: message } };
-        writeEvent(log, JSON.stringify(log));
-    }
-
-    function onError(msg, stack) {
-        var error = { type: 'Error', error: { message: msg, stack: stack } };
-        writeEvent(error, JSON.stringify(error));
-    }
-
     function pageOpenHandler(status) {
         var waitCondition = function () { return page.evaluate(isTestingDone); };
 
@@ -114,7 +87,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
 
             // Initialize startTime, this will get updated everytime we recieve 
             // content from the test framework
-            startTime = new Date().getTime();
+            updateEventTime();
             trySetupTestFramework();
             page.evaluate(onPageLoaded);
             waitFor(waitCondition, timeOut);
@@ -124,26 +97,9 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         }
     }
 
-    if (system.args.length <= 1) {
-        console.log('Error: too few arguments');
-        phantom.exit();
-    }
+    page.onConsoleMessage = chutzpahFunctions.captureLogMessage;
+    page.onError = chutzpahFunctions.onError;
 
-    testFile = system.args[1];
-    testMode = system.args[2] || "execution";
-    timeOut = parseInt(system.args[3]) || 5001;
-
-    if (system.args.length > 4) {
-	    ignoreResourceLoadingError = "true" === system.args[4].toLowerCase();
-    }    
-    
-    if (system.args.length > 5) {
-        userAgent = system.args[5];
-    }
-
-
-    page.onConsoleMessage = captureLogMessage;
-    page.onError = onError;
 
     page.onInitialized = function () {
         if (testMode === 'discovery') {
@@ -161,51 +117,50 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     };
 
     page.onResourceReceived = function (res) {
-        rawLog("!!_!! Resource Recieved: " + res.url);
+        chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + res.url);
         trySetupTestFramework();
     };
 
-
     page.onResourceError = function (res) {
         if (!ignoreResourceLoadingError) {
-            onError(res.errorString);
+            chutzpahFunctions.onError(res.errorString);
         }
-        rawLog("!!_!! Resource Error for " +res.url + " with error " + res.errorString);
-    }
+        chutzpahFunctions.rawLog("!!_!! Resource Error for " + res.url + " with error " + res.errorString);
+    };
 
 
     page.onResourceTimeout = function (res) {
         if (!ignoreResourceLoadingError) {
-            onError(res.errorString);
+            chutzpahFunctions.onError(res.errorString);
         }
-        rawLog("!!_!! Resource Timeout for " + res.url + " with error " + res.errorString);
-    }
+        chutzpahFunctions.rawLog("!!_!! Resource Timeout for " + res.url + " with error " + res.errorString);
+    };
 
     page.onAlert = function (msg) {
-        rawLog("!!_!! Alert raised with message " + msg);
+        chutzpahFunctions.rawLog("!!_!! Alert raised with message " + msg);
     };
 
     page.onConfirm = function (msg) {
-        rawLog("!!_!! Confirm raised with message " + msg);
+        chutzpahFunctions.rawLog("!!_!! Confirm raised with message " + msg);
         return true;
     };
 
 
     page.onPrompt = function (msg, defaultVal) {
-        rawLog("!!_!! Prompt raised with message " + msg);
+        chutzpahFunctions.rawLog("!!_!! Prompt raised with message " + msg);
         return defaultVal;
     };
 
     page.onClosing = function (closingPage) {
-        rawLog("!!_!! Closing raised " + closingPage.url);
+        chutzpahFunctions.rawLog("!!_!! Closing raised " + closingPage.url);
     };
 
     page.onUrlChanged = function (targetUrl) {
-        rawLog("!!_!! Url Change " + targetUrl);
+        chutzpahFunctions.rawLog("!!_!! Url Change " + targetUrl);
     };
 
     page.onFilePicker = function (oldFile) {
-        rawLog("!!_!! File Picker raised " + oldFile);
+        chutzpahFunctions.rawLog("!!_!! File Picker raised " + oldFile);
         return oldFile;
     };
 
@@ -223,17 +178,17 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
     }
 
     // Setup callback to be invoked from client using window.callPhantom
-    page.onCallback = function(data) {
+    page.onCallback = function (data) {
 
         if (!data || typeof data.Type !== "string") return null;
 
         switch (data.Type) {
             case "Eval":
-            {
-                if (typeof data.Data === "string")
-                    return eval(data.Data);
-                return null;
-            }
+                {
+                    if (typeof data.Data === "string")
+                        return eval(data.Data);
+                    return null;
+                }
         }
     }
 
