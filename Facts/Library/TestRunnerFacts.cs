@@ -167,9 +167,6 @@ namespace Chutzpah.Facts
                 var summary = new TestFileSummary("somePath");
                 summary.AddTestCase(new TestCase());
                 var context = runner.SetupTestContext(testPaths: new[] { @"path\tests.html" }, harnessPath: @"harnessPath", testRunnerPath: "runner");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("runner")).Returns("jsPath");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                var args = TestableTestRunner.BuildArgs("jsPath", "harnessPath", "discovery", Constants.DefaultTestFileTimeout);
                 runner.Mock<ITestExecutionProvider>()
                     .Setup(x => x.Name).Returns(Browser.PhantomJs);
                 runner.Mock<ITestExecutionProvider>()
@@ -228,9 +225,6 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var context = runner.SetupTestContext(testRunnerPath: "testRunner.js");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("runner.js");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestLaunchMode = TestLaunchMode.FullBrowser });
 
@@ -256,8 +250,6 @@ namespace Chutzpah.Facts
                 var runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
                 var context = runner.SetupTestContext();
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
 
@@ -270,8 +262,6 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var context = runner.SetupTestContext();
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
 
@@ -283,8 +273,6 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var context = runner.SetupTestContext();
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
                 runner.ClassUnderTest.EnableDebugMode();
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html");
@@ -297,8 +285,6 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var context = runner.SetupTestContext();
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(TestRunner.TestRunnerJsName)).Returns("jsPath");
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", new TestOptions { TestLaunchMode = TestLaunchMode.FullBrowser });
 
@@ -313,8 +299,6 @@ namespace Chutzpah.Facts
                 summary.AddTestCase(new TestCase());
                 var testCallback = new MockTestMethodRunnerCallback();
                 var context = runner.SetupTestContext(testRunnerPath: "testRunner.js");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
-                runner.Mock<IFileProbe>().Setup(x => x.FindFilePath("testRunner.js")).Returns("runner.js");
                 runner.Mock<ITestExecutionProvider>()
                     .Setup(x => x.Name).Returns(Browser.PhantomJs);
                 runner.Mock<ITestExecutionProvider>()
