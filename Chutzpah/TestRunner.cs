@@ -632,7 +632,7 @@ namespace Chutzpah
         {
 
             var provider = testExecutionProviders.FirstOrDefault(x => x.Name == testContext.TestFileSettings.Browser);
-            if(provider == null)
+            if (provider == null)
             {
                 throw new ArgumentException("Could not find browser");
             }
