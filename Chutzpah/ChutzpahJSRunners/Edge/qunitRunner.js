@@ -9,8 +9,8 @@ module.exports = async function (params, callback) {
         await chutzpahRunner.runner(params, callback,
             functions.onInitialized,
             functions.onPageLoaded,
-            functions.isFrameworkLoaded,
-            functions.onFrameworkLoaded,
+            functions.isQunitLoaded,
+            functions.onQUnitLoaded,
             functions.isTestingDone);
 
         callback(null, 'Node.js welcomes you');
