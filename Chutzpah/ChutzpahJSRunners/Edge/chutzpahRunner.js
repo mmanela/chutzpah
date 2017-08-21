@@ -1,230 +1,229 @@
-﻿
-var module = module || {};
+﻿var module = module || {};
 module.exports = module.exports || {};
 
-function onInitialized() {
-    console.log("!!_!! onInitialized");
-}
+module.exports.runner = async (inputParams, callback, onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) => {
 
-function isTestingDone() {
-    console.log("!!_!! isTestingDone");
-    return window.chutzpah.isTestingFinished === true;
-}
+    const chutzpahCommon = require('../chutzpahFunctions.js');
 
-function isQunitLoaded() {
-    console.log("!!_!! isQunitLoaded");
-    return window.QUnit;
-}
-
-function onQUnitLoaded() {
-    console.log("!!_!! onQUnitLoaded");
+    var testFrameworkLoaded = false,
+        testFile = null,
+        testMode = null,
+        timeOut = null,
+        startTime = null,
+        userAgent = null,
+        ignoreResourceLoadingErrors = false;
 
 
-    function log(obj) {
-        console.log(JSON.stringify(obj));
+    testFile = inputParams.fileUrl;
+    testMode = inputParams.testMode || "execution";
+    timeOut = parseInt(inputParams.timeOut) || 5001;
+    ignoreResourceLoadingErrors = inputParams.ignoreResourceLoadingErrors;
+    userAgent = inputParams.userAgent;
+
+    console.log("@@@ timeout: " + timeOut);
+
+    function updateEventTime() {
+        console.log("### Updated startTime: " + startTime);
+        startTime = new Date().getTime();
     }
 
-    var activeTestCase = null,
-        isGlobalError = false,
-        fileStartTime = new Date().getTime(),
-        testStartTime = new Date().getTime(),
-        beginCallbackContent = QUnit.begin.toString(),
-        callback = {};
+    async function trySetupTestFramework(evaluate) {
+        console.log("trySetupTestFramework");
+        if (!testFrameworkLoaded) {
 
-    window.chutzpah.isTestingFinished = false;
-    window.chutzpah.testCases = [];
-    window.chutzpah.currentModule = null;
+            console.log("checking isFrameworkLoaded ");
+            var loaded = await evaluate(isFrameworkLoaded);
+            if (loaded) {
+                testFrameworkLoaded = true;
+                console.log("calling onFrameworkLoaded");
+                await evaluate(onFrameworkLoaded);
+            }
+        }
+    }
 
-    if (window.chutzpah.testMode === 'discovery') {
-        // In discovery mode override QUnit's functions
+    async function wait(delay) {
+        return new Promise(function (resolve, reject) {
+            setTimeout(resolve, delay);
+        });
+    }
 
-        var realAsyncTest = window.asyncTest = QUnit.asyncTest;
-        var realTest = window.test = QUnit.test;
+    async function waitFor(testIfDone, timeOutMillis) {
+        let maxtimeOutMillis = timeOutMillis,
+            isDone = false,
+            result = -1;
 
-        window.asyncTest = QUnit.asyncTest = function (name) {
-            if (arguments.length === 2) {
-                arguments[1] = function () { expect(0); Qunit.start(); }
+        async function intervalHandler() {
+            console.log("intervalHandler");
+            var now = new Date().getTime();
+
+            console.log(`@@@  isDone: ${isDone}, now: ${now}, startTime: ${startTime}, diff: ${now - startTime}`);
+            if (!isDone && ((now - startTime) < maxtimeOutMillis)) {
+                console.log("@@@ Checking if done...");
+                isDone = await testIfDone();
+                console.log("@@@ isDone: " + isDone);
+                return -1; // Not done, try again
+            } else {
+                if (!isDone) {
+                    return 3; // Timeout
+                } else {
+                    return 0; // Done succesfully
+                }
+            }
+        }
+
+
+        while (result < 0) {
+            console.log("@@@ wait...: " + result);
+            await wait(100);
+            result = await intervalHandler();
+
+            if (result >= 0) {
+                console.log("Positive result, fin! " + result);
+                return result;
+            }
+        }
+    }
+
+    async function pageOpenHandler(evaluate) {
+        console.log("pageOpenHandler");
+
+        var waitCondition = async () => {
+            let result = await evaluate(isTestingDone);
+            console.log("@@@ waitCondition result: " + JSON.stringify(result));
+            return result.result && result.result.value;
+        };
+
+        console.log("Promise in pageOpenHandler");
+        // Initialize startTime, this will get updated everytime we recieve 
+        // content from the test framework
+        updateEventTime();
+        console.log("First trySetupTestFramework");
+        await trySetupTestFramework(evaluate);
+
+
+        console.log("Evaluate onPageLoaded");
+        await evaluate(onPageLoaded);
+
+
+        console.log("Calling waitFor...");
+        return await waitFor(waitCondition, timeOut);
+    }
+
+    async function pageInitializedHandler(evaluate) {
+        console.log("pageInitializedHandler");
+        await evaluate(onInitialized);
+    }
+
+    function getPageInitializationScript() {
+        if (testMode === 'discovery') {
+            return "window.chutzpah = { testMode: 'discovery', phantom: true };";
+        }
+        else {
+            return "window.chutzpah = { testMode: 'execution', phantom: true };";
+        }
+    }
+
+
+    function wrapFunctionForEvaluation(func) {
+        let str = '(' + func.toString() + ')()'
+
+        // If the result is an instanceof of Promise, It's resolved in context of nodejs later.
+        return `
+        {
+          let result = ${str};
+          if (result instanceof Promise) {
+            result;
+          } 
+          else {
+            let json = JSON.stringify(result);
+            json;
+          }
+        }
+      `.trim()
+    }
+
+
+    const chromeLauncher = require('chrome-launcher');
+    const CDP = require('chrome-remote-interface');
+
+
+    console.log("Launch Chrome");
+    const launchedChrome = await chromeLauncher.launch({
+        chromeFlags: ['--disable-gpu']
+    });
+
+    console.log("Get CDP");
+    const client = await CDP({ port: launchedChrome.port });
+
+    try {
+        const { Network, Page, Runtime, Console, Security } = client;
+
+        if (userAgent) {
+            Network.setUserAgentOverride(userAgent);
+        }
+
+        const evaluate = async (func) => { return await Runtime.evaluate({ expression: wrapFunctionForEvaluation(func) }) };
+
+        var chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime);
+
+        // Map from requestId to url
+        const requestMap = {};
+
+        Network.requestWillBeSent((params) => {
+            requestMap[params.requestId] = params.request.url;
+        });
+        Network.responseReceived(async (params) => {
+            const url = requestMap[params.requestId];
+            chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + url);
+            await trySetupTestFramework(evaluate);
+        });
+        Network.loadingFailed((params) => {
+            const url = requestMap[params.requestId];
+            if (!ignoreResourceLoadingError) {
+                chutzpahFunctions.onError(params.errorText);
+            }
+            chutzpahFunctions.rawLog("!!_!! Resource Error for " + url + " with error " + params.errorText);
+
+        });
+
+        Console.messageAdded((params) => {
+            if (params.message.level === 'error') {
+                chutzpahFunctions.onError(params.message.text, params.message.text);
             }
             else {
-                arguments[2] = function () { expect(0); Qunit.start(); }
+                chutzpahFunctions.captureLogMessage(params.message.text);
             }
+        });
 
-            var args = [].slice.call(arguments);
-            args.push(true);
-            realTest.apply(this, args);
-        };
+        await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable()])
 
-        window.test = QUnit.test = function (name) {
-            if (arguments.length === 2) {
-                arguments[1] = function () { expect(0); }
-            }
-            else {
-                arguments[2] = function () { expect(0); }
-            }
 
-            realTest.apply(this, arguments);
-        };
+        await Page.addScriptToEvaluateOnNewDocument({ source: getPageInitializationScript() });
+
+        console.log("### Navigate...");
+        await Page.navigate({ url: testFile });
+
+        console.log("### After navigate");
+
+
+        //console.log("### Wait for dom content loaded");
+        //await Page.domContentEventFired();
+
+        console.log("### Wait for page load event");
+        await Page.loadEventFired();
+        console.log("### loadEventFired");
+
+        console.log("### calling pageInitializedHandler");
+        await pageInitializedHandler(evaluate);
+
+        console.log("### calling pageOpenHandler");
+        let result = await pageOpenHandler(evaluate);
+        callback(null, result);
+
+    } catch (err) {
+        console.error(err);
+    } finally {
+        await client.close();
     }
 
-    callback.begin = function () {
-        // Testing began
-        fileStartTime = new Date().getTime();
-        log({ type: "FileStart" });
-    };
-
-    callback.moduleStart = function (info) {
-        window.chutzpah.currentModule = info.name;
-    };
-
-    callback.moduleDone = function (info) {
-        window.chutzpah.currentModule = null;
-    };
-
-    callback.testStart = function (info) {
-        if (info.name === 'global failure') {
-            isGlobalError = true;
-            return;
-        }
-
-        isGlobalError = false;
-        testStartTime = new Date().getTime();
-        var newTestCase = { moduleName: info.module || window.chutzpah.currentModule, testName: info.name, testResults: [] };
-        window.chutzpah.testCases.push(newTestCase);
-        activeTestCase = newTestCase;
-
-        log({ type: "TestStart", testCase: activeTestCase });
-    };
-
-    callback.log = function (info) {
-        if (isGlobalError) {
-            log({ type: 'Error', error: { message: (info.message || "") + "" } });
-        }
-        else if (info.result !== undefined) {
-            var testResult = {};
-
-            testResult.passed = info.result;
-            QUnit.jsDump.multiline = false; // Make jsDump use single line
-            if (info.actual !== undefined || info.expected !== undefined) {
-                testResult.actual = QUnit.jsDump.parse(info.actual);
-                testResult.expected = QUnit.jsDump.parse(info.expected);
-
-                testResult.message = "Expected: " + testResult.expected + ", Actual: " + testResult.actual;
-            }
-
-            // If we also have a user supplied message add extra space to Expected has a space between it and the message
-            if (info.message) {
-                testResult.message = " " + testResult.message;
-            }
-
-            testResult.message = (info.message || "") + testResult.message;
-
-            activeTestCase.testResults.push(testResult);
-        }
-    };
-
-    callback.testDone = function (info) {
-        if (info.name === 'global failure') return;
-
-        if (info.skipped) {
-            activeTestCase.skipped = info.skipped;
-        }
-
-        // Log test case when done. This will get picked up by phantom and streamed to chutzpah
-        var timetaken = new Date().getTime() - testStartTime;
-        activeTestCase.timetaken = timetaken;
-        log({ type: "TestDone", testCase: activeTestCase });
-    };
-
-    function logCoverage() {
-        if (window._Chutzpah_covobj_name && window[window._Chutzpah_covobj_name]) {
-            log({ type: "CoverageObject", object: JSON.stringify(window[window._Chutzpah_covobj_name]) });
-        }
-    }
-
-    callback.done = function (info) {
-        var timetaken = new Date().getTime() - fileStartTime;
-        logCoverage();
-        log({ type: "FileDone", timetaken: timetaken, passed: info.passed, failed: info.failed });
-        window.chutzpah.isTestingFinished = true;
-    };
-
-    /*
-    Check to see if we are running on a very old version of QUnit
-    in newer version the callbacks are register functions. In older versions
-    they are empty functions. The heuristic below is too look for 'config[key]'.
-    If we see that it is a newer version of qunit. Otherwise we need to do some more work. 
-    */
-    if (beginCallbackContent.indexOf('callback') < 0) {
-        var oldCallback = {
-            begin: QUnit.begin,
-            done: QUnit.done,
-            log: QUnit.log,
-            testStart: QUnit.testStart,
-            testDone: QUnit.testDone,
-            moduleStart: QUnit.moduleStart,
-            moduleDone: QUnit.moduleDone
-        };
-        // For each event, call out callback and then any existing registered callback
-        QUnit.begin = function () {
-            callback.begin.apply(this, arguments);
-            oldCallback.begin.apply(this, arguments);
-        };
-        QUnit.done = function () {
-            callback.done.apply(this, arguments);
-            oldCallback.done.apply(this, arguments);
-        };
-        QUnit.log = function () {
-            callback.log.apply(this, arguments);
-            oldCallback.log.apply(this, arguments);
-        };
-        QUnit.testStart = function () {
-            callback.testStart.apply(this, arguments);
-            oldCallback.testStart.apply(this, arguments);
-        };
-        QUnit.testDone = function () {
-            callback.testDone.apply(this, arguments);
-            oldCallback.testDone.apply(this, arguments);
-        };
-        QUnit.moduleStart = function () {
-            callback.moduleStart.apply(this, arguments);
-            oldCallback.moduleStart.apply(this, arguments);
-        };
-        QUnit.moduleDone = function () {
-            callback.moduleDone.apply(this, arguments);
-            oldCallback.moduleDone.apply(this, arguments);
-        };
-    }
-    else {
-        QUnit.begin(callback.begin);
-        QUnit.done(callback.done);
-        QUnit.log(callback.log);
-        QUnit.testStart(callback.testStart);
-        QUnit.testDone(callback.testDone);
-    }
-
-}
-
-function onPageLoaded() {
-    console.log("!!_!! onPageLoaded");
-
-    if (window.chutzpah.usingModuleLoader) {
-        console.log("!!_!! Test file is using module loader.");
-        // Since we are using a module loader let the harness determine when its ready to run tests
-        return;
-    }
-
-    function startQUnit() {
-        console.log("!!_!! Starting QUnit from Phantom onPageLoaded...");
-        (window.chutzpah.start || window.QUnit.start)();
-    }
-
-    if (!window._Chutzpah_covobj_name && window.chutzpah.autoStart !== false) {
-        startQUnit();
-    }
-}
-
-module.exports.onInitialized = onInitialized;
-module.exports.isTestingDone = isTestingDone;
-module.exports.isQunitLoaded = isQunitLoaded;
-module.exports.onQUnitLoaded = onQUnitLoaded;
-module.exports.onPageLoaded = onPageLoaded;
+};
