@@ -182,7 +182,7 @@ task Install-EdgeJs {
 
 task Sign-ForeignAssemblies {
 
-  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"}
+  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"; "Edge.js" = "lib\net40"}
   
   clean $autoSignedNugetPackages
  

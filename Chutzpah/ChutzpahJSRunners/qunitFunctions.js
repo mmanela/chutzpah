@@ -1,3 +1,7 @@
+
+var module = module || {};
+module.exports = module.exports || {};
+
 function onInitialized() {
     console.log("!!_!! onInitialized");
 }
@@ -218,3 +222,9 @@ function onPageLoaded() {
         startQUnit();
     }
 }
+
+module.exports.onInitialized = onInitialized;
+module.exports.isTestingDone = isTestingDone;
+module.exports.isQunitLoaded = isQunitLoaded;
+module.exports.onQUnitLoaded = onQUnitLoaded;
+module.exports.onPageLoaded = onPageLoaded;

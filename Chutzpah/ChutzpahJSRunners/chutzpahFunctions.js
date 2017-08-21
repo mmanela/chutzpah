@@ -1,4 +1,7 @@
-﻿var chutzpah = chutzpah || {};
+﻿var module = module || {};
+module.exports = module.exports || {};
+
+var chutzpah = chutzpah || {};
 
 chutzpah.getCommonFunctions = function (exit, updateEventTime) {
 
@@ -60,3 +63,5 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime) {
     return functions;
 
 };
+
+module.exports.getCommonFunctions = chutzpah.getCommonFunctions;

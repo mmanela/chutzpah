@@ -26,28 +26,27 @@ namespace Chutzpah
         public IList<TestFileSummary> Execute(TestOptions testOptions, TestContext testContext, TestExecutionMode testExecutionMode, ITestMethodRunnerCallback callback)
         {
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
-
+            var testRunnerPathNormalized = UrlBuilder.NormalizeUrlPath(runnerPath);
+            string fileUrl = BuildHarnessUrl(testContext);
 
             var streamTimeout = ((testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500).GetValueOrDefault(); // Add buffer to timeout to account for serialization
 
             Func<EdgeJsStringSource, TestCaseStreamReadResult> streamProcessor =
                 processStream => readerFactory.Create().Read(processStream, testOptions, testContext, callback);
 
-            var func = edgeJsProxy.CreateFunction(@"
-            return function (params, callback) {
-
-                params.onMessage('!!_!! This is cool', function(error, result) {});
-                params.onMessage('!!_!! NICE', function(error, result) {});
-                callback(null, '!!_!! Hello ' + params.message);
-            }
-        ");
+            var func = edgeJsProxy.CreateFunction($"return require('{testRunnerPathNormalized}')");
             var parameters = new ChromTestExecutionParameters();
+            parameters.fileUrl = fileUrl;
+            parameters.timeout = testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
+            parameters.testMode = testExecutionMode.ToString().ToLowerInvariant();
+            parameters.ignoreResourceLoadingErrors = testContext.TestFileSettings.IgnoreResourceLoadingErrors.GetValueOrDefault();
+            parameters.userAgent = testContext.TestFileSettings.UserAgent;
 
             Func<Func<object, Task<object>>, Task<object>> invoker = (Func<object, Task<object>> onMessage) =>
-            {
-                parameters.onMessage = onMessage;
-                return func(parameters);
-            };
+           {
+               parameters.onMessage = onMessage;
+               return func(parameters);
+           };
 
             var source = new EdgeJsStringSource(invoker, streamTimeout);
 
@@ -66,6 +65,18 @@ namespace Chutzpah
             public string userAgent { get; set; }
             public bool ignoreResourceLoadingErrors { get; set; }
             public Func<object, Task<object>> onMessage { get; set; }
+        }
+
+        private string BuildHarnessUrl(TestContext testContext)
+        {
+            if (testContext.IsRemoteHarness)
+            {
+                return testContext.TestHarnessPath;
+            }
+            else
+            {
+                return urlBuilder.GenerateFileUrl(testContext, testContext.TestHarnessPath, fullyQualified: true);
+            }
         }
     }
 }
