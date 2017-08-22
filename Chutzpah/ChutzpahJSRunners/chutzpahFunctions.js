@@ -3,7 +3,7 @@ module.exports = module.exports || {};
 
 var chutzpah = chutzpah || {};
 
-chutzpah.getCommonFunctions = function (exit, updateEventTime) {
+chutzpah.getCommonFunctions = function (exit, updateEventTime, writer) {
 
     var functions = {};
 
@@ -23,11 +23,11 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime) {
             case 'Log':
             case 'Error':
             case 'CoverageObject':
-                console.log(wrap(eventObj.type) + json);
+                writer(wrap(eventObj.type) + json);
                 break;
 
             case 'FileDone':
-                console.log(wrap(eventObj.type) + json);
+                writer(wrap(eventObj.type) + json);
                 exit(eventObj.failed > 0 ? 1 : 0);
                 break;
 

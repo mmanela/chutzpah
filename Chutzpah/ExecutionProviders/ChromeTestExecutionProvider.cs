@@ -43,10 +43,10 @@ namespace Chutzpah
             parameters.userAgent = testContext.TestFileSettings.UserAgent;
 
             Func<Func<object, Task<object>>, Task<object>> invoker = (Func<object, Task<object>> onMessage) =>
-           {
+            {
                parameters.onMessage = onMessage;
                return func(parameters);
-           };
+            };
 
             var source = new EdgeJsStringSource(invoker, streamTimeout);
 

@@ -44,7 +44,7 @@ chutzpah.runner = function (onInitialized, onPageLoaded, isFrameworkLoaded, onFr
         startTime = new Date().getTime();
     }
 
-    var chutzpahFunctions = chutzpah.getCommonFunctions(phantom.exit, updateEventTime);
+    var chutzpahFunctions = chutzpah.getCommonFunctions(phantom.exit, updateEventTime, console.log);
 
 
     function trySetupTestFramework() {

@@ -6,6 +6,7 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     const chutzpahCommon = require('../chutzpahFunctions.js');
 
     var testFrameworkLoaded = false,
+        attemptingToSetupTestFramework = false,
         testFile = null,
         testMode = null,
         timeOut = null,
@@ -20,17 +21,15 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     ignoreResourceLoadingErrors = inputParams.ignoreResourceLoadingErrors;
     userAgent = inputParams.userAgent;
 
-    console.log("@@@ timeout: " + timeOut);
 
     function updateEventTime() {
-        console.log("### Updated startTime: " + startTime);
         startTime = new Date().getTime();
     }
 
     async function trySetupTestFramework(evaluate) {
         console.log("trySetupTestFramework");
-        if (!testFrameworkLoaded) {
-
+        if (!testFrameworkLoaded && !attemptingToSetupTestFramework) {
+            attemptingToSetupTestFramework = true;
             console.log("checking isFrameworkLoaded ");
             var loaded = await evaluate(isFrameworkLoaded);
             if (loaded) {
@@ -38,7 +37,10 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
                 console.log("calling onFrameworkLoaded");
                 await evaluate(onFrameworkLoaded);
             }
+
+            attemptingToSetupTestFramework = false;
         }
+
     }
 
     async function wait(delay) {
@@ -56,11 +58,8 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
             console.log("intervalHandler");
             var now = new Date().getTime();
 
-            console.log(`@@@  isDone: ${isDone}, now: ${now}, startTime: ${startTime}, diff: ${now - startTime}`);
             if (!isDone && ((now - startTime) < maxtimeOutMillis)) {
-                console.log("@@@ Checking if done...");
                 isDone = await testIfDone();
-                console.log("@@@ isDone: " + isDone);
                 return -1; // Not done, try again
             } else {
                 if (!isDone) {
@@ -164,7 +163,7 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
 
         const evaluate = async (func) => { return await Runtime.evaluate({ expression: wrapFunctionForEvaluation(func) }) };
 
-        var chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime);
+        var chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime, inputParams.onMessage);
 
         // Map from requestId to url
         const requestMap = {};

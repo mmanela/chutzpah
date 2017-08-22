@@ -20,7 +20,6 @@ namespace Chutzpah.Models
                 if (!string.IsNullOrEmpty(stringMessage))
                 {
                     Emit(stringMessage);
-                    Console.WriteLine($"Got this message: {stringMessage}");
                 }
                 return Task.FromResult<object>(null);
             });
