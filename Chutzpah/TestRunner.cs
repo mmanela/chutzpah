@@ -425,16 +425,16 @@ namespace Chutzpah
 
                             // Allow override from command line.
                             var browserArgs = testContext.TestFileSettings.BrowserArguments;
-                            if (!string.IsNullOrWhiteSpace(options.BrowserArgs))
+                            if (!string.IsNullOrWhiteSpace(options.OpenInBrowserArgs))
                             {
-                                var path = BrowserPathHelper.GetBrowserPath(options.BrowserName);
+                                var path = BrowserPathHelper.GetBrowserPath(options.OpenInBrowserName);
                                 browserArgs = new Dictionary<string, string>
                                 {
-                                    { Path.GetFileNameWithoutExtension(path), options.BrowserArgs }
+                                    { Path.GetFileNameWithoutExtension(path), options.OpenInBrowserArgs }
                                 };
                             }
 
-                            process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.BrowserName, browserArgs);
+                            process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.OpenInBrowserName, browserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
@@ -630,8 +630,8 @@ namespace Chutzpah
                                                  TestExecutionMode testExecutionMode,
                                                  ITestMethodRunnerCallback callback)
         {
-
-            var provider = testExecutionProviders.FirstOrDefault(x => x.Name == testContext.TestFileSettings.Browser);
+            var browser = (options.Browser ?? testContext.TestFileSettings.Browser).GetValueOrDefault();
+            var provider = testExecutionProviders.FirstOrDefault(x => x.Name == browser);
             if (provider == null)
             {
                 throw new ArgumentException("Could not find browser");

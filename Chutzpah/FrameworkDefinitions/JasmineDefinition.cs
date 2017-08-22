@@ -63,7 +63,7 @@ namespace Chutzpah.FrameworkDefinitions
             return testHarness[GetVersion(chutzpahTestSettings)];
         }
 
-        public override string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings)
+        public override string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions testOptions)
         {
             return testRunner[GetVersion(chutzpahTestSettings)];
         }

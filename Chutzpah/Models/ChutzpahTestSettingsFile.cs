@@ -45,7 +45,7 @@ namespace Chutzpah.Models
     }
     public enum Browser
     {
-        PhantomJs,
+        Phantom,
         Chrome
     }
 
@@ -94,7 +94,7 @@ namespace Chutzpah.Models
             IgnoreResourceLoadingErrors = false;
 
             // Default to PhantomJs for now but once stable make Chrome default
-            Browser = Models.Browser.Chrome;
+            Browser = Models.Browser.Phantom;
             
             if (ForceWebServerMode)
             {

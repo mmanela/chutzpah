@@ -148,7 +148,7 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
 
     console.log("Launch Chrome");
     const launchedChrome = await chromeLauncher.launch({
-        chromeFlags: ['--disable-gpu']
+        chromeFlags: ['--disable-gpu', '--headless']
     });
 
     console.log("Get CDP");

@@ -15,7 +15,7 @@ namespace Chutzpah
         private readonly string headlessBrowserPath;
         private readonly ITestCaseStreamReaderFactory readerFactory;
 
-        public Browser Name => Browser.PhantomJs;
+        public Browser Name => Browser.Phantom;
 
         public PhantomTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)

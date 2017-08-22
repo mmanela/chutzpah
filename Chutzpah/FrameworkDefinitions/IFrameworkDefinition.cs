@@ -27,7 +27,8 @@ namespace Chutzpah.FrameworkDefinitions
         /// Gets the file name of the JavaScript test runner to use with the framework.
         /// </summary>
         /// <param name="chutzpahTestSettings"></param>
-        string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings);
+        /// <param name="options"></param>
+        string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options);
 
         /// <summary>
         /// Gets the name of the blanket script to use for code coverage

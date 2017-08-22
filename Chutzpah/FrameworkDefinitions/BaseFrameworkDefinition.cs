@@ -58,11 +58,11 @@ namespace Chutzpah.FrameworkDefinitions
         /// Gets the file name of the JavaScript test runner to use with the framework.
         /// </summary>
         /// <param name="chutzpahTestSettings"></param>
-        public virtual string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings)
+        public virtual string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options)
         {
-            switch (chutzpahTestSettings.Browser)
+            switch ((options.Browser ?? chutzpahTestSettings.Browser).GetValueOrDefault())
             {
-                case Browser.PhantomJs:
+                case Browser.Phantom:
                     return @"ChutzpahJSRunners\Phantom\" + FrameworkKey + "Runner.js";
                 case Browser.Chrome:
                     return @"ChutzpahJSRunners\Edge\" + FrameworkKey + "Runner.js";
