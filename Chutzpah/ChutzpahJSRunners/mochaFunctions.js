@@ -1,4 +1,7 @@
-﻿function onInitialized() {
+﻿var module = module || {};
+module.exports = module.exports || {};
+
+function onInitialized() {
     console.log("!!_!! onInitialized");
 
     chutzpah.isTestingFinished = false;
@@ -7,7 +10,6 @@
 
 function onPageLoaded() {
     console.log("!!_!! onPageLoaded");
-
 
     if (!window.chutzpah.usingModuleLoader && window.chutzpah.autoStart !== false) {
         (window.chutzpah.start || mocha.run)();
@@ -155,3 +157,9 @@ function isTestingDone() {
     console.log("!!_!! isTestingDone: " + (chutzpah.isTestingFinished === true));
     return chutzpah.isTestingFinished === true;
 }
+
+module.exports.onInitialized = onInitialized;
+module.exports.isTestingDone = isTestingDone;
+module.exports.isMochaLoaded = isMochaLoaded;
+module.exports.onMochaLoaded = onMochaLoaded;
+module.exports.onPageLoaded = onPageLoaded;

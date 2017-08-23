@@ -1,4 +1,7 @@
-﻿function onInitialized() {
+﻿var module = module || {};
+module.exports = module.exports || {};
+
+function onInitialized() {
     console.log("!!_!! onInitialized  Jasmine - v2");
 }
 
@@ -7,7 +10,7 @@ function isTestingDone() {
     return window.chutzpah.isTestingFinished === true;
 }
 
-function isJamineLoaded() {
+function isJasmineLoaded() {
     console.log("!!_!! isJasmineLoaded");
     return window.jasmine;
 }
@@ -148,3 +151,9 @@ function onPageLoaded() {
         (window.chutzpah.start || window.initializeJasmine)();
     }
 }
+
+module.exports.onInitialized = onInitialized;
+module.exports.isTestingDone = isTestingDone;
+module.exports.isJasmineLoaded = isJasmineLoaded;
+module.exports.onJasmineLoaded = onJasmineLoaded;
+module.exports.onPageLoaded = onPageLoaded;

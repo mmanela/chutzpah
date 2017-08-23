@@ -8,7 +8,7 @@
     phantom.injectJs('../jasmineFunctionsV1.js');
 
     try {
-        chutzpah.runner(onInitialized, onPageLoaded, isJamineLoaded, onJasmineLoaded, isTestingDone);
+        chutzpah.runner(onInitialized, onPageLoaded, isJasmineLoaded, onJasmineLoaded, isTestingDone);
     } catch (e) {
         phantom.exit(2); // Unkown error
     }

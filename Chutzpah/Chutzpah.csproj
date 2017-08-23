@@ -389,6 +389,15 @@
     <Content Include="ChutzpahJSRunners\Edge\chutzpahRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ChutzpahJSRunners\Edge\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Edge\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Edge\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ChutzpahJSRunners\Edge\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

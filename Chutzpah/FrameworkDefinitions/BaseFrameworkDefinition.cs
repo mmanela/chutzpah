@@ -60,12 +60,17 @@ namespace Chutzpah.FrameworkDefinitions
         /// <param name="chutzpahTestSettings"></param>
         public virtual string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options)
         {
+            return BuildTestRunnerPath(chutzpahTestSettings, options, FrameworkKey + "Runner.js");
+        }
+
+        protected string BuildTestRunnerPath(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options, string runnerName)
+        {
             switch ((options.Browser ?? chutzpahTestSettings.Browser).GetValueOrDefault())
             {
                 case Browser.Phantom:
-                    return @"ChutzpahJSRunners\Phantom\" + FrameworkKey + "Runner.js";
+                    return @"ChutzpahJSRunners\Phantom\" + runnerName;
                 case Browser.Chrome:
-                    return @"ChutzpahJSRunners\Edge\" + FrameworkKey + "Runner.js";
+                    return @"ChutzpahJSRunners\Edge\" + runnerName;
                 default:
                     throw new ArgumentException("Unknown browser");
             }
