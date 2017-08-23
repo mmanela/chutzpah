@@ -24,8 +24,15 @@ namespace Chutzpah.Models
                 return Task.FromResult<object>(null);
             });
 
+            try
+            {
+                await invoker(onMessage);
+            }
+            catch(Exception e)
+            {
+                ChutzpahTracer.TraceError(e, "Exception from EdgeJS");
+            }
 
-            await invoker(onMessage);
             return null;
         }
     }

@@ -250,10 +250,13 @@ namespace Chutzpah
                         break;
 
                     case "FileDone":
-
+                        Console.WriteLine("Got FileDone");
                         var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
+
+                        Console.WriteLine("Parsed FileDone");
                         FireFileFinished(callback, testContext.InputTestFilesString, streamingTestFileContexts, jsFileDone);
 
+                        Console.WriteLine("Fired FireFileFinished");
                         break;
 
                     case "TestStart":

@@ -12,7 +12,8 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
         timeOut = null,
         startTime = null,
         userAgent = null,
-        ignoreResourceLoadingErrors = false;
+        ignoreResourceLoadingErrors = false,
+        finalResult = 0;
 
 
     testFile = inputParams.fileUrl;
@@ -21,20 +22,23 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     ignoreResourceLoadingErrors = inputParams.ignoreResourceLoadingErrors;
     userAgent = inputParams.userAgent;
 
+    function debugLog(msg) {
+        console.log(msg);
+    }
 
     function updateEventTime() {
         startTime = new Date().getTime();
     }
 
     async function trySetupTestFramework(evaluate) {
-        console.log("trySetupTestFramework");
+        debugLog("trySetupTestFramework");
         if (!testFrameworkLoaded && !attemptingToSetupTestFramework) {
             attemptingToSetupTestFramework = true;
-            console.log("checking isFrameworkLoaded ");
+            debugLog("checking isFrameworkLoaded ");
             var loaded = await evaluate(isFrameworkLoaded);
             if (loaded) {
                 testFrameworkLoaded = true;
-                console.log("calling onFrameworkLoaded");
+                debugLog("calling onFrameworkLoaded");
                 await evaluate(onFrameworkLoaded);
             }
 
@@ -55,7 +59,7 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
             result = -1;
 
         async function intervalHandler() {
-            console.log("intervalHandler");
+            debugLog("intervalHandler");
             var now = new Date().getTime();
 
             if (!isDone && ((now - startTime) < maxtimeOutMillis)) {
@@ -72,44 +76,44 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
 
 
         while (result < 0) {
-            console.log("@@@ wait...: " + result);
+            debugLog("@@@ wait...: " + result);
             await wait(100);
             result = await intervalHandler();
 
             if (result >= 0) {
-                console.log("Positive result, fin! " + result);
+                debugLog("Positive result, fin! " + result);
                 return result;
             }
         }
     }
 
     async function pageOpenHandler(evaluate) {
-        console.log("pageOpenHandler");
+        debugLog("pageOpenHandler");
 
         var waitCondition = async () => {
             let result = await evaluate(isTestingDone);
-            console.log("@@@ waitCondition result: " + JSON.stringify(result));
+            debugLog("@@@ waitCondition result: " + JSON.stringify(result));
             return result.result && result.result.value;
         };
 
-        console.log("Promise in pageOpenHandler");
+        debugLog("Promise in pageOpenHandler");
         // Initialize startTime, this will get updated everytime we recieve 
         // content from the test framework
         updateEventTime();
-        console.log("First trySetupTestFramework");
+        debugLog("First trySetupTestFramework");
         await trySetupTestFramework(evaluate);
 
 
-        console.log("Evaluate onPageLoaded");
+        debugLog("Evaluate onPageLoaded");
         await evaluate(onPageLoaded);
 
 
-        console.log("Calling waitFor...");
+        debugLog("Calling waitFor...");
         return await waitFor(waitCondition, timeOut);
     }
 
     async function pageInitializedHandler(evaluate) {
-        console.log("pageInitializedHandler");
+        debugLog("pageInitializedHandler");
         await evaluate(onInitialized);
     }
 
@@ -146,12 +150,12 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     const CDP = require('chrome-remote-interface');
 
 
-    console.log("Launch Chrome");
+    debugLog("Launch Chrome");
     const launchedChrome = await chromeLauncher.launch({
         chromeFlags: ['--disable-gpu', '--headless']
     });
 
-    console.log("Get CDP");
+    debugLog("Get CDP");
     const client = await CDP({ port: launchedChrome.port });
 
     try {
@@ -199,30 +203,46 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
 
         await Page.addScriptToEvaluateOnNewDocument({ source: getPageInitializationScript() });
 
-        console.log("### Navigate...");
+        debugLog("### Navigate...");
         await Page.navigate({ url: testFile });
 
-        console.log("### After navigate");
+        debugLog("### After navigate");
 
 
-        //console.log("### Wait for dom content loaded");
+        //debugLog("### Wait for dom content loaded");
         //await Page.domContentEventFired();
 
-        console.log("### Wait for page load event");
+        debugLog("### Wait for page load event");
         await Page.loadEventFired();
-        console.log("### loadEventFired");
+        debugLog("### loadEventFired");
 
-        console.log("### calling pageInitializedHandler");
+        debugLog("### calling pageInitializedHandler");
         await pageInitializedHandler(evaluate);
 
-        console.log("### calling pageOpenHandler");
-        let result = await pageOpenHandler(evaluate);
-        callback(null, result);
+        debugLog("### calling pageOpenHandler");
+        finalResult = await pageOpenHandler(evaluate);
+        debugLog("Just about done: " + finalResult);
 
     } catch (err) {
-        console.error(err);
-    } finally {
+        debugLog("Error: " + err);
+        callback(err, null);
+        return;
+    }
+
+
+    debugLog("Killing chrome");
+    if (launchedChrome) {
+        launchedChrome.kill();
+    }
+
+    debugLog("Closing client");
+    if (client) {
         await client.close();
     }
+
+    debugLog("Closed client");
+
+    debugLog("Calling callback");
+    callback(null, finalResult);
 
 };

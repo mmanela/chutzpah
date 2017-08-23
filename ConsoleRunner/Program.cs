@@ -131,7 +131,6 @@ namespace Chutzpah
 
         static int RunTests(CommandLine commandLine, IEnumerable<SummaryTransformer> transformers)
         {
-
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
             if (commandLine.Trace)

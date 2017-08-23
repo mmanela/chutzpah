@@ -12,10 +12,8 @@ module.exports = async function (params, callback) {
             functions.isQunitLoaded,
             functions.onQUnitLoaded,
             functions.isTestingDone);
-
-        callback(null, 'Node.js welcomes you');
-        //chutzpah.runner(onInitialized, onPageLoaded, isQunitLoaded, onQUnitLoaded, isTestingDone);
+        
     } catch (e) {
-        throw new Error("Failed to run qunitRunner.js");
+        throw new Error("Failed to run qunitRunner.js: " + e);
     }
 };
