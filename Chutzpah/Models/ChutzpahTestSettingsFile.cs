@@ -94,7 +94,7 @@ namespace Chutzpah.Models
             IgnoreResourceLoadingErrors = false;
 
             // Default to PhantomJs for now but once stable make Chrome default
-            Browser = Models.Browser.Phantom;
+            Browser = Models.Browser.Chrome;
             
             if (ForceWebServerMode)
             {

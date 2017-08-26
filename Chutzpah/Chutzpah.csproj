@@ -528,6 +528,12 @@
     <None Include="Models\vstsModel\vstst.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="../EdgeJsPackages\node_modules\**\*.*">
+      <TargetDirectory>$(OutputPath)</TargetDirectory>
+      <Link>node_modules\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <InProject>false</InProject>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
@@ -540,15 +546,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>
-robocopy $(SolutionDir)EdgeJsPackages\node_modules $(TargetDir)node_modules /MIR /MT /NP /NJH
-if errorlevel 4 goto BuildEventFailed
-if errorlevel 0 goto end
-
-:BuildEventEnd echo FILECOPY for $(ProjectName) FAILED
-exit 1
-
-:end
-exit 0</PreBuildEvent>
+    <PreBuildEvent></PreBuildEvent>
   </PropertyGroup>
 </Project>

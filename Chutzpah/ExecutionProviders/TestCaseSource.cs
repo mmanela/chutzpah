@@ -7,7 +7,7 @@ namespace Chutzpah.Models
     {
         private Func<T, bool> subscriber = null;
         private readonly int timeout;
-        public DateTime LastTestEvent { get; set; }
+        public DateTime LastTestEvent { get; set; } = DateTime.Now;
 
         public TestCaseSource(int timeout)
         {

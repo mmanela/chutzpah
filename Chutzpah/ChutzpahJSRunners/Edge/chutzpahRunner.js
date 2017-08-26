@@ -201,7 +201,9 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
         await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable()])
 
 
-        await Page.addScriptToEvaluateOnNewDocument({ source: getPageInitializationScript() });
+        await Page.addScriptToEvaluateOnLoad({ scriptSource: getPageInitializationScript() });
+        //Use this one the method hits main line chrome: 
+        // await Page.addScriptToEvaluateOnNewDocument({ source: getPageInitializationScript() });
 
         debugLog("### Navigate...");
         await Page.navigate({ url: testFile });
