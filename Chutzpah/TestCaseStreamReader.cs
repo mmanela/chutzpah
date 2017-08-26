@@ -64,9 +64,9 @@ namespace Chutzpah
             testCaseSource.Subscribe((line) => ProcessLine(line, testContext, streamingTestFileContexts, deferredEvents, callback, testOptions.DebugEnabled));
 
             var readerTask = testCaseSource.Open();
-            while (readerTask.Status == TaskStatus.WaitingToRun
+            while ((readerTask.Status == TaskStatus.WaitingToRun
                 || readerTask.Status == TaskStatus.WaitingForActivation
-               || (readerTask.Status == TaskStatus.Running && testCaseSource.IsAlive))
+               || readerTask.Status == TaskStatus.Running) && testCaseSource.IsAlive)
             {
                 Thread.Sleep(100);
             }
