@@ -129,7 +129,6 @@ namespace Chutzpah
             callback.TestFinished(jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
 
-
             ChutzpahTracer.TraceInformation("Test Case Finished:'{0}'", jsTestCase.TestCase.GetDisplayName());
             
         }
@@ -185,6 +184,18 @@ namespace Chutzpah
             error.Error.InputTestFile = testFileContext.ReferencedFile.Path;
             callback.FileError(error.Error);
             testFileContext.TestFileSummary.Errors.Add(error.Error);
+
+            if (testFileContext.TestContext.TestFileSettings.CreateFailedTestForFileError.GetValueOrDefault())
+            {
+                var fileErrorTest = new TestCase();
+                fileErrorTest.InputTestFile = testFileContext.ReferencedFile.Path;
+                fileErrorTest.TestName = "!! File Error - Error encountered outside of test case execution !!";
+                fileErrorTest.TestResults.Add(new TestResult { Passed = false, StackTrace = error.Error.StackAsString ?? error.Error.FormatStackObject(), Message = error.Error.Message });
+                callback.TestStarted(fileErrorTest);
+                callback.TestFinished(fileErrorTest);
+
+                testFileContext.TestFileSummary.AddTestCase(fileErrorTest);
+            }
 
             ChutzpahTracer.TraceError("Eror recieved from Phantom {0}", error.Error.Message);
         }

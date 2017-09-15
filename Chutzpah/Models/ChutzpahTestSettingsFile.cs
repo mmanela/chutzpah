@@ -332,6 +332,14 @@ namespace Chutzpah.Models
         /// </summary>
         public string Proxy { get; set; }
 
+
+        /// <summary>
+        /// Tells Chutzpah to create a failed test case when an unhandle exception occurs when
+        /// running a test that happens ouside of a test itself. This is useful in some build systems
+        /// to provide better failure reporting
+        /// </summary>
+        public bool? CreateFailedTestForFileError { get; set; }
+
         public string SettingsFileName
         {
             get
@@ -353,7 +361,6 @@ namespace Chutzpah.Models
                 return testPatternRegex ?? (testPatternRegex = new Regex(TestPattern));
             }
         }
-
 
         public override int GetHashCode()
         {
@@ -474,6 +481,7 @@ namespace Chutzpah.Models
             this.TraceFilePath = this.TraceFilePath ?? parent.TraceFilePath;
             this.CodeCoverageTimeout = this.CodeCoverageTimeout ?? parent.CodeCoverageTimeout;
             this.Proxy = this.Proxy ?? parent.Proxy;
+            this.CreateFailedTestForFileError = this.CreateFailedTestForFileError ?? parent.CreateFailedTestForFileError;
 
             // Deprecated
             this.AMDBasePath = this.AMDBasePath ?? parent.AMDBasePath;

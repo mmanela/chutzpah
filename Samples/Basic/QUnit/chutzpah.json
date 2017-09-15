@@ -11,5 +11,7 @@
     "Server": {
     	"Enabled": true
     },
-    "CodeCoverageTimeout": 10000
+    "CodeCoverageTimeout": 10000,
+
+    "CreateFailedTestForFileError": true
 }
