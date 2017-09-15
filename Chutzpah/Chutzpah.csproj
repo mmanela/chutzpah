@@ -441,15 +441,6 @@
     <Content Include="ChutzpahTestHarnessFiles\Mocha\mocha.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ChutzpahTestHarnessFiles\QUnit\qunit.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\3rdParty\Phantom\phantomjs.exe">
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -462,6 +453,24 @@
     </Content>
     <Content Include="ChutzpahJSRunners\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v1\qunit.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v1\qunit.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v1\qunit.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v2\qunit.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v2\qunit.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahTestHarnessFiles\QUnit\v2\qunit.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

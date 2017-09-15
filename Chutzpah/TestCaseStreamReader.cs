@@ -189,7 +189,7 @@ namespace Chutzpah
             {
                 var fileErrorTest = new TestCase();
                 fileErrorTest.InputTestFile = testFileContext.ReferencedFile.Path;
-                fileErrorTest.TestName = "!! File Error - Error encountered outside of test case execution !!";
+                fileErrorTest.TestName = string.Format("!! File Error #{0} - Error encountered outside of test case execution !!", testFileContext.TestFileSummary.Errors.Count);
                 fileErrorTest.TestResults.Add(new TestResult { Passed = false, StackTrace = error.Error.StackAsString ?? error.Error.FormatStackObject(), Message = error.Error.Message });
                 callback.TestStarted(fileErrorTest);
                 callback.TestFinished(fileErrorTest);

@@ -1,5 +1,6 @@
 ﻿{
     "Framework": "qunit",
+    "FrameworkVersion": "2",
     "TestHarnessLocationMode": "SettingsFileAdjacent",
     "References" : [
       {"Path" : "../code.js" }

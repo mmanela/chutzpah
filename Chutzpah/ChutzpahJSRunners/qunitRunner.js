@@ -107,6 +107,8 @@
                 var testResult = {};
 
                 testResult.passed = info.result;
+
+                QUnit.jsDump = QUnit.jsDump || QUnit.dump;
                 QUnit.jsDump.multiline = false; // Make jsDump use single line
                 if (info.actual !== undefined || info.expected !== undefined) {
                     testResult.actual = QUnit.jsDump.parse(info.actual);

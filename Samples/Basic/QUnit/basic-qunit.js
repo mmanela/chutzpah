@@ -1,30 +1,30 @@
 ﻿/// <reference path="../code.js" />
 
 
- test("A basic test", function () {
-      ok(true, "this test is fine");
+ QUnit.test("A basic test", function (assert) {
+      assert.ok(true, "this test is fine");
       var value = "hello";
-      equal("hello", value, "We expect value to be hello");
+      assert.equal("hello", value, "We expect value to be hello");
   });
 
-  module("stringLib");
+  QUnit.module("stringLib");
 
-  test("will get vowel count", function () {
+  QUnit.test("will get vowel count", function (assert) {
       var count = stringLib.vowels("hello");
 
-      equal(count, 2, "We expect 2 vowels in hello");
+      assert.equal(count, 2, "We expect 2 vowels in hello");
   });
 
-  module("mathLib");
+  QUnit.module("mathLib");
 
-  test("will add 5 to number", function () {
+  QUnit.test("will add 5 to number", function (assert) {
       var res = mathLib.add5(10);
 
-      equal(res, 15, "should add 5");
+      assert.equal(res, 15, "should add 5");
   });
 
-  test("will multiply 5 to number", function () {
+  QUnit.test("will multiply 5 to number", function (assert) {
       var res = mathLib.mult5(10);
 
-      equal(res, 55, "should multiply by 5");
+      assert.equal(res, 55, "should multiply by 5");
   });

@@ -1,0 +1,81 @@
+﻿<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>QUnit Tests</title>
+    @@TestFrameworkDependencies@@
+    @@CodeCoverageDependencies@@
+    @@ReferencedCSSFiles@@
+    @@ReferencedJSFiles@@
+    @@TestJSFile@@
+
+    <script>
+        
+        // Prevent QUnit from autostarting so have better control of the timing
+        window.QUnit.config.autostart = false;
+
+        var amdTestPaths = [@@AMDTestPath@@];
+        window.chutzpah.boot(amdTestPaths);
+
+        if (window.chutzpah.usingModuleLoader) {
+            
+            if("@@AMDBasePath@@") {
+                window.chutzpah.amdConfig({
+                    baseUrl: "@@AMDBasePath@@"
+                });
+            }
+
+            window.chutzpah.amdConfig({
+                map: {
+                    '*': {
+                        @@AMDModuleMap@@
+                        }
+                }
+            });
+
+            window.QUnit.config.autostart = false;
+            window.chutzpah.start = function() {
+                window.chutzpah.amdImport(amdTestPaths, function () {
+                    console.log("!!_!! Starting QUnit from inline AMD call...");
+                    if (!window._Chutzpah_covobj_name) {
+                        window.QUnit.start();
+                    }
+                });
+            }
+
+            if(window.chutzpah.autoStart !== false) {
+                window.chutzpah.start();
+            }
+        }
+        else {
+            window.chutzpah.start = function() {
+                console.log("!!_!! Starting QUnit ...");
+                if (!window._Chutzpah_covobj_name) {
+                    window.QUnit.start();
+                }
+            }
+
+
+            var currentWindowOnload = window.onload;
+            window.onload = function() {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }
+
+                if (!window.chutzpah.phantom && window.chutzpah.autoStart !== false) {
+                    console.log("!!_!! Stating QUnit from HTML OnLoad callback...");
+                    window.chutzpah.start();
+                }
+            };
+        }
+    </script>
+</head>
+
+<body>
+    @@TestHtmlTemplateFiles@@
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+</body>
+</html>
+
