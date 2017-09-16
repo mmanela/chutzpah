@@ -75,7 +75,7 @@ namespace Chutzpah.Facts.Integration
   
                     // React Samples
                     
-                    new object[] { @"Samples\React\Basic\chutzpah.json", 1},
+                   //  new object[] { @"Samples\React\Basic\chutzpah.json", 1},
 
                 };
             }
