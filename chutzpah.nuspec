@@ -14,10 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-            * Update to QUnit 1.23.1, Jasmine 2.5.2, Mocha 3.2.0
-            * Fix coverage bug in server mode
-            * Fix time taken in TRX files
-            * Allow unknown file type to be requested in server mode
+            * Add support for Qunit 2.4
         </releaseNotes>
     </metadata>
 </package>
