@@ -117,11 +117,11 @@ namespace Chutzpah
         }
 
 
-        public static string NormalizeFilePath(string path)
+        public static string NormalizeFilePath(string path, bool lowerCase = true)
         {
             if (path == null) return null;
 
-            return path.ToLowerInvariant().Replace(@"/", @"\");
+            return (lowerCase ? path.ToLowerInvariant() : path).Replace(@"/", @"\");
         }
 
         public static string NormalizeUrlPath(string path)

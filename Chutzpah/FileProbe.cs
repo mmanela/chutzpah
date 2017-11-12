@@ -175,11 +175,11 @@ namespace Chutzpah
                 }
 
                 // If a folder path is given enumerate that folder (recursively) with the optional include/exclude paths
-                var folderPath = UrlBuilder.NormalizeFilePath(FindFolderPath(testPath));
+                var folderPath = FindFolderPath(testPath);
                 if (folderPath != null)
                 {
 
-                    var childFiles = fileSystem.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+                    var childFiles = fileSystem.GetFiles(UrlBuilder.NormalizeFilePath(folderPath, false), "*.*", SearchOption.AllDirectories);
                     var validFiles = from file in childFiles
                                      let normalizedFile = UrlBuilder.NormalizeFilePath(file)
                                      where !IsTemporaryChutzpahFile(normalizedFile)
