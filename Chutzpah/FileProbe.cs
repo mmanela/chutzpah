@@ -163,7 +163,7 @@ namespace Chutzpah
 
                 // The path we assume default to the chuzpah.json directory if the Path property is not set
                 var testPath = string.IsNullOrEmpty(pathSettings.Path) ? pathSettings.SettingsFileDirectory : pathSettings.Path;
-                testPath = UrlBuilder.NormalizeFilePath(testPath);
+                testPath = UrlBuilder.NormalizeFilePath(testPath, false);
                 testPath = testPath != null ? Path.Combine(pathSettings.SettingsFileDirectory, testPath) : null;
 
                 // If a file path is given just return that file
