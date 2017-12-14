@@ -145,77 +145,58 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
       `.trim()
     }
 
-
-    const chromeLauncher = require('chrome-launcher');
-    const CDP = require('chrome-remote-interface');
-
+    const puppeteer = require('puppeteer');
 
     debugLog("Launch Chrome");
-    const launchedChrome = await chromeLauncher.launch({
-        chromeFlags: ['--disable-gpu', '--headless']
-    });
-
-    debugLog("Get CDP");
-    const client = await CDP({ port: launchedChrome.port });
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
 
     try {
-        const { Network, Page, Runtime, Console, Security } = client;
 
         if (userAgent) {
-            Network.setUserAgentOverride(userAgent);
+            page.setUserAgen(userAgent);
         }
 
-        const evaluate = async (func) => { return await Runtime.evaluate({ expression: wrapFunctionForEvaluation(func) }) };
+        const evaluate = async (func) => { return await page.evaluate(wrapFunctionForEvaluation(func)); };
 
         var chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime, inputParams.onMessage);
 
-        // Map from requestId to url
-        const requestMap = {};
-
-        Network.requestWillBeSent((params) => {
-            requestMap[params.requestId] = params.request.url;
-        });
-        Network.responseReceived(async (params) => {
-            const url = requestMap[params.requestId];
-            chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + url);
+        page.on('requestfinished', (async (request) => {
+            chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + request.url);
             await trySetupTestFramework(evaluate);
-        });
-        Network.loadingFailed((params) => {
-            const url = requestMap[params.requestId];
+        }));
+
+        page.on('requestfailed', ((request) => {
+            let errorText = request.failure().errorText;
             if (!ignoreResourceLoadingError) {
-                chutzpahFunctions.onError(params.errorText);
+                chutzpahFunctions.onError(errorText);
             }
-            chutzpahFunctions.rawLog("!!_!! Resource Error for " + url + " with error " + params.errorText);
+            chutzpahFunctions.rawLog("!!_!! Resource Error for " + request.url + " with error " + errorText);
 
-        });
+        }));
 
-        Console.messageAdded((params) => {
-            if (params.message.level === 'error') {
-                chutzpahFunctions.onError(params.message.text, params.message.text);
+        page.on('console', message => {
+            if (message.type === 'error') {
+                chutzpahFunctions.onError(message.text, message.text);
             }
             else {
-                chutzpahFunctions.captureLogMessage(params.message.text);
+                chutzpahFunctions.captureLogMessage(message.text);
             }
         });
 
-        await Promise.all([Network.enable(), Page.enable(), Runtime.enable(), Console.enable()])
+        page.on('error', error => {
+            chutzpahFunctions.onError(error.message, error.stack);
+        });
 
+        page.on('pageerror', error => {
+            chutzpahFunctions.onError(error.message, error.stack);
+        });
 
-        await Page.addScriptToEvaluateOnLoad({ scriptSource: getPageInitializationScript() });
-        //Use this one the method hits main line chrome: 
-        // await Page.addScriptToEvaluateOnNewDocument({ source: getPageInitializationScript() });
+        await page.evaluateOnNewDocument(getPageInitializationScript());
 
         debugLog("### Navigate...");
-        await Page.navigate({ url: testFile });
+        await page.goto(testFile, { waitUntil: "load" });
 
-        debugLog("### After navigate");
-
-
-        //debugLog("### Wait for dom content loaded");
-        //await Page.domContentEventFired();
-
-        debugLog("### Wait for page load event");
-        await Page.loadEventFired();
         debugLog("### loadEventFired");
 
         debugLog("### calling pageInitializedHandler");
@@ -232,14 +213,9 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     }
 
 
-    debugLog("Killing chrome");
-    if (launchedChrome) {
-        launchedChrome.kill();
-    }
-
     debugLog("Closing client");
-    if (client) {
-        await client.close();
+    if (browser) {
+        await browser.close();
     }
 
     debugLog("Closed client");

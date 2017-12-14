@@ -41,7 +41,14 @@ task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, R
 
 
 function getLatestNugetPackagePath($name) {
-  return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+  # This is a temporary hack since the Main Edge.js repo is not taking PR's for critical fixes
+  # so for now, taking a private drop of Edge.js
+  if ($name -eq "Edge.js") {
+    return (Get-Item "$baseDir\3rdParty\Edge.js.9.0.0");
+  }
+  else {
+    return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+  }
 }
 
 task Set-Version {
@@ -175,7 +182,6 @@ task Setup-SymbolicLinks {
 task Install-EdgeJs {
   $edgeJsPackageFolder = (getLatestNugetPackagePath "Edge.js").FullName
   $edgeJsContentPath = Join-Path $edgeJsPackageFolder "content\edge"
-
 
   roboexec {robocopy $edgeJsContentPath "$baseDir\chutzpah\edge" /MIR /MT /NP /NJH}
 }
@@ -318,7 +324,7 @@ function clean([string[]]$paths) {
 
 function roboexec([scriptblock]$cmd) {
     & $cmd | out-null
-    if ($lastexitcode -eq 0) { throw "No files were copied for command: " + $cmd }
+    #if ($lastexitcode -eq 0) { throw "No files were copied for command: " + $cmd }
 }
 
 # Borrowed from Luis Rocha's Blog (http://www.luisrocha.net/2009/11/setting-assembly-version-with-windows.html)

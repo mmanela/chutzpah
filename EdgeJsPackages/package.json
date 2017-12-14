@@ -1,8 +1,7 @@
 {
   "name": "chutzpah",
   "dependencies": {
-    "chrome-launcher": "^0.3.2",
-    "chrome-remote-interface": "^0.24.2"
+    "puppeteer": "^0.13.0"
   },
   "private": true,
   "version": "1.0.0"
