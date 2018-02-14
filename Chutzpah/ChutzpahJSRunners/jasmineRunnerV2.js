@@ -141,10 +141,13 @@
 
         if (window.chutzpah.testMode === 'discovery') {
             // If discovery mode overwrite execute to not run the test
-            var oldSpecExec = jasmine.Spec.prototype.execute;
-            jasmine.Spec.prototype.execute = function(onComplete) {
-                this.fn = function() {};
-                oldSpecExec.call(this, onComplete);
+            jasmine.getEnv().beforeAll = function () { };
+            jasmine.getEnv().afterAll = function () { };
+            jasmine.Spec.prototype.execute = function (onComplete) {
+                this.onStart(this);
+                this.resultCallback(this.result);
+                if (onComplete)
+                    onComplete();
             };
         }
     }
