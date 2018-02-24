@@ -210,7 +210,7 @@ namespace Chutzpah.Coverage
 
 .chutzpah-source div
 {
-  white-space:nowrap;
+  white-space:pre;
 }
 
 .chutzpah-source span
