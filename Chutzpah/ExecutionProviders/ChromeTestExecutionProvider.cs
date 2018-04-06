@@ -14,13 +14,15 @@ namespace Chutzpah
         private readonly IUrlBuilder urlBuilder;
         private readonly ITestCaseStreamReaderFactory readerFactory;
         private readonly IEdgeJsProxy edgeJsProxy;
+        private readonly bool isRunningElevated;
 
-        public ChromeTestExecutionProvider(IFileProbe fileProbe, IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory, IEdgeJsProxy edgeJsProxy)
+        public ChromeTestExecutionProvider(IFileProbe fileProbe, IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory, IEdgeJsProxy edgeJsProxy, IProcessHelper processHelper)
         {
             this.fileProbe = fileProbe;
             this.urlBuilder = urlBuilder;
             this.readerFactory = readerFactory;
             this.edgeJsProxy = edgeJsProxy;
+            isRunningElevated = processHelper.IsRunningElevated();
         }
 
         public IList<TestFileSummary> Execute(TestOptions testOptions, TestContext testContext, TestExecutionMode testExecutionMode, ITestMethodRunnerCallback callback)
@@ -41,6 +43,7 @@ namespace Chutzpah
             parameters.testMode = testExecutionMode.ToString().ToLowerInvariant();
             parameters.ignoreResourceLoadingErrors = testContext.TestFileSettings.IgnoreResourceLoadingErrors.GetValueOrDefault();
             parameters.userAgent = testContext.TestFileSettings.UserAgent;
+            parameters.isRunningElevated = isRunningElevated;
 
             Func<Func<object, Task<object>>, Task<object>> invoker = (Func<object, Task<object>> onMessage) =>
             {
@@ -54,7 +57,7 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Used to pass parameters to the JS test runners. Proeprties are left lower case
+        /// Used to pass parameters to the JS test runners. Properties are left lower case
         /// for consistency in JS land.
         /// </summary>
         private class ChromTestExecutionParameters
@@ -64,6 +67,7 @@ namespace Chutzpah
             public int timeout { get; set; }
             public string userAgent { get; set; }
             public bool ignoreResourceLoadingErrors { get; set; }
+            public bool isRunningElevated { get; set; }
             public Func<object, Task<object>> onMessage { get; set; }
         }
 

@@ -12,7 +12,7 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime, writer) {
 
     functions.writeEvent = function (eventObj, json) {
 
-        // Everytime we get an event update the startTime. We want timeout to happen
+        // Every time we get an event update the startTime. We want timeout to happen
         // when were have gone quiet for too long
         updateEventTime();
         switch (eventObj.type) {

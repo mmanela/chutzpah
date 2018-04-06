@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using Chutzpah.Models;
@@ -124,6 +125,13 @@ namespace Chutzpah
         {
             file = urlBuilder.GenerateLocalFileUrl(file);
             OpenBrowser(file);
+        }
+
+        public bool IsRunningElevated()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         private void OpenBrowser(string file, string browserName = null, IDictionary<string, string> browserArgs = null)

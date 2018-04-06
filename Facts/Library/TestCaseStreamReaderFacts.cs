@@ -272,7 +272,6 @@ namespace Chutzpah.Facts
                 Assert.Equal("file", result.InputTestFile);
             }
 
-
             [Fact]
             public void Will_supress_internal_log_event()
             {
@@ -521,7 +520,7 @@ namespace Chutzpah.Facts
                 var reader = new TestableTestCaseStreamReader();
 
                 var context = reader.BuildContext("file");
-                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
+                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 10000);
                 var process = new Mock<IProcessWrapper>();
                 var processStream = new ProcessStreamStringSource(process.Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
@@ -557,7 +556,7 @@ namespace Chutzpah.Facts
                 var reader = new TestableTestCaseStreamReader();
                 var context = reader.BuildContext("file");
                 context.TestFileSettings = new ChutzpahTestSettingsFile { TestFileTimeout = 200 };
-                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 1000);
+                var stream = new WaitingStreamReader(new MemoryStream(Encoding.UTF8.GetBytes("")), 10000);
                 var process = new Mock<IProcessWrapper>();
                 var processStream = new ProcessStreamStringSource(process.Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
@@ -568,7 +567,6 @@ namespace Chutzpah.Facts
                 Assert.NotNull(summary);
                 process.Verify(x => x.Kill());
             }
-
 
             [Fact]
             public void Will_place_ambiguous_test_in_first_context_given_no_matches_and_no_current_file_match()

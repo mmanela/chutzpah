@@ -70,7 +70,7 @@ namespace Chutzpah
         {
             Console.WriteLine("Chutzpah console test runner  ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
             Console.WriteLine("Version {0}", Assembly.GetEntryAssembly().GetName().Version);
-            Console.WriteLine("Copyright (C) 2017 Matthew Manela (http://matthewmanela.com).");
+            Console.WriteLine("Copyright (C) 2018 Matthew Manela (http://matthewmanela.com).");
         }
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)

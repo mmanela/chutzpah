@@ -290,7 +290,7 @@ namespace Chutzpah
         private void AddBrowser(string value)
         {
             Browser browser;
-            if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, out browser))
+            if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, true, out browser))
             {
                 Browser = browser;
             }

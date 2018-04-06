@@ -25,7 +25,7 @@ namespace Chutzpah.Models
             }
             catch
             {
-                // Supress any exception from here since there is nothing more we can do
+                // Suppress any exception from here since there is nothing more we can do
             }
         }
 

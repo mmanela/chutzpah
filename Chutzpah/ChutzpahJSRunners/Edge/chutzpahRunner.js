@@ -4,6 +4,7 @@ module.exports = module.exports || {};
 module.exports.runner = async (inputParams, callback, onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) => {
 
     const chutzpahCommon = require('../chutzpahFunctions.js');
+    const chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime, inputParams.onMessage);
 
     var testFrameworkLoaded = false,
         attemptingToSetupTestFramework = false,
@@ -13,7 +14,8 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
         startTime = null,
         userAgent = null,
         ignoreResourceLoadingErrors = false,
-        finalResult = 0;
+        finalResult = 0,
+        isRunningElevated = false;
 
 
     testFile = inputParams.fileUrl;
@@ -21,9 +23,10 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
     timeOut = parseInt(inputParams.timeOut) || 5001;
     ignoreResourceLoadingErrors = inputParams.ignoreResourceLoadingErrors;
     userAgent = inputParams.userAgent;
+    isRunningElevated = inputParams.isRunningElevated;
 
     function debugLog(msg) {
-        console.log(msg);
+        chutzpahFunctions.rawLog(msg);
     }
 
     function updateEventTime() {
@@ -147,8 +150,11 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
 
     const puppeteer = require('puppeteer');
 
-    debugLog("Launch Chrome");
-    const browser = await puppeteer.launch({ headless: true });
+    debugLog("Launch Chrome: Elevated= " + isRunningElevated);
+
+    // If isRunningElevated, we need to turn off sandbox since it does not work with admin users
+    const browser = await puppeteer.launch({
+        headless: true, args: isRunningElevated ? ["--no-sandbox"] : [] });
     const page = await browser.newPage();
 
     try {
@@ -158,8 +164,6 @@ module.exports.runner = async (inputParams, callback, onInitialized, onPageLoade
         }
 
         const evaluate = async (func) => { return await page.evaluate(wrapFunctionForEvaluation(func)); };
-
-        var chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime, inputParams.onMessage);
 
         page.on('requestfinished', (async (request) => {
             chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + request.url);

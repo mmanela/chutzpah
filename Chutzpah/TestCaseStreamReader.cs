@@ -16,9 +16,9 @@ using JsonSerializer = Chutzpah.Wrappers.JsonSerializer;
 namespace Chutzpah
 {
     /// <summary>
-    /// Reads from the stream of test results writen by our phantom test runner. As events from this stream arrive we 
-    /// will derserialize them and publish them to the runner callback.
-    /// The reader keeps track of how long it has been since the last event has been revieved from the stream. If this is longer
+    /// Reads from the stream of test results written by our phantom test runner. As events from this stream arrive we 
+    /// will deserialize them and publish them to the runner callback.
+    /// The reader keeps track of how long it has been since the last event has been received from the stream. If this is longer
     /// than the configured test file timeout then we kill phantom since it is likely stuck in a infinite loop or error.
     /// We make this timeout the test file timeout plus a small (generous) delay time to account for serialization. 
     /// </summary>
@@ -198,7 +198,7 @@ namespace Chutzpah
             callback.FileError(error.Error);
             testFileContext.TestFileSummary.Errors.Add(error.Error);
 
-            ChutzpahTracer.TraceError("Eror recieved from Phantom {0}", error.Error.Message);
+            ChutzpahTracer.TraceError("Eror received from Phantom {0}", error.Error.Message);
         }
 
         private bool ProcessLine(string line, TestContext testContext, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)
@@ -386,7 +386,7 @@ namespace Chutzpah
             catch (SerializationException e)
             {
                 // Ignore malformed json and move on
-                ChutzpahTracer.TraceError(e, "Recieved malformed json from Phantom in this line: '{0}'", line);
+                ChutzpahTracer.TraceError(e, "Received malformed json from Phantom in this line: '{0}'", line);
             }
 
 

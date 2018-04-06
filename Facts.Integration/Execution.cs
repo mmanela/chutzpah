@@ -68,6 +68,24 @@ namespace Chutzpah.Facts.Integration
             ChutzpahTracer.Enabled = TestUtils.TracingEnabled;
         }
 
+
+        [Fact]
+        public void CanaryInTheCoalMine()
+        {
+            var testRunner = TestRunner.Create();
+            testRunner.EnableDebugMode();
+            ChutzpahTracer.Enabled = true;
+            ChutzpahTracer.AddConsoleListener();
+
+            var scriptPath = @"Samples\RequireJS\QUnit\chutzpah.json";
+
+            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
+
+            Assert.Equal(1, result.FailedCount);
+            Assert.Equal(3, result.PassedCount);
+            Assert.Equal(4, result.TotalCount);
+        }
+
         [Theory]
         [MemberData("ChutzpahSamples")]
         public void Will_run_tests_from_chutzpah_samples(string scriptPath, int count)
