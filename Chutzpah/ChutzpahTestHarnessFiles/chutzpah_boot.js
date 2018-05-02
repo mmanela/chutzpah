@@ -19,10 +19,13 @@ window.chutzpah.boot = function (amdTestPaths) {
             return window.require.config.apply(window.require, arguments);
         }
     }
-        // Are we systemJS compatible?
+    // Are we systemJS compatible?
     else if (window.System && typeof window.System.import === "function") {
         amdImport = function (paths, callback) {
-            return window.System.import.apply(window.System, paths).then(callback);
+            var imports = paths.map(function(path) { 
+                return window.System.import(path); 
+            });
+            return Promise.all(imports).then(callback);
         }
 
         amdConfig = function () {
