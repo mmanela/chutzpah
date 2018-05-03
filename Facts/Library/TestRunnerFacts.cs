@@ -37,7 +37,7 @@ namespace Chutzpah.Facts
                     .Returns<TestContext, string, bool, bool, string>((c, p, fq, d, s) => p);
 
                 Mock<ITestExecutionProvider>()
-                    .Setup(x => x.Name).Returns(Browser.Phantom);
+                    .Setup(x => x.CanHandleBrowser(It.IsAny<Browser>())).Returns(true);
                 Mock<ITestExecutionProvider>()
                     .Setup(x => x.Execute(It.IsAny<TestOptions>(), It.IsAny<TestContext>(), TestExecutionMode.Execution, It.IsAny<ITestMethodRunnerCallback>()))
                     .Returns(new List<TestFileSummary> { new TestFileSummary("somePath") });
@@ -168,8 +168,6 @@ namespace Chutzpah.Facts
                 summary.AddTestCase(new TestCase());
                 var context = runner.SetupTestContext(testPaths: new[] { @"path\tests.html" }, harnessPath: @"harnessPath", testRunnerPath: "runner");
                 runner.Mock<ITestExecutionProvider>()
-                    .Setup(x => x.Name).Returns(Browser.Phantom);
-                runner.Mock<ITestExecutionProvider>()
                     .Setup(x => x.Execute(It.IsAny<TestOptions>(), It.IsAny<TestContext>(), TestExecutionMode.Discovery, It.IsAny<ITestMethodRunnerCallback>()))
                     .Returns(new List<TestFileSummary> { summary });
 
@@ -209,8 +207,6 @@ namespace Chutzpah.Facts
                 var summary = new TestFileSummary("somePath");
                 summary.AddTestCase(new TestCase());
                 var context = runner.SetupTestContext(testPaths: new[] { @"path\tests.html" }, harnessPath: @"harnessPath", testRunnerPath: "runner");
-                runner.Mock<ITestExecutionProvider>()
-                    .Setup(x => x.Name).Returns(Browser.Phantom);
                 runner.Mock<ITestExecutionProvider>()
                     .Setup(x => x.Execute(It.IsAny<TestOptions>(), It.IsAny<TestContext>(), TestExecutionMode.Execution, It.IsAny<ITestMethodRunnerCallback>()))
                     .Returns(new List<TestFileSummary> { summary });
@@ -299,8 +295,6 @@ namespace Chutzpah.Facts
                 summary.AddTestCase(new TestCase());
                 var testCallback = new MockTestMethodRunnerCallback();
                 var context = runner.SetupTestContext(testRunnerPath: "testRunner.js");
-                runner.Mock<ITestExecutionProvider>()
-                    .Setup(x => x.Name).Returns(Browser.Phantom);
                 runner.Mock<ITestExecutionProvider>()
                     .Setup(x => x.Execute(It.IsAny<TestOptions>(), It.IsAny<TestContext>(), TestExecutionMode.Execution, It.IsAny<ITestMethodRunnerCallback>()))
                     .Returns(new List<TestFileSummary> { summary });

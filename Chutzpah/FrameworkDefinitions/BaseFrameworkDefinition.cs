@@ -70,7 +70,7 @@ namespace Chutzpah.FrameworkDefinitions
                 case Browser.Phantom:
                     return @"ChutzpahJSRunners\Phantom\" + runnerName;
                 case Browser.Chrome:
-                    return @"ChutzpahJSRunners\Edge\" + runnerName;
+                    return @"ChutzpahJSRunners\Chrome\" + runnerName;
                 default:
                     throw new ArgumentException("Unknown browser");
             }

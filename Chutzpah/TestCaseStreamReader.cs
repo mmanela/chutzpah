@@ -198,7 +198,7 @@ namespace Chutzpah
             callback.FileError(error.Error);
             testFileContext.TestFileSummary.Errors.Add(error.Error);
 
-            ChutzpahTracer.TraceError("Eror received from Phantom {0}", error.Error.Message);
+            ChutzpahTracer.TraceError("Error received from Phantom {0}", error.Error.Message);
         }
 
         private bool ProcessLine(string line, TestContext testContext, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)

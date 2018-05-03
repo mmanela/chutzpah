@@ -3,7 +3,7 @@ module.exports = module.exports || {};
 
 var chutzpah = chutzpah || {};
 
-chutzpah.getCommonFunctions = function (exit, updateEventTime, writer) {
+chutzpah.getCommonFunctions = function (exit, updateEventTime) {
     var functions = {};
 
     function wrap(txt) {
@@ -24,12 +24,12 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime, writer) {
             case 'CoverageObject':
                 var str = wrap(eventObj.type) + json;
                 // Don't ask me why but Phantom NEEDS me to literally write console.log for it to work
-                writer ? writer(str) : console.log(str);
+                console.log(str);
                 break;
 
             case 'FileDone':
                 var str = wrap(eventObj.type) + json;
-                writer ? writer(str) : console.log(str);
+                console.log(str);
                 exit(eventObj.failed > 0 ? 1 : 0);
                 break;
 

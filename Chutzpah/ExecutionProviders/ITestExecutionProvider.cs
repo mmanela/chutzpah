@@ -5,7 +5,7 @@ namespace Chutzpah
 {
     public interface ITestExecutionProvider
     {
-        Browser Name { get; }
+        bool CanHandleBrowser(Browser browser);
 
         IList<TestFileSummary> Execute(TestOptions testOptions,
                      TestContext testContext,

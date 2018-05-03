@@ -9,7 +9,7 @@ properties {
   
   $autoSignedNugetPackages = "$baseDir/packages_autosigned"
   $nugetPackges = "$baseDir/packages"
-  $edgeJsPackges = "$baseDir/EdgeJsPackages"
+  $nodeJsPackges = "$baseDir/Chutzpah/Node/packages"
 
   # Temp work around psake limitation to not use Msbuild 15
   $defaultMSBuildPath = Join-Path (Resolve-Path "${env:ProgramFiles(x86)}") "Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
@@ -28,7 +28,7 @@ properties {
 # Aliases
 task Default -depends Build
 
-task Install -depends Sign-ForeignAssemblies, Install-EdgeJs, Install-TypeScript, Install-NodeModules, Setup-SymbolicLinks
+task Install -depends Sign-ForeignAssemblies, Install-TypeScript, Install-NodeModules, Setup-SymbolicLinks
 
 task Package -depends Clean-Solution-VS,Clean-PackageFiles, Set-Version, Update-VersionInFiles, Build-Solution-VS, Package-Files, Package-NuGet, Package-Chocolatey
 task Clean -depends Clean-Solution-NoVS
@@ -41,14 +41,7 @@ task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, R
 
 
 function getLatestNugetPackagePath($name) {
-  # This is a temporary hack since the Main Edge.js repo is not taking PR's for critical fixes
-  # so for now, taking a private drop of Edge.js
-  if ($name -eq "Edge.js") {
-    return (Get-Item "$baseDir\3rdParty\Edge.js.9.0.0");
-  }
-  else {
     return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
-  }
 }
 
 task Set-Version {
@@ -168,7 +161,8 @@ task Install-NodeModules {
   exec {  & npm install }
 
 
-  push-location $edgeJsPackges
+  push-location $nodeJsPackges
+  $env:PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 1;
   exec {  & npm install }
   pop-location
 }
@@ -179,16 +173,9 @@ task Setup-SymbolicLinks {
 
 }
 
-task Install-EdgeJs {
-  $edgeJsPackageFolder = (getLatestNugetPackagePath "Edge.js").FullName
-  $edgeJsContentPath = Join-Path $edgeJsPackageFolder "content\edge"
-
-  roboexec {robocopy $edgeJsContentPath "$baseDir\chutzpah\edge" /MIR /MT /NP /NJH}
-}
-
 task Sign-ForeignAssemblies {
 
-  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"; "Edge.js" = "lib\net40"}
+  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"; }
   
   clean $autoSignedNugetPackages
  

@@ -15,7 +15,7 @@ namespace Chutzpah
         private readonly string headlessBrowserPath;
         private readonly ITestCaseStreamReaderFactory readerFactory;
 
-        public Browser Name => Browser.Phantom;
+        public bool CanHandleBrowser(Browser browser) => browser == Browser.Phantom;
 
         public PhantomTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)
@@ -46,7 +46,7 @@ namespace Chutzpah
             Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor =
                 processStream => readerFactory.Create().Read(processStream, testOptions, testContext, callback);
 
-            var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor, streamTimeout);
+            var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor, streamTimeout, null);
 
             HandleTestProcessExitCode(processResult.ExitCode, testContext.FirstInputTestFile, processResult.Model.TestFileSummaries.Select(x => x.Errors).FirstOrDefault(), callback);
 

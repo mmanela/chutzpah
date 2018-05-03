@@ -21,7 +21,7 @@ namespace Chutzpah
             this.urlBuilder = urlBuilder;
         }
 
-        public ProcessResult<TestCaseStreamReadResult> RunExecutableAndProcessOutput(string exePath, string arguments, Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor, int streamTimeout) 
+        public ProcessResult<TestCaseStreamReadResult> RunExecutableAndProcessOutput(string exePath, string arguments, Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor, int streamTimeout, IDictionary<string, string> environmentVars)
         {
             var p = new Process();
             p.StartInfo.UseShellExecute = false;
@@ -30,6 +30,18 @@ namespace Chutzpah
             p.StartInfo.FileName = exePath;
             p.StartInfo.Arguments = arguments;
             p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+
+            if (environmentVars != null)
+            {
+                foreach (KeyValuePair<string, string> entry in environmentVars)
+                {
+                    p.StartInfo.EnvironmentVariables[entry.Key] = entry.Value;
+                }
+            }
+
             p.Start();
 
             ChutzpahTracer.TraceInformation("Started headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
@@ -49,7 +61,7 @@ namespace Chutzpah
         public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)
         {
             ChutzpahTracer.TraceInformation("Started batch compile using {0} with args {1}", compileConfiguration.Executable, compileConfiguration.Arguments);
-            
+
             var timeout = compileConfiguration.Timeout.Value;
             var p = new Process();
             // Append path to where .net drop is so you can use things like msbuild
@@ -97,7 +109,7 @@ namespace Chutzpah
                 p.Start();
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
-                
+
                 if (p.WaitForExit(timeout) &&
                     outputWaitHandle.WaitOne(timeout) &&
                     errorWaitHandle.WaitOne(timeout))

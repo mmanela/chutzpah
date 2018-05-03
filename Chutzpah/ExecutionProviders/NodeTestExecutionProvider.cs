@@ -1,0 +1,130 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Chutzpah.Models;
+
+namespace Chutzpah
+{
+    public class NodeTestExecutionProvider : ITestExecutionProvider
+    {
+        public static string HeadlessBrowserName = "node.exe";
+        private const string PackagesPath = @"Node\packages\node_modules";
+        private readonly IProcessHelper processTools;
+        private readonly IFileProbe fileProbe;
+        private readonly IUrlBuilder urlBuilder;
+        private readonly string headlessBrowserPath;
+        private readonly ITestCaseStreamReaderFactory readerFactory;
+        
+        public bool CanHandleBrowser(Browser browser) => browser == Browser.Chrome;
+
+        public NodeTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
+                                       IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)
+        {
+            this.processTools = process;
+            this.fileProbe = fileProbe;
+            this.urlBuilder = urlBuilder;
+
+            var path = Path.Combine("Node", Environment.Is64BitProcess ? "x64" : "x86", HeadlessBrowserName);
+            this.headlessBrowserPath = fileProbe.FindFilePath(path);
+
+            if (path == null)
+                throw new FileNotFoundException("Unable to find node: " + path);
+
+            this.readerFactory = readerFactory;
+        }
+
+        public IList<TestFileSummary> Execute(TestOptions testOptions,
+                            TestContext testContext,
+                            TestExecutionMode testExecutionMode,
+                            ITestMethodRunnerCallback callback)
+        {
+
+            string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
+            string fileUrl = BuildHarnessUrl(testContext);
+            string runnerArgs = BuildRunnerArgs(testOptions, testContext, fileUrl, runnerPath, testExecutionMode);
+
+            var streamTimeout = ((testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500).GetValueOrDefault(); // Add buffer to timeout to account for serialization
+
+            Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor =
+                processStream => readerFactory.Create().Read(processStream, testOptions, testContext, callback);
+
+            var environmentVariables = BuildEnvironmentVariables();
+            var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor, streamTimeout, environmentVariables);
+
+            HandleTestProcessExitCode(processResult.ExitCode, testContext.FirstInputTestFile, processResult.Model.TestFileSummaries.Select(x => x.Errors).FirstOrDefault(), callback);
+
+            return processResult.Model.TestFileSummaries;
+        }
+
+        private IDictionary<string, string> BuildEnvironmentVariables()
+        {
+            var envVars = new Dictionary<string, string>();
+
+            var chutzpahNodeModules = fileProbe.FindFolderPath(PackagesPath);
+            envVars.Add("NODE_PATH", chutzpahNodeModules);
+            return envVars;
+        }
+
+
+        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile, IList<TestError> errors, ITestMethodRunnerCallback callback)
+        {
+            string errorMessage = null;
+
+            switch ((TestProcessExitCode)exitCode)
+            {
+                case TestProcessExitCode.AllPassed:
+                case TestProcessExitCode.SomeFailed:
+                    return;
+                case TestProcessExitCode.Timeout:
+                    errorMessage = "Timeout occurred when executing test file";
+                    break;
+                default:
+                    errorMessage = "Unknown error occurred when executing test file. Received exit code of " + exitCode;
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                var error = new TestError
+                {
+                    InputTestFile = inputTestFile,
+                    Message = errorMessage
+                };
+
+                errors.Add(error);
+
+                callback.FileError(error);
+                ChutzpahTracer.TraceError("Headless browser returned with an error: {0}", errorMessage);
+            }
+        }
+
+        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode)
+        {
+            string runnerArgs;
+            var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
+            var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
+            runnerArgs = string.Format("{0} {1} {2} {3}",
+                                        runnerPath,
+                                        fileUrl,
+                                        testModeStr,
+                                        timeout);
+
+            return runnerArgs;
+        }
+
+        private string BuildHarnessUrl(TestContext testContext)
+        {
+
+            if (testContext.IsRemoteHarness)
+            {
+                return testContext.TestHarnessPath;
+            }
+            else
+            {
+                return string.Format("\"{0}\"", urlBuilder.GenerateFileUrl(testContext, testContext.TestHarnessPath, fullyQualified: true));
+            }
+        }
+
+    }
+}
