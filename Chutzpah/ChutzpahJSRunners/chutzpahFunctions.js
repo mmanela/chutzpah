@@ -58,7 +58,7 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime) {
     };
 
     functions.onError = function (msg, stack) {
-        var error = { type: 'Error', error: { message: msg, stack: stack } };
+        var error = { type: 'Error', error: { message: msg, stackAsString: stack } };
         functions.writeEvent(error, JSON.stringify(error));
     };
 

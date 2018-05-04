@@ -69,22 +69,21 @@ namespace Chutzpah.Facts.Integration
         }
 
 
-        [Fact]
-        public void CanaryInTheCoalMine()
-        {
-            var testRunner = TestRunner.Create();
-            testRunner.EnableDebugMode();
-            ChutzpahTracer.Enabled = true;
-            ChutzpahTracer.AddConsoleListener();
+        //[Fact]
+        //public void CanaryInTheCoalMine()
+        //{
+        //    var testRunner = TestRunner.Create();
+        //    testRunner.EnableDebugMode();
+        //    ChutzpahTracer.Enabled = true;
 
-            var scriptPath = @"Samples\RequireJS\QUnit\chutzpah.json";
+        //    var scriptPath = @"Samples\RequireJS\QUnit\chutzpah.json";
 
-            var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
+        //    var result = testRunner.RunTests(scriptPath, new ExceptionThrowingRunnerCallback());
 
-            Assert.Equal(1, result.FailedCount);
-            Assert.Equal(3, result.PassedCount);
-            Assert.Equal(4, result.TotalCount);
-        }
+        //    Assert.Equal(1, result.FailedCount);
+        //    Assert.Equal(3, result.PassedCount);
+        //    Assert.Equal(4, result.TotalCount);
+        //}
 
         [Theory]
         [MemberData("ChutzpahSamples")]

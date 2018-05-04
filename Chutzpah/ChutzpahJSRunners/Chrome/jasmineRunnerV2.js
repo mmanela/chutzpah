@@ -1,12 +1,12 @@
 /// <reference path="chutzpahRunner.js" />
 
-module.exports = async function (params, callback) {
+(async function () {
 
     const functions = require('../jasmineFunctionsV2.js');
     const chutzpahRunner = require('./chutzpahRunner.js');
 
     try {
-        await chutzpahRunner.runner(params, callback,
+        await chutzpahRunner.runner(
             functions.onInitialized,
             functions.onPageLoaded,
             functions.isJasmineLoaded,
@@ -16,4 +16,7 @@ module.exports = async function (params, callback) {
     } catch (e) {
         throw new Error("Failed to run jasmineRunnerV2.js: " + e);
     }
-};
+})().catch(e => {
+    console.error(e);
+    process.exit(2);
+});

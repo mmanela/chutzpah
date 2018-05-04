@@ -4,7 +4,7 @@ module.exports = module.exports || {};
 module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) => {
 
     const chutzpahCommon = require('../chutzpahFunctions.js');
-    const chutzpahFunctions = chutzpahCommon.getCommonFunctions(function (status) { callback(null, status) }, updateEventTime);
+    const chutzpahFunctions = chutzpahCommon.getCommonFunctions(process.exit, updateEventTime);
 
     var testFrameworkLoaded = false,
         attemptingToSetupTestFramework = false,
@@ -13,7 +13,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         timeOut = null,
         startTime = null,
         userAgent = null,
-        ignoreResourceLoadingErrors = false,
+        ignoreResourceLoadingError = false,
         finalResult = 0,
         isRunningElevated = false;
 
@@ -28,7 +28,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     }
 
     if (process.argv.length > 6) {
-        ignoreResourceLoadingErrors = "true" === process.argv[6].toLowerCase();
+        ignoreResourceLoadingError = "true" === process.argv[6].toLowerCase();
     }
 
     if (process.argv.length > 7) {
@@ -36,7 +36,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     }
 
     function debugLog(msg) {
-        chutzpahFunctions.rawLog(msg);
+        //chutzpahFunctions.rawLog(msg);
     }
 
     function updateEventTime() {
@@ -207,6 +207,22 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         }
     }
 
+
+    function handleError(error) {
+        var error;
+        if (typeof (error) === 'object') {
+            chutzpahFunctions.onError(error.message, error.stack);
+        }
+        else {
+            chutzpahFunctions.onError(error);
+        }
+    }
+
+
+    // Capture all uncaught exceptions and wrap before logging
+    process.on('uncaughtException', handleError);
+
+
     let chromeExecutable = null;
     const chromePaths = getChromePaths();
     if (chromePaths.length <= 0) {
@@ -223,9 +239,17 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     const page = await browser.newPage();
 
     try {
+        await page.setBypassCSP(true);
+    } catch (error) {
+        // Older chromes won't support this so just ignore...
+    }
+
+
+
+    try {
 
         if (userAgent) {
-            page.setUserAgen(userAgent);
+            page.setUserAgent(userAgent);
         }
 
         const evaluate = async (func) => { return await page.evaluate(wrapFunctionForEvaluation(func)); };
@@ -254,11 +278,11 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         });
 
         page.on('error', error => {
-            chutzpahFunctions.onError(error.message, error.stack);
+            handleError(error);
         });
 
         page.on('pageerror', error => {
-            chutzpahFunctions.onError(error.message, error.stack);
+            handleError(error);
         });
 
         await page.evaluateOnNewDocument(getPageInitializationScript());
