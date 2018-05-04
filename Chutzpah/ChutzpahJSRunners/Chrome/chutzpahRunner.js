@@ -24,15 +24,15 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     timeOut = parseInt(process.argv[4]) || 5001;
 
     if (process.argv.length > 5) {
-        ignoreResourceLoadingErrors = "true" === process.argv[5].toLowerCase();
+        isRunningElevated = process.argv[5];
     }
 
     if (process.argv.length > 6) {
-        userAgent = process.argv[6];
+        ignoreResourceLoadingErrors = "true" === process.argv[6].toLowerCase();
     }
 
     if (process.argv.length > 7) {
-        isRunningElevated = process.argv[7];
+        userAgent = process.argv[7];
     }
 
     function debugLog(msg) {
@@ -104,13 +104,13 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         debugLog("pageOpenHandler");
 
         var waitCondition = async () => {
-            let result = await evaluate(isTestingDone);
+            let result = Boolean(await evaluate(isTestingDone));
             debugLog("@@@ waitCondition result: " + JSON.stringify(result));
-            return result.result && result.result.value;
+            return result;
         };
 
         debugLog("Promise in pageOpenHandler");
-        // Initialize startTime, this will get updated everytime we recieve 
+        // Initialize startTime, this will get updated every time we receive 
         // content from the test framework
         updateEventTime();
         debugLog("First trySetupTestFramework");
@@ -231,7 +231,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         const evaluate = async (func) => { return await page.evaluate(wrapFunctionForEvaluation(func)); };
 
         page.on('requestfinished', (async (request) => {
-            chutzpahFunctions.rawLog("!!_!! Resource Recieved: " + request.url());
+            chutzpahFunctions.rawLog("!!_!! Resource Received: " + request.url());
             await trySetupTestFramework(evaluate);
         }));
 
@@ -246,10 +246,10 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
 
         page.on('console', message => {
             if (message.type === 'error') {
-                chutzpahFunctions.onError(message.text, message.text);
+                chutzpahFunctions.onError(message.text(), message.text());
             }
             else {
-                chutzpahFunctions.captureLogMessage(message.text);
+                chutzpahFunctions.captureLogMessage(message.text());
             }
         });
 
@@ -277,7 +277,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
 
     } catch (err) {
         debugLog("Error: " + err);
-        process.exit(1);
+        process.exit(2);
     }
 
 

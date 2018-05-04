@@ -15,7 +15,8 @@ namespace Chutzpah
         private readonly IUrlBuilder urlBuilder;
         private readonly string headlessBrowserPath;
         private readonly ITestCaseStreamReaderFactory readerFactory;
-        
+        private readonly bool isRunningElevated;
+
         public bool CanHandleBrowser(Browser browser) => browser == Browser.Chrome;
 
         public NodeTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
@@ -32,6 +33,8 @@ namespace Chutzpah
                 throw new FileNotFoundException("Unable to find node: " + path);
 
             this.readerFactory = readerFactory;
+
+            isRunningElevated = process.IsRunningElevated();
         }
 
         public IList<TestFileSummary> Execute(TestOptions testOptions,
@@ -42,12 +45,11 @@ namespace Chutzpah
 
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildHarnessUrl(testContext);
-            string runnerArgs = BuildRunnerArgs(testOptions, testContext, fileUrl, runnerPath, testExecutionMode);
+            string runnerArgs = BuildRunnerArgs(testOptions, testContext, fileUrl, runnerPath, testExecutionMode, isRunningElevated);
 
             var streamTimeout = ((testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500).GetValueOrDefault(); // Add buffer to timeout to account for serialization
 
-            Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor =
-                processStream => readerFactory.Create().Read(processStream, testOptions, testContext, callback);
+            TestCaseStreamReadResult streamProcessor(ProcessStreamStringSource processStream) => readerFactory.Create().Read(processStream, testOptions, testContext, callback);
 
             var environmentVariables = BuildEnvironmentVariables();
             var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor, streamTimeout, environmentVariables);
@@ -99,16 +101,19 @@ namespace Chutzpah
             }
         }
 
-        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode)
+        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode, bool isRunningElevated)
         {
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
-            runnerArgs = string.Format("{0} {1} {2} {3}",
+            runnerArgs = string.Format("{0} {1} {2} {3} {4} {5} {6}",
                                         runnerPath,
                                         fileUrl,
                                         testModeStr,
-                                        timeout);
+                                        timeout,
+                                        isRunningElevated,
+                                        context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
+                                        context.TestFileSettings.UserAgent);
 
             return runnerArgs;
         }
