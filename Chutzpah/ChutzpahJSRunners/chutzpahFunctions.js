@@ -14,7 +14,10 @@ chutzpah.getCommonFunctions = function (exit, updateEventTime) {
 
         // Every time we get an event update the startTime. We want timeout to happen
         // when were have gone quiet for too long
-        updateEventTime();
+        if (json.indexOf("!!_!!") < 0) {
+            updateEventTime();
+        }
+
         switch (eventObj.type) {
             case 'FileStart':
             case 'TestStart':

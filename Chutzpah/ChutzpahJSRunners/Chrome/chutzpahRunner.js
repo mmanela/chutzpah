@@ -36,7 +36,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     }
 
     function debugLog(msg) {
-        //chutzpahFunctions.rawLog(msg);
+        //chutzpahFunctions.rawLog("!!_!! " + msg);
     }
 
     function updateEventTime() {
@@ -49,7 +49,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
             attemptingToSetupTestFramework = true;
             debugLog("checking isFrameworkLoaded ");
             var loaded = await evaluate(isFrameworkLoaded);
-            if (loaded) {
+            if (loaded && (typeof loaded !== "string" || loaded === "true")) {
                 testFrameworkLoaded = true;
                 debugLog("calling onFrameworkLoaded");
                 await evaluate(onFrameworkLoaded);
@@ -104,7 +104,8 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         debugLog("pageOpenHandler");
 
         var waitCondition = async () => {
-            let result = Boolean(await evaluate(isTestingDone));
+            let rawResult = await evaluate(isTestingDone);
+            let result = rawResult && (typeof rawResult !== "string" || rawResult === "true");
             debugLog("@@@ waitCondition result: " + JSON.stringify(result));
             return result;
         };

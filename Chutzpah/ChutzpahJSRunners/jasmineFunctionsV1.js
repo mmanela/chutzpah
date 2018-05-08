@@ -12,7 +12,7 @@ function isTestingDone() {
 
 function isJasmineLoaded() {
     console.log("!!_!! isJasmineLoaded");
-    return window.jasmine;
+    return !!window.jasmine;
 }
 
 function onJasmineLoaded() {
