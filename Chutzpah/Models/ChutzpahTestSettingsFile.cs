@@ -67,7 +67,7 @@ namespace Chutzpah.Models
     public class ChutzpahTestSettingsFile
     {
         public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile(true);
-        public const bool ForceWebServerMode = false;
+        public const bool ForceWebServerMode = true;
 
         private Regex testPatternRegex;
 

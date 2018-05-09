@@ -88,6 +88,20 @@ namespace Chutzpah.Facts.Integration
             get { return TestPathGroups.ChutzpahSamplesWithCoverageSupported; }
         }
 
+        //[Fact]
+        //public void CanaryInTheCoalMine()
+        //{
+        //    var testRunner = TestRunner.Create();
+        //    testRunner.EnableDebugMode();
+        //    ChutzpahTracer.Enabled = true;
+
+        //    var scriptPath = @"JS\Test\basic-qunit.js";
+
+        //    var result = testRunner.RunTests(scriptPath, WithCoverage(), new ExceptionThrowingRunnerCallback());
+            
+        //    Assert.Equal(4, result.TotalCount);
+        //}
+
         [Theory]
         [MemberData("ChutzpahSamples")]
         public void Will_run_coverage_from_chutzpah_amd_samples(string scriptPath, int count)

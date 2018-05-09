@@ -157,6 +157,11 @@ namespace Chutzpah
 
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
+            if (settings.Server == null && settings.Browser != Browser.Phantom)
+            {
+                settings.Server = new ForcedChutzpahWebServerConfiguration();
+            }
+
             if (settings.Server != null)
             {
                 settings.Server.FileCachingEnabled = settings.Server.FileCachingEnabled ?? true;
@@ -176,7 +181,7 @@ namespace Chutzpah
 
                 settings.Server.RootPath = ResolveFolderPath(settings, ExpandVariable(chutzpahVariables, rootPath));
 
-                
+
             }
         }
 

@@ -612,7 +612,7 @@ namespace Chutzpah.Facts.Integration
             Assert.Equal(1, result.TotalCount);
         }
 
-        [Fact]
+        [Fact(Skip ="Skipping since it requires disabling x-origin")]
         public void Will_execute_ajax_call_test()
         {
             var testRunner = TestRunner.Create();
