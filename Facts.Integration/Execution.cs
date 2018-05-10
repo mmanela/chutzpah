@@ -149,7 +149,7 @@ namespace Chutzpah.Facts.Integration
 
             var stackTrace = result.Tests.Single().TestResults.Single().StackTrace;
             Assert.NotNull(stackTrace);
-            Assert.Contains("/jasmine-scriptError.js:5", stackTrace);
+            Assert.Contains("/jasmine-scriptError.js", stackTrace);
         }
 
         [Fact]
