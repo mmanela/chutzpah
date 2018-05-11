@@ -28,7 +28,7 @@ namespace Chutzpah
         /// <summary>
         /// The browser to run the headless tests with
         /// </summary>
-        public Browser? Browser { get; set; }
+        public Engine? Engine { get; set; }
 
         /// <summary>
         /// The name of browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional

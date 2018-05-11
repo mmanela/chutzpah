@@ -23,6 +23,59 @@ namespace Chutzpah
 
         public ProcessResult<TestCaseStreamReadResult> RunExecutableAndProcessOutput(string exePath, string arguments, Func<ProcessStreamStringSource, TestCaseStreamReadResult> streamProcessor, int streamTimeout, IDictionary<string, string> environmentVars)
         {
+            Process p = InvokeProcess(exePath, arguments, environmentVars);
+
+            ChutzpahTracer.TraceInformation("Started headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
+
+            // Output will be null if the stream reading times out
+            var processStream = new ProcessStreamStringSource(new ProcessWrapper(p), p.StandardOutput, streamTimeout);
+            var output = streamProcessor(processStream);
+            p.WaitForExit(5000);
+
+
+
+            ChutzpahTracer.TraceInformation("Ended headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
+
+            return new ProcessResult<TestCaseStreamReadResult>(output.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
+        }
+
+
+        public bool RunExecutableAndProcessOutput(string exePath, string arguments, IDictionary<string, string> environmentVars, out string standardOutput, out string standardError)
+        {
+            Process p = InvokeProcess(exePath, arguments, environmentVars);
+
+            ChutzpahTracer.TraceInformation("Started executable: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
+
+
+            p.WaitForExit(120 * 1000);
+
+
+            standardOutput = null;
+            StringBuilder output = new StringBuilder();
+            while (!p.StandardOutput.EndOfStream)
+            {
+                string line = p.StandardOutput.ReadLine();
+                output.AppendLine(line);
+            }
+            standardOutput = output.ToString();
+
+            standardError = null;
+            StringBuilder error = new StringBuilder();
+            while (!p.StandardError.EndOfStream)
+            {
+                string line = p.StandardError.ReadLine();
+                error.AppendLine(line);
+            }
+            standardError = error.ToString();
+
+            ChutzpahTracer.TraceInformation("Ended executable: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
+
+            return p.ExitCode == 0;
+        }
+
+
+        private static Process InvokeProcess(string exePath, string arguments, IDictionary<string, string> environmentVars)
+        {
             var p = new Process();
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
@@ -43,19 +96,7 @@ namespace Chutzpah
             }
 
             p.Start();
-
-            ChutzpahTracer.TraceInformation("Started headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
-
-            // Output will be null if the stream reading times out
-            var processStream = new ProcessStreamStringSource(new ProcessWrapper(p), p.StandardOutput, streamTimeout);
-            var output = streamProcessor(processStream);
-            p.WaitForExit(5000);
-
-
-
-            ChutzpahTracer.TraceInformation("Ended headless browser: {0} with PID: {1} using args: {2}", exePath, p.Id, arguments);
-
-            return new ProcessResult<TestCaseStreamReadResult>(output.TimedOut ? (int)TestProcessExitCode.Timeout : p.ExitCode, output);
+            return p;
         }
 
         public BatchCompileResult RunBatchCompileProcess(BatchCompileConfiguration compileConfiguration)

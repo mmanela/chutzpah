@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chutzpah.Exceptions;
 using Chutzpah.Models;
 
 namespace Chutzpah
@@ -17,7 +18,7 @@ namespace Chutzpah
         private readonly ITestCaseStreamReaderFactory readerFactory;
         private readonly bool isRunningElevated;
 
-        public bool CanHandleBrowser(Browser browser) => browser == Browser.Chrome;
+        public bool CanHandleBrowser(Engine engine) => engine == Engine.Chrome;
 
         public NodeTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)
@@ -37,6 +38,25 @@ namespace Chutzpah
             isRunningElevated = process.IsRunningElevated();
         }
 
+        public void SetupEnvironment(TestOptions testOptions, TestContext testContext)
+        {
+            if (testContext.TestFileSettings.EngineOptions != null && testContext.TestFileSettings.EngineOptions.PreventDownloadOfEngineDepenedencies)
+            {
+                return;
+            }
+
+            
+            string runnerPath = Directory.GetParent(fileProbe.FindFilePath(testContext.TestRunner)) + @"\setupRunner.js";
+            var environmentVariables = BuildEnvironmentVariables();
+            var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerPath, environmentVariables, out string standardOutput, out string standardError);
+
+            if (!processResult)
+            {
+                throw new ChutzpahException($"Unable to install Chromium: Output: {standardOutput},   Error: {standardError}");
+            }
+
+        }
+
         public IList<TestFileSummary> Execute(TestOptions testOptions,
                             TestContext testContext,
                             TestExecutionMode testExecutionMode,
@@ -45,7 +65,8 @@ namespace Chutzpah
 
             string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
             string fileUrl = BuildHarnessUrl(testContext);
-            string runnerArgs = BuildRunnerArgs(testOptions, testContext, fileUrl, runnerPath, testExecutionMode, isRunningElevated);
+            bool preventDownloadOfEngineDepenedencies = testContext.TestFileSettings.EngineOptions != null && testContext.TestFileSettings.EngineOptions.PreventDownloadOfEngineDepenedencies;
+            string runnerArgs = BuildRunnerArgs(testOptions, testContext, fileUrl, runnerPath, testExecutionMode, isRunningElevated, preventDownloadOfEngineDepenedencies);
 
             var streamTimeout = ((testContext.TestFileSettings.TestFileTimeout ?? testOptions.TestFileTimeoutMilliseconds) + 500).GetValueOrDefault(); // Add buffer to timeout to account for serialization
 
@@ -101,7 +122,7 @@ namespace Chutzpah
             }
         }
 
-        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode, bool isRunningElevated)
+        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode, bool isRunningElevated, bool tryToFindChrome)
         {
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
@@ -112,6 +133,7 @@ namespace Chutzpah
                                         testModeStr,
                                         timeout,
                                         isRunningElevated,
+                                        tryToFindChrome,
                                         context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
                                         context.TestFileSettings.UserAgent);
 
@@ -130,6 +152,5 @@ namespace Chutzpah
                 return string.Format("\"{0}\"", urlBuilder.GenerateFileUrl(testContext, testContext.TestHarnessPath, fullyQualified: true));
             }
         }
-
     }
 }

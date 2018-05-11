@@ -153,7 +153,7 @@ namespace Chutzpah
                 var testOptions = new TestOptions
                 {
                     TestLaunchMode = commandLine.OpenInBrowser ? TestLaunchMode.FullBrowser : TestLaunchMode.HeadlessBrowser,
-                    Browser = commandLine.Browser,
+                    Engine = commandLine.Engine,
                     OpenInBrowserName = commandLine.BrowserName,
                     OpenInBrowserArgs = commandLine.BrowserArgs,
                     TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,

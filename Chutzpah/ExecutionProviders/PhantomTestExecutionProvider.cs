@@ -15,7 +15,7 @@ namespace Chutzpah
         private readonly string headlessBrowserPath;
         private readonly ITestCaseStreamReaderFactory readerFactory;
 
-        public bool CanHandleBrowser(Browser browser) => browser == Browser.Phantom;
+        public bool CanHandleBrowser(Engine engine) => engine == Engine.Phantom;
 
         public PhantomTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)
@@ -119,5 +119,8 @@ namespace Chutzpah
             }
         }
 
+        public void SetupEnvironment(TestOptions testOptions, TestContext testContext)
+        {
+        }
     }
 }

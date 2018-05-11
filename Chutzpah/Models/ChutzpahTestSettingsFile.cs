@@ -43,10 +43,15 @@ namespace Chutzpah.Models
         /// </summary>
         Never
     }
-    public enum Browser
+    public enum Engine
     {
         Phantom,
         Chrome
+    }
+
+    public class EngineOptions
+    {
+        public bool PreventDownloadOfEngineDepenedencies { get; set; }
     }
 
     public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
@@ -94,7 +99,7 @@ namespace Chutzpah.Models
             IgnoreResourceLoadingErrors = false;
 
             // Default to PhantomJs for now but once stable make Chrome default
-            Browser = Models.Browser.Chrome;
+            Engine = Models.Engine.Chrome;
             
             if (ForceWebServerMode)
             {
@@ -248,7 +253,10 @@ namespace Chutzpah.Models
         /// </summary>
         public int? CodeCoverageTimeout { get; set; }
 
-        public Browser? Browser { get; set; }
+        public Engine? Engine { get; set; }
+
+
+        public EngineOptions EngineOptions { get; set; }
 
         /// <summary>
         /// The dictionary of browser name (keys) to corresponding browser arguments (values), i.e.; { 'chrome': '--allow-file-access-from-files' }.
@@ -418,7 +426,9 @@ namespace Chutzpah.Models
             this.CodeCoverageIgnores = parent.CodeCoverageIgnores.Concat(this.CodeCoverageIgnores).ToList();
             this.Transforms = parent.Transforms.Concat(this.Transforms).ToList();
 
-            this.Browser = this.Browser ?? parent.Browser;
+            this.Engine = this.Engine ?? parent.Engine;
+            this.EngineOptions = this.EngineOptions ?? parent.EngineOptions;
+            
             foreach (var browserArgument in parent.BrowserArguments)
             {
                 // We should only override the child if the child does not already define a value for a key

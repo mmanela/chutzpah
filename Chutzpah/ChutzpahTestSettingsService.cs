@@ -157,7 +157,7 @@ namespace Chutzpah
 
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
-            if (settings.Server == null && settings.Browser != Browser.Phantom)
+            if (settings.Server == null && settings.Engine != Engine.Phantom)
             {
                 settings.Server = new ForcedChutzpahWebServerConfiguration();
             }

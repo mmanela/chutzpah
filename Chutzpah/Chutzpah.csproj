@@ -395,6 +395,9 @@
     <Content Include="ChutzpahJSRunners\Chrome\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ChutzpahJSRunners\Chrome\setupRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ChutzpahJSRunners\jasmineFunctionsV2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

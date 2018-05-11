@@ -41,7 +41,7 @@ namespace Chutzpah
         public bool NoLogo { get; protected set; }
 
         public bool OpenInBrowser { get; protected set; }
-        public bool BrowserChoice { get; protected set; }
+        public bool EngineChoice { get; protected set; }
 
         public int? TimeOutMilliseconds { get; protected set; }
 
@@ -72,7 +72,7 @@ namespace Chutzpah
         public string BrowserArgs { get; protected set; }
 
         public string Proxy { get; protected set; }
-        public Browser? Browser { get; internal set; }
+        public Engine? Engine { get; internal set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
@@ -128,9 +128,9 @@ namespace Chutzpah
                         AddBrowserName(option.Value);
                         OpenInBrowser = true;
                         break;
-                    case "/browser":
-                        AddBrowser(option.Value);
-                        BrowserChoice = true;
+                    case "/engine":
+                        AddEngine(option.Value);
+                        EngineChoice = true;
                         break;
                     case "/browserargs":
                         AddBrowserArgs(option.Value);
@@ -287,12 +287,12 @@ namespace Chutzpah
         }
 
 
-        private void AddBrowser(string value)
+        private void AddEngine(string value)
         {
-            Browser browser;
+            Engine browser;
             if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, true, out browser))
             {
-                Browser = browser;
+                Engine = browser;
             }
             else
             {

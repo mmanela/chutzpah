@@ -15,7 +15,8 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         userAgent = null,
         ignoreResourceLoadingError = false,
         finalResult = 0,
-        isRunningElevated = false;
+        isRunningElevated = false,
+        tryToFindChrome = false;
 
     startTime = new Date().getTime();;
 
@@ -24,15 +25,19 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     timeOut = parseInt(process.argv[4]) || 5001;
 
     if (process.argv.length > 5) {
-        isRunningElevated = process.argv[5];
+        isRunningElevated = "true" === process.argv[5].toLowerCase();
     }
 
     if (process.argv.length > 6) {
-        ignoreResourceLoadingError = "true" === process.argv[6].toLowerCase();
+        tryToFindChrome = "true" === process.argv[6].toLowerCase();
     }
 
     if (process.argv.length > 7) {
-        userAgent = process.argv[7];
+        ignoreResourceLoadingError = "true" === process.argv[7].toLowerCase();
+    }
+
+    if (process.argv.length > 8) {
+        userAgent = process.argv[8];
     }
 
     function debugLog(msg) {
@@ -224,30 +229,37 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     process.on('uncaughtException', handleError);
 
 
-    let chromeExecutable = null;
-    const chromePaths = getChromePaths();
-    if (chromePaths.length <= 0) {
-        debugLog("Could not find chrome paths");
-    }
-    chromeExecutable = chromePaths[0];
-
-    debugLog("Launch Chrome: Elevated= " + isRunningElevated);
-
-    // If isRunningElevated, we need to turn off sandbox since it does not work with admin users
-    const browser = await puppeteer.launch({
-        headless: true, args: isRunningElevated ? ["--no-sandbox"] : [], executablePath: chromeExecutable
-    });
-    const page = await browser.newPage();
-
-    try {
-        await page.setBypassCSP(true);
-    } catch (error) {
-        // Older chromes won't support this so just ignore...
-    }
-
 
 
     try {
+        let chromeExecutable = null;
+
+        if (tryToFindChrome) {
+            const chromePaths = getChromePaths();
+            if (chromePaths.length <= 0) {
+                debugLog("Could not find chrome paths");
+            }
+            chromeExecutable = chromePaths[0];
+            chutzpahFunctions.rawLog("!!_!! Using Chrome Install : " + chromeExecutable);
+        }
+        else {
+            chutzpahFunctions.rawLog("!!_!! Using Chromium...");
+        }
+
+        debugLog("Launch Chrome: Elevated= " + isRunningElevated);
+
+        // If isRunningElevated, we need to turn off sandbox since it does not work with admin users
+        const browser = await puppeteer.launch({
+            headless: true, args: isRunningElevated ? ["--no-sandbox"] : [], executablePath: chromeExecutable
+        });
+        const page = await browser.newPage();
+
+        try {
+            await page.setBypassCSP(true);
+        } catch (error) {
+            // Older chromes won't support this so just ignore...
+        }
+
 
         if (userAgent) {
             page.setUserAgent(userAgent);
@@ -301,7 +313,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         debugLog("Just about done: " + finalResult);
 
     } catch (err) {
-        debugLog("Error: " + err);
+        chutzpahFunctions.rawLog("!!_!! Error: " + err);
         process.exit(2);
     }
 

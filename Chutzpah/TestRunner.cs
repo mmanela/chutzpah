@@ -630,12 +630,14 @@ namespace Chutzpah
                                                  TestExecutionMode testExecutionMode,
                                                  ITestMethodRunnerCallback callback)
         {
-            var browser = (options.Browser ?? testContext.TestFileSettings.Browser).GetValueOrDefault();
+            var browser = (options.Engine ?? testContext.TestFileSettings.Engine).GetValueOrDefault();
             var provider = testExecutionProviders.FirstOrDefault(x => x.CanHandleBrowser(browser));
             if (provider == null)
             {
                 throw new ArgumentException("Could not find browser");
             }
+
+            provider.SetupEnvironment(options, testContext);
 
             return provider.Execute(options, testContext, testExecutionMode, callback);
         }

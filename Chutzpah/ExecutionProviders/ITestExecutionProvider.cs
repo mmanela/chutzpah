@@ -5,11 +5,13 @@ namespace Chutzpah
 {
     public interface ITestExecutionProvider
     {
-        bool CanHandleBrowser(Browser browser);
+        bool CanHandleBrowser(Engine browser);
 
         IList<TestFileSummary> Execute(TestOptions testOptions,
                      TestContext testContext,
                      TestExecutionMode testExecutionMode,
                      ITestMethodRunnerCallback callback);
+
+        void SetupEnvironment(TestOptions testOptions, TestContext testContext);
     }
 }

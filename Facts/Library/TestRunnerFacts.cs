@@ -37,7 +37,7 @@ namespace Chutzpah.Facts
                     .Returns<TestContext, string, bool, bool, string>((c, p, fq, d, s) => p);
 
                 Mock<ITestExecutionProvider>()
-                    .Setup(x => x.CanHandleBrowser(It.IsAny<Browser>())).Returns(true);
+                    .Setup(x => x.CanHandleBrowser(It.IsAny<Engine>())).Returns(true);
                 Mock<ITestExecutionProvider>()
                     .Setup(x => x.Execute(It.IsAny<TestOptions>(), It.IsAny<TestContext>(), TestExecutionMode.Execution, It.IsAny<ITestMethodRunnerCallback>()))
                     .Returns(new List<TestFileSummary> { new TestFileSummary("somePath") });
@@ -49,10 +49,10 @@ namespace Chutzpah.Facts
                 return string.Format(format, "--ignore-ssl-errors=true --proxy-type=none --ssl-protocol=any", runner, harness, mode, timeout.HasValue ? timeout.ToString() : "", ignoreResourceLoadingError.ToString());
             }
 
-            public TestContext SetupTestContext(string[] testPaths = null, string harnessPath = @"harnessPath", string testRunnerPath = "testRunner.js", bool success = true, bool @throw = false, Browser browser = Browser.Phantom)
+            public TestContext SetupTestContext(string[] testPaths = null, string harnessPath = @"harnessPath", string testRunnerPath = "testRunner.js", bool success = true, bool @throw = false, Engine browser = Engine.Phantom)
             {
                 var context = new TestContext { TestHarnessPath = harnessPath, TestRunner = testRunnerPath };
-                context.TestFileSettings.Browser = browser;
+                context.TestFileSettings.Engine = browser;
                 if (testPaths != null)
                 {
                     var pathCount = testPaths.Length;

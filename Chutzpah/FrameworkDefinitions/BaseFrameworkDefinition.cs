@@ -65,11 +65,11 @@ namespace Chutzpah.FrameworkDefinitions
 
         protected string BuildTestRunnerPath(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options, string runnerName)
         {
-            switch ((options.Browser ?? chutzpahTestSettings.Browser).GetValueOrDefault())
+            switch ((options.Engine ?? chutzpahTestSettings.Engine).GetValueOrDefault())
             {
-                case Browser.Phantom:
+                case Engine.Phantom:
                     return @"ChutzpahJSRunners\Phantom\" + runnerName;
-                case Browser.Chrome:
+                case Engine.Chrome:
                     return @"ChutzpahJSRunners\Chrome\" + runnerName;
                 default:
                     throw new ArgumentException("Unknown browser");
