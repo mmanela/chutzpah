@@ -401,6 +401,24 @@
     <Content Include="ChutzpahJSRunners\jasmineFunctionsV2.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\chutzpahRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\qunitRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\setupRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ChutzpahJSRunners\mochaFunctions.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

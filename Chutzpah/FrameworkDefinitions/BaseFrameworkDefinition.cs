@@ -71,6 +71,8 @@ namespace Chutzpah.FrameworkDefinitions
                     return @"ChutzpahJSRunners\Phantom\" + runnerName;
                 case Engine.Chrome:
                     return @"ChutzpahJSRunners\Chrome\" + runnerName;
+                case Engine.JsDom:
+                    return @"ChutzpahJSRunners\JsDom\" + runnerName;
                 default:
                     throw new ArgumentException("Unknown browser");
             }

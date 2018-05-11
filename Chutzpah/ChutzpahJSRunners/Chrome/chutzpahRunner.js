@@ -314,6 +314,13 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
 
     } catch (err) {
         chutzpahFunctions.rawLog("!!_!! Error: " + err);
+
+
+        debugLog("Closing client");
+        if (browser) {
+            await browser.close();
+        }
+
         process.exit(2);
     }
 
