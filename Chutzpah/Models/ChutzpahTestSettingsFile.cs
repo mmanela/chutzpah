@@ -100,7 +100,7 @@ namespace Chutzpah.Models
             IgnoreResourceLoadingErrors = false;
 
             // Default to PhantomJs for now but once stable make JsDom default
-            Engine = Models.Engine.JsDom;
+            Engine = Models.Engine.Phantom;
             
             if (ForceWebServerMode)
             {
