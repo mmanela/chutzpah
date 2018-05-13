@@ -41,6 +41,7 @@ namespace Chutzpah
         public bool NoLogo { get; protected set; }
 
         public bool OpenInBrowser { get; protected set; }
+        public bool EngineChoice { get; protected set; }
 
         public int? TimeOutMilliseconds { get; protected set; }
 
@@ -71,6 +72,7 @@ namespace Chutzpah
         public string BrowserArgs { get; protected set; }
 
         public string Proxy { get; protected set; }
+        public Engine? Engine { get; internal set; }
 
         private static void GuardNoOptionValue(KeyValuePair<string, string> option)
         {
@@ -101,93 +103,97 @@ namespace Chutzpah
 
                 switch (optionName)
                 {
-                case "/wait":
-                    GuardNoOptionValue(option);
-                    Wait = true;
-                    break;
-                case "/discovery":
-                    GuardNoOptionValue(option);
-                    Discovery = true;
-                    break;
-                case "/debug":
-                    GuardNoOptionValue(option);
-                    Debug = true;
-                    break;
-                case "/trace":
-                    GuardNoOptionValue(option);
-                    Trace = true;
-                    break;
-                case "/failonerror":
-                case "/failonscripterror":
-                    GuardNoOptionValue(option);
-                    FailOnError = true;
-                    break;
-                case "/openinbrowser":
-                    AddBrowserName(option.Value);
-                    OpenInBrowser = true;
-                    break;
-                case "/browserargs":
-                    AddBrowserArgs(option.Value);
-                    break;
-                case "/silent":
-                    GuardNoOptionValue(option);
-                    Silent = true;
-                    break;
-                case "/nologo":
-                    GuardNoOptionValue(option);
-                    NoLogo = true;
-                    break;
-                case "/teamcity":
-                    GuardNoOptionValue(option);
-                    TeamCity = true;
-                    break;
-                case "/timeoutmilliseconds":
-                    AddTimeoutOption(option.Value);
-                    break;
-                case "/parallelism":
-                    AddParallelismOption(option.Value);
-                    break;
-                case "/file":
-                case "/path":
-                    AddFileOption(option.Value);
-                    break;
-                case "/proxy":
-                    AddProxy(option.Value);
-                    break;
-                case "/vsoutput":
-                    GuardNoOptionValue(option);
-                    VsOutput = true;
-                    break;
-                case "/coverage":
-                    GuardNoOptionValue(option);
-                    Coverage = true;
-                    break;
-                case "/coverageincludes":
-                    AddCoverageIncludeOption(option.Value);
-                    break;
-                case "/coverageexcludes":
-                    AddCoverageExcludeOption(option.Value);
-                    break;
-                case "/coverageignores":
-                    AddCoverageIgnoreOption(option.Value);
-                    break;
-                case "/showfailurereport":
-                    GuardNoOptionValue(option);
-                    ShowFailureReport = true;
-                    break;
-                case "/settingsfileenvironment":
-                    AddSettingsFileEnvironment(option.Value);
-                    break;
-                default:
-                    var trimmedName = optionName.Trim('/');
-                    if (!optionName.StartsWith("/") || !transformerNames.Contains(trimmedName))
-                    {
-                        throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
-                    }
+                    case "/wait":
+                        GuardNoOptionValue(option);
+                        Wait = true;
+                        break;
+                    case "/discovery":
+                        GuardNoOptionValue(option);
+                        Discovery = true;
+                        break;
+                    case "/debug":
+                        GuardNoOptionValue(option);
+                        Debug = true;
+                        break;
+                    case "/trace":
+                        GuardNoOptionValue(option);
+                        Trace = true;
+                        break;
+                    case "/failonerror":
+                    case "/failonscripterror":
+                        GuardNoOptionValue(option);
+                        FailOnError = true;
+                        break;
+                    case "/openinbrowser":
+                        AddBrowserName(option.Value);
+                        OpenInBrowser = true;
+                        break;
+                    case "/engine":
+                        AddEngine(option.Value);
+                        EngineChoice = true;
+                        break;
+                    case "/browserargs":
+                        AddBrowserArgs(option.Value);
+                        break;
+                    case "/silent":
+                        GuardNoOptionValue(option);
+                        Silent = true;
+                        break;
+                    case "/nologo":
+                        GuardNoOptionValue(option);
+                        NoLogo = true;
+                        break;
+                    case "/teamcity":
+                        GuardNoOptionValue(option);
+                        TeamCity = true;
+                        break;
+                    case "/timeoutmilliseconds":
+                        AddTimeoutOption(option.Value);
+                        break;
+                    case "/parallelism":
+                        AddParallelismOption(option.Value);
+                        break;
+                    case "/file":
+                    case "/path":
+                        AddFileOption(option.Value);
+                        break;
+                    case "/proxy":
+                        AddProxy(option.Value);
+                        break;
+                    case "/vsoutput":
+                        GuardNoOptionValue(option);
+                        VsOutput = true;
+                        break;
+                    case "/coverage":
+                        GuardNoOptionValue(option);
+                        Coverage = true;
+                        break;
+                    case "/coverageincludes":
+                        AddCoverageIncludeOption(option.Value);
+                        break;
+                    case "/coverageexcludes":
+                        AddCoverageExcludeOption(option.Value);
+                        break;
+                    case "/coverageignores":
+                        AddCoverageIgnoreOption(option.Value);
+                        break;
+                    case "/showfailurereport":
+                        GuardNoOptionValue(option);
+                        ShowFailureReport = true;
+                        break;
+                    case "/settingsfileenvironment":
+                        AddSettingsFileEnvironment(option.Value);
+                        break;
+                    default:
+                        var trimmedName = optionName.Trim('/');
+                        if (!optionName.StartsWith("/") || !transformerNames.Contains(trimmedName))
+                        {
+                            throw new ArgumentException(String.Format("unknown command line option: {0}", option.Key));
+                        }
 
-                    TransformersRequested[trimmedName] = option.Value;
+                        TransformersRequested[trimmedName] = option.Value;
 
-                    break;
+                        break;
                 }
             }
         }
@@ -277,6 +283,20 @@ namespace Chutzpah
                 {
                     throw new ArgumentException("invalid browser name, expecting either ie, chrome or firefox");
                 }
+            }
+        }
+
+
+        private void AddEngine(string value)
+        {
+            Engine browser;
+            if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, true, out browser))
+            {
+                Engine = browser;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid browser");
             }
         }
 

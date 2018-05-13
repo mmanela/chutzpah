@@ -32,8 +32,8 @@ namespace Chutzpah.FrameworkDefinitions
             this.fileDependencies = new[]
                 {
                     "chutzpah_boot.js",
-                    "mocha\\mocha.css", 
-                    "mocha\\mocha.js", 
+                    "mocha\\mocha.css",
+                    "mocha\\mocha.js",
                 };
         }
 
@@ -76,8 +76,8 @@ namespace Chutzpah.FrameworkDefinitions
 
         public static string GetInterfaceType(ChutzpahTestSettingsFile chutzpahTestSettings, string testFilePath, string testFileText)
         {
-            if(!string.IsNullOrEmpty(chutzpahTestSettings.MochaInterface) 
-                && knownInterfaces.Contains(chutzpahTestSettings.MochaInterface,StringComparer.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(chutzpahTestSettings.MochaInterface)
+                && knownInterfaces.Contains(chutzpahTestSettings.MochaInterface, StringComparer.OrdinalIgnoreCase))
             {
                 return chutzpahTestSettings.MochaInterface.ToLowerInvariant();
             }

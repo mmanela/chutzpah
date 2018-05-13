@@ -18,8 +18,7 @@ namespace Chutzpah
 {
     public class TestRunner : ITestRunner
     {
-        public static string HeadlessBrowserName = "phantomjs.exe";
-        public static string TestRunnerJsName = @"ChutzpahJSRunners\chutzpahRunner.js";
+        public static string TestRunnerJsName = @"ChutzpahJSRunners\Phantom\chutzpahRunner.js";
         private readonly Stopwatch stopWatch;
         private readonly IProcessHelper process;
         private readonly ITestCaseStreamReaderFactory testCaseStreamReaderFactory;
@@ -29,9 +28,11 @@ namespace Chutzpah
         private readonly ITestContextBuilder testContextBuilder;
         private readonly IChutzpahTestSettingsService testSettingsService;
         private readonly ITransformProcessor transformProcessor;
+        private readonly IUrlBuilder urlBuilder;
         private readonly IChutzpahWebServerFactory webServerFactory;
         private bool m_debugEnabled;
         private IChutzpahWebServerHost m_activeWebServerHost;
+        private readonly IList<ITestExecutionProvider> testExecutionProviders;
 
         public static ITestRunner Create(bool debugEnabled = false)
         {
@@ -44,7 +45,6 @@ namespace Chutzpah
             return runner;
         }
 
-        readonly IUrlBuilder urlBuilder;
 
         public IChutzpahWebServerHost ActiveWebServerHost
         {
@@ -74,7 +74,8 @@ namespace Chutzpah
                           IChutzpahTestSettingsService testSettingsService,
                           ITransformProcessor transformProcessor,
                           IChutzpahWebServerFactory webServerFactory,
-                          IUrlBuilder urlBuilder)
+                          IUrlBuilder urlBuilder,
+                          IList<ITestExecutionProvider> testExecutionProviders)
         {
             this.urlBuilder = urlBuilder;
             this.process = process;
@@ -87,6 +88,7 @@ namespace Chutzpah
             this.testSettingsService = testSettingsService;
             this.transformProcessor = transformProcessor;
             this.webServerFactory = webServerFactory;
+            this.testExecutionProviders = testExecutionProviders;
         }
 
 
@@ -173,7 +175,7 @@ namespace Chutzpah
         {
             callback = options.TestLaunchMode == TestLaunchMode.FullBrowser || callback == null ? RunnerCallback.Empty : callback;
             callback.TestSuiteStarted();
-            
+
             var testCaseSummary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
 
             callback.TestSuiteFinished(testCaseSummary);
@@ -190,16 +192,13 @@ namespace Chutzpah
             var overallSummary = new TestCaseSummary();
 
             options.TestExecutionMode = testExecutionMode;
+            options.DebugEnabled = m_debugEnabled;
 
             stopWatch.Start();
-            string headlessBrowserPath = fileProbe.FindFilePath(HeadlessBrowserName);
             if (testPaths == null)
                 throw new ArgumentNullException("testPaths");
-            if (headlessBrowserPath == null)
-                throw new FileNotFoundException("Unable to find headless browser: " + HeadlessBrowserName);
             if (fileProbe.FindFilePath(TestRunnerJsName) == null)
                 throw new FileNotFoundException("Unable to find test runner base js file: " + TestRunnerJsName);
-
 
             // Concurrent list to collect test contexts
             var testContexts = new ConcurrentBag<TestContext>();
@@ -245,7 +244,7 @@ namespace Chutzpah
                 ActiveWebServerHost = webServerHost;
 
                 // Build test harness for each context and execute it in parallel
-                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, headlessBrowserPath, testFileSummaries, overallSummary, webServerHost);
+                ExecuteTestContexts(options, testExecutionMode, callback, testContexts, parallelOptions, testFileSummaries, overallSummary, webServerHost);
 
 
                 // Gather TestFileSummaries into TaseCaseSummary
@@ -389,7 +388,6 @@ namespace Chutzpah
             ITestMethodRunnerCallback callback,
             ConcurrentBag<TestContext> testContexts,
             ParallelOptions parallelOptions,
-            string headlessBrowserPath,
             ConcurrentQueue<TestFileSummary> testFileSummaries,
             TestCaseSummary overallSummary,
             IChutzpahWebServerHost webServerHost)
@@ -427,16 +425,16 @@ namespace Chutzpah
 
                             // Allow override from command line.
                             var browserArgs = testContext.TestFileSettings.BrowserArguments;
-                            if (!string.IsNullOrWhiteSpace(options.BrowserArgs))
+                            if (!string.IsNullOrWhiteSpace(options.OpenInBrowserArgs))
                             {
-                                var path = BrowserPathHelper.GetBrowserPath(options.BrowserName);
+                                var path = BrowserPathHelper.GetBrowserPath(options.OpenInBrowserName);
                                 browserArgs = new Dictionary<string, string>
                                 {
-                                    { Path.GetFileNameWithoutExtension(path), options.BrowserArgs }
+                                    { Path.GetFileNameWithoutExtension(path), options.OpenInBrowserArgs }
                                 };
                             }
 
-                            process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.BrowserName, browserArgs);
+                            process.LaunchFileInBrowser(testContext, testContext.TestHarnessPath, options.OpenInBrowserName, browserArgs);
                         }
                         else if (options.TestLaunchMode == TestLaunchMode.HeadlessBrowser)
                         {
@@ -446,7 +444,6 @@ namespace Chutzpah
                                 testContext.FirstInputTestFile);
 
                             var testSummaries = InvokeTestRunner(
-                                headlessBrowserPath,
                                 options,
                                 testContext,
                                 testExecutionMode,
@@ -625,91 +622,25 @@ namespace Chutzpah
             }
             return scriptPaths
                     .Where(x => x.FullPath != null)
-                    .ToList(); ;
+                    .ToList();
         }
 
-        private IList<TestFileSummary> InvokeTestRunner(string headlessBrowserPath,
-                                                 TestOptions options,
+        private IList<TestFileSummary> InvokeTestRunner(TestOptions options,
                                                  TestContext testContext,
                                                  TestExecutionMode testExecutionMode,
                                                  ITestMethodRunnerCallback callback)
         {
-            string runnerPath = fileProbe.FindFilePath(testContext.TestRunner);
-            string fileUrl = BuildHarnessUrl(testContext);
-
-            string runnerArgs = BuildRunnerArgs(options, testContext, fileUrl, runnerPath, testExecutionMode);
-            Func<ProcessStream, IList<TestFileSummary>> streamProcessor =
-                processStream => testCaseStreamReaderFactory.Create().Read(processStream, options, testContext, callback, m_debugEnabled);
-            var processResult = process.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor);
-
-            HandleTestProcessExitCode(processResult.ExitCode, testContext.FirstInputTestFile, processResult.Model.Select(x => x.Errors).FirstOrDefault(), callback);
-
-            return processResult.Model;
-        }
-
-        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile, IList<TestError> errors, ITestMethodRunnerCallback callback)
-        {
-            string errorMessage = null;
-
-            switch ((TestProcessExitCode)exitCode)
+            var browser = (options.Engine ?? testContext.TestFileSettings.Engine).GetValueOrDefault();
+            var provider = testExecutionProviders.FirstOrDefault(x => x.CanHandleBrowser(browser));
+            if (provider == null)
             {
-                case TestProcessExitCode.AllPassed:
-                case TestProcessExitCode.SomeFailed:
-                    return;
-                case TestProcessExitCode.Timeout:
-                    errorMessage = "Timeout occurred when executing test file";
-                    break;
-                default:
-                    errorMessage = "Unknown error occurred when executing test file. Received exit code of " + exitCode;
-                    break;
+                throw new ArgumentException("Could not find browser");
             }
 
-            if (!string.IsNullOrEmpty(errorMessage))
-            {
-                var error = new TestError
-                {
-                    InputTestFile = inputTestFile,
-                    Message = errorMessage
-                };
+            provider.SetupEnvironment(options, testContext);
 
-                errors.Add(error);
-
-                callback.FileError(error);
-                ChutzpahTracer.TraceError("Headless browser returned with an error: {0}", errorMessage);
-            }
+            return provider.Execute(options, testContext, testExecutionMode, callback);
         }
 
-        private static string BuildRunnerArgs(TestOptions options, TestContext context, string fileUrl, string runnerPath, TestExecutionMode testExecutionMode)
-        {
-            string runnerArgs;
-            var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
-            var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
-            var proxy = options.Proxy ?? context.TestFileSettings.Proxy;
-            var proxySetting = string.IsNullOrEmpty(proxy) ? "--proxy-type=none" : string.Format("--proxy={0}", proxy);
-            runnerArgs = string.Format("--ignore-ssl-errors=true {0} --ssl-protocol=any \"{1}\" {2} {3} {4} {5} {6}",
-                                       proxySetting,
-                                       runnerPath,
-                                       fileUrl,
-                                       testModeStr,
-                                       timeout,
-                                       context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
-                                       context.TestFileSettings.UserAgent);
-
-
-            return runnerArgs;
-        }
-
-        private string BuildHarnessUrl(TestContext testContext)
-        {
-
-            if (testContext.IsRemoteHarness)
-            {
-                return testContext.TestHarnessPath;
-            }
-            else
-            {
-                return string.Format("\"{0}\"", urlBuilder.GenerateFileUrl(testContext, testContext.TestHarnessPath, fullyQualified: true));
-            }
-        }
     }
 }

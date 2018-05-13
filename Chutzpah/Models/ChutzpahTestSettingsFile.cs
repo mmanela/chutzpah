@@ -43,8 +43,18 @@ namespace Chutzpah.Models
         /// </summary>
         Never
     }
+    public enum Engine
+    {
+        Phantom,
+        Chrome,
+        JsDom
+    }
 
-    
+    public class EngineOptions
+    {
+        public bool PreventDownloadOfEngineDepenedencies { get; set; }
+    }
+
     public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
     {
         public ForcedChutzpahWebServerConfiguration()
@@ -63,7 +73,7 @@ namespace Chutzpah.Models
     public class ChutzpahTestSettingsFile
     {
         public static ChutzpahTestSettingsFile Default = new ChutzpahTestSettingsFile(true);
-        public const bool ForceWebServerMode = false;
+        public const bool ForceWebServerMode = true;
 
         private Regex testPatternRegex;
 
@@ -88,6 +98,9 @@ namespace Chutzpah.Models
             RootReferencePathMode = Models.RootReferencePathMode.DriveRoot;
             EnableTestFileBatching = false;
             IgnoreResourceLoadingErrors = false;
+
+            // Default to PhantomJs for now but once stable make JsDom default
+            Engine = Models.Engine.JsDom;
             
             if (ForceWebServerMode)
             {
@@ -240,6 +253,11 @@ namespace Chutzpah.Models
         /// The timeout in milliseconds for how long to wait to instrument each file. Defaults to 5000ms. 
         /// </summary>
         public int? CodeCoverageTimeout { get; set; }
+
+        public Engine? Engine { get; set; }
+
+
+        public EngineOptions EngineOptions { get; set; }
 
         /// <summary>
         /// The dictionary of browser name (keys) to corresponding browser arguments (values), i.e.; { 'chrome': '--allow-file-access-from-files' }.
@@ -416,6 +434,9 @@ namespace Chutzpah.Models
             this.CodeCoverageIgnores = parent.CodeCoverageIgnores.Concat(this.CodeCoverageIgnores).ToList();
             this.Transforms = parent.Transforms.Concat(this.Transforms).ToList();
 
+            this.Engine = this.Engine ?? parent.Engine;
+            this.EngineOptions = this.EngineOptions ?? parent.EngineOptions;
+            
             foreach (var browserArgument in parent.BrowserArguments)
             {
                 // We should only override the child if the child does not already define a value for a key

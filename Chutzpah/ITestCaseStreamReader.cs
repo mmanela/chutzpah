@@ -5,6 +5,6 @@ namespace Chutzpah
 {
     public interface ITestCaseStreamReader
     {
-        IList<TestFileSummary> Read(ProcessStream processStream, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback, bool debugEnabled);
+        TestCaseStreamReadResult Read(TestCaseSource<string> testCaseSource, TestOptions testOptions, TestContext testContext, ITestMethodRunnerCallback callback);
     }
 }

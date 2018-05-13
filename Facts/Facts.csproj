@@ -147,6 +147,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Library\ExecutionProviders\" />
     <Folder Include="VisualStudio\" />
   </ItemGroup>
   <ItemGroup>

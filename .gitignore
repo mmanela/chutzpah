@@ -57,3 +57,5 @@ Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.js
 Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.d.ts
 Samples/Compilation/TypeScriptToSingleFileExceptForTests/test/*.map
 Facts.Integration/JS/Test/TestSettings/CodeCoverage/myCoverage.json
+EdgeJsPackages/node_modules
+Chutzpah/edge/

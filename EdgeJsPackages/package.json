@@ -1,0 +1,8 @@
+{
+  "name": "chutzpah",
+  "dependencies": {
+    "puppeteer": "^0.13.0"
+  },
+  "private": true,
+  "version": "1.0.0"
+}

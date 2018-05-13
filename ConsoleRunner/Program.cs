@@ -70,7 +70,7 @@ namespace Chutzpah
         {
             Console.WriteLine("Chutzpah console test runner  ({0}-bit .NET {1})", IntPtr.Size * 8, Environment.Version);
             Console.WriteLine("Version {0}", Assembly.GetEntryAssembly().GetName().Version);
-            Console.WriteLine("Copyright (C) 2016 Matthew Manela (http://matthewmanela.com).");
+            Console.WriteLine("Copyright (C) 2018 Matthew Manela (http://matthewmanela.com).");
         }
 
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -131,7 +131,6 @@ namespace Chutzpah
 
         static int RunTests(CommandLine commandLine, IEnumerable<SummaryTransformer> transformers)
         {
-
             var testRunner = TestRunner.Create(debugEnabled: commandLine.Debug);
 
             if (commandLine.Trace)
@@ -145,30 +144,31 @@ namespace Chutzpah
             TestCaseSummary testResultsSummary = null;
             try
             {
-                var callback = commandLine.TeamCity 
-                                ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback() 
+                var callback = commandLine.TeamCity
+                                ? (ITestMethodRunnerCallback)new TeamCityConsoleRunnerCallback()
                                 : new StandardConsoleRunnerCallback(commandLine.Silent, commandLine.VsOutput, commandLine.ShowFailureReport, commandLine.FailOnError);
 
                 callback = new ParallelRunnerCallbackAdapter(callback);
 
                 var testOptions = new TestOptions
+                {
+                    TestLaunchMode = commandLine.OpenInBrowser ? TestLaunchMode.FullBrowser : TestLaunchMode.HeadlessBrowser,
+                    Engine = commandLine.Engine,
+                    OpenInBrowserName = commandLine.BrowserName,
+                    OpenInBrowserArgs = commandLine.BrowserArgs,
+                    TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
+                    ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
+                    Proxy = commandLine.Proxy,
+                    CoverageOptions = new CoverageOptions
                     {
-                        TestLaunchMode = commandLine.OpenInBrowser ? TestLaunchMode.FullBrowser : TestLaunchMode.HeadlessBrowser,
-                        BrowserName = commandLine.BrowserName,
-                        BrowserArgs = commandLine.BrowserArgs,
-                        TestFileTimeoutMilliseconds = commandLine.TimeOutMilliseconds,
-                        ChutzpahSettingsFileEnvironments = commandLine.SettingsFileEnvironments,
-                        Proxy = commandLine.Proxy,
-                        CoverageOptions = new CoverageOptions
-                                              {
-                                                  Enabled = commandLine.Coverage,
-                                                  IncludePatterns = (commandLine.CoverageIncludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries),
-                                                  ExcludePatterns = (commandLine.CoverageExcludePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries),
-                                                  IgnorePatterns = (commandLine.CoverageIgnorePatterns ?? "").Split(new[]{','},StringSplitOptions.RemoveEmptyEntries)
-                                              }
-                    };
+                        Enabled = commandLine.Coverage,
+                        IncludePatterns = (commandLine.CoverageIncludePatterns ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                        ExcludePatterns = (commandLine.CoverageExcludePatterns ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                        IgnorePatterns = (commandLine.CoverageIgnorePatterns ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    }
+                };
 
-                if(commandLine.Parallelism > 0)
+                if (commandLine.Parallelism > 0)
                 {
                     testOptions.MaxDegreeOfParallelism = commandLine.Parallelism;
                 }
@@ -217,7 +217,7 @@ namespace Chutzpah
             return failedCount;
         }
 
-        private static void ProcessTestSummaryTransformers(IEnumerable<SummaryTransformer>  transformers, CommandLine commandLine, TestCaseSummary testResultsSummary)
+        private static void ProcessTestSummaryTransformers(IEnumerable<SummaryTransformer> transformers, CommandLine commandLine, TestCaseSummary testResultsSummary)
         {
             foreach (var transformer in transformers.Where(x => commandLine.TransformersRequested.ContainsKey(x.Name)))
             {

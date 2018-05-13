@@ -26,21 +26,26 @@ namespace Chutzpah
         public TestLaunchMode TestLaunchMode { get; set; }
 
         /// <summary>
+        /// The browser to run the headless tests with
+        /// </summary>
+        public Engine? Engine { get; set; }
+
+        /// <summary>
         /// The name of browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional
         /// </summary>
-        public string BrowserName { get; set; }
+        public string OpenInBrowserName { get; set; }
 
         /// <summary>
         /// The arguments for the corresponding browser which will be opened when TestLaunchMode.FullBrowser is set, this value is optional
         /// </summary>
-        public string BrowserArgs { get; set; }
+        public string OpenInBrowserArgs { get; set; }
 
         /// <summary>
         /// Test launch object implementing the Custom test launch logic.
         /// Required when TestLaunchMode == TestLaunchMode.Custom.
         /// </summary>
         public ITestLauncher CustomTestLauncher { get; set; }
-        
+
         /// <summary>
         /// The time to wait for the tests to compelte in milliseconds
         /// </summary>
@@ -59,8 +64,8 @@ namespace Chutzpah
         /// <summary>
         /// This is the max number of files to run tests for
         /// </summary>
-        public int FileSearchLimit { get; set; }       
-        
+        public int FileSearchLimit { get; set; }
+
         /// <summary>
         /// The maximum degree of parallelism to process test files
         /// </summary>
@@ -94,5 +99,6 @@ namespace Chutzpah
         /// Optional proxy settings in format of [address]:[port]
         /// </summary>
         public string Proxy { get; set; }
+        public bool DebugEnabled { get; internal set; }
     }
 }

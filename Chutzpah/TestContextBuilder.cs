@@ -145,7 +145,7 @@ namespace Chutzpah
                         InputTestFilesString = firstFilePath,
                         TestHarnessPath = firstFilePath,
                         IsRemoteHarness = firstFileKind == PathType.Url,
-                        TestRunner = definition.GetTestRunner(chutzpahTestSettings),
+                        TestRunner = definition.GetTestRunner(chutzpahTestSettings, options),
                     };
                 }
 
@@ -174,7 +174,7 @@ namespace Chutzpah
                     InputTestFilesString = string.Join(",", testFiles),
                     TestHarnessDirectory = testHarnessDirectory,
                     ReferencedFiles = referencedFiles,
-                    TestRunner = definition.GetTestRunner(chutzpahTestSettings),
+                    TestRunner = definition.GetTestRunner(chutzpahTestSettings, options),
                     TemporaryFiles = temporaryFiles,
                     TestFileSettings = chutzpahTestSettings
                 };

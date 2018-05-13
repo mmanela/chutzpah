@@ -243,8 +243,14 @@
     <Compile Include="Coverage\CoverageOutputGenerator.cs" />
     <Compile Include="Coverage\ILineCoverageMapper.cs" />
     <Compile Include="Coverage\SourceMapDotNetLineCoverageMapper.cs" />
+    <Compile Include="ExecutionProviders\NodeTestExecutionProvider.cs" />
+    <Compile Include="ExecutionProviders\ProcessStreamStringSource.cs" />
+    <Compile Include="ExecutionProviders\TestCaseSource.cs" />
+    <Compile Include="ExecutionProviders\PhantomTestExecutionProvider.cs" />
+    <Compile Include="ExecutionProviders\ITestExecutionProvider.cs" />
     <Compile Include="IUrlBuilder.cs" />
     <Compile Include="Server\ChutzpahServerFileProvider.cs" />
+    <Compile Include="Models\TestCaseStreamReadResult.cs" />
     <Compile Include="Transformers\JacocoTransformer.cs" />
     <Compile Include="UrlBuilder.cs" />
     <Compile Include="FileProcessors\ISourceMapDiscoverer.cs" />
@@ -371,14 +377,61 @@
     <Compile Include="TestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\TestCaseSummary.cs" />
-    <Compile Include="Models\ProcessStream.cs" />
     <Compile Include="Wrappers\ProcessWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ChutzpahJSRunners\jasmineRunnerV2.js">
+    <Content Include="ChutzpahJSRunners\Chrome\chutzpahRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\mochaRunner.js">
+    <Content Include="ChutzpahJSRunners\Chrome\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Chrome\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Chrome\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Chrome\qunitRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Chrome\setupRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\jasmineFunctionsV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\chutzpahRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\JsDom\qunitRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\mochaFunctions.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\chutzpahRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\jasmineRunnerV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\jasmineRunnerV2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\mochaRunner.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\Phantom\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ChutzpahTestHarnessFiles\chutzpah_boot.js">
@@ -445,15 +498,6 @@
       <Link>phantomjs.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\chutzpahRunner.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ChutzpahJSRunners\jasmineRunnerV1.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ChutzpahJSRunners\qunitRunner.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="ChutzpahTestHarnessFiles\QUnit\v1\qunit.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -472,12 +516,34 @@
     <Content Include="ChutzpahTestHarnessFiles\QUnit\v2\qunit.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ChutzpahJSRunners\chutzpahFunctions.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\jasmineFunctionsV1.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ChutzpahJSRunners\qunitFunctions.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Node\x64\node.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Node\x86\node.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Models\vstsModel\vstst.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Node\packages\node_modules\**\*.*">
+      <TargetDirectory>$(OutputPath)</TargetDirectory>
+      <Link>Node\packages\node_modules\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <InProject>false</InProject>
+    </None>
+    <None Include="Node\packages\package.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
@@ -489,4 +555,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

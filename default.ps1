@@ -9,6 +9,7 @@ properties {
   
   $autoSignedNugetPackages = "$baseDir/packages_autosigned"
   $nugetPackges = "$baseDir/packages"
+  $nodeJsPackges = "$baseDir/Chutzpah/Node/packages"
 
   # Temp work around psake limitation to not use Msbuild 15
   $defaultMSBuildPath = Join-Path (Resolve-Path "${env:ProgramFiles(x86)}") "Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
@@ -40,7 +41,7 @@ task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, R
 
 
 function getLatestNugetPackagePath($name) {
-  return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+    return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
 }
 
 task Set-Version {
@@ -158,6 +159,12 @@ task Install-TypeScript {
 task Install-NodeModules {
   
   exec {  & npm install }
+
+
+  push-location $nodeJsPackges
+  $env:PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 1;
+  exec {  & npm install }
+  pop-location
 }
 
 task Setup-SymbolicLinks {
@@ -166,10 +173,9 @@ task Setup-SymbolicLinks {
 
 }
 
-
 task Sign-ForeignAssemblies {
 
-  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"}
+  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"; }
   
   clean $autoSignedNugetPackages
  
@@ -203,8 +209,7 @@ task Package-Files -depends Clean-PackageFiles {
     create $filesDir, $packageDir
     copy-item "$baseDir\License.txt" -destination $filesDir
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
-    
-    
+
     # Copy Adapter files to package zip  
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $filesDir
@@ -306,7 +311,7 @@ function clean([string[]]$paths) {
 
 function roboexec([scriptblock]$cmd) {
     & $cmd | out-null
-    if ($lastexitcode -eq 0) { throw "No files were copied for command: " + $cmd }
+    #if ($lastexitcode -eq 0) { throw "No files were copied for command: " + $cmd }
 }
 
 # Borrowed from Luis Rocha's Blog (http://www.luisrocha.net/2009/11/setting-assembly-version-with-windows.html)

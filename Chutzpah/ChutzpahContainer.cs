@@ -57,6 +57,7 @@ namespace Chutzpah
                             scan.AddAllTypesOf<IMochaReferencedFileProcessor>();
                             scan.AddAllTypesOf<ILineCoverageMapper>();
                             scan.AddAllTypesOf<IFrameworkDefinition>();
+                            scan.AddAllTypesOf<ITestExecutionProvider>();
                         });
                 });
 
