@@ -50,6 +50,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
             attemptingToSetupTestFramework = true;
             debugLog("checking isFrameworkLoaded ");
             var loaded = await evaluate(isFrameworkLoaded);
+            debugLog("=== loaded:" + JSON.stringify(loaded));
             if (loaded && (typeof loaded !== "string" || loaded === "true")) {
                 testFrameworkLoaded = true;
                 debugLog("calling onFrameworkLoaded");
@@ -127,9 +128,9 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         return await waitFor(waitCondition, timeOut);
     }
 
-    async function pageInitializedHandler(evaluate) {
+    function pageInitializedHandler(evaluate) {
         debugLog("pageInitializedHandler");
-        await evaluate(onInitialized);
+        evaluate(onInitialized);
     }
 
     function getPageInitializationScript() {
@@ -181,17 +182,20 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
 
 
     function captureLog(message) {
-        debugLog("captureLog: " + message);
+        //debugLog("captureLog: " + message);
+        //debugLog("AA" + JSON.stringify(message));
         if (message.type === 'error') {
-            chutzpahFunctions.onError(message.text(), message.text());
+            chutzpahFunctions.onError(message, message);
         }
         else {
-            chutzpahFunctions.captureLogMessage(message.text());
+            chutzpahFunctions.captureLogMessage(message);
         }
     }
 
 
     let window = null;
+    let evaluate = (func) => { return window.eval(wrapFunctionForEvaluation(func)); };
+
     try {
 
         const virtualConsole = jsdom.createVirtualConsole();
@@ -207,24 +211,26 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
             jsdom.env({
                 url: testFile,
                 virtualConsole: virtualConsole,
+                userAgent: userAgent, 
                 resourceLoader: function (resource, callback) {
-                    var pathname = resource.url.pathname;
-
+                    var href = resource.url.href;
                     return resource.defaultFetch((err, body) => {
                         if (err) {
                             let errorText = error.message;
                             if (!ignoreResourceLoadingError) {
                                 chutzpahFunctions.onError(errorText);
                             }
-                            chutzpahFunctions.rawLog("!!_!! Resource Error for " + pathname + " with error " + errorText);
+                            chutzpahFunctions.rawLog("!!_!! Resource Error for " + href + " with error " + errorText);
 
                             return callback(err);
                         }
 
                         callback(null, body);
 
-                        chutzpahFunctions.rawLog("!!_!! Resource Received: " + pathname);
-                        await trySetupTestFramework(evaluate);
+                        chutzpahFunctions.rawLog("!!_!! Resource Received: " + href);
+
+                        // TODO: should I synchronize invocations of this?
+                        trySetupTestFramework(evaluate);
                     });
                 },
                 features: {
@@ -232,31 +238,57 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
                     ProcessExternalResources: ["script"],
                     SkipExternalResources: false
                 },
-                done: function (err, window) {
+                created: function (err, win) {
+
+                    chutzpahFunctions.rawLog("!!_!! On JsDom ::created");
+
+                    if (err !== null) {
+                        return;
+                    }
+                    window = win;
+
+                    debugLog("Setup stubs for JsDom");
+                    window.eval(`
+                        window.scrollTo = function() {};
+                        HTMLCanvasElement.prototype.getContext = () => {
+                         return {
+                              fillStyle: null,
+                              fillRect: function() {},
+                              drawImage: function() {},
+                              getImageData: function() {},
+                              scale: function() {},
+                            };
+                        }
+                    `);
+
+
+                    debugLog("Evaling page initialization script");
+                    window.eval(getPageInitializationScript());
+
+                    pageInitializedHandler(evaluate);
+
+                },
+                done: function (err, win) {
+
+                    chutzpahFunctions.rawLog("!!_!! On JsDom::loadDone");
+
                     if (err !== null) {
                         reject(err);
                     }
 
-                    resolve(window);
+                    resolve();
                 }
             });
         });
 
 
-        const evaluate = (func) => { return window.eval(wrapFunctionForEvaluation(func)); };
-
-        await page.evaluateOnNewDocument(getPageInitializationScript());
-
         debugLog("### Navigate...");
-        window = await loadPagePromise();
-
-        debugLog("### calling pageInitializedHandler");
-        await pageInitializedHandler(evaluate);
+        await loadPagePromise;
 
         debugLog("### calling pageOpenHandler");
         finalResult = await pageOpenHandler(evaluate);
         debugLog("Just about done: " + finalResult);
-        
+
         if (window) { window.close(); }
 
     } catch (err) {

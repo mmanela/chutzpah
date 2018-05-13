@@ -18,7 +18,7 @@ namespace Chutzpah
         private readonly ITestCaseStreamReaderFactory readerFactory;
         private readonly bool isRunningElevated;
 
-        public bool CanHandleBrowser(Engine engine) => engine == Engine.Chrome;
+        public bool CanHandleBrowser(Engine engine) => engine == Engine.Chrome || engine == Engine.JsDom;
 
         public NodeTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)
@@ -40,7 +40,8 @@ namespace Chutzpah
 
         public void SetupEnvironment(TestOptions testOptions, TestContext testContext)
         {
-            if (testContext.TestFileSettings.EngineOptions != null && testContext.TestFileSettings.EngineOptions.PreventDownloadOfEngineDepenedencies)
+            if (testContext.TestFileSettings.Engine != Engine.Chrome || 
+                (testContext.TestFileSettings.EngineOptions != null && testContext.TestFileSettings.EngineOptions.PreventDownloadOfEngineDepenedencies))
             {
                 return;
             }
@@ -133,9 +134,9 @@ namespace Chutzpah
                                         testModeStr,
                                         timeout,
                                         isRunningElevated,
-                                        tryToFindChrome,
                                         context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
-                                        context.TestFileSettings.UserAgent);
+                                        context.TestFileSettings.UserAgent,
+                                        tryToFindChrome);
 
             return runnerArgs;
         }

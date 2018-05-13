@@ -13,7 +13,7 @@ function isTestingDone() {
 
 function isQunitLoaded() {
     console.log("!!_!! isQunitLoaded");
-    return !!window.QUnit;
+    return !!window.QUnit && !!window.QUnit.test;
 }
 
 function onQUnitLoaded() {

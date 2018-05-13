@@ -416,9 +416,6 @@
     <Content Include="ChutzpahJSRunners\JsDom\qunitRunner.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ChutzpahJSRunners\JsDom\setupRunner.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="ChutzpahJSRunners\mochaFunctions.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

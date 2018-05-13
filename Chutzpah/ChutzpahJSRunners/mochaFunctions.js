@@ -19,7 +19,7 @@ function onPageLoaded() {
 function isMochaLoaded() {
     console.log("!!_!! isMochaLoaded");
 
-    return !!window.mocha;
+    return !!window.mocha && !!mocha.reporter;
 }
 
 function onMochaLoaded() {

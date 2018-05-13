@@ -29,15 +29,15 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     }
 
     if (process.argv.length > 6) {
-        tryToFindChrome = "true" === process.argv[6].toLowerCase();
+        ignoreResourceLoadingError = "true" === process.argv[6].toLowerCase();
     }
 
     if (process.argv.length > 7) {
-        ignoreResourceLoadingError = "true" === process.argv[7].toLowerCase();
+        userAgent = process.argv[7];
     }
 
     if (process.argv.length > 8) {
-        userAgent = process.argv[8];
+        tryToFindChrome = "true" === process.argv[8].toLowerCase();
     }
 
     function debugLog(msg) {

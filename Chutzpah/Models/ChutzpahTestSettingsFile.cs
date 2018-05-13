@@ -99,8 +99,8 @@ namespace Chutzpah.Models
             EnableTestFileBatching = false;
             IgnoreResourceLoadingErrors = false;
 
-            // Default to PhantomJs for now but once stable make Chrome default
-            Engine = Models.Engine.Chrome;
+            // Default to PhantomJs for now but once stable make JsDom default
+            Engine = Models.Engine.JsDom;
             
             if (ForceWebServerMode)
             {
