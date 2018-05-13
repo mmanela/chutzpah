@@ -14,7 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-            * Add support for Qunit 2.4
+            * Update dependent dll
         </releaseNotes>
     </metadata>
 </package>
