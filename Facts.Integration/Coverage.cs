@@ -7,6 +7,7 @@ using Xunit.Extensions;
 
 namespace Chutzpah.Facts.Integration
 {
+    
     public class Coverage : CoverageBase
     {
         public Coverage()
