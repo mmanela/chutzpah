@@ -67,7 +67,8 @@ namespace Chutzpah.VS2012.TestAdapter
 
         private static string BuildFullyQualifiedName(Models.TestCase testCase)
         {
-            var parts = new[] { testCase.InputTestFile, testCase.ModuleName, testCase.TestName };
+            var filePath = !string.IsNullOrEmpty(testCase.PathFromTestSettingsDirectory) ? testCase.PathFromTestSettingsDirectory : testCase.InputTestFile;
+            var parts = new[] { filePath, testCase.ModuleName, testCase.TestName };
             return String.Join("::", parts).ToLowerInvariant();
         }
 

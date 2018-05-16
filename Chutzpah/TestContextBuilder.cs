@@ -426,9 +426,11 @@ namespace Chutzpah
                 Path = f.File.FullPath,
                 IsLocal = true,
                 IsFileUnderTest = true,
-                // Expand reference comments if we either do not have a matching test path setting or the user explictly asked to do it
+                // Expand reference comments if we either do not have a matching test path setting or the user explicitly asked to do it
                 ExpandReferenceComments = f.MatchingTestSetting == null || f.MatchingTestSetting.ExpandReferenceComments,
-                IncludeInTestHarness = chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal
+                IncludeInTestHarness = chutzpahTestSettings.TestHarnessReferenceMode == TestHarnessReferenceMode.Normal,
+
+                PathFromTestSettingsDirectory = string.IsNullOrEmpty(chutzpahTestSettings.SettingsFileDirectory) ? null : UrlBuilder.GetRelativePath(chutzpahTestSettings.SettingsFileDirectory, f.File.FullPath)
             });
         }
 

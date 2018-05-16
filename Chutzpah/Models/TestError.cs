@@ -15,6 +15,7 @@ namespace Chutzpah.Models
         public string Message { get; set; }
         public IList<Stack> Stack { get; set; }
         public string StackAsString { get; set; }
+        public string PathFromTestSettingsDirectory { get; internal set; }
 
         public string GetFormattedStackTrace()
         {

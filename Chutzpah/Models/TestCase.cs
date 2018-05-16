@@ -20,6 +20,7 @@ namespace Chutzpah.Models
 
         public string HtmlTestFile { get; set; }
         public string InputTestFile { get; set; }
+        public string PathFromTestSettingsDirectory { get; set; }
         public string ModuleName { get; set; }
         public string TestName { get; set; }
         public int Line { get; set; }
@@ -33,7 +34,7 @@ namespace Chutzpah.Models
         /// </summary>
         public int TimeTaken { get; set; }
 
-        public bool ResultsAllPassed { get { return TestResults.All(x => x.Passed); }}
+        public bool ResultsAllPassed { get { return TestResults.All(x => x.Passed); } }
 
         public TestOutcome TestOutcome
         {

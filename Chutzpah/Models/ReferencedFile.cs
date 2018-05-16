@@ -107,5 +107,10 @@ namespace Chutzpah.Models
         /// A cached hash string for the file user for user generation
         /// </summary>
         public string Hash { get; set; }
+
+        /// <summary>
+        /// Relative path from test settings directory (if one exists)
+        /// </summary>
+        public string PathFromTestSettingsDirectory { get; internal set; }
     }
 }

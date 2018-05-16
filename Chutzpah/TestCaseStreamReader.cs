@@ -137,6 +137,7 @@ namespace Chutzpah
 
             var jsTestCase = jsRunnerOutput as JsTestCase;
             jsTestCase.TestCase.InputTestFile = testFileContext.ReferencedFile.Path;
+            jsTestCase.TestCase.PathFromTestSettingsDirectory = currentTestFileContext.ReferencedFile.PathFromTestSettingsDirectory;
             AddLineNumber(testFileContext.ReferencedFile, testIndex, jsTestCase);
             callback.TestFinished(jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
@@ -186,6 +187,7 @@ namespace Chutzpah
             }
 
             log.Log.InputTestFile = testFileContext.ReferencedFile.Path;
+            log.Log.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
             callback.FileLog(log.Log);
             testFileContext.TestFileSummary.Logs.Add(log.Log);
         }
@@ -195,6 +197,7 @@ namespace Chutzpah
             var error = jsRunnerOutput as JsError;
 
             error.Error.InputTestFile = testFileContext.ReferencedFile.Path;
+            error.Error.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
             callback.FileError(error.Error);
             testFileContext.TestFileSummary.Errors.Add(error.Error);
 
@@ -202,6 +205,7 @@ namespace Chutzpah
             {
                 var fileErrorTest = new TestCase();
                 fileErrorTest.InputTestFile = testFileContext.ReferencedFile.Path;
+                fileErrorTest.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
                 fileErrorTest.TestName = string.Format("!! File Error #{0} - Error encountered outside of test case execution !!", testFileContext.TestFileSummary.Errors.Count);
                 fileErrorTest.TestResults.Add(new TestResult { Passed = false, StackTrace = error.Error.StackAsString ?? error.Error.FormatStackObject(), Message = error.Error.Message });
                 callback.TestStarted(fileErrorTest);
@@ -348,6 +352,7 @@ namespace Chutzpah
                         PlayDeferredEvents(currentTestFileContext, deferredEvents);
 
                         jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
+                        jsTestCaseStart.TestCase.PathFromTestSettingsDirectory = currentTestFileContext.ReferencedFile.PathFromTestSettingsDirectory;
                         callback.TestStarted(jsTestCaseStart.TestCase);
 
 
