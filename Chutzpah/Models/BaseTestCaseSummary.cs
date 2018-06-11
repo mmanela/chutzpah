@@ -83,6 +83,14 @@ namespace Chutzpah.Models
         }
 
         /// <summary>
+        /// Number of tests which not ran
+        /// </summary>
+        public int NotRanCount
+        {
+            get { return Tests.Count(x => x.TestOutcome == TestOutcome.None); }
+        }
+
+        /// <summary>
         /// Add a test case
         /// </summary>
         /// <param name="testCase"></param>

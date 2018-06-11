@@ -74,7 +74,7 @@ namespace Chutzpah
             if (readerTask.IsCompleted)
             {
                 ChutzpahTracer.TraceInformation("Finished reading stream from test file '{0}'", testContext.FirstInputTestFile);
-                testCaseStreamReadResult.TestFileSummaries = streamingTestFileContexts.Select(x => x.TestFileSummary).ToList();
+
             }
             else
             {
@@ -84,18 +84,57 @@ namespace Chutzpah
                 // not know where they belong
                 PlayDeferredEvents(streamingTestFileContexts.FirstOrDefault(), deferredEvents);
 
-                // We timed out so kill the process and return an empty test file summary
+                // We timed out so kill the process
                 ChutzpahTracer.TraceError("Test file '{0}' timed out after running for {1} milliseconds", testContext.FirstInputTestFile, (DateTime.Now - testCaseSource.LastTestEvent).TotalMilliseconds);
 
 
                 testCaseSource.Dispose();
                 testCaseStreamReadResult.TimedOut = true;
-                testCaseStreamReadResult.TestFileSummaries = testContext.ReferencedFiles.Where(x => x.IsFileUnderTest).Select(file => new TestFileSummary(file.Path)).ToList();
+                FireTimedoutOutput(callback, streamingTestFileContexts);
             }
 
+            FileNotRanTests(streamingTestFileContexts);
+            testCaseStreamReadResult.TestFileSummaries = streamingTestFileContexts.Select(x => x.TestFileSummary).ToList();
             return testCaseStreamReadResult;
         }
 
+        /// <summary>
+        /// Fail the timed out test
+        /// </summary>
+        /// <param name="streamingTestFileContexts">List of StreamingTestFileContext</param>
+        private void FireTimedoutOutput(ITestMethodRunnerCallback callback, IList<StreamingTestFileContext> streamingTestFileContexts)
+        {
+            foreach (var streamingTestFileContext in streamingTestFileContexts)
+            {
+                FailTimedOutTest(callback, streamingTestFileContext);
+            }
+        }
+
+        /// <summary>
+        /// Find tests which are not ran
+        /// </summary>
+        /// <param name="streamingTestFileContexts">List of StreamingTestFileContext</param>
+        private void FileNotRanTests(IList<StreamingTestFileContext> streamingTestFileContexts)
+        {
+            foreach (var streamingTestFileContext in streamingTestFileContexts)
+            {
+                int totalTestsCountInFile = streamingTestFileContext.ReferencedFile.FilePositions.TotalTestsCount();
+                for (int i = 0; i < totalTestsCountInFile; i++)
+                {
+                    string testNameInFile = streamingTestFileContext.ReferencedFile.FilePositions[i].TestName;
+                    if (!streamingTestFileContext.SeenTests.Any(t => (t.Item2 == testNameInFile)))
+                    {
+                        var notRanTest = new TestCase();
+                        notRanTest.InputTestFile = streamingTestFileContext.ReferencedFile.Path;
+                        notRanTest.TestName = testNameInFile;
+                        notRanTest.Line = streamingTestFileContext.ReferencedFile.FilePositions[i].Line;
+                        notRanTest.Column = streamingTestFileContext.ReferencedFile.FilePositions[i].Column;
+                        notRanTest.NotRan = true;
+                        streamingTestFileContext.TestFileSummary.AddTestCase(notRanTest);
+                    }
+                }
+            }
+        }
         class StreamingTestFileContext
         {
             public ReferencedFile ReferencedFile { get; set; }
@@ -217,6 +256,37 @@ namespace Chutzpah
             ChutzpahTracer.TraceError("Error received from Phantom {0}", error.Error.Message);
         }
 
+        private void FailTimedOutTest(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext)
+        {
+            var failedTest = new TestCase();
+            var timedOutTest = FindTimedoutTest(testFileContext);
+            if (timedOutTest != null)
+            {
+                failedTest.InputTestFile = testFileContext.ReferencedFile.Path;
+                failedTest.ModuleName = timedOutTest.Item1;
+                failedTest.TestName = timedOutTest.Item2;
+                failedTest.Line = testFileContext.ReferencedFile.FilePositions[timedOutTest.Item2].Line;
+                failedTest.Column = testFileContext.ReferencedFile.FilePositions[timedOutTest.Item2].Column;
+                failedTest.TestResults.Add(new TestResult { Passed = false, Message = "Timeout occurred when executing test file." });
+                testFileContext.TestFileSummary.AddTestCase(failedTest);
+
+                callback.TestStarted(failedTest);
+                callback.TestFinished(failedTest);
+            }
+        }
+
+        private Tuple<string, string> FindTimedoutTest(StreamingTestFileContext testFileContext)
+        {
+            foreach (var seenTest in testFileContext.SeenTests)
+            {
+                if (!(testFileContext.TestFileSummary.Tests.Any(t => (t.ModuleName == seenTest.Item1 && t.TestName == seenTest.Item2))))
+                {
+                    return seenTest;
+                }
+            }
+
+            return null;
+        }
         private bool ProcessLine(string line, TestContext testContext, IList<StreamingTestFileContext> streamingTestFileContexts, IList<Action<StreamingTestFileContext>> deferredEvents, ITestMethodRunnerCallback callback, bool debugEnabled)
         {
 

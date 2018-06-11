@@ -26,6 +26,7 @@ namespace Chutzpah.Models
         public int Line { get; set; }
         public int Column { get; set; }
         public bool Skipped { get; set; }
+        public bool NotRan { get; set; }
         public IList<TestResult> TestResults { get; set; }
 
 
@@ -34,7 +35,7 @@ namespace Chutzpah.Models
         /// </summary>
         public int TimeTaken { get; set; }
 
-        public bool ResultsAllPassed { get { return TestResults.All(x => x.Passed); } }
+        public bool ResultsAllPassed { get { return TestResults.Count() != 0 && TestResults.All(x => x.Passed); } }    
 
         public TestOutcome TestOutcome
         {
@@ -43,6 +44,10 @@ namespace Chutzpah.Models
                 if (Skipped)
                 {
                     return TestOutcome.Skipped;
+                }
+                else if (NotRan)
+                {
+                    return TestOutcome.None;
                 }
                 else if (ResultsAllPassed)
                 {

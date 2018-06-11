@@ -259,9 +259,10 @@ namespace Chutzpah
                 overallSummary.TransformResult = transformProcessor.ProcessTransforms(testContexts, overallSummary);
 
                 ChutzpahTracer.TraceInformation(
-                    "Chutzpah run finished with {0} passed, {1} failed and {2} errors",
+                    "Chutzpah run finished with {0} passed, {1} failed, {2} not ran and {3} errors",
                     overallSummary.PassedCount,
                     overallSummary.FailedCount,
+                    overallSummary.NotRanCount,
                     overallSummary.Errors.Count);
 
                 return overallSummary;

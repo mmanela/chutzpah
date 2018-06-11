@@ -13,6 +13,11 @@ namespace Chutzpah.Models
             this.positions = new List<FilePosition>();
         }
 
+        public int TotalTestsCount()
+        {
+            return positions.Count();
+        }
+
         public FilePosition this[int index]
         {
             get
