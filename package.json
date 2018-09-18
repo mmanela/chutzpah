@@ -14,11 +14,9 @@
     "core-js": "2.4.1",
     "reflect-metadata": "^0.1.8",
     "rxjs": "5.0.1",
-    "zone.js": "^0.7.4",
-    "es6-shim": "^0.35.0"
+    "zone.js": "^0.7.4"
   },
   "devDependencies": {
-    "@types/es6-shim": "~0.31.32",
     "@types/jasmine": "~2.5.38"
   },
   "scripts": {
