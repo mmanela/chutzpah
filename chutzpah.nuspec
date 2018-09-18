@@ -14,7 +14,10 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-            * Update dependent dll
+            * Update QUnit to 2.6.2
+            * Update Jasmine to 2.9
+            * Add support for running tests with JSDom
+            * Add support for running tests with Chrome
         </releaseNotes>
     </metadata>
 </package>
