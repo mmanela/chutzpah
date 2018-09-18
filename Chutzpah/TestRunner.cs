@@ -240,7 +240,7 @@ namespace Chutzpah
                 }
 
                 // Find the first test context with a web server configuration and use it
-                var webServerHost = SetupWebServerHost(testContexts, activeWebServerHost);
+                var webServerHost = SetupWebServerHost(testContexts, options);
                 ActiveWebServerHost = webServerHost;
 
                 // Build test harness for each context and execute it in parallel
@@ -282,11 +282,25 @@ namespace Chutzpah
             }
         }
 
-        private IChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts, IChutzpahWebServerHost activeWebServerHost)
+        private IChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts, TestOptions options)
         {
+            var needsServer = options.Engine != Engine.Phantom;
+
             IChutzpahWebServerHost webServerHost = null;
-            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.GetValueOrDefault()).ToList();
+            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server?.Enabled.GetValueOrDefault() == true).ToList();
             var contextWithChosenServerConfiguration = contextUsingWebServer.FirstOrDefault();
+
+            if (contextWithChosenServerConfiguration == null && needsServer)
+            {
+                foreach (var testContext in testContexts)
+                {
+                    testContext.TestFileSettings.Server = ForcedChutzpahWebServerConfiguration.Instance;
+                }
+
+                contextUsingWebServer = testContexts.ToList();
+                contextWithChosenServerConfiguration = testContexts.FirstOrDefault();
+            }
+
             if (contextWithChosenServerConfiguration != null)
             {
                 var webServerConfiguration = contextWithChosenServerConfiguration.TestFileSettings.Server;

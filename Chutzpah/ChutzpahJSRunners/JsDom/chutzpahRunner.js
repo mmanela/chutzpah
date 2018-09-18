@@ -32,8 +32,8 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         ignoreResourceLoadingError = "true" === process.argv[6].toLowerCase();
     }
 
-    if (process.argv.length > 7) {
-        userAgent = process.argv[7];
+    if (process.argv.length > 8) {
+        userAgent = process.argv[8];
     }
 
     function debugLog(msg) {

@@ -52,11 +52,13 @@ namespace Chutzpah.Models
 
     public class EngineOptions
     {
-        public bool PreventDownloadOfEngineDepenedencies { get; set; }
+        public string ChromeBrowserPath { get; set; }
     }
 
     public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
     {
+        public static readonly ForcedChutzpahWebServerConfiguration Instance = new ForcedChutzpahWebServerConfiguration();
+
         public ForcedChutzpahWebServerConfiguration()
         {
             Enabled = true;
@@ -104,7 +106,7 @@ namespace Chutzpah.Models
             
             if (ForceWebServerMode)
             {
-                Server = new ForcedChutzpahWebServerConfiguration();
+                Server = ForcedChutzpahWebServerConfiguration.Instance;
             }
         }
 

@@ -14,5 +14,9 @@
         { "Path": "lib/react/react-dom.js", "IsTestFrameworkFile": true },
         { "Path": "lib/react/react-with-addons.js", "IsTestFrameworkFile": true },
         { "Path": "src/example.jsx" }
-    ]
+    ],
+
+    "EngineOptions": { 
+        "ChromeBrowserPath": "C:\\Dev\\test\\node_modules\\puppeteer\\.local-chromium\\win64-588429\\chrome-win32\\chrome.exe"
+    }
 }
