@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2016 Pivotal Labs
+Copyright (c) 2008-2018 Pivotal Labs
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -34,6 +34,46 @@ jasmineRequire.HtmlReporter = function(j$) {
     elapsed: function() { return 0; }
   };
 
+  function ResultsStateBuilder() {
+    this.topResults = new j$.ResultsNode({}, '', null);
+    this.currentParent = this.topResults;
+    this.specsExecuted = 0;
+    this.failureCount = 0;
+    this.pendingSpecCount = 0;
+  }
+
+  ResultsStateBuilder.prototype.suiteStarted = function(result) {
+    this.currentParent.addChild(result, 'suite');
+    this.currentParent = this.currentParent.last();
+  };
+
+  ResultsStateBuilder.prototype.suiteDone = function(result) {
+    if (this.currentParent !== this.topResults) {
+      this.currentParent = this.currentParent.parent;
+    }
+  };
+
+  ResultsStateBuilder.prototype.specStarted = function(result) {
+  };
+
+  ResultsStateBuilder.prototype.specDone = function(result) {
+    this.currentParent.addChild(result, 'spec');
+
+    if (result.status !== 'disabled') {
+      this.specsExecuted++;
+    }
+
+    if (result.status === 'failed') {
+      this.failureCount++;
+    }
+
+    if (result.status == 'pending') {
+      this.pendingSpecCount++;
+    }
+  };
+
+
+
   function HtmlReporter(options) {
     var env = options.env || {},
       getContainer = options.getContainer,
@@ -43,14 +83,13 @@ jasmineRequire.HtmlReporter = function(j$) {
       onThrowExpectationsClick = options.onThrowExpectationsClick || function() {},
       onRandomClick = options.onRandomClick || function() {},
       addToExistingQueryString = options.addToExistingQueryString || defaultQueryString,
+      filterSpecs = options.filterSpecs,
       timer = options.timer || noopTimer,
       results = [],
-      specsExecuted = 0,
-      failureCount = 0,
-      pendingSpecCount = 0,
       htmlReporterMain,
       symbols,
-      failedSuites = [];
+      failedSuites = [],
+      deprecationWarnings = [];
 
     this.initialize = function() {
       clearPrior();
@@ -76,12 +115,10 @@ jasmineRequire.HtmlReporter = function(j$) {
 
     var summary = createDom('div', {className: 'jasmine-summary'});
 
-    var topResults = new j$.ResultsNode({}, '', null),
-      currentParent = topResults;
+    var stateBuilder = new ResultsStateBuilder();
 
     this.suiteStarted = function(result) {
-      currentParent.addChild(result, 'suite');
-      currentParent = currentParent.last();
+      stateBuilder.suiteStarted(result);
     };
 
     this.suiteDone = function(result) {
@@ -89,25 +126,20 @@ jasmineRequire.HtmlReporter = function(j$) {
         failedSuites.push(result);
       }
 
-      if (currentParent == topResults) {
-        return;
-      }
-
-      currentParent = currentParent.parent;
+      stateBuilder.suiteDone(result);
+      addDeprecationWarnings(result);
     };
 
     this.specStarted = function(result) {
-      currentParent.addChild(result, 'spec');
+      stateBuilder.specStarted(result);
     };
 
     var failures = [];
     this.specDone = function(result) {
+      stateBuilder.specDone(result);
+
       if(noExpectations(result) && typeof console !== 'undefined' && typeof console.error !== 'undefined') {
         console.error('Spec \'' + result.fullName + '\' has no expectations.');
-      }
-
-      if (result.status != 'disabled') {
-        specsExecuted++;
       }
 
       if (!symbols){
@@ -122,8 +154,6 @@ jasmineRequire.HtmlReporter = function(j$) {
       ));
 
       if (result.status == 'failed') {
-        failureCount++;
-
         var failure =
           createDom('div', {className: 'jasmine-spec-detail jasmine-failed'},
             createDom('div', {className: 'jasmine-description'},
@@ -142,9 +172,7 @@ jasmineRequire.HtmlReporter = function(j$) {
         failures.push(failure);
       }
 
-      if (result.status == 'pending') {
-        pendingSpecCount++;
-      }
+      addDeprecationWarnings(result);
     };
 
     this.jasmineDone = function(doneResult) {
@@ -207,9 +235,9 @@ jasmineRequire.HtmlReporter = function(j$) {
         }
       };
 
-      if (specsExecuted < totalSpecsDefined) {
-        var skippedMessage = 'Ran ' + specsExecuted + ' of ' + totalSpecsDefined + ' specs - run all';
-        var skippedLink = order && order.random ? '?random=true' : '?';
+      if (stateBuilder.specsExecuted < totalSpecsDefined) {
+        var skippedMessage = 'Ran ' + stateBuilder.specsExecuted + ' of ' + totalSpecsDefined + ' specs - run all';
+        var skippedLink = addToExistingQueryString('spec', '');
         alert.appendChild(
           createDom('span', {className: 'jasmine-bar jasmine-skipped'},
             createDom('a', {href: skippedLink, title: 'Run all specs'}, skippedMessage)
@@ -220,9 +248,9 @@ jasmineRequire.HtmlReporter = function(j$) {
       var statusBarClassName = 'jasmine-bar ';
 
       if (totalSpecsDefined > 0) {
-        statusBarMessage += pluralize('spec', specsExecuted) + ', ' + pluralize('failure', failureCount);
-        if (pendingSpecCount) { statusBarMessage += ', ' + pluralize('pending spec', pendingSpecCount); }
-        statusBarClassName += (failureCount > 0) ? 'jasmine-failed' : 'jasmine-passed';
+        statusBarMessage += pluralize('spec', stateBuilder.specsExecuted) + ', ' + pluralize('failure', stateBuilder.failureCount);
+        if (stateBuilder.pendingSpecCount) { statusBarMessage += ', ' + pluralize('pending spec', stateBuilder.pendingSpecCount); }
+        statusBarClassName += (stateBuilder.failureCount > 0) ? 'jasmine-failed' : 'jasmine-passed';
       } else {
         statusBarClassName += 'jasmine-skipped';
         statusBarMessage += 'No specs found';
@@ -254,15 +282,26 @@ jasmineRequire.HtmlReporter = function(j$) {
         alert.appendChild(createDom('span', {className: errorBarClassName}, errorBarMessagePrefix + failure.message));
       }
 
+      addDeprecationWarnings(doneResult);
+
+      var warningBarClassName = 'jasmine-bar jasmine-warning';
+      for(i = 0; i < deprecationWarnings.length; i++) {
+        var warning = deprecationWarnings[i];
+        alert.appendChild(createDom('span', {className: warningBarClassName}, 'DEPRECATION: ' + warning));
+      }
+
       var results = find('.jasmine-results');
       results.appendChild(summary);
 
-      summaryList(topResults, summary);
+      summaryList(stateBuilder.topResults, summary);
 
       function summaryList(resultsTree, domParent) {
         var specListNode;
         for (var i = 0; i < resultsTree.children.length; i++) {
           var resultNode = resultsTree.children[i];
+          if (filterSpecs && !hasActiveSpec(resultNode)) {
+            continue;
+          }
           if (resultNode.type == 'suite') {
             var suiteListNode = createDom('ul', {className: 'jasmine-suite', id: 'suite-' + resultNode.result.id},
               createDom('li', {className: 'jasmine-suite-detail'},
@@ -324,6 +363,17 @@ jasmineRequire.HtmlReporter = function(j$) {
     };
 
     return this;
+
+    function addDeprecationWarnings(result) {
+      if (result && result.deprecationWarnings) {
+        for(var i = 0; i < result.deprecationWarnings.length; i++) {
+          var warning = result.deprecationWarnings[i].message;
+          if (!j$.util.arrayContains(warning)) {
+            deprecationWarnings.push(warning);
+          }
+        }
+      }
+    }
 
     function find(selector) {
       return getContainer().querySelector('.jasmine_html-reporter ' + selector);
@@ -389,6 +439,20 @@ jasmineRequire.HtmlReporter = function(j$) {
     function noExpectations(result) {
       return (result.failedExpectations.length + result.passedExpectations.length) === 0 &&
         result.status === 'passed';
+    }
+
+    function hasActiveSpec(resultNode) {
+      if (resultNode.type == 'spec' && resultNode.result.status != 'disabled') {
+        return true;
+      }
+
+      if (resultNode.type == 'suite') {
+        for (var i = 0, j = resultNode.children.length; i < j; i++) {
+          if (hasActiveSpec(resultNode.children[i])) {
+            return true;
+          }
+        }
+      }
     }
   }
 

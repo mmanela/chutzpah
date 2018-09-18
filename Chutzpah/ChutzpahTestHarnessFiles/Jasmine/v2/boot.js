@@ -50,6 +50,8 @@
     getWindowLocation: function() { return window.location; }
   });
 
+  var filterSpecs = !!queryString.getParam("spec");
+
   var catchingExceptions = queryString.getParam("catch");
   env.catchExceptions(typeof catchingExceptions === "undefined" ? true : catchingExceptions);
 
@@ -77,7 +79,8 @@
     getContainer: function() { return document.body; },
     createElement: function() { return document.createElement.apply(document, arguments); },
     createTextNode: function() { return document.createTextNode.apply(document, arguments); },
-    timer: new jasmine.Timer()
+    timer: new jasmine.Timer(),
+    filterSpecs: filterSpecs
   });
 
   /**
