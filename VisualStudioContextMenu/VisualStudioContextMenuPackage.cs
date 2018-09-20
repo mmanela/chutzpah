@@ -19,6 +19,8 @@ using Task = System.Threading.Tasks.Task;
 using Chutzpah.Coverage;
 using Microsoft.Build.Evaluation;
 using Chutzpah.Models;
+using Microsoft.VisualStudio;
+using System.Threading;
 
 namespace Chutzpah.VisualStudioContextMenu
 {
@@ -34,7 +36,7 @@ namespace Chutzpah.VisualStudioContextMenu
     /// </summary>
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideBindingPath]
     // This attribute is used to register the informations needed to show the this package
     // in the Help/About dialog of Visual Studio.
@@ -42,10 +44,10 @@ namespace Chutzpah.VisualStudioContextMenu
     [ProvideOptionPage(typeof(ChutzpahSettings), "Chutzpah", "Chutzpah Settings", 111, 113, true)]
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
-    [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
     [Guid(GuidList.guidChutzpahPkgString)]
-    public sealed class ChutzpahPackage : Package
+    public sealed class ChutzpahPackage : AsyncPackage
     {
         private DTE2 dte;
         private ITestRunner testRunner;
@@ -78,22 +80,24 @@ namespace Chutzpah.VisualStudioContextMenu
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by Visual Studio.
         /// </summary>
-        protected override void Initialize()
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
-            base.Initialize();
 
-            dte = (DTE2)GetService(typeof(DTE));
+            testRunner = TestRunner.Create();
+            processHelper = ChutzpahContainer.Get<IProcessHelper>();
+
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+
+            dte = (DTE2)(await GetServiceAsync(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
             if (dte == null)
             {
                 //if dte is null then we throw a exception
-                //this is a fatal error
+                //this is a fatal errorma
                 throw new ArgumentNullException("dte");
             }
 
-            testRunner = TestRunner.Create();
-            
-            processHelper = ChutzpahContainer.Get<IProcessHelper>();
             Logger = new Logger(this);
             Settings = GetDialogPage(typeof(ChutzpahSettings)) as ChutzpahSettings;
 

@@ -9,6 +9,9 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using System.Linq;
 using System.ComponentModel.Composition.Hosting;
+using Microsoft.VisualStudio;
+using System.Threading;
+using System;
 
 namespace Chutzpah.VS2012
 {
@@ -24,16 +27,16 @@ namespace Chutzpah.VS2012
     /// </summary>
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideBindingPath]
     [ProvideOptionPage(typeof (ChutzpahUTESettings), "Chutzpah", "Chutzpah Test Adapter Settings", 115, 116, true)]
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", Constants.ChutzpahVersion, IconResourceID = 400)]
-    [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
-    [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
     [Guid(GuidList.guidVS2012ChutzpahPkgString)]
-    public sealed class ChutzpahVS2012Package : Package
+    public sealed class ChutzpahVS2012Package : AsyncPackage
     {
         internal ILogger Logger { get; private set; }
         public ChutzpahUTESettings Settings { get; private set; }
@@ -74,10 +77,11 @@ namespace Chutzpah.VS2012
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
-        protected override void Initialize()
+        protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
-            base.Initialize();
+
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             Logger = new Logger(this);
             Settings = GetDialogPage(typeof (ChutzpahUTESettings)) as ChutzpahUTESettings;
