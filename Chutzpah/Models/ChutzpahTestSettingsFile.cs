@@ -52,6 +52,9 @@ namespace Chutzpah.Models
 
     public class EngineOptions
     {
+        /// <summary>
+        /// The path to the chrome/chromium executable on the machine
+        /// </summary>
         public string ChromeBrowserPath { get; set; }
     }
 
@@ -256,9 +259,15 @@ namespace Chutzpah.Models
         /// </summary>
         public int? CodeCoverageTimeout { get; set; }
 
+        /// <summary>
+        /// The browser engine to use to run the tests. Default is Phantom but JSDOM and Chrome are available. 
+        /// If you choose Chrome you must have an instance of Chrome or Chromium on the machine that Chutzpah can find.
+        /// </summary>
         public Engine? Engine { get; set; }
 
-
+        /// <summary>
+        /// The options for configuring the chosen engine
+        /// </summary>        
         public EngineOptions EngineOptions { get; set; }
 
         /// <summary>
