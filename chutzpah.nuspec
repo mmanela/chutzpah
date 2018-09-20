@@ -16,8 +16,9 @@
         <releaseNotes>
             * Update QUnit to 2.6.2
             * Update Jasmine to 2.9
-            * Add support for running tests with JSDom
-            * Add support for running tests with Chrome
+            * Support latest VS and remove support for VS 2012, 2013
+            * Add beta support for running tests with JSDom
+            * Add beta support for running tests with Chrome
         </releaseNotes>
     </metadata>
 </package>
