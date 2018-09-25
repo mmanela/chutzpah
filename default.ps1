@@ -248,7 +248,7 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     }
     
     regex-replace "$nugetDir\Chutzpah.nuspec" '(?m)@Version@' $vStr
-    exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -o $packageDir }
+    exec { .\Tools\nuget.exe pack "$nugetDir\Chutzpah.nuspec" -OutputDirectory $packageDir }
 }
 
 task Push-Public -depends Push-Nuget, Push-Chocolatey
