@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace Chutzpah
 {
+    // Missing a comment
     public class FileProbe : IFileProbe
     {
         private readonly IEnvironmentWrapper environment;
