@@ -16,51 +16,67 @@ namespace Chutzpah.Callbacks
             this.nestedCallback = nestedCallback;
         }
 
-        public void TestSuiteStarted()
+        public void TestContextStarted(TestContext context)
         {
             lock (sync)
             {
-                nestedCallback.TestSuiteStarted();
+                nestedCallback.TestContextStarted(context);
             }
         }
 
-        public void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        public void TestContextFinished(TestContext context)
         {
             lock (sync)
             {
-                nestedCallback.TestSuiteFinished(testResultsSummary);
+                nestedCallback.TestContextFinished(context);
             }
         }
 
-        public void FileStarted(string fileName)
+        public void TestSuiteStarted(TestContext context)
         {
             lock (sync)
             {
-                nestedCallback.FileStarted(fileName);
+                nestedCallback.TestSuiteStarted(context);
             }
         }
 
-        public void FileFinished(string fileName, TestFileSummary testResultsSummary)
+        public void TestSuiteFinished(TestContext context, TestCaseSummary testResultsSummary)
         {
             lock (sync)
             {
-                nestedCallback.FileFinished(fileName, testResultsSummary);
+                nestedCallback.TestSuiteFinished(context, testResultsSummary);
             }
         }
 
-        public void TestStarted(TestCase testCase)
+        public void FileStarted(TestContext context)
         {
             lock (sync)
             {
-                nestedCallback.TestStarted(testCase);
+                nestedCallback.FileStarted(context);
             }
         }
 
-        public void TestFinished(TestCase testCase)
+        public void FileFinished(TestContext context, TestFileSummary testResultsSummary)
         {
             lock (sync)
             {
-                nestedCallback.TestFinished(testCase);
+                nestedCallback.FileFinished(context, testResultsSummary);
+            }
+        }
+
+        public void TestStarted(TestContext context, TestCase testCase)
+        {
+            lock (sync)
+            {
+                nestedCallback.TestStarted(context, testCase);
+            }
+        }
+
+        public void TestFinished(TestContext context, TestCase testCase)
+        {
+            lock (sync)
+            {
+                nestedCallback.TestFinished(context, testCase);
             }
         }
 
@@ -72,19 +88,19 @@ namespace Chutzpah.Callbacks
             }
         }
 
-        public void FileError(TestError error)
+        public void FileError(TestContext context, TestError error)
         {
             lock (sync)
             {
-                nestedCallback.FileError(error);
+                nestedCallback.FileError(context, error);
             }
         }
 
-        public void FileLog(TestLog log)
+        public void FileLog(TestContext context, TestLog log)
         {
             lock (sync)
             {
-                nestedCallback.FileLog(log);
+                nestedCallback.FileLog(context, log);
             }
         }
     }

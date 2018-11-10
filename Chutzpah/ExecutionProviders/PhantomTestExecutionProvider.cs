@@ -48,13 +48,13 @@ namespace Chutzpah
 
             var processResult = processTools.RunExecutableAndProcessOutput(headlessBrowserPath, runnerArgs, streamProcessor, streamTimeout, null);
 
-            HandleTestProcessExitCode(processResult.ExitCode, testContext.FirstInputTestFile, processResult.Model.TestFileSummaries.Select(x => x.Errors).FirstOrDefault(), callback);
+            HandleTestProcessExitCode(testContext, processResult.ExitCode, testContext.FirstInputTestFile, processResult.Model.TestFileSummaries.Select(x => x.Errors).FirstOrDefault(), callback);
 
             return processResult.Model.TestFileSummaries;
         }
 
 
-        private static void HandleTestProcessExitCode(int exitCode, string inputTestFile, IList<TestError> errors, ITestMethodRunnerCallback callback)
+        private static void HandleTestProcessExitCode(TestContext context, int exitCode, string inputTestFile, IList<TestError> errors, ITestMethodRunnerCallback callback)
         {
             string errorMessage = null;
 
@@ -81,7 +81,7 @@ namespace Chutzpah
 
                 errors.Add(error);
 
-                callback.FileError(error);
+                callback.FileError(context, error);
                 ChutzpahTracer.TraceError("Headless browser returned with an error: {0}", errorMessage);
             }
         }

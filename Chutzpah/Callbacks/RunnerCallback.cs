@@ -19,43 +19,48 @@ namespace Chutzpah
             }
         }
 
-        public virtual void TestSuiteStarted() { }
-        public virtual void TestSuiteFinished(TestCaseSummary testResultsSummary) { }
-        public virtual void FileStarted(string fileName) { }
+        public virtual void TestContextStarted(TestContext context) { }
+        public virtual void TestContextFinished(TestContext context) { }
 
-        public virtual void FileFinished(string fileName, TestFileSummary testResultsSummary){}
+        public virtual void TestSuiteStarted(TestContext context) { }
+        public virtual void TestSuiteFinished(TestContext context,TestCaseSummary testResultsSummary) { }
 
-        public virtual void TestStarted(TestCase testCase) { }
+        public virtual void FileStarted(TestContext context) { }
+        public virtual void FileFinished(TestContext context, TestFileSummary testResultsSummary) { }
+
         public virtual void ExceptionThrown(Exception exception, string fileName) { }
-        public virtual void FileError(TestError error) { }
-        public virtual void FileLog(TestLog log) { }
-        public virtual void TestFinished(TestCase testCase)
+
+        public virtual void FileError(TestContext context, TestError error) { }
+        public virtual void FileLog(TestContext context, TestLog log) { }
+
+        public virtual void TestStarted(TestContext context, TestCase testCase) { }
+        public virtual void TestFinished(TestContext context, TestCase testCase)
         {
             switch (testCase.TestOutcome)
             {
                 case TestOutcome.Passed:
                     ChutzpahTracer.TraceInformation("File {0}, Test {1} passed", testCase.InputTestFile, testCase.TestName);
-                    TestPassed(testCase);
+                    TestPassed(context, testCase);
                     break;
                 case TestOutcome.Failed: 
                     ChutzpahTracer.TraceInformation("File {0}, Test {1} failed", testCase.InputTestFile, testCase.TestName);
-                    TestFailed(testCase);
+                    TestFailed(context, testCase);
                     break;
                 case TestOutcome.Skipped:
                     ChutzpahTracer.TraceInformation("File {0}, Test {1} skipped", testCase.InputTestFile, testCase.TestName);
-                    TestSkipped(testCase);
+                    TestSkipped(context, testCase);
                     break;
                 default:
                     break;
             }
 
-            TestComplete(testCase);
+            TestComplete(context, testCase);
         }
 
-        protected virtual void TestComplete(TestCase testCase) { }
-        protected virtual void TestFailed(TestCase testCase) { }
-        protected virtual void TestPassed(TestCase testCase) { }
-        protected virtual void TestSkipped(TestCase testCase) { }
+        protected virtual void TestComplete(TestContext context, TestCase testCase) { }
+        protected virtual void TestFailed(TestContext context, TestCase testCase) { }
+        protected virtual void TestPassed(TestContext context, TestCase testCase) { }
+        protected virtual void TestSkipped(TestContext context, TestCase testCase) { }
 
         protected virtual string GetCodeCoverageMessage(CoverageData coverageData)
         {

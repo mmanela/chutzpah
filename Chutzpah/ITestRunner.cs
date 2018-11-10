@@ -32,7 +32,7 @@ namespace Chutzpah
 
         TestCaseSummary RunTests(string testPath, ITestMethodRunnerCallback callback = null);
         TestCaseSummary RunTests(string testPath, TestOptions options, ITestMethodRunnerCallback callback = null);
-        TestCaseSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null);
+        TestCaseSummary RunTests(IEnumerable<string> testPaths, TestOptions options, ITestMethodRunnerCallback callback = null, TestContext testContext = null);
         TestCaseSummary RunTests(IEnumerable<string> testPaths, ITestMethodRunnerCallback callback = null);
 
         IEnumerable<TestCase> DiscoverTests(string testPath);

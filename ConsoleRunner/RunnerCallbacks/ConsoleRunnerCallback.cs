@@ -14,15 +14,15 @@ namespace Chutzpah.RunnerCallbacks
             Console.Error.Write(GetExceptionThrownMessage(exception, fileName));
         }
 
-        public override void FileError(TestError error)
+        public override void FileError(TestContext context, TestError error)
         {
             var errorMessage = GetFileErrorMessage(error);
             Console.Write(errorMessage);
         }
 
-        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        public override void TestSuiteFinished(TestContext context, TestCaseSummary testResultsSummary)
         {
-            base.TestSuiteFinished(testResultsSummary);
+            base.TestSuiteFinished(context, testResultsSummary);
         }
     }
 }

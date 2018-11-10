@@ -232,12 +232,11 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
-                var context = runner.SetupTestContext();
                 runner.Mock<IFileProbe>().Setup(x => x.FindFilePath(@"path\tests.html")).Returns(@"D:\path\tests.html");
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
 
-                testCallback.Verify(x => x.TestSuiteStarted());
+                testCallback.Verify(x => x.TestSuiteStarted(null));
             }
 
             [Fact]
@@ -245,11 +244,10 @@ namespace Chutzpah.Facts
             {
                 var runner = new TestableTestRunner();
                 var testCallback = new MockTestMethodRunnerCallback();
-                var context = runner.SetupTestContext();
 
                 TestCaseSummary res = runner.ClassUnderTest.RunTests(@"path\tests.html", testCallback.Object);
 
-                testCallback.Verify(x => x.TestSuiteFinished(It.IsAny<TestCaseSummary>()));
+                testCallback.Verify(x => x.TestSuiteFinished(null, It.IsAny<TestCaseSummary>()));
             }
 
 

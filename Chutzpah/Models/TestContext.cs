@@ -22,6 +22,11 @@ namespace Chutzpah.Models
         public string FirstInputTestFile { get; set; }
 
         /// <summary>
+        /// The Id of the Task running the TestContext
+        /// </summary>
+        public int TaskId { get; set; }
+
+        /// <summary>
         /// The path to the test runner
         /// </summary>
         public string TestRunner { get; set; }
