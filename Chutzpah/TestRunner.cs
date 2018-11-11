@@ -414,7 +414,7 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.FirstInputTestFile, testExecutionMode);
 
-                    testContext.TaskId = Task.CurrentId.HasValue ? Task.CurrentId.Value : 0;
+                    testContext.TaskId = Task.CurrentId.GetValueOrDefault();
                     try
                     {
                         try
