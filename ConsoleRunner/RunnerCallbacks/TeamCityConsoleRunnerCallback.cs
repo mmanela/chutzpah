@@ -10,21 +10,59 @@ namespace Chutzpah.RunnerCallbacks
         private const string ChutzpahJavascriptTestSuiteName = "JavaScript Tests";
         private readonly IList<string> _testCaseMessages = new List<string>();
 
-        public override void FileLog(TestLog log)
+        public override void FileLog(TestContext context, TestLog log)
         {
             _testCaseMessages.Add(GetFileLogMessage(log));
         }
 
-        public override void TestSuiteFinished(TestCaseSummary summary)
+        public override void TestContextStarted(TestContext context)
         {
-            base.TestSuiteFinished(summary);
-
-            Console.WriteLine("##teamcity[testSuiteFinished name='{0}']",Escape(ChutzpahJavascriptTestSuiteName));
+            WriteTeamCity($"flowStarted flowId='{context?.TaskId ?? 0}'");
         }
 
-        public override void TestSuiteStarted()
+        public override void TestContextFinished(TestContext context)
         {
-            Console.WriteLine("##teamcity[testSuiteStarted name='{0}']",Escape(ChutzpahJavascriptTestSuiteName));
+            WriteTeamCity($"flowFinished flowId='{context?.TaskId ?? 0}'");
+        }
+
+        public override void TestSuiteFinished(TestContext context, TestCaseSummary summary)
+        {
+            base.TestSuiteFinished(context, summary);
+
+            WriteTeamCity($"testSuiteFinished {NameAndFlowId(Escape(ChutzpahJavascriptTestSuiteName), context)}");
+        }
+
+        public override void TestSuiteStarted(TestContext context)
+        {
+            WriteTeamCity($"testSuiteStarted {NameAndFlowId(Escape(ChutzpahJavascriptTestSuiteName), context)}");
+        }
+
+        protected override void TestFailed(TestContext context, TestCase testCase)
+        {
+            WriteTeamCity($"testFailed {NameAndFlowId(Escape(testCase.GetDisplayName()), context)} details='{Escape(GetTestFailureMessage(testCase))}'");
+
+            WriteOutput(context, testCase, CombineWithTestCaseMessages(GetTestFailureMessage(testCase)));
+        }
+
+        protected override void TestComplete(TestContext context, TestCase testCase)
+        {
+            WriteTeamCity($"testFinished {NameAndFlowId(Escape(testCase.GetDisplayName()), context)} duration='{(double)testCase.TimeTaken}'");
+        }
+
+        protected override void TestPassed(TestContext context, TestCase testCase)
+        {
+            WriteOutput(context, testCase, CombineWithTestCaseMessages("Passed"));
+        }
+
+        protected override void TestSkipped(TestContext context, TestCase testCase)
+        {
+            WriteTeamCity($"testIgnored {NameAndFlowId(Escape(testCase.GetDisplayName()), context)}");
+        }
+
+        public override void TestStarted(TestContext context, TestCase testCase)
+        {
+            _testCaseMessages.Clear();
+            WriteTeamCity($"testStarted {NameAndFlowId(Escape(testCase.GetDisplayName()), context)}");
         }
 
         private string CombineWithTestCaseMessages(string output)
@@ -32,42 +70,12 @@ namespace Chutzpah.RunnerCallbacks
             return string.Join("\n", _testCaseMessages.Concat(Enumerable.Repeat(output, 1)));
         }
 
-        protected override void TestFailed(TestCase testCase)
-        {
-            Console.WriteLine(
-                "##teamcity[testFailed name='{0}' details='{1}']",
-                Escape(testCase.GetDisplayName()),
-                Escape(GetTestFailureMessage(testCase))
-                );
-
-            WriteOutput(testCase.GetDisplayName(), CombineWithTestCaseMessages(GetTestFailureMessage(testCase)));
-        }
-
-        protected override void TestComplete(TestCase testCase)
-        {
-            WriteFinished(testCase.GetDisplayName(), testCase.TimeTaken);
-        }
-
-        protected override void TestPassed(TestCase testCase)
-        {
-            WriteOutput(testCase.GetDisplayName(), CombineWithTestCaseMessages("Passed"));
-        }
-
-        protected override void TestSkipped(TestCase testCase)
-        {
-            Console.WriteLine(
-                "##teamcity[testIgnored name='{0}']", Escape(testCase.GetDisplayName()));
-        }
-
-
-        public override void TestStarted(TestCase testCase)
-        {
-            _testCaseMessages.Clear();
-            Console.WriteLine(
-                "##teamcity[testStarted name='{0}']", Escape(testCase.GetDisplayName()));
-        }
-
         // Helpers
+
+        static string NameAndFlowId(string name, TestContext context)
+        {
+            return $"name='{name}' flowId='{context?.TaskId ?? 0}'";
+        }
 
         static string Escape(string value)
         {
@@ -78,16 +86,16 @@ namespace Chutzpah.RunnerCallbacks
                 .Replace("]", "|]");
         }
 
-        static void WriteFinished(string name, double duration)
-        {
-            Console.WriteLine("##teamcity[testFinished name='{0}' duration='{1}']",
-                                          Escape(name), duration);
-        }
-
-        static void WriteOutput(string name, string output)
+        static void WriteOutput(TestContext context, TestCase testCase, string output)
         {
             if (output != null)
-                Console.WriteLine("##teamcity[testStdOut name='{0}' out='{1}']", Escape(name), Escape(output));
+                WriteTeamCity($"testStdOut {NameAndFlowId(Escape(testCase.GetDisplayName()), context)} out='{Escape(output)}'");
         }
+
+        static void WriteTeamCity(string content)
+        {
+            Console.WriteLine("##teamcity[{0}]", content);
+        }
+       
     }
 }

@@ -170,15 +170,16 @@ namespace Chutzpah
         }
 
         public TestCaseSummary RunTests(IEnumerable<string> testPaths,
-                                          TestOptions options,
-                                          ITestMethodRunnerCallback callback = null)
+                                        TestOptions options,
+                                        ITestMethodRunnerCallback callback = null,
+                                        TestContext testContext = null)
         {
             callback = options.TestLaunchMode == TestLaunchMode.FullBrowser || callback == null ? RunnerCallback.Empty : callback;
-            callback.TestSuiteStarted();
+            callback.TestSuiteStarted(testContext);
 
             var testCaseSummary = ProcessTestPaths(testPaths, options, TestExecutionMode.Execution, callback);
 
-            callback.TestSuiteFinished(testCaseSummary);
+            callback.TestSuiteFinished(testContext, testCaseSummary);
             return testCaseSummary;
         }
 
@@ -413,6 +414,7 @@ namespace Chutzpah
                 {
                     ChutzpahTracer.TraceInformation("Start test run for {0} in {1} mode", testContext.FirstInputTestFile, testExecutionMode);
 
+                    testContext.TaskId = Task.CurrentId.GetValueOrDefault();
                     try
                     {
                         try
@@ -457,11 +459,15 @@ namespace Chutzpah
                                 testContext.TestHarnessPath,
                                 testContext.FirstInputTestFile);
 
+                            callback.TestContextStarted(testContext);
+
                             var testSummaries = InvokeTestRunner(
                                 options,
                                 testContext,
                                 testExecutionMode,
                                 callback);
+
+                            callback.TestContextFinished(testContext);
 
                             foreach (var testSummary in testSummaries)
                             {
@@ -508,7 +514,7 @@ namespace Chutzpah
                         };
 
                         overallSummary.Errors.Add(error);
-                        callback.FileError(error);
+                        callback.FileError(testContext, error);
 
                         ChutzpahTracer.TraceError(e, "Error during test execution of {0}", testContext.FirstInputTestFile);
                     }
@@ -597,7 +603,7 @@ namespace Chutzpah
                     };
 
                     overallSummary.Errors.Add(error);
-                    callback.FileError(error);
+                    callback.FileError(null, error);
 
                     ChutzpahTracer.TraceError(e, "Error during building test context for {0}", pathString);
                 }

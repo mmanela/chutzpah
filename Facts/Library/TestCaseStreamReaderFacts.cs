@@ -172,7 +172,7 @@ namespace Chutzpah.Facts
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
-                callback.Verify(x => x.FileStarted("file"));
+                callback.Verify(x => x.FileStarted(context));
             }
 
             [Fact]
@@ -185,7 +185,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestFileSummary result = null;
-                callback.Setup(x => x.FileFinished("file", It.IsAny<TestFileSummary>())).Callback<string, TestFileSummary>((f, t) => result = t); ;
+                callback.Setup(x => x.FileFinished(context, It.IsAny<TestFileSummary>())).Callback<TestContext, TestFileSummary>((c, t) => result = t); ;
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -204,7 +204,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
-                callback.Setup(x => x.TestStarted(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+                callback.Setup(x => x.TestStarted(context, It.IsAny<TestCase>())).Callback<TestContext, TestCase>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -224,7 +224,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
-                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+                callback.Setup(x => x.TestFinished(context, It.IsAny<TestCase>())).Callback<TestContext, TestCase>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -244,7 +244,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
-                callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
+                callback.Setup(x => x.FileLog(context, It.IsAny<TestLog>())).Callback<TestContext, TestLog>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -263,7 +263,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
-                callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
+                callback.Setup(x => x.FileLog(context, It.IsAny<TestLog>())).Callback<TestContext, TestLog>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -282,7 +282,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestLog result = null;
-                callback.Setup(x => x.FileLog(It.IsAny<TestLog>())).Callback<TestLog>(t => result = t);
+                callback.Setup(x => x.FileLog(context, It.IsAny<TestLog>())).Callback<TestContext, TestLog>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -299,7 +299,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestError result = null;
-                callback.Setup(x => x.FileError(It.IsAny<TestError>())).Callback<TestError>(t => result = t);
+                callback.Setup(x => x.FileError(context, It.IsAny<TestError>())).Callback<TestContext, TestError>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -472,7 +472,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
-                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+                callback.Setup(x => x.TestFinished(context, It.IsAny<TestCase>())).Callback<TestContext, TestCase>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 
@@ -503,7 +503,7 @@ namespace Chutzpah.Facts
                 var processStream = new ProcessStreamStringSource(new Mock<IProcessWrapper>().Object, stream, 1000);
                 var callback = new Mock<ITestMethodRunnerCallback>();
                 TestCase result = null;
-                callback.Setup(x => x.TestFinished(It.IsAny<TestCase>())).Callback<TestCase>(t => result = t);
+                callback.Setup(x => x.TestFinished(It.Is<TestContext>(testContext => testContext == context), It.IsAny<TestCase>())).Callback<TestContext, TestCase>((c, t) => result = t);
 
                 reader.ClassUnderTest.Read(processStream, new TestOptions(), context, callback.Object);
 

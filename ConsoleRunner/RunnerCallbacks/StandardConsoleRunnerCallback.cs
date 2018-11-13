@@ -37,7 +37,7 @@ namespace Chutzpah.RunnerCallbacks
 
         }
 
-        public override void FileLog(TestLog log)
+        public override void FileLog(TestContext context, TestLog log)
         {
             ClearCounter();
 
@@ -46,7 +46,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.ResetColor();
         }
 
-        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        public override void TestSuiteFinished(TestContext context, TestCaseSummary testResultsSummary)
         {
 
             if (testResultsSummary.CoverageObject != null && testResultsSummary.CoverageObject.Any())
@@ -57,7 +57,7 @@ namespace Chutzpah.RunnerCallbacks
 
             if (showFailureReport)
             {
-                PrintErrorReport(testResultsSummary);
+                PrintErrorReport(context, testResultsSummary);
             }
 
 
@@ -73,10 +73,10 @@ namespace Chutzpah.RunnerCallbacks
                 Console.WriteLine("=== {0} total, {1} failed, took {2:n} seconds ===", testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
             }
 
-            base.TestSuiteFinished(testResultsSummary);
+            base.TestSuiteFinished(context, testResultsSummary);
         }
 
-        private void PrintErrorReport(TestCaseSummary testResultsSummary)
+        private void PrintErrorReport(TestContext context, TestCaseSummary testResultsSummary)
         {
             var failedTests = (from testResult in testResultsSummary.Tests 
                               where !testResult.ResultsAllPassed
@@ -91,12 +91,12 @@ namespace Chutzpah.RunnerCallbacks
 
                 foreach (var fileError in fileErrors)
                 {
-                    FileError(fileError);    
+                    FileError(context, fileError);    
                 }
 
                 foreach (var result in failedTests)
                 {
-                    TestFailed(result);
+                    TestFailed(context, result);
                 }
 
 
@@ -104,11 +104,11 @@ namespace Chutzpah.RunnerCallbacks
             }
         }
 
-        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
+        public override void FileFinished(TestContext context, TestFileSummary testResultsSummary)
         {
             ClearCounter();
 
-            Console.WriteLine("File: {0}", fileName);
+            Console.WriteLine("File: {0}", context.InputTestFilesString);
             var seconds = testResultsSummary.TimeTaken / 1000.0;
             Console.WriteLine(Indent("{0} total, {1} failed, took {2:n} seconds", 2), testResultsSummary.TotalCount, testResultsSummary.FailedCount, seconds);
             Console.WriteLine();
@@ -116,10 +116,10 @@ namespace Chutzpah.RunnerCallbacks
 
             PrintRunningTestCount();
 
-            base.FileFinished(fileName, testResultsSummary);
+            base.FileFinished(context, testResultsSummary);
         }
 
-        protected override void TestFailed(TestCase testCase)
+        protected override void TestFailed(TestContext context, TestCase testCase)
         {
             ClearCounter();
 
@@ -169,7 +169,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.ResetColor();
         }
 
-        public override void FileError(TestError error)
+        public override void FileError(TestContext context, TestError error)
         {
             ClearCounter();
 
@@ -192,7 +192,7 @@ namespace Chutzpah.RunnerCallbacks
             Console.WriteLine(GetCodeCoverageMessage(coverage));
         }
 
-        protected override void TestComplete(TestCase testCase)
+        protected override void TestComplete(TestContext context, TestCase testCase)
         {
             ++testCount;
             PrintRunningTestCount();

@@ -132,14 +132,14 @@ namespace Chutzpah
             }
         }
 
-        private void FireTestFinished(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
+        private void FireTestFinished(TestContext testContext, ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput, int testIndex)
         {
 
             var jsTestCase = jsRunnerOutput as JsTestCase;
             jsTestCase.TestCase.InputTestFile = testFileContext.ReferencedFile.Path;
             jsTestCase.TestCase.PathFromTestSettingsDirectory = currentTestFileContext.ReferencedFile.PathFromTestSettingsDirectory;
             AddLineNumber(testFileContext.ReferencedFile, testIndex, jsTestCase);
-            callback.TestFinished(jsTestCase.TestCase);
+            callback.TestFinished(testContext, jsTestCase.TestCase);
             testFileContext.TestFileSummary.AddTestCase(jsTestCase.TestCase);
 
 
@@ -147,9 +147,9 @@ namespace Chutzpah
 
         }
 
-        private void FireFileStarted(ITestMethodRunnerCallback callback, TestContext testContext)
+        private void FireFileStarted(TestContext testContext, ITestMethodRunnerCallback callback)
         {
-            callback.FileStarted(testContext.InputTestFilesString);
+            callback.FileStarted(testContext);
         }
 
         private void FireCoverageObject(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
@@ -158,11 +158,11 @@ namespace Chutzpah
             testFileContext.TestFileSummary.CoverageObject = testFileContext.TestContext.CoverageEngine.DeserializeCoverageObject(jsCov.Object, testFileContext.TestContext);
         }
 
-        private void FireFileFinished(ITestMethodRunnerCallback callback, string testFilesString, IEnumerable<StreamingTestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
+        private void FireFileFinished(TestContext testContext, ITestMethodRunnerCallback callback, IEnumerable<StreamingTestFileContext> testFileContexts, JsRunnerOutput jsRunnerOutput)
         {
             var jsFileDone = jsRunnerOutput as JsFileDone;
 
-            var testFileSummary = new TestFileSummary(testFilesString);
+            var testFileSummary = new TestFileSummary(testContext.InputTestFilesString);
             testFileSummary.TimeTaken = jsFileDone.TimeTaken;
 
             foreach (var context in testFileContexts)
@@ -172,10 +172,10 @@ namespace Chutzpah
                 testFileSummary.AddTestCases(context.TestFileSummary.Tests);
             }
 
-            callback.FileFinished(testFilesString, testFileSummary);
+            callback.FileFinished(testContext, testFileSummary);
         }
 
-        private void FireLogOutput(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireLogOutput(TestContext testContext, ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var log = jsRunnerOutput as JsLog;
 
@@ -188,17 +188,17 @@ namespace Chutzpah
 
             log.Log.InputTestFile = testFileContext.ReferencedFile.Path;
             log.Log.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
-            callback.FileLog(log.Log);
+            callback.FileLog(testContext, log.Log);
             testFileContext.TestFileSummary.Logs.Add(log.Log);
         }
 
-        private void FireErrorOutput(ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
+        private void FireErrorOutput(TestContext testContext, ITestMethodRunnerCallback callback, StreamingTestFileContext testFileContext, JsRunnerOutput jsRunnerOutput)
         {
             var error = jsRunnerOutput as JsError;
 
             error.Error.InputTestFile = testFileContext.ReferencedFile.Path;
             error.Error.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
-            callback.FileError(error.Error);
+            callback.FileError(testContext, error.Error);
             testFileContext.TestFileSummary.Errors.Add(error.Error);
 
             if (testFileContext.TestContext.TestFileSettings.CreateFailedTestForFileError.GetValueOrDefault())
@@ -208,8 +208,8 @@ namespace Chutzpah
                 fileErrorTest.PathFromTestSettingsDirectory = testFileContext.ReferencedFile.PathFromTestSettingsDirectory;
                 fileErrorTest.TestName = string.Format("!! File Error #{0} - Error encountered outside of test case execution !!", testFileContext.TestFileSummary.Errors.Count);
                 fileErrorTest.TestResults.Add(new TestResult { Passed = false, StackTrace = error.Error.StackAsString ?? error.Error.FormatStackObject(), Message = error.Error.Message });
-                callback.TestStarted(fileErrorTest);
-                callback.TestFinished(fileErrorTest);
+                callback.TestStarted(testContext, fileErrorTest);
+                callback.TestFinished(testContext, fileErrorTest);
 
                 testFileContext.TestFileSummary.AddTestCase(fileErrorTest);
             }
@@ -246,7 +246,7 @@ namespace Chutzpah
                 {
                     case "FileStart":
 
-                        FireFileStarted(callback, testContext);
+                        FireFileStarted(testContext, callback);
 
                         break;
 
@@ -268,7 +268,7 @@ namespace Chutzpah
                     case "FileDone":
                         var jsFileDone = jsonSerializer.Deserialize<JsFileDone>(json);
                         
-                        FireFileFinished(callback, testContext.InputTestFilesString, streamingTestFileContexts, jsFileDone);
+                        FireFileFinished(testContext, callback, streamingTestFileContexts, jsFileDone);
                         
                         break;
 
@@ -353,7 +353,7 @@ namespace Chutzpah
 
                         jsTestCaseStart.TestCase.InputTestFile = currentTestFileContext.ReferencedFile.Path;
                         jsTestCaseStart.TestCase.PathFromTestSettingsDirectory = currentTestFileContext.ReferencedFile.PathFromTestSettingsDirectory;
-                        callback.TestStarted(jsTestCaseStart.TestCase);
+                        callback.TestStarted(testContext, jsTestCaseStart.TestCase);
 
 
                         ChutzpahTracer.TraceInformation("Test Case Started:'{0}'", jsTestCaseStart.TestCase.GetDisplayName());
@@ -364,7 +364,7 @@ namespace Chutzpah
                         var jsTestCaseDone = jsonSerializer.Deserialize<JsTestCase>(json);
                         var currentTestIndex = testIndex;
 
-                        FireTestFinished(callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
+                        FireTestFinished(testContext, callback, currentTestFileContext, jsTestCaseDone, currentTestIndex);
 
                         testIndex++;
 
@@ -375,11 +375,11 @@ namespace Chutzpah
 
                         if (currentTestFileContext != null)
                         {
-                            FireLogOutput(callback, currentTestFileContext, log);
+                            FireLogOutput(testContext, callback, currentTestFileContext, log);
                         }
                         else
                         {
-                            AddDeferredEvent((fileContext) => FireLogOutput(callback, fileContext, log), deferredEvents);
+                            AddDeferredEvent((fileContext) => FireLogOutput(testContext, callback, fileContext, log), deferredEvents);
                         }
                         break;
 
@@ -387,11 +387,11 @@ namespace Chutzpah
                         var error = jsonSerializer.Deserialize<JsError>(json);
                         if (currentTestFileContext != null)
                         {
-                            FireErrorOutput(callback, currentTestFileContext, error);
+                            FireErrorOutput(testContext, callback, currentTestFileContext, error);
                         }
                         else
                         {
-                            AddDeferredEvent((fileContext) => FireErrorOutput(callback, fileContext, error), deferredEvents);
+                            AddDeferredEvent((fileContext) => FireErrorOutput(testContext, callback, fileContext, error), deferredEvents);
                         }
 
                         break;
