@@ -20,7 +20,7 @@ namespace Chutzpah.VisualStudio.Callback
             this.statusBar = statusBar;
         }
 
-        public override void TestSuiteStarted()
+        public override void TestSuiteStarted(TestContext context)
         {
             dte.ToolWindows.OutputWindow.Parent.Activate();
             dte.ToolWindows.ErrorList.Parent.Activate();
@@ -31,7 +31,7 @@ namespace Chutzpah.VisualStudio.Callback
             SetStatusBarMessage("Testing Started");
         }
 
-        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        public override void TestSuiteFinished(TestContext context, TestCaseSummary testResultsSummary)
         {
             var statusBarText = "";
             if (testResultsSummary.SkippedCount > 0)
@@ -48,13 +48,13 @@ namespace Chutzpah.VisualStudio.Callback
             SetStatusBarMessage(statusBarText);
         }
 
-        public override void FileStarted(string fileName)
+        public override void FileStarted(TestContext context)
         {
-            var text = string.Format("------ Test started: File: {0} ------\n", fileName);
+            var text = string.Format("------ Test started: File: {0} ------\n", context?.InputTestFilesString);
             testPane.OutputString(text);
         }
 
-        public override void FileFinished(string fileName, TestFileSummary testResultsSummary)
+        public override void FileFinished(TestContext context, TestFileSummary testResultsSummary)
         {
             var text = "";
 
@@ -69,29 +69,29 @@ namespace Chutzpah.VisualStudio.Callback
             testPane.OutputString(text);
         }
 
-        protected override void TestFailed(TestCase result)
+        protected override void TestFailed(TestContext context, TestCase result)
         {
             var errorMessage = GetTestFailureMessage(result);
             WriteToOutputPaneAndErrorTaskList(result.InputTestFile, errorMessage, errorMessage, result.Line);
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
-        protected override void TestPassed(TestCase result)
+        protected override void TestPassed(TestContext context, TestCase result)
         {
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
-        protected override void TestSkipped(TestCase result)
+        protected override void TestSkipped(TestContext context, TestCase result)
         {
             SetStatusBarMessage(GetStatusBarMessage(result));
         }
 
-        public override void FileError(TestError error)
+        public override void FileError(TestContext context, TestError error)
         {
             testPane.OutputString(GetFileErrorMessage(error));
         }
 
-        public override void FileLog(TestLog log)
+        public override void FileLog(TestContext context, TestLog log)
         {
             testPane.OutputString(GetFileLogMessage(log));
         }

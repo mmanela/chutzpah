@@ -16,7 +16,7 @@ namespace Chutzpah.VS2012.TestAdapter
             this.discoverySink = discoverySink;
         }
 
-        public override void FileError(TestError error)
+        public override void FileError(TestContext context, TestError error)
         {
             logger.SendMessage(TestMessageLevel.Error, GetFileErrorMessage(error));
         }
@@ -26,7 +26,7 @@ namespace Chutzpah.VS2012.TestAdapter
             logger.SendMessage(TestMessageLevel.Error, GetExceptionThrownMessage(exception, fileName));
         }
 
-        public override void TestFinished(TestCase test)
+        public override void TestFinished(TestContext context, TestCase test)
         {
             var testCase = test.ToVsTestCase();
             discoverySink.SendTestCase(testCase);

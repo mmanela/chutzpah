@@ -24,12 +24,12 @@ namespace Chutzpah.VS2012.TestAdapter
             this.runContext = runContext;
         }
 
-        public override void FileError(TestError error)
+        public override void FileError(TestContext context, TestError error)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Error, GetFileErrorMessage(error));
         }
 
-        public override void FileLog(TestLog log)
+        public override void FileLog(TestContext context, TestLog log)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Informational, GetFileLogMessage(log));
         }
@@ -39,7 +39,7 @@ namespace Chutzpah.VS2012.TestAdapter
             frameworkHandle.SendMessage(TestMessageLevel.Error, GetExceptionThrownMessage(exception, fileName));
         }
 
-        public override void TestStarted(TestCase test)
+        public override void TestStarted(TestContext context, TestCase test)
         {
             var testCase = test.ToVsTestCase();
 
@@ -48,7 +48,7 @@ namespace Chutzpah.VS2012.TestAdapter
 
         }
 
-        public override void TestFinished(TestCase test)
+        public override void TestFinished(TestContext context, TestCase test)
         {
             var testCase = test.ToVsTestCase();
             var result = test.ToVsTestResult();
@@ -61,9 +61,9 @@ namespace Chutzpah.VS2012.TestAdapter
             frameworkHandle.RecordEnd(testCase, outcome);
         }
 
-        public override void TestSuiteFinished(TestCaseSummary testResultsSummary)
+        public override void TestSuiteFinished(TestContext context, TestCaseSummary testResultsSummary)
         {
-            base.TestSuiteFinished(testResultsSummary);
+            base.TestSuiteFinished(context, testResultsSummary);
 
             if(!runContext.IsDataCollectionEnabled || testResultsSummary.CoverageObject == null)
             {
