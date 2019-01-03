@@ -112,7 +112,7 @@ namespace Chutzpah
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
-            runnerArgs = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}",
+            runnerArgs = string.Format("\"{0}\" {1} {2} {3} {4} {5} {6} {7}",
                                         runnerPath,
                                         fileUrl,
                                         testModeStr,
