@@ -234,7 +234,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
     try {
         let chromeExecutable = null;
 
-        if (chromePath == null) {
+        if (!chromePath) {
             const chromePaths = getChromePaths();
             if (chromePaths.length <= 0) {
                 debugLog("Could not find chrome paths");
