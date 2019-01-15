@@ -20,9 +20,9 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 
 
 ## Test Framework Versions
-Mocha 3.2.0
-Qunit 2.6.2
-Jasmine 2.9
+- Qunit 2.6.2
+- Jasmine 2.9
+- Mocha 3.2.0
 
 ## Recent News
 
