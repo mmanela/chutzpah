@@ -19,6 +19,11 @@ Chutzpah uses the [PhantomJS](http://www.phantomjs.org/) headless browser to run
 * [Visual Studio Test Runner for 2015+](http://visualstudiogallery.msdn.microsoft.com/71a4e9bd-f660-448f-bd92-f5a65d39b7f0)
 
 
+## Test Framework Versions
+Mocha 3.2.0
+Qunit 2.6.2
+Jasmine 2.9
+
 ## Recent News
 
 * **[Chutzpah 4.3 - Web Server Mode](http://matthewmanela.com/blog/chutzpah-4-3-0-web-server-mode/)**
