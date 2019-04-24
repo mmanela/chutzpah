@@ -1,6 +1,8 @@
 ﻿var module = module || {};
 module.exports = module.exports || {};
 
+const timers = require("timers");
+
 module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, onFrameworkLoaded, isTestingDone) => {
 
     const chutzpahCommon = require('../chutzpahFunctions.js');
@@ -246,6 +248,10 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
                         return;
                     }
                     window = win;
+
+                    // JSDom doesn't define these but we can use the global ones Node gives us.
+                    window.setTimeout = timers.setTimeout;
+                    window.setImmediate = timers.setImmediate;
 
                     debugLog("Setup stubs for JsDom");
                     window.eval(`

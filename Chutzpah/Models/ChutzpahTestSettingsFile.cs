@@ -56,6 +56,11 @@ namespace Chutzpah.Models
         /// The path to the chrome/chromium executable on the machine
         /// </summary>
         public string ChromeBrowserPath { get; set; }
+
+        /// <summary>
+        /// Whether or not to execute node with remote debugging enabled.
+        /// </summary>
+        public bool NodeInspect { get; set; }
     }
 
     public class ForcedChutzpahWebServerConfiguration : ChutzpahWebServerConfiguration
