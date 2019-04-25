@@ -250,8 +250,8 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
                     window = win;
 
                     // JSDom doesn't define these but we can use the global ones Node gives us.
-                    window.setTimeout = timers.setTimeout;
                     window.setImmediate = timers.setImmediate;
+                    window.clearImmediate = timers.clearImmediate;
 
                     debugLog("Setup stubs for JsDom");
                     window.eval(`
