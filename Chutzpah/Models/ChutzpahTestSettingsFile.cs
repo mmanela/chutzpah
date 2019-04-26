@@ -47,8 +47,7 @@ namespace Chutzpah.Models
     {
         Phantom,
         Chrome,
-        JsDom,
-        HeadlessChromium
+        JsDom
     }
 
     public class EngineOptions

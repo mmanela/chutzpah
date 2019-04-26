@@ -159,7 +159,7 @@ namespace Chutzpah
 
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
-            if (settings.Engine.GetValueOrDefault() != Engine.Phantom && settings.Engine.GetValueOrDefault() != Engine.HeadlessChromium)
+            if (settings.Engine.GetValueOrDefault() != Engine.Phantom)
             {
                 if (settings.Server == null)
                 {

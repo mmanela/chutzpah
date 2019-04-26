@@ -70,7 +70,6 @@ namespace Chutzpah.FrameworkDefinitions
                 case Engine.Phantom:
                     return @"ChutzpahJSRunners\Phantom\" + runnerName;
                 case Engine.Chrome:
-                case Engine.HeadlessChromium:
                     return @"ChutzpahJSRunners\Chrome\" + runnerName;
                 case Engine.JsDom:
                     return @"ChutzpahJSRunners\JsDom\" + runnerName;

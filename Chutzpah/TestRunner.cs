@@ -285,7 +285,7 @@ namespace Chutzpah
 
         private IChutzpahWebServerHost SetupWebServerHost(ConcurrentBag<TestContext> testContexts, TestOptions options)
         {
-            var needsServer = options.Engine.GetValueOrDefault() != Engine.Phantom && options.Engine.GetValueOrDefault() != Engine.HeadlessChromium;
+            var needsServer = options.Engine.GetValueOrDefault() != Engine.Phantom;
 
             IChutzpahWebServerHost webServerHost = null;
             var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server.Enabled.HasValue).ToList();
