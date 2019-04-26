@@ -18,7 +18,7 @@ namespace Chutzpah
         private readonly ITestCaseStreamReaderFactory readerFactory;
         private readonly bool isRunningElevated;
 
-        public bool CanHandleBrowser(Engine engine) => engine == Engine.Chrome || engine == Engine.JsDom;
+        public bool CanHandleBrowser(Engine engine) => engine == Engine.Chrome || engine == Engine.JsDom || engine == Engine.HeadlessChromium;
 
         public NodeTestExecutionProvider(IProcessHelper process, IFileProbe fileProbe,
                                        IUrlBuilder urlBuilder, ITestCaseStreamReaderFactory readerFactory)

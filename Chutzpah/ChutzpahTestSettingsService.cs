@@ -159,7 +159,7 @@ namespace Chutzpah
 
         private void ProcessServerSettings(ChutzpahTestSettingsFile settings, IDictionary<string, string> chutzpahVariables)
         {
-            if (settings.Engine.GetValueOrDefault() != Engine.Phantom)
+            if (settings.Engine.GetValueOrDefault() != Engine.Phantom && settings.Engine.GetValueOrDefault() != Engine.HeadlessChromium)
             {
                 if (settings.Server == null)
                 {
@@ -171,7 +171,7 @@ namespace Chutzpah
                 }
             }
 
-            if (settings.Server != null)
+            if (settings.Server != null && settings.Server.Enabled.GetValueOrDefault())
             {
                 settings.Server.FileCachingEnabled = settings.Server.FileCachingEnabled ?? true;
 
