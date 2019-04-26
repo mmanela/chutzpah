@@ -165,7 +165,7 @@ namespace Chutzpah
                 {
                     settings.Server = ForcedChutzpahWebServerConfiguration.Instance;
                 }
-                else
+                else if (!settings.Server.Enabled.HasValue)
                 {
                     settings.Server.Enabled = true;
                 }
