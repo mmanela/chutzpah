@@ -288,7 +288,7 @@ namespace Chutzpah
             var needsServer = options.Engine.GetValueOrDefault() != Engine.Phantom;
 
             IChutzpahWebServerHost webServerHost = null;
-            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server.Enabled.HasValue).ToList();
+            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.HasValue).ToList();
             var contextWithChosenServerConfiguration = contextUsingWebServer.FirstOrDefault();
 
             if (contextWithChosenServerConfiguration == null && needsServer)
@@ -306,8 +306,7 @@ namespace Chutzpah
             {
                 var webServerConfiguration = contextWithChosenServerConfiguration.TestFileSettings.Server;
 
-                // create host if it no value (default) or explicit enabled.
-                if (!webServerConfiguration.Enabled.HasValue || webServerConfiguration.Enabled.Value == true)
+                if (webServerConfiguration.Enabled.GetValueOrDefault())
                 {
                     webServerHost = webServerFactory.CreateServer(webServerConfiguration, ActiveWebServerHost);
 
