@@ -288,8 +288,8 @@ namespace Chutzpah
             var needsServer = options.Engine.GetValueOrDefault() != Engine.Phantom;
 
             IChutzpahWebServerHost webServerHost = null;
-            var contextUsingWebServer = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.HasValue).ToList();
-            var contextWithChosenServerConfiguration = contextUsingWebServer.FirstOrDefault();
+            var contextWithServerSetting = testContexts.Where(x => x.TestFileSettings.Server != null && x.TestFileSettings.Server.Enabled.HasValue).ToList();
+            var contextWithChosenServerConfiguration = contextWithServerSetting.FirstOrDefault();
 
             if (contextWithChosenServerConfiguration == null && needsServer)
             {
@@ -298,7 +298,7 @@ namespace Chutzpah
                     testContext.TestFileSettings.Server = ForcedChutzpahWebServerConfiguration.Instance;
                 }
 
-                contextUsingWebServer = testContexts.ToList();
+                contextWithServerSetting = testContexts.ToList();
                 contextWithChosenServerConfiguration = testContexts.FirstOrDefault();
             }
 
@@ -311,7 +311,13 @@ namespace Chutzpah
                     webServerHost = webServerFactory.CreateServer(webServerConfiguration, ActiveWebServerHost);
 
                     // Stash host object on context for use in url generation
-                    contextUsingWebServer.ForEach(x => x.WebServerHost = webServerHost);
+                    contextWithServerSetting.ForEach(x =>
+                    {
+                        if (x.TestFileSettings.Server.Enabled.GetValueOrDefault())
+                        {
+                            x.WebServerHost = webServerHost;
+                        }
+                    });
                 }
             }
 
