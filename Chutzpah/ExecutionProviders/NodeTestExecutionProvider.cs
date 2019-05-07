@@ -114,13 +114,13 @@ namespace Chutzpah
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
             string inspectBrkArg = context.TestFileSettings.EngineOptions.NodeInspect ? "--inspect-brk" : "";
 
-            var chromeArgs = string.Empty;
+            var engineBrowserOptions = string.Empty;
             if (context.TestFileSettings.BrowserArguments != null)
             {
-                var chromeEntry = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals("chrome", StringComparison.OrdinalIgnoreCase));
-                if (chromeEntry.Any())
+                var matchingEntries = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals(options.Engine.ToString(), StringComparison.OrdinalIgnoreCase));
+                if (matchingEntries.Any())
                 {
-                    chromeArgs = chromeEntry.FirstOrDefault().Value;
+                    engineBrowserOptions = matchingEntries.FirstOrDefault().Value;
                 }
             }
 
@@ -134,7 +134,7 @@ namespace Chutzpah
                                         context.TestFileSettings.IgnoreResourceLoadingErrors.Value,
                                         $"\"{chromeBrowserPath}\"",
                                         context.TestFileSettings.UserAgent,
-                                        chromeArgs);
+                                        engineBrowserOptions);
 
             return runnerArgs;
         }
