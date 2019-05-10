@@ -165,13 +165,13 @@ namespace Chutzpah
                 {
                     settings.Server = ForcedChutzpahWebServerConfiguration.Instance;
                 }
-                else
+                else if (!settings.Server.Enabled.HasValue)
                 {
                     settings.Server.Enabled = true;
                 }
             }
 
-            if (settings.Server != null)
+            if (settings.Server != null && settings.Server.Enabled.GetValueOrDefault())
             {
                 settings.Server.FileCachingEnabled = settings.Server.FileCachingEnabled ?? true;
 
