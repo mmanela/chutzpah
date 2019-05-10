@@ -120,7 +120,7 @@ namespace Chutzpah
                 var matchingEntries = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals(options.Engine.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (matchingEntries.Any())
                 {
-                    engineBrowserOptions = matchingEntries.FirstOrDefault().Value;
+                    engineBrowserOptions = matchingEntries.First().Value;
                 }
             }
 
