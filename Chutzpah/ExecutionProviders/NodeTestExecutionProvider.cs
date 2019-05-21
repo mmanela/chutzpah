@@ -115,7 +115,7 @@ namespace Chutzpah
             string inspectBrkArg = context.TestFileSettings.EngineOptions.NodeInspect ? "--inspect-brk" : "";
 
             var engineBrowserOptions = string.Empty;
-            if (context.TestFileSettings.BrowserArguments != null)
+            if (context.TestFileSettings.BrowserArguments != null && options.Engine != null)
             {
                 var matchingEntries = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals(options.Engine.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (matchingEntries.Any())
