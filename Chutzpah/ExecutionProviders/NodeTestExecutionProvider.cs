@@ -112,7 +112,7 @@ namespace Chutzpah
             string runnerArgs;
             var testModeStr = testExecutionMode.ToString().ToLowerInvariant();
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
-            string inspectBrkArg = context.TestFileSettings.EngineOptions.NodeInspect ? "--inspect-brk" : "";
+            string inspectBrkArg = context.TestFileSettings.EngineOptions != null && context.TestFileSettings.EngineOptions.NodeInspect ? "--inspect-brk" : "";
 
             var engineBrowserOptions = string.Empty;
             if (context.TestFileSettings.BrowserArguments != null && options.Engine != null)
