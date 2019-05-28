@@ -9,7 +9,7 @@ Chutzpah is an open source JavaScript test runner which enables you to run unit 
 _For comments, praise, complaints you can reach me on twitter at [@mmanela](http://twitter.com/mmanela)_.
 
 Chutzpah supports the [QUnit](http://docs.jquery.com/QUnit), [Jasmine](https://jasmine.github.io/) and [Mocha](http://mochajs.org/) testing frameworks. 
-Chutzpah uses the [PhantomJS](http://phantomjs.org/) headless browser to run your tests.
+Chutzpah uses either JSDom, Chrome or [PhantomJS](http://phantomjs.org/) to run your tests.
 
 
 ## Get Chutzpah
