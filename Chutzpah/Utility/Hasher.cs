@@ -9,11 +9,11 @@ namespace Chutzpah.Utility
     public class Hasher : IHasher
     {
         private readonly string versionSalt;
-        private readonly ThreadLocal<SHA1Managed> sha1;
+        private readonly ThreadLocal<HMACSHA1> sha1;
 
         public Hasher()
         {
-            sha1 = new ThreadLocal<SHA1Managed>(() => new SHA1Managed());
+            sha1 = new ThreadLocal<HMACSHA1>(() => new HMACSHA1());
             versionSalt = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
