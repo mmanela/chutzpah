@@ -1,8 +1,8 @@
-/// <reference path="scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="scripts/typings/angularjs/angular.d.ts" />
+/// <reference path="../../libs/typings/angularjs/angular-mocks.d.ts" />
+/// <reference path="../../libs/typings/angularjs/angular.d.ts" />
 var Example;
 (function (Example) {
-    var Controller = (function () {
+    var Controller = /** @class */ (function () {
         function Controller($http) {
             var _this = this;
             this.DoSomeThing = function () {
@@ -17,7 +17,7 @@ var Example;
             this.someResponse = -1;
         }
         return Controller;
-    })();
+    }());
     Example.Controller = Controller;
 })(Example || (Example = {}));
 //# sourceMappingURL=Controller.js.map

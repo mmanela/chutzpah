@@ -1,7 +1,4 @@
 /// <reference path="../src/controller.ts" />
-/// <reference path="../src/scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="../src/scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="scripts/typings/jasmine/jasmine.d.ts" />
 var Tests;
 (function (Tests) {
     describe("ControllerTests", function () {
