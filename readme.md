@@ -17,6 +17,7 @@ Chutzpah uses either JSDom, Chrome or [PhantomJS](http://phantomjs.org/) to run 
 * Command Line Runner [nuget](https://www.nuget.org/packages/Chutzpah) or [chocolatey](http://chocolatey.org/packages/chutzpah)
 * [Visual Studio Test Adapter for Visual Studio 2015+](http://visualstudiogallery.msdn.microsoft.com/f8741f04-bae4-4900-81c7-7c9bfb9ed1fe)
 * [Visual Studio Test Runner for 2015+](http://visualstudiogallery.msdn.microsoft.com/71a4e9bd-f660-448f-bd92-f5a65d39b7f0)
+* [Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=dfrencham.chutzpahrunner)
 
 
 ## Test Framework Versions
