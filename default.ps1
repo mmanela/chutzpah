@@ -14,7 +14,7 @@ properties {
   # Temp work around psake limitation to not use Msbuild 15
   $defaultMSBuildPath = Join-Path (Resolve-Path "${env:ProgramFiles(x86)}") "Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
   if($env:Chutzpah_MSBuild_Path -and (Test-Path $env:Chutzpah_MSBuild_Path)) {
-    $msbuild = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
+    $msbuild = Join-Path (Resolve-Path "${env:Chutzpah_MSBuild_Path}") "MSBuild.exe"
   } 
   elseif (Test-Path $defaultMSBuildPath) {
     $msbuild = $defaultMSBuildPath
