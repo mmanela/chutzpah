@@ -2,7 +2,7 @@
   "name": "chutzpah",
   "dependencies": {
     "puppeteer-core": "^1.8.0",
-    "jsdom": "^15.1.1"
+    "jsdom": "^11.0.0"
   },
   "private": true,
   "version": "1.0.0"
