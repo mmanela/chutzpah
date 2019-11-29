@@ -250,8 +250,12 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         chutzpahFunctions.rawLog("!!_!! Using Chrome Install : " + chromeExecutable);
         debugLog("Launch Chrome (" + chromeExecutable + "): Elevated= " + isRunningElevated);
 
+        // Disable CORS by default
+        var launchBrowserArges = ["--disable-web-security"];
         // If isRunningElevated, we need to turn off sandbox since it does not work with admin users
-        var launchBrowserArges = isRunningElevated ? ["--no-sandbox"] : [];
+        if (isRunningElevated) {
+            launchBrowserArges.push("--no-sandbox");
+        }
         if (browserArgs) {
             launchBrowserArges.push(...browserArgs.trim().split(" "));
         }
