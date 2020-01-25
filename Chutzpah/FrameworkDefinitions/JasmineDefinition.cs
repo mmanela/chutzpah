@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Chutzpah.FileProcessors;
+using Chutzpah.Exceptions;
 
 namespace Chutzpah.FrameworkDefinitions
 {
@@ -25,9 +26,9 @@ namespace Chutzpah.FrameworkDefinitions
             fileDependencies["1"] = new[]
                 {
                     "chutzpah_boot.js",
-                    @"jasmine\v1\jasmine.css", 
-                    @"jasmine\v1\jasmine.js", 
-                    @"jasmine\v1\jasmine-html.js", 
+                    @"jasmine\v1\jasmine.css",
+                    @"jasmine\v1\jasmine.js",
+                    @"jasmine\v1\jasmine-html.js",
                     @"jasmine\v1\jasmine_favicon.png",
                     @"jasmine\v1\jasmine-ddescribe-iit.js"
                 };
@@ -35,18 +36,30 @@ namespace Chutzpah.FrameworkDefinitions
             fileDependencies["2"] = new[]
                 {
                     "chutzpah_boot.js",
-                    @"jasmine\v2\jasmine.css", 
-                    @"jasmine\v2\jasmine.js", 
-                    @"jasmine\v2\jasmine-html.js", 
-                    @"jasmine\v2\boot.js", 
+                    @"jasmine\v2\jasmine.css",
+                    @"jasmine\v2\jasmine.js",
+                    @"jasmine\v2\jasmine-html.js",
+                    @"jasmine\v2\boot.js",
                     @"jasmine\v2\jasmine_favicon.png"
+                };
+
+            fileDependencies["3"] = new[]
+                {
+                    "chutzpah_boot.js",
+                    @"jasmine\v3\jasmine.css",
+                    @"jasmine\v3\jasmine.js",
+                    @"jasmine\v3\jasmine-html.js",
+                    @"jasmine\v3\boot.js",
+                    @"jasmine\v3\jasmine_favicon.png"
                 };
 
             testHarness["1"] = @"jasmine\v1\jasmine.html";
             testHarness["2"] = @"jasmine\v2\jasmine.html";
+            testHarness["3"] = @"jasmine\v3\jasmine.html";
 
             testRunner["1"] = @"jasmineRunnerV1.js";
             testRunner["2"] = @"jasmineRunnerV2.js";
+            testRunner["3"] = @"jasmineRunnerV3.js";
         }
 
         /// <summary>
@@ -65,7 +78,14 @@ namespace Chutzpah.FrameworkDefinitions
 
         public override string GetTestRunner(ChutzpahTestSettingsFile chutzpahTestSettings, TestOptions options)
         {
-            var runnerName = testRunner[GetVersion(chutzpahTestSettings)];
+            var engine = options.Engine ?? chutzpahTestSettings.Engine;
+            var version = GetVersion(chutzpahTestSettings);
+            if (version == "3" && engine == Engine.Phantom)
+            {
+                throw new ChutzpahException("Jasmine 3 or greater requires using either the JSDom or Chrome engines.");
+            }
+            var runnerName = testRunner[version];
+
             return BuildTestRunnerPath(chutzpahTestSettings, options, runnerName);
         }
 
@@ -121,10 +141,17 @@ namespace Chutzpah.FrameworkDefinitions
 
         private string GetVersion(ChutzpahTestSettingsFile testSettingsFile)
         {
-            if (!string.IsNullOrEmpty(testSettingsFile.FrameworkVersion) 
+            if (!string.IsNullOrEmpty(testSettingsFile.FrameworkVersion)
                 && (testSettingsFile.FrameworkVersion == "1" || testSettingsFile.FrameworkVersion.StartsWith("1.")))
             {
                 return "1";
+            }
+
+            if (!string.IsNullOrEmpty(testSettingsFile.FrameworkVersion)
+                && (testSettingsFile.FrameworkVersion == "3" || testSettingsFile.FrameworkVersion.StartsWith("3.")))
+            {
+
+                return "3";
             }
 
             return "2";

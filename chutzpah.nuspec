@@ -14,11 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-            * Update QUnit to 2.6.2
-            * Update Jasmine to 2.9
-            * Support latest VS and remove support for VS 2012, 2013
-            * Add beta support for running tests with JSDom
-            * Add beta support for running tests with Chrome
+            * Add Jasmine 3.5 (requires using Chrome or JsDom engine)
         </releaseNotes>
     </metadata>
 </package>
