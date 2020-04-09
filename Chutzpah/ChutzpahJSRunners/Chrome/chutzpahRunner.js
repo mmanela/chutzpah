@@ -17,7 +17,8 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         finalResult = 0,
         isRunningElevated = false,
         chromePath = null,
-        browserArgs = null;
+        browserArgs = null,
+        browser = null;
 
     startTime = new Date().getTime();
 
@@ -262,7 +263,7 @@ module.exports.runner = async (onInitialized, onPageLoaded, isFrameworkLoaded, o
         chutzpahFunctions.rawLog("!!_!! puppeteer browser args: " + JSON.stringify(launchBrowserArges));
 
         // If isRunningElevated, we need to turn off sandbox since it does not work with admin users
-        const browser = await puppeteer.launch({
+        browser = await puppeteer.launch({
                 headless: true, args: launchBrowserArges, executablePath: chromeExecutable
             });
 
