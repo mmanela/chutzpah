@@ -17,6 +17,6 @@
     ],
 
     "EngineOptions": { 
-        "ChromeBrowserPath": "C:\\Dev\\test\\node_modules\\puppeteer\\.local-chromium\\win64-588429\\chrome-win32\\chrome.exe"
+        "ChromeBrowserPath": "C:\\Program Files (x86)\\Google\\Chrome Beta\\Application\\chrome.exe"
     }
 }

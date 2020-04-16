@@ -6,14 +6,15 @@
     "@angular/core": "~2.4.0",
     "@angular/forms": "~2.4.0",
     "@angular/http": "~2.4.0",
+    "@angular/material": "2.0.0-beta.1",
     "@angular/platform-browser": "~2.4.0",
     "@angular/platform-browser-dynamic": "~2.4.0",
     "@angular/router": "~3.4.0",
-    "@angular/material": "2.0.0-beta.1",
-    "systemjs": "0.19.41",
     "core-js": "2.4.1",
+    "npm": "^6.14.4",
     "reflect-metadata": "^0.1.8",
     "rxjs": "5.0.1",
+    "systemjs": "0.19.41",
     "zone.js": "^0.7.4"
   },
   "devDependencies": {
