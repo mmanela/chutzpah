@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using Chutzpah.Models;
 
 namespace Chutzpah
@@ -11,6 +8,8 @@ namespace Chutzpah
     /// </summary>
     public interface ITestLauncher
     {
+        Process DebuggingProcess { get; set; }
+
         void LaunchTest(TestContext testContext);
     }
 }

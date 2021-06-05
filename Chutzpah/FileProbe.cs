@@ -37,11 +37,11 @@ namespace Chutzpah
         }
 
         /// <summary>
-        /// Finds a Chutzpah test settings file given a directory. Will recursively scan current direcotry 
+        /// Finds a Chutzpah test settings file given a directory. Will recursively scan current directory 
         /// and all directories above until it finds the file 
         /// </summary>
         /// <param name="currentDirectory">the directory to start searching from</param>
-        /// <returns>Eithe the found setting file path or null</returns>
+        /// <returns>Either the found setting file path or null</returns>
         public string FindTestSettingsFile(string currentDirectory)
         {
             string settingsFilePath = null;

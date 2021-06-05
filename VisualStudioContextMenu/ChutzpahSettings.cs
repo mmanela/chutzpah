@@ -22,7 +22,7 @@ namespace Chutzpah.VS.Common.Settings
         [Browsable(true)]
         [Category("General")]
         [DisplayName("Max degree of Parallelism")]
-        [Description("The maximum amount of concurreny Chutzpah should use")]
+        [Description("The maximum amount of concurrency Chutzpah should use")]
         public int MaxDegreeOfParallelism { get; set; }
 
         [Browsable(true)]
