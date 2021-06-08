@@ -90,7 +90,7 @@ namespace Chutzpah
             string parentPath = null;
             if (isBuiltInDependency)
             {
-                // We need a fully qualified url when using vitural server path
+                // We need a fully qualified url when using virtual server path
                 fullyQualified = true;
 
                 parentPath = fileProbe.BuiltInDependencyDirectory;
