@@ -9,6 +9,8 @@ namespace Chutzpah.VS.Common
     {
         readonly IUrlBuilder urlBuilder;
 
+        public Process DebuggingProcess { get; set; }
+
         public VsDebuggerTestLauncher(IUrlBuilder urlBuilder)
         {
             this.urlBuilder = urlBuilder;
@@ -37,23 +39,31 @@ namespace Chutzpah.VS.Common
             };
             Process ieMainProcess = Process.Start(startInfo);
 
+            int ieBrowserTabOpenTimeout = ((testContext.TestFileSettings.IEBrowserTabOpenTimeout ?? Constants.DefaultIEBrowserTabOpenTimeout) * 100);
+
             // Get child 'tab' process spawned by IE.
-            // We need to wait a few ms for IE to open the process.
-            Process ieTabProcess = null;
-            for (int i = 0;; ++i) {
+            for (int i = 0;; ++i)
+            {
+                // We need to wait a few ms for IE to open the process.
                 System.Threading.Thread.Sleep(10);
-                ieTabProcess = ProcessExtensions.FindFirstChildProcessOf(ieMainProcess.Id);
-                if (ieTabProcess != null) {
-                    break; }
-                if (i > 400) { // 400 * 10 = 4s timeout
-                    throw new InvalidOperationException("Timeout waiting for Internet Explorer child process to start."); }
+
+                this.DebuggingProcess = ProcessExtensions.FindFirstChildProcessOf(ieMainProcess.Id);
+                if (this.DebuggingProcess != null)
+                {
+                    break;
+                }
+
+                if (i > ieBrowserTabOpenTimeout)
+                {
+                    throw new InvalidOperationException("Timeout waiting for Internet Explorer child process to start.");
+                }
             }
                            
             // Debug the script in that tab process.
-            DteHelpers.DebugAttachToProcess(ieTabProcess.Id, "script");
+            DteHelpers.DebugAttachToProcess(this.DebuggingProcess.Id, "script");
 
             // Resume the threads in the IE process which where started off suspended.
-            ieTabProcess.Resume();
+            this.DebuggingProcess.Resume();
         }
     }
 }

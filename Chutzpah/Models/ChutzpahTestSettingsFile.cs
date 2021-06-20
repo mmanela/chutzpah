@@ -188,7 +188,7 @@ namespace Chutzpah.Models
         public string TestHarnessDirectory { get; set; }
 
         /// <summary>
-        /// A Regualr Expression which tells Chutpah where to find the names of your tests in the test file. 
+        /// A Regular Expression which tells Chutzpah where to find the names of your tests in the test file. 
         /// The regex must contain a capture group named TestName like (?<TestName>) that contains the test name (inside of the quotes)
         /// </summary>
         public string TestPattern { get; set; }
@@ -213,7 +213,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// Tells Chutzpah the root path for your AMD paths. This is only needed if your baseUrl is a different location than your source directory.
         /// This is common if you are compiling from another language to JavaScript and copying those compiled files to a different folder.
-        /// For example if you have all your .ts files in /src and you compile them to a /out directry then your AMDBaseUrl is /out and AMDAppDirectory is /src
+        /// For example if you have all your .ts files in /src and you compile them to a /out directory then your AMDBaseUrl is /out and AMDAppDirectory is /src
         /// 
         /// Defaults to the test harness directory if not set
         /// </summary>
@@ -339,7 +339,7 @@ namespace Chutzpah.Models
         /// <summary>
         /// This is deprecated and only here for back compat for now
         /// If True, forces code coverage to run always
-        /// If Null or not not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
+        /// If Null or not set, allows code coverage to run if invoked using test adapter, command line or context menu options (default)
         /// If False, forces code coverage to never run. 
         /// </summary>
         public bool? EnableCodeCoverage
@@ -368,8 +368,8 @@ namespace Chutzpah.Models
 
 
         /// <summary>
-        /// Tells Chutzpah to create a failed test case when an unhandle exception occurs when
-        /// running a test that happens ouside of a test itself. This is useful in some build systems
+        /// Tells Chutzpah to create a failed test case when an unhandled exception occurs when
+        /// running a test that happens outside of a test itself. This is useful in some build systems
         /// to provide better failure reporting
         /// </summary>
         public bool? CreateFailedTestForFileError { get; set; }
@@ -395,6 +395,8 @@ namespace Chutzpah.Models
                 return testPatternRegex ?? (testPatternRegex = new Regex(TestPattern));
             }
         }
+
+        public int? IEBrowserTabOpenTimeout { get;  set; }
 
         public override int GetHashCode()
         {
@@ -508,6 +510,7 @@ namespace Chutzpah.Models
             this.MochaInterface = this.MochaInterface ?? parent.MochaInterface;
             this.RootReferencePathMode = this.RootReferencePathMode ?? parent.RootReferencePathMode;
             this.TestFileTimeout = this.TestFileTimeout ?? parent.TestFileTimeout;
+            this.IEBrowserTabOpenTimeout = this.IEBrowserTabOpenTimeout ?? parent.IEBrowserTabOpenTimeout;
             this.TestHarnessReferenceMode = this.TestHarnessReferenceMode ?? parent.TestHarnessReferenceMode;
             this.TestPattern = this.TestPattern ?? parent.TestPattern;
             this.UserAgent = this.UserAgent ?? parent.UserAgent;

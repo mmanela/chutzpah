@@ -534,6 +534,15 @@ namespace Chutzpah
                     }
                 });
 
+            if ((options.TestLaunchMode == TestLaunchMode.Custom)
+                && (webServerHost != null))
+            {
+                // if is being debugged using the web server, wait until the debugging process has exited before continuing
+                while (!options.CustomTestLauncher.DebuggingProcess.HasExited)
+                {
+                    Thread.Sleep(1000);
+                }
+            }
 
             // Clean up test context
             foreach (var testContext in testContexts)

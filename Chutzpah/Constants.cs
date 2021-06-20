@@ -15,6 +15,9 @@ namespace Chutzpah
         // from phantom after this amount of time abort
         public const int DefaultTestFileTimeout = 10000;
 
+        // Default time in seconds to wait for the Internet Explorer tab to open
+        public const int DefaultIEBrowserTabOpenTimeout = 4;
+
         // Default of how many files to open during test file discovery
         public const int DefaultFileSeachLimit = 10000;
 
