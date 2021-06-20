@@ -14,7 +14,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>testing javascript tdd qunit jasmine mocha coffeescript typescript</tags>
         <releaseNotes>
-            * Add Jasmine 3.5 (requires using Chrome or JsDom engine)
+            * VS Debugging bug fix (from @icnocop)
         </releaseNotes>
     </metadata>
 </package>
