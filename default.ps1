@@ -212,7 +212,7 @@ task Package-Files -depends Clean-PackageFiles {
 
     # Copy Adapter files to package zip  
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $filesDir
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $filesDir
  
     
     cd $filesDir
@@ -221,7 +221,7 @@ task Package-Files -depends Clean-PackageFiles {
     
     # Copy over Vsix Files
     copy-item "$baseDir\VisualStudioContextMenu\bin\$configuration\Chutzpah.VisualStudioContextMenu.vsix" -destination $packageDir
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.vsix" -destination $packageDir
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.vsix" -destination $packageDir
 }
 
 task Package-NuGet -depends Clean-PackageFiles, Set-Version {
@@ -236,7 +236,7 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     
     # Copy Adapter files to nuget zip  
     copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $nugetTools
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2012.TestAdapter.*" -destination $nugetTools
+    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $nugetTools
     
     
     $v = new-object -TypeName System.Version -ArgumentList $global:version

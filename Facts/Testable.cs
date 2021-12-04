@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Moq;
-using StructureMap.AutoMocking;
+using StructureMap.AutoMocking.Moq;
 
 namespace Chutzpah.Facts
 {
@@ -29,7 +26,7 @@ namespace Chutzpah.Facts
 
         public void Inject<T>(T type)
         {
-            autoMocker.Inject(type);
+            //autoMocker.Inject(type);
         }
 
         public void InjectArray<T>(T[] types)
