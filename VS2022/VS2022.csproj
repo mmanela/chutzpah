@@ -126,7 +126,7 @@
       <Project>{1689355D-3366-460C-8CF3-5F035EE21B05}</Project>
       <Name>VS.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VS2012.TestAdapter\VS2022.TestAdapter.csproj">
+    <ProjectReference Include="..\VS2022.TestAdapter\VS2022.TestAdapter.csproj">
       <Project>{bd1f2d08-d667-4b0d-8775-b14dcd582d7e}</Project>
       <Name>VS2022.TestAdapter</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>

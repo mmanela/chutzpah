@@ -226,8 +226,6 @@ task Sign-ForeignAssemblies {
   
   Write-Host "Signing dll's in $autoSignedNugetPackages"
   exec { & $signerExe -in $folderPaths -out $autoSignedNugetPackages -k "$baseDir/chutzpah.snk" }
-  
-  Copy-Item "$userNugetPackages\libuv" "$autoSignedNugetPackages\libuv" -Force -Recurse
 }
 
 task Package-Files -depends Clean-PackageFiles {
@@ -237,8 +235,8 @@ task Package-Files -depends Clean-PackageFiles {
     roboexec {robocopy "$baseDir\ConsoleRunner\bin\$configuration\" $filesDir /S /xd JS /xf *.xml}
 
     # Copy Adapter files to package zip  
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $filesDir
+    copy-item "$baseDir\VS2022\bin\$configuration\Chutzpah.VS.Common.*" -destination $filesDir
+    copy-item "$baseDir\VS2022\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $filesDir
  
     
     cd $filesDir
@@ -247,7 +245,7 @@ task Package-Files -depends Clean-PackageFiles {
     
     # Copy over Vsix Files
     copy-item "$baseDir\VisualStudioContextMenu\bin\$configuration\Chutzpah.VisualStudioContextMenu.vsix" -destination $packageDir
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.vsix" -destination $packageDir
+    copy-item "$baseDir\VS2022\bin\$configuration\Chutzpah.VS2022.vsix" -destination $packageDir
 }
 
 task Package-NuGet -depends Clean-PackageFiles, Set-Version {
@@ -261,8 +259,8 @@ task Package-NuGet -depends Clean-PackageFiles, Set-Version {
     
     
     # Copy Adapter files to nuget zip  
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS.Common.*" -destination $nugetTools
-    copy-item "$baseDir\VS2012\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $nugetTools
+    copy-item "$baseDir\VS2022\bin\$configuration\Chutzpah.VS.Common.*" -destination $nugetTools
+    copy-item "$baseDir\VS2022\bin\$configuration\Chutzpah.VS2022.TestAdapter.*" -destination $nugetTools
     
     
     $v = new-object -TypeName System.Version -ArgumentList $global:version
@@ -370,7 +368,7 @@ function Update-OtherFiles ([string] $version) {
     $contantsFile = Join-Path $baseDir "Chutzpah\Constants.cs"
     (Get-Content $contantsFile) | ForEach-Object { $_ -replace $chutzpahVersionPattern, $chutzpahVersion } | Set-Content $contantsFile
     
-     $manifestFile = Join-Path $baseDir "VS2012\source.extension.vsixmanifest"
+     $manifestFile = Join-Path $baseDir "VS2022\source.extension.vsixmanifest"
      $manifest = [xml](Get-Content $manifestFile)
      $manifest.PackageManifest.Metadata.Identity.Version = $version
      $manifest.Save($manifestFile)

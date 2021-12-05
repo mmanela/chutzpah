@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     [Export(typeof(ISettingsProvider))]
     [Export(typeof(IRunSettingsService))]

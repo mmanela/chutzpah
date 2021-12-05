@@ -32,9 +32,9 @@ using Xunit;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("4.4.12.1")]
-[assembly: AssemblyVersion("4.4.12.1")]
-[assembly: AssemblyFileVersion("4.4.12.1")]
+// [assembly: AssemblyVersion("4.4.12.4")]
+[assembly: AssemblyVersion("4.4.12.4")]
+[assembly: AssemblyFileVersion("4.4.12.4")]
 
 
 
