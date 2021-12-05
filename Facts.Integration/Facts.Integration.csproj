@@ -831,6 +831,10 @@
     <PackageReference Include="xunit">
       <Version>2.4.1</Version>
     </PackageReference>
+	<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
 	<Reference Include="StructureMap, Version=4.7.1, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages_autosigned\StructureMap.dll</HintPath>
