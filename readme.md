@@ -1,4 +1,28 @@
 # ![](https://raw.githubusercontent.com/mmanela/chutzpah/master/doc/images/chetTimesSmall.png) Chutzpah - A JavaScript Test Runner
+
+## Introduction
+
+This fork is meant to build extension packages for Visual Studio 2022 only. It does not have any prebuilt packages yet.
+
+Prerequisites:
+* Visual Studio 2022
+* [chocolately](https://chocolatey.org/install)
+
+To build:
+* Check out source code
+* Open a Command Prompt. If you are using something other than Community offering, then set this msbuild location variable
+
+    `setx Chutzpah_MSBuild_Path "Path_toMbuild_folder"`
+
+    e.g. `setx Chutzpah_MSBuild_Path "C:\Program Files\Microsoft Visual Studio\2022\Professional\Msbuild\Current\Bin\amd64"`
+* Run `build Install`
+* Run `build Package`
+
+If all goes well, then you should see 2 vxis packages in `_package` folder.
+
+
+---
+
 Pronunciation: [hutz·pah](http://www.thefreedictionary.com/chutzpah)
 
 [![Build Status](https://mmanela.visualstudio.com/Chutzpah/_apis/build/status/ChutzpahBuild)](https://mmanela.visualstudio.com/Chutzpah/_build/latest?definitionId=1)
