@@ -9,6 +9,8 @@ properties {
   
   $autoSignedNugetPackages = "$baseDir/packages_autosigned"
   $nugetPackges = "$baseDir/packages"
+  $userNugetPackages = Join-Path (Resolve-Path "${env:USERPROFILE}") ".nuget/packages"
+  
   $nodeJsPackges = "$baseDir/Chutzpah/Node/packages"
 
   # Temp work around psake limitation to not use Msbuild 15
@@ -41,7 +43,24 @@ task Build-Full -depends  Clean-Solution-VS, Build-Solution-VS, Run-UnitTests, R
 
 
 function getLatestNugetPackagePath($name) {
-    return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+	return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+	
+	#if (Test-Path $nugetPackges) {
+	#	write-host "Locating package $name in $nugetPackges"
+	#	return @(Get-ChildItem "$nugetPackges\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+    #}
+	
+	write-host "Locating package $name in $userNugetPackages"
+	
+	$path = "$userNugetPackages\$name"
+	if (Test-Path $path) {
+		return Get-ChildItem "$userNugetPackages\$name"
+	}
+	
+	write-host "Doing secondary match"
+	$path = @(Get-ChildItem "$userNugetPackages\$name.*" | ? { $_.Name -match "$name.(\d)+" } | Sort-Object -Descending)[0]
+	write-host "Found $path"
+	return $path
 }
 
 task Set-Version {
@@ -175,7 +194,11 @@ task Setup-SymbolicLinks {
 
 task Sign-ForeignAssemblies {
 
-  $packagesToSign = @{"ServiceStack.Text" = "lib/net45"; }
+  #$packagesToSign = @{"ServiceStack.Text" = "lib/net45"; }
+  $packagesToSign = @{
+	"StructureMap" = "lib/net45";   
+	"structuremap.automocking.moq"="lib/net40";
+	}
   
   clean $autoSignedNugetPackages
  
@@ -183,16 +206,17 @@ task Sign-ForeignAssemblies {
     create $autoSignedNugetPackages
   }
   
-  $signerToolFolder = (getLatestNugetPackagePath "Brutal.Dev.StrongNameSigner").FullName
+  $signerToolFolder = (getLatestNugetPackagePath "Brutal.Dev.StrongNameSigner").FullName  
   $signerExe = Join-Path $signerToolFolder build/StrongNameSigner.Console.exe
   
-  Write-Host "Signing assemblies"
+  Write-Host "Signing assemblies using $signerExe"
   $folderPaths = ""
   
   foreach($name in $packagesToSign.Keys) {
     $targetFolder = $packagesToSign[$name]
     $folderToSign = getLatestNugetPackagePath $name
-    $fullPath = Join-Path $folderToSign.FullName $targetFolder
+	write-host "folderToSign=$folderToSign"
+    $fullPath = Join-Path $folderToSign.FullName $targetFolder	
     $folderName = $folderToSign.Name
     
     $folderPaths += $fullpath + "|"
@@ -202,6 +226,8 @@ task Sign-ForeignAssemblies {
   
   Write-Host "Signing dll's in $autoSignedNugetPackages"
   exec { & $signerExe -in $folderPaths -out $autoSignedNugetPackages -k "$baseDir/chutzpah.snk" }
+  
+  Copy-Item "$userNugetPackages\libuv" "$autoSignedNugetPackages\libuv" -Force -Recurse
 }
 
 task Package-Files -depends Clean-PackageFiles {
