@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     public static class ChutzpahExtensionMethods
     {

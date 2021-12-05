@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using Chutzpah.Extensions;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     [Export(typeof(IRunFromContextFileExtensions))]
     public class RunContextFileExtensions : IRunFromContextFileExtensions

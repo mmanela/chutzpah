@@ -1,16 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Linq;
+using Chutzpah.Callbacks;
 using Chutzpah.Models;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using Chutzpah.Callbacks;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     [FileExtension(Chutzpah.Constants.CoffeeScriptExtension)]
     [FileExtension(Chutzpah.Constants.TypeScriptReactExtension)]

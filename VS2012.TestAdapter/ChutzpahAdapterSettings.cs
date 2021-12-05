@@ -1,13 +1,12 @@
+using Chutzpah.Models;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Chutzpah.Models;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
 
     public class ChutzpahAdapterSettings : TestRunSettings

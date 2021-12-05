@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Chutzpah.Extensions;
+﻿using Chutzpah.Extensions;
 using Chutzpah.Models;
 using Chutzpah.VS.Common;
 using Chutzpah.VS11.EventWatchers;
 using Chutzpah.VS11.EventWatchers.EventArgs;
 using Microsoft.Build.Evaluation;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using VS11.Plugin;
 using ILogger = Chutzpah.VS.Common.ILogger;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     public class TestFileCandidate
     {

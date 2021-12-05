@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using Chutzpah.Coverage;
 using Chutzpah.Models;
-using Chutzpah.Utility;
-using Chutzpah.Wrappers;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using System;
+using System.IO;
 using TestCase = Chutzpah.Models.TestCase;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     public class ExecutionCallback : RunnerCallback
     {

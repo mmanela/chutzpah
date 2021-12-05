@@ -1,6 +1,6 @@
 using Chutzpah.VS.Common.Settings;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     public interface IChutzpahSettingsMapper
     {

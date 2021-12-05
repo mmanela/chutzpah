@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>14.0</OldToolsVersion>
     <TargetFrameworkProfile />
     <GenerateVsixV3>true</GenerateVsixV3>
     <NuGetPackageImportStamp>
@@ -25,7 +20,7 @@
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Chutzpah.VS2012</RootNamespace>
+    <RootNamespace>Chutzpah.VS2022</RootNamespace>
     <AssemblyName>Chutzpah.VS2022</AssemblyName>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -92,7 +87,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ChutzpahVS2012Package.cs" />
+    <Compile Include="ChutzpahVS2022Package.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +142,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.TestWindow.Interfaces">
       <Version>11.0.61030</Version>
+    </PackageReference>
+    <PackageReference Include="stdole">
+      <Version>17.0.31902.203</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup>

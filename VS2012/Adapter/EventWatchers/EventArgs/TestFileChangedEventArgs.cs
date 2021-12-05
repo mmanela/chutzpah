@@ -1,4 +1,4 @@
-using Chutzpah.VS2012.TestAdapter;
+using Chutzpah.VS2022.TestAdapter;
 
 namespace Chutzpah.VS11.EventWatchers.EventArgs
 {

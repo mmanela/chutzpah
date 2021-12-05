@@ -1,14 +1,11 @@
+using Chutzpah.VS.Common.Settings;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestWindow.Extensibility;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
 using System.Xml.XPath;
-using Chutzpah.VS.Common.Settings;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestWindow.Extensibility;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     [Export(typeof(IRunSettingsService))]
     [Export(typeof(IChutzpahSettingsMapper))]

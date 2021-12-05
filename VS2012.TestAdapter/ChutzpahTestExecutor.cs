@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using System.Diagnostics;
 using System;
 
-namespace Chutzpah.VS2012.TestAdapter
+namespace Chutzpah.VS2022.TestAdapter
 {
     [ExtensionUri(AdapterConstants.ExecutorUriString)]
     public class ChutzpahTestExecutor : ITestExecutor
