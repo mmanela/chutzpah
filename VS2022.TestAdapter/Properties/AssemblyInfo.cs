@@ -1,27 +1,23 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Xunit;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Facts.Integration")]
+[assembly: AssemblyTitle("VS11.Plugin")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Matthew Manela")]
-[assembly: AssemblyProduct("Facts.Integration")]
-[assembly: AssemblyCopyright("Copyright © Matthew Manela 2012")]
-[assembly: AssemblyTrademark("27:a5a5e840015a1206931d4f596f5ce3765fcc455f")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("VS11.Plugin")]
+[assembly: AssemblyCopyright("")]
+[assembly: AssemblyTrademark("71:975ceea202283b96c2090b9f00b74eb391448845")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4ccfe8e3-6b4f-41f9-9e68-00e144daaedd")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,7 +31,3 @@ using Xunit;
 // [assembly: AssemblyVersion("4.4.12.4")]
 [assembly: AssemblyVersion("4.4.12.4")]
 [assembly: AssemblyFileVersion("4.4.12.4")]
-
-
-
-[assembly: CollectionBehavior(DisableTestParallelization = true)]

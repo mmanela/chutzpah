@@ -24,7 +24,7 @@ namespace Chutzpah.VSTS {
     [System.Xml.Serialization.XmlRootAttribute("GenericTest", Namespace="http://microsoft.com/schemas/VisualStudio/TeamTest/2010", IsNullable=false)]
     public partial class GenericTestType : BaseTestType {
         
-        private object[] itemsField;
+        //private object[] itemsField;
         
         ///// <remarks/>
         //[System.Xml.Serialization.XmlElementAttribute("Command", typeof(GenericTestTypeCommand))]
@@ -2299,7 +2299,7 @@ namespace Chutzpah.VSTS {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public partial class CodedWebTestElementType : BaseTestType {
         
-        private object[] itemsField;
+        //private object[] itemsField;
         
         ///// <remarks/>
         //[System.Xml.Serialization.XmlElementAttribute("IncludedWebTests", typeof(CodedWebTestElementTypeIncludedWebTests))]

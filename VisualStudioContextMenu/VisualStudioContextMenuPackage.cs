@@ -466,7 +466,7 @@ namespace Chutzpah.VisualStudioContextMenu
             var filePaths = new List<string>();
             foreach (object item in SolutionExplorerItems)
             {
-                var solutionItem = ((UIHierarchyItem)item).Object as EnvDTE.SolutionClass;
+                var solutionItem = ((UIHierarchyItem)item).Object as EnvDTE.Solution;
                 var projectItem = ((UIHierarchyItem)item).Object as EnvDTE.ProjectItem;
                 var projectNode = ((UIHierarchyItem)item).Object as EnvDTE.Project;
 

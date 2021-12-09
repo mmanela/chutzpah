@@ -112,10 +112,10 @@ namespace Chutzpah.Models
             // Default to PhantomJs for now but once stable make JsDom default
             Engine = Models.Engine.Phantom;
             
-            if (ForceWebServerMode)
-            {
-                Server = ForcedChutzpahWebServerConfiguration.Instance;
-            }
+            //if (ForceWebServerMode)
+            //{
+            //    Server = ForcedChutzpahWebServerConfiguration.Instance;
+            //}
         }
 
         public bool IsDefaultSettings { get; set; }

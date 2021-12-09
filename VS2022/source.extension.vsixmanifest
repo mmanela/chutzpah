@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="63768A3F-B111-4075-891B-455910567C70" Version="4.4.12" Language="en-US" Publisher="Matthew Manela" />
-    <DisplayName>Chutzpah Test Runner Context Menu Extension</DisplayName>
-    <Description>Chutzpah is an open source JavaScript test runner which helps you integrate JavaScript unit testing into your website. It enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
+    <Identity Id="0E655946-6443-4BCE-AABB-6466C14C6521" Version="4.4.12" Language="en-US" Publisher="Matthew Manela" />
+    <DisplayName>Chutzpah Test Adapter for the Test Explorer</DisplayName>
+    <Description xml:space="preserve">Chutzpah adapter for the Visual Studio Unit Test Explorer. Chutzpah is an open source JavaScript test runner which enables you to run JavaScript unit tests from the command line and from inside of Visual Studio.</Description>
+    <MoreInfo>https://github.com/mmanela/chutzpah</MoreInfo>
     <License>EULA.rtf</License>
     <GettingStartedGuide>https://github.com/mmanela/chutzpah</GettingStartedGuide>
     <Icon>chetTimes.png</Icon>
@@ -30,6 +31,10 @@
   </Dependencies>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Type="Microsoft.VisualStudio.MefComponent" Path="|VS2022.TestAdapter|" />
+    <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|VS2022.TestAdapter|" />
+    <Asset d:Source="Project" d:ProjectName="VS.Common" Type="Microsoft.VisualStudio.MefComponent" Path="|VS.Common|" />
+    <Asset d:Source="Project" d:ProjectName="%CurrentProject%" Type="Microsoft.VisualStudio.MefComponent" Path="|%CurrentProject%|" />
   </Assets>
   <Prerequisites>
     <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,)" DisplayName="Visual Studio core editor" />

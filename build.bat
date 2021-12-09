@@ -12,14 +12,24 @@ goto Build
 set Configuration=Release
 goto Build
 
-
 :Install
 .\Tools\nuget.exe restore Chutzpah.VS.sln
+
+REM Download packages for further processing
+set nugetOpts=install -OutputDirectory packages
+.\Tools\nuget.exe %nugetOpts% psake -version 4.9.0
+.\Tools\nuget.exe %nugetOpts% libuv -version 1.10.0
+.\Tools\nuget.exe %nugetOpts% StructureMap -version 4.7.1
+.\Tools\nuget.exe %nugetOpts% structuremap.automocking.moq -version 4.0.0.315
+.\Tools\nuget.exe %nugetOpts% Brutal.Dev.StrongNameSigner -version 2.9.1
+.\Tools\nuget.exe %nugetOpts% xunit.runner.console -version 2.4.1
+
+
 goto Build
 
 :Build
 
-powershell -NonInteractive -NoProfile -ExecutionPolicy unrestricted -Command "& {Import-Module %~dp0\packages\psake.4.6.0\Tools\psake.psm1; Invoke-psake default.ps1 -properties @{configuration='%Configuration%'} -parameters @{arg0='%1'; arg1='%2'; arg2='%3'; arg3='%4'} -framework '4.5.1x86' %1"; exit !($psake.build_success);}"
+powershell -NonInteractive -NoProfile -ExecutionPolicy unrestricted -Command "& {Import-Module %~dp0packages\psake.4.9.0\tools\psake\psake.psm1; Invoke-psake psakefile.ps1 -properties @{configuration='%Configuration%'} -parameters @{arg0='%1'; arg1='%2'; arg2='%3'; arg3='%4'} -framework '4.8x64' %1"; exit !($psake.build_success);}"
 
 goto end
 
