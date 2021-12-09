@@ -33,7 +33,6 @@ PublishProfiles/
 _out/
 _build/
 _nuget/
-_package/
 _chocolatey/
 _Chutzpah.*
 _UpgradeReport_Files/
