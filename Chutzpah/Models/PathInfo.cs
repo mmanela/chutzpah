@@ -1,8 +1,11 @@
+using System.Diagnostics;
+
 namespace Chutzpah.Models
 {
     /// <summary>
     /// Contains information about a path like full path and type
     /// </summary>
+    [DebuggerDisplay("{FullPath}")]
     public class PathInfo
     {
         /// <summary>

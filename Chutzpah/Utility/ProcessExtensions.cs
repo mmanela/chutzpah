@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Management;
 
 namespace Chutzpah.Utility
 {
@@ -59,10 +60,10 @@ namespace Chutzpah.Utility
              int processId);
         [DllImport("kernel32.dll")]
         static extern IntPtr OpenThread(
-            ThreadAccess dwDesiredAccess, 
-            bool bInheritHandle, 
+            ThreadAccess dwDesiredAccess,
+            bool bInheritHandle,
             uint dwThreadId);
-        [DllImport("kernel32.dll", SetLastError=true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool CloseHandle(
             IntPtr hObject);
@@ -88,7 +89,8 @@ namespace Chutzpah.Utility
             foreach (ProcessThread thread in process.Threads)
             {
                 var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
-                if (pOpenThread != IntPtr.Zero) {
+                if (pOpenThread != IntPtr.Zero)
+                {
                     SuspendThread(pOpenThread);
                     CloseHandle(pOpenThread);
                 }
@@ -103,7 +105,8 @@ namespace Chutzpah.Utility
             foreach (ProcessThread thread in process.Threads)
             {
                 var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);
-                if (pOpenThread != IntPtr.Zero) {
+                if (pOpenThread != IntPtr.Zero)
+                {
                     ResumeThread(pOpenThread);
                     CloseHandle(pOpenThread);
                 }
@@ -127,22 +130,53 @@ namespace Chutzpah.Utility
                     uint bytesWritten;
                     int ntStatus = NtQueryInformationProcess(
                         p.Handle,
-                        0, 
-                        ref processInfoB, 
+                        0,
+                        ref processInfoB,
                         (uint)Marshal.SizeOf(processInfoB),
                         out bytesWritten); // == 0 is OK
-                    if (0 != ntStatus) { // fail?
-                        continue; }
+                    if (0 != ntStatus)
+                    { // fail?
+                        continue;
+                    }
                     // Is it a child process of the subject process?
-                    if (processInfoB.InheritedFromUniqueProcessId == subjectProcessId) {
-                        return p; }
+                    if (processInfoB.InheritedFromUniqueProcessId == subjectProcessId)
+                    {
+                        return p;
+                    }
                 }
                 catch (Exception /* ex */)
                 {
                     // Ignore, most likely 'Access Denied'
                 }
             }
-            return null; 
+            return null;
+        }
+
+        /// <summary>
+        /// Locate the first child process for the specified process id.
+        /// </summary>
+        /// <param name="parentProcessId"></param>
+        /// <returns></returns>
+        public static Process FindFirstChildProcess(int parentProcessId)
+        {
+            //https://docs.microsoft.com/en-us/dotnet/api/system.management.managementobjectsearcher.get?view=dotnet-plat-ext-6.0
+            //https://social.msdn.microsoft.com/Forums/en-US/81c8137e-6868-4b95-bdf8-37624b7f0166/managementobjectsearcher-processes-win32process-access-denied?forum=csharplanguage
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select * From Win32_Process Where ParentProcessId = " + parentProcessId);
+            ManagementObjectCollection resultList = searcher.Get();
+
+            try
+            {
+                foreach (ManagementObject item in resultList)
+                {
+                    object value = item.GetPropertyValue("ProcessId");
+                    int childProcessId = Convert.ToInt32(value);
+                    return Process.GetProcessById(childProcessId);
+                }
+            }
+            catch { }
+
+            return null;
+
         }
 
         /// <summary>
@@ -150,42 +184,53 @@ namespace Chutzpah.Utility
         /// </summary>
         /// <param name="matchSame">Value to return if/when process ids are the same.</param>
         public static bool IsProcessAAncestorOfProcessB(
-            int processId_A, 
-            int processId_B, 
+            int processId_A,
+            int processId_B,
             bool matchSame = true,
             int maxHops = int.MaxValue)
         {
-            if (processId_A == processId_B) {
-                return matchSame; }
+            if (processId_A == processId_B)
+            {
+                return matchSame;
+            }
             // Get process handle from the process id.
             //Process pB = Process.GetProcessById(processId_B); // This throws if process not found, which is undesirable.
             var hProcess = OpenProcess(ProcessAccessFlags.QueryInformation, false, processId_B);
-            if (hProcess == IntPtr.Zero) {
-                return false; }
+            if (hProcess == IntPtr.Zero)
+            {
+                return false;
+            }
             // Get info about the process.
             PROCESS_BASIC_INFORMATION processInfoB = new PROCESS_BASIC_INFORMATION();
             uint bytesWritten;
             int ntStatus = NtQueryInformationProcess(
                 hProcess,
-                0, 
-                ref processInfoB, 
+                0,
+                ref processInfoB,
                 (uint)Marshal.SizeOf(processInfoB),
                 out bytesWritten); // == 0 is OK
             CloseHandle(hProcess);
-            if (0 != ntStatus) {
+            if (0 != ntStatus)
+            {
                 Debug.Assert(false);
-                return false; }
+                return false;
+            }
             // Does B directly inherit from A?
-            if (processInfoB.InheritedFromUniqueProcessId == processId_A) {
-                return true; }
+            if (processInfoB.InheritedFromUniqueProcessId == processId_A)
+            {
+                return true;
+            }
             // Optionally recurse up the hierarchy.
-            if (maxHops > 0) {
-                if (processInfoB.InheritedFromUniqueProcessId != 0) {
+            if (maxHops > 0)
+            {
+                if (processInfoB.InheritedFromUniqueProcessId != 0)
+                {
                     return IsProcessAAncestorOfProcessB(
-                        processId_A, 
-                        (int)processInfoB.InheritedFromUniqueProcessId, 
+                        processId_A,
+                        (int)processInfoB.InheritedFromUniqueProcessId,
                         matchSame,
-                        maxHops -1); }
+                        maxHops - 1);
+                }
             }
             // No match.
             return false;

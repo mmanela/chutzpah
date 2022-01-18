@@ -1,4 +1,8 @@
-﻿using System;
+﻿//----------------------------------------------------
+// Copyright 2022 Epic Systems Corporation
+//----------------------------------------------------
+
+using System;
 using System.Diagnostics;
 using Chutzpah.Models;
 using Chutzpah.Utility;
@@ -27,27 +31,31 @@ namespace Chutzpah.VS.Common
                 UseShellExecute = true,
                 FileName = BrowserPathHelper.GetBrowserPath("ie"),
                 Arguments = string.Format("-noframemerging -suspended -debug {0}", file)
-                    // -noframemerging
-                    //      This is what VS does when launching the script debugger.
-                    //      Unsure whether strictly necessary.
-                    // -suspended
-                    //      This is what VS does when launching the script debugger.
-                    //      Seems to cause IE to suspend all threads which is what we want.
-                    // -debug
-                    //      This is what VS does when launching the script debugger.
-                    //      Not sure exactly what it does.
+                //Arguments = file
+                // -noframemerging
+                //      This is what VS does when launching the script debugger.
+                //      Unsure whether strictly necessary.
+                // -suspended
+                //      This is what VS does when launching the script debugger.
+                //      Seems to cause IE to suspend all threads which is what we want.
+                // -debug
+                //      This is what VS does when launching the script debugger.
+                //      Not sure exactly what it does.
             };
             Process ieMainProcess = Process.Start(startInfo);
 
-            int ieBrowserTabOpenTimeout = ((testContext.TestFileSettings.IEBrowserTabOpenTimeout ?? Constants.DefaultIEBrowserTabOpenTimeout) * 100);
+            //Wait for some time for the ie process to start
+            //System.Threading.Thread.Sleep(250);
+
+            int ieBrowserTabOpenTimeout = 10;   //We will try 10 times and not 400
 
             // Get child 'tab' process spawned by IE.
-            for (int i = 0;; ++i)
+            for (int i = 0; ; ++i)
             {
                 // We need to wait a few ms for IE to open the process.
                 System.Threading.Thread.Sleep(10);
 
-                this.DebuggingProcess = ProcessExtensions.FindFirstChildProcessOf(ieMainProcess.Id);
+                DebuggingProcess = ProcessExtensions.FindFirstChildProcess(ieMainProcess.Id);
                 if (this.DebuggingProcess != null)
                 {
                     break;
@@ -58,7 +66,7 @@ namespace Chutzpah.VS.Common
                     throw new InvalidOperationException("Timeout waiting for Internet Explorer child process to start.");
                 }
             }
-                           
+
             // Debug the script in that tab process.
             DteHelpers.DebugAttachToProcess(this.DebuggingProcess.Id, "script");
 

@@ -356,7 +356,7 @@ namespace Chutzpah
             // own context
             foreach (var group in fileSettingGroups)
             {
-                if (group.Key.EnableTestFileBatching.Value)
+                if (group.Key.EnableTestFileBatching == true)
                 {
                     testGroups.Add(group.ToList());
                 }

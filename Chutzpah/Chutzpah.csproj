@@ -45,6 +45,7 @@
     <Reference Include="System">
       <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.dll</HintPath>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -395,7 +396,7 @@
       <Link>x64\%(FileName)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <InProject>false</InProject>
-    </None>    
+    </None>
     <None Include="$(MSBuildThisFileDirectory)..\packages\Libuv.1.10.0\runtimes\win-x86\native\*.dll">
       <Link>x86\%(FileName)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -414,7 +415,7 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
-    </PackageReference>	
+    </PackageReference>
     <PackageReference Include="ServiceStack">
       <Version>5.13.2</Version>
     </PackageReference>
