@@ -20,7 +20,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Initializes a new instance of the JasmineDefinition class.
         /// </summary>
-        public JasmineDefinition(IEnumerable<IJasmineReferencedFileProcessor> fileProcessors)
+        public JasmineDefinition(IJasmineReferencedFileProcessor[] fileProcessors)
         {
             this.fileProcessors = fileProcessors;
             fileDependencies["1"] = new[]

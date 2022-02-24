@@ -75,7 +75,7 @@ namespace Chutzpah
                           ITransformProcessor transformProcessor,
                           IChutzpahWebServerFactory webServerFactory,
                           IUrlBuilder urlBuilder,
-                          IList<ITestExecutionProvider> testExecutionProviders)
+                          ITestExecutionProvider[] testExecutionProviders)
         {
             this.urlBuilder = urlBuilder;
             this.process = process;

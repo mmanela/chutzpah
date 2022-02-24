@@ -26,7 +26,7 @@ namespace Chutzpah
             IHttpWrapper httpWrapper,
             IFileProbe fileProbe,
             ICoverageEngineFactory coverageEngineFactory,
-            IEnumerable<IFrameworkDefinition> frameworkDefinitions,
+            IFrameworkDefinition[] frameworkDefinitions,
             IChutzpahTestSettingsService settingsService)
         {
             this.referenceProcessor = referenceProcessor;

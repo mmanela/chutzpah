@@ -74,7 +74,7 @@ namespace Chutzpah.Facts.ConsoleRunner
                 cb.TestStarted(ctx, tc);
                 cb.FileLog(ctx, log);
                 cb.TestFinished(ctx, tc);
-
+                 
                 Assert.Contains($"##teamcity[testStdOut name='foo' flowId='65' out='Log Message: hello from test.js|n|nTest |'foo|' failed|n\tfailure|nin  (line 0)|n|n']", _out.ToString());
             }
 

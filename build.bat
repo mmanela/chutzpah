@@ -19,8 +19,9 @@ REM Download packages for further processing
 set nugetOpts=install -OutputDirectory packages
 .\Tools\nuget.exe %nugetOpts% psake -version 4.9.0
 .\Tools\nuget.exe %nugetOpts% libuv -version 1.10.0
-.\Tools\nuget.exe %nugetOpts% StructureMap -version 4.7.1
-.\Tools\nuget.exe %nugetOpts% structuremap.automocking.moq -version 4.0.0.315
+.\Tools\nuget.exe %nugetOpts% StructureMap -version 4.6.1
+.\Tools\nuget.exe %nugetOpts% StructureMap.AutoMocking.Moq.Updated -version 1.0.2
+rem .\Tools\nuget.exe %nugetOpts% structuremap.automocking.moq -version 4.0.0.315
 .\Tools\nuget.exe %nugetOpts% Brutal.Dev.StrongNameSigner -version 2.9.1
 .\Tools\nuget.exe %nugetOpts% xunit.runner.console -version 2.4.1
 

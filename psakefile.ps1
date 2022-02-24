@@ -197,7 +197,7 @@ task Sign-ForeignAssemblies {
   #$packagesToSign = @{"ServiceStack.Text" = "lib/net45"; }
   $packagesToSign = @{
 	"StructureMap" = "lib/net45";   
-	"structuremap.automocking.moq"="lib/net40";
+	"StructureMap.AutoMocking.Moq.Updated"="lib/netstandard2.0";
 	}
   
   clean $autoSignedNugetPackages

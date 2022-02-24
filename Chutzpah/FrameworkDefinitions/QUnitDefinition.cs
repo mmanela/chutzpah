@@ -18,7 +18,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Initializes a new instance of the QUnitDefinition class.
         /// </summary>
-        public QUnitDefinition(IEnumerable<IQUnitReferencedFileProcessor> fileProcessors)
+        public QUnitDefinition(IQUnitReferencedFileProcessor[] fileProcessors)
         {
             this.fileProcessors = fileProcessors;
 

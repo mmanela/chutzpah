@@ -26,7 +26,7 @@ namespace Chutzpah.FrameworkDefinitions
         /// <summary>
         /// Initializes a new instance of the MochaDefinition class.
         /// </summary>
-        public MochaDefinition(IEnumerable<IMochaReferencedFileProcessor> fileProcessors)
+        public MochaDefinition(IMochaReferencedFileProcessor[] fileProcessors)
         {
             this.fileProcessors = fileProcessors;
             this.fileDependencies = new[]

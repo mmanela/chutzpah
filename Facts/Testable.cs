@@ -26,7 +26,7 @@ namespace Chutzpah.Facts
 
         public void Inject<T>(T type)
         {
-            //autoMocker.Inject(type);
+            autoMocker.Inject(typeof(T), type);
         }
 
         public void InjectArray<T>(T[] types)

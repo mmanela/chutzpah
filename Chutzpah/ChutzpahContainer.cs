@@ -51,13 +51,13 @@ namespace Chutzpah
                     config.Scan(scan =>
                         {
                             scan.TheCallingAssembly();
-                            scan.WithDefaultConventions();
                             scan.AddAllTypesOf<IQUnitReferencedFileProcessor>();
                             scan.AddAllTypesOf<IJasmineReferencedFileProcessor>();
                             scan.AddAllTypesOf<IMochaReferencedFileProcessor>();
                             scan.AddAllTypesOf<ILineCoverageMapper>();
                             scan.AddAllTypesOf<IFrameworkDefinition>();
                             scan.AddAllTypesOf<ITestExecutionProvider>();
+                            scan.WithDefaultConventions();
                         });
                 });
 
