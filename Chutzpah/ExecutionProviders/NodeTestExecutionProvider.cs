@@ -114,10 +114,11 @@ namespace Chutzpah
             var timeout = context.TestFileSettings.TestFileTimeout ?? options.TestFileTimeoutMilliseconds ?? Constants.DefaultTestFileTimeout;
             string inspectBrkArg = context.TestFileSettings.EngineOptions != null && context.TestFileSettings.EngineOptions.NodeInspect ? "--inspect-brk" : "";
 
+            Engine? engine = options.Engine ?? context.TestFileSettings.Engine;
             var engineBrowserOptions = string.Empty;
-            if (context.TestFileSettings.BrowserArguments != null && options.Engine != null)
+            if (context.TestFileSettings.BrowserArguments != null && engine != null)
             {
-                var matchingEntries = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals(options.Engine.ToString(), StringComparison.OrdinalIgnoreCase));
+                var matchingEntries = context.TestFileSettings.BrowserArguments.Where(x => x.Key.Equals(engine.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (matchingEntries.Any())
                 {
                     engineBrowserOptions = matchingEntries.First().Value;
